@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    {% if title %}
+    <title>Profireader-article</title>
+    {% else %}
+    <title>Profireader</title>
+    {% endif %}
+</head>
+<body>
+<form action="" name="article" method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        <p>
+            Make your article
+            {{ form.article(cols=200, rows=10) }}
+        </p>
+    </div>
+
+
+<div>
+    <input type="submit" value="Save">
+</div>
+
+</form>
+</body>
+</html>
