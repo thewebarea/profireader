@@ -1,8 +1,10 @@
 from sqlalchemy import MetaData,create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker,scoped_session
 
 metadata=MetaData()
 engine = create_engine('postgresql://postgres:minkovski@postgres.d/Profireader')
-Session = sessionmaker(bind=engine)
-Session.configure(bind=engine)
-sql_session=Session()
+sql_session=scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+def init_db():
+    metadata.create_all(bind=engine)
