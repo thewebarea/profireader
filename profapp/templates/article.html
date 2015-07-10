@@ -13,9 +13,18 @@
     {{ form.hidden_tag() }}
     <div>
         <p>
-            <p>Make your article</p>
-            {{ form.article(cols=100, rows=30) }}
+            <p>Name for your article {{ form.name }}</p>
+            {{ form.article(cols=70, rows=15) }}
         </p>
+    </div>
+    <div>{% for post in posts %}
+        <p>
+            Your "{{ post.name }}" article
+        </p>
+        <p>{{ post.article_text }}</p>
+        <p>_____________________________</p>
+        {% endfor %}
+
     </div>
 
 
