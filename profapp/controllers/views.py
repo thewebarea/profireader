@@ -1,15 +1,17 @@
 from flask import render_template, redirect, url_for, request
-from profapp import app
-from .forms import ArticleForm
+from profapp.controllers.forms import ArticleForm
 from profapp.models.articles import Article, ArticleHistory
 from profapp.models.users import User
 from profapp.models.company import Company
 from db_connect import sql_session
 #from config import POSTS_PER_PAGE
 
+from flask import Blueprint
 
-@app.route('/article/',methods=['GET','POST'])
-@app.route('/article/<int:page>',methods=['GET', 'POST'])
+article_bp = Blueprint('articles', __name__)
+
+@article_bp.route('/article/', methods=['GET','POST'])
+@article_bp.route('/article/<int:page>', methods=['GET', 'POST'])
 def article(page=1):
 
     form = ArticleForm()
@@ -28,7 +30,7 @@ def article(page=1):
                               article_history.id)
             sql_session.add(article)
             sql_session.commit()
-        return redirect(url_for('article',page=article_history.id))
+        return redirect(url_for('article', page=article_history.id))
     elif request.method!='POST':
 
         for post in posts:
@@ -38,6 +40,6 @@ def article(page=1):
     return render_template('article.html', form=form, posts=posts)
 
 
-@app.route('/')
+@article_bp.route('/')
 def index():
     return render_template('index.html')
