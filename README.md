@@ -6,7 +6,7 @@ libpq-dev python-dev packages first:
 $ sudo apt-get install libpq-dev python-dev
 
 also you have to install 'python3-venv' package in order to work with Python 3
-$ sudo apt-get install python3-venv
+$ sudo apt-get install python3-venv python3-pip
 
 create new postgresql user 'pfuser':
 $ sudo -u postgres createuser -D -A -P pfuser
@@ -16,7 +16,6 @@ pfuser have to create new db named 'profireader'
 $ sudo -u postgres createdb -O pfuser profireader
 
 now virtual environment with all necessary packages have to be created:
-$ apt-get install python3-pip
 $ pyvenv env && source env/bin/activate && pip3 install -r requirements.txt
 
 ------------------------------------------------------
