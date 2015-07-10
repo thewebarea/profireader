@@ -16,6 +16,7 @@ pfuser have to create new db named 'profireader'
 $ sudo -u postgres createdb -O pfuser profireader
 
 now virtual environment with all necessary packages have to be created:
+$ apt-get install python3-pip
 $ pyvenv env && source env/bin/activate && pip3 install -r requirements.txt
 
 ------------------------------------------------------
