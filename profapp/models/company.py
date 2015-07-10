@@ -9,6 +9,7 @@ company_table=Table('company',metadata,
                     )
 class Company(object):
     query=sql_session.query_property()
+
     def __init__(self,name,portal_consist=False):
         self.name=name
         self.portal_consist=portal_consist
