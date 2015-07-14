@@ -2,7 +2,8 @@ import os
 
 def database_uri(host, username, password, db_name):
     return 'postgresql+psycopg2://{username}:{password}@{host}/{db_name}'. \
-        format(**{'db_name': db_name, 'host': host,
+        format(**{'db_name': db_name,
+                  'host': host,
                   'username': username,
                   'password': password})
 
@@ -29,7 +30,7 @@ class Config(object):
     # Enable protection against *Cross-site Request Forgery (CSRF)*
     CSRF_ENABLED = True
 
-    host = 'localhost'
+    host = 'db.prof'
     username = 'pfuser'
     password = 'min~Kovski'
 

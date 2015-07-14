@@ -12,6 +12,10 @@ create new postgresql user 'pfuser':
 $ sudo -u postgres createuser -D -A -P pfuser
 (here system asks a password for just created user. Password: min~Kovski)
 
+you need to add ip to host:
+ping ip : ping postgres.d
+add ip to file: mcedit /etc/hosts
+
 pfuser have to create new db named 'profireader'
 $ sudo -u postgres createdb -O pfuser profireader
 
@@ -19,6 +23,3 @@ now virtual environment with all necessary packages have to be created:
 $ pyvenv env && source env/bin/activate && pip3 install -r requirements.txt
 
 ------------------------------------------------------
-
-Tips:
-If psycopg2 cann't be installed correctly then...
