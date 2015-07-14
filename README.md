@@ -14,12 +14,21 @@ $ sudo -u postgres createuser -D -A -P pfuser
 
 you need to add ip to host:
 ping ip : ping postgres.d
-add ip to file: mcedit /etc/hosts
+add ip and host name db.prof to file: mcedit /etc/hosts
+
 
 pfuser have to create new db named 'profireader'
 $ sudo -u postgres createdb -O pfuser profireader
 
 now virtual environment with all necessary packages have to be created:
 $ pyvenv env && source env/bin/activate && pip3 install -r requirements.txt
+
+also you need to install file manager from bower package
+$sudo apt-get install nodejs
+$sudo apt-get install npm
+$ln -s /usr/bin/nodejs /usr/bin/node
+$npm install -g bower
+
+
 
 ------------------------------------------------------
