@@ -1,14 +1,175 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Profireader</title>
-  </head>
-  <body>
-    {% if authorised %}
-    {% else %}
-    {% endif %}
-    <hr>
-    {% block content %}{% endblock %}
-  </body>
-</html>
+<div class="topbar">
+    <div class="topbar-wrapper">
+
+        <div class="js-topbar-dialog-corral">
+
+<div style="top: 34px; left: 0px; display: none;" class="topbar-dialog siteSwitcher-dialog dno">
+    <div class="header">
+        <h3><a href="https://stackoverflow.com/">current community</a></h3>
+    </div>
+    <div class="modal-content current-site-container">
+        <ul class="current-site">
+                <li>
+                        <div class="related-links">
+            <a href="http://chat.stackoverflow.com/" class="js-gps-track" data-gps-track="site_switcher.click({ item_type:6 })">chat</a>
+                    <a href="http://blog.stackoverflow.com/" class="js-gps-track" data-gps-track="site_switcher.click({ item_type:7 })">blog</a>
+            </div>
+
+
+
+
+    <a href="https://stackoverflow.com/" class="current-site-link site-link js-gps-track" data-id="1" data-gps-track="
+        site_switcher.click({ item_type:3 })">
+        <div class="site-icon favicon favicon-stackoverflow" title="Stack Overflow"></div>
+        Stack Overflow
+    </a>
+
+                </li>
+                <li class="related-site">
+                        <div class="L-shaped-icon-container">
+        <span class="L-shaped-icon"></span>
+    </div>
+
+
+
+
+
+    <a href="http://meta.stackoverflow.com/" class="site-link js-gps-track" data-id="552" data-gps-track="
+            site.switch({ target_site:552, item_type:3 }),
+        site_switcher.click({ item_type:4 })">
+        <div class="site-icon favicon favicon-stackoverflowmeta" title="Meta Stack Overflow"></div>
+        Meta Stack Overflow
+    </a>
+
+                </li>
+                            <li class="related-site">
+                        <div class="L-shaped-icon-container">
+        <span class="L-shaped-icon"></span>
+    </div>
+
+                    <a class="site-link js-gps-track" href="https://careers.stackoverflow.com/?utm_source=stackoverflow.com&amp;utm_medium=site-ui&amp;utm_campaign=multicollider" data-gps-track="site_switcher.click({ item_type:9 })">
+                        <div class="site-icon favicon favicon-careers" title="Stack Overflow Careers"></div>
+                        Stack Overflow Careers
+                    </a>
+                </li>
+        </ul>
+    </div>
+
+    <div class="header" id="your-communities-header">
+        <h3>
+your communities        </h3>
+
+    </div>
+    <div class="modal-content" id="your-communities-section">
+
+            <div class="call-to-login">
+<a href="https://stackoverflow.com/users/signup?returnurl=http%3a%2f%2fstackoverflow.com%2f" class="login-link js-gps-track" data-gps-track="site_switcher.click({ item_type:10 })">Sign up</a> or <a href="https://stackoverflow.com/users/login?returnurl=http%3a%2f%2fstackoverflow.com%2f" class="login-link js-gps-track" data-gps-track="site_switcher.click({ item_type:11 })">log in</a> to customize your list.
+            </div>
+    </div>
+
+    <div class="header">
+        <h3><a href="https://stackexchange.com/sites">more stack exchange communities</a></h3>
+    </div>
+    <div class="modal-content">
+            <div class="child-content">
+
+<div class="site-filter-container">
+    <input id="js-site-filter-txt" class="site-filter-input" placeholder="Find a Stack Exchange community" type="text">
+</div>
+
+<ul class="other-sites js-other-sites">
+        <li>
+                <a class="other-site-link js-gps-track" href="https://academia.stackexchange.com/" data-id="415" data-gps-track="site.switch({ target_site:415, item_type:3 }), site_switcher.click({ item_type:2 })">
+        <div class="site-icon favicon favicon-academia" title="Academia"></div>
+        Academia
+        <p class="site-desc">For academics and those enrolled in higher education</p>
+    </a>
+
+        </li>
+        <li>
+                <a class="other-site-link js-gps-track" href="https://ham.stackexchange.com/" data-id="520" data-gps-track="site.switch({ target_site:520, item_type:3 }), site_switcher.click({ item_type:2 })">
+        <div class="site-icon favicon favicon-ham" title="Amateur Radio"></div>
+        Amateur Radio
+        <p class="site-desc">For amateur radio enthusiasts</p>
+    </a>
+
+        </li>
+        <li>
+                <a class="other-site-link js-gps-track" href="https://android.stackexchange.com/" data-id="139" data-gps-track="site.switch({ target_site:139, item_type:3 }), site_switcher.click({ item_type:2 })">
+        <div class="site-icon favicon favicon-android" title="Android Enthusiasts"></div>
+        Android Enthusiasts
+        <p class="site-desc">For enthusiasts and power users of the Android operating system</p>
+    </a>
+
+        </li>
+
+</ul></div>
+    </div>
+</div>
+        </div>
+
+        <div class="network-items">
+
+            <a href="https://stackexchange.com/" class="topbar-icon icon-site-switcher yes-hover js-site-switcher-button js-gps-track" data-gps-track="site_switcher.show" title="A list of all 547 Profireader sites">
+                <span class="hidden-text">Stack Exchange</span>
+            </a>
+
+        </div>
+
+        <div class="topbar-links">
+
+                <div class="links-container">
+                <span class="topbar-menu-links">
+                                <a href="https://stackoverflow.com/users/signup?returnurl=http%3a%2f%2fstackoverflow.com%2f" class="login-link">sign up</a>
+                                <a href="https://stackoverflow.com/users/login?returnurl=http%3a%2f%2fstackoverflow.com%2f" class="login-link">log in</a>
+
+                            <a href="#" class="icon-help js-help-button" title="Help Center and other resources">
+        help
+        <span class="triangle"></span>
+    </a>
+    <div class="topbar-dialog help-dialog js-help-dialog dno">
+        <div class="modal-content">
+            <ul>
+                                    <li>
+                        <a href="https://stackoverflow.com/tour" class="js-gps-track" data-gps-track="help_popup.click({ item_type:1 })">
+                            Tour
+                            <span class="item-summary">
+                                Start here for a quick overview of the site
+                            </span>
+                        </a>
+                    </li>
+                <li>
+                    <a href="https://stackoverflow.com/help" class="js-gps-track" data-gps-track="help_popup.click({ item_type:4 })">
+                        Help Center
+                        <span class="item-summary">
+                            Detailed answers to any questions you might have
+                        </span>
+                    </a>
+                </li>
+                    <li>
+                        <a href="https://meta.stackoverflow.com/" class="js-gps-track" data-gps-track="help_popup.click({ item_type:2 })">
+                            Meta
+                            <span class="item-summary">
+                                Discuss the workings and policies of this site
+                            </span>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+
+                            <a href="https://careers.stackoverflow.com/?utm_source=stackoverflow.com&amp;utm_medium=site-ui&amp;utm_campaign=anon-topbar">profireader something</a>
+                    </span>
+                </div>
+
+            <div class="search-container">
+                <form id="search" action="/search" method="get" autocomplete="off">
+                    <input name="q" placeholder="search" tabindex="1" autocomplete="off" maxlength="240" type="text">
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% block content %}{% endblock %}
