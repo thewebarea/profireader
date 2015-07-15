@@ -12,10 +12,12 @@ create new postgresql user 'pfuser':
 $ sudo -u postgres createuser -D -A -P pfuser
 (here system asks a password for just created user. Password: min~Kovski)
 
-you need to add ip to host:
-ping ip : ping postgres.d
-add ip and host name db.prof to file: mcedit /etc/hosts
-
+you need to add ip of db host (db.prof) to file /etc/hosts
+If db is located on postgres.d server then its ip can be found with
+`ping postgres.d` command. If db is located on localhost then ip is 0.0.0.0
+Though, running `mcedit /etc/hosts` add following line:
+ip    db.prof
+where ip is a value derived on previous step.
 
 pfuser have to create new db named 'profireader'
 $ sudo -u postgres createdb -O pfuser profireader
