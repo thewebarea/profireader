@@ -1,5 +1,5 @@
 #from .db import db
-from flask import Flask, render_template
+from flask import Flask
 from profapp.controllers.views import article_bp, index , filemanager_bp
 #from profapp import views
 
