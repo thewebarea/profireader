@@ -5,10 +5,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+Virtualenviroment/
 # C extensions
 *.so
-
+.bowerrc
 # Distribution / packaging
 .Python
 env/

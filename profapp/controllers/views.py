@@ -9,6 +9,7 @@ from db_connect import sql_session
 from flask import Blueprint
 
 article_bp = Blueprint('articles', __name__)
+filemanager_bp = Blueprint('filemanager', __name__, static_folder='../static/angular-filemanager', static_url_path='')
 
 @article_bp.route('/article/', methods=['GET','POST'])
 @article_bp.route('/article/<int:page>', methods=['GET', 'POST'])
@@ -43,3 +44,7 @@ def article(page=1):
 @article_bp.route('/')
 def index():
     return render_template('index.html')
+
+@filemanager_bp.route('/')
+def filemanager():
+    return filemanager_bp.send_static_file('index.html')
