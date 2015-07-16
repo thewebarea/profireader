@@ -22,15 +22,15 @@ where ip is a value derived on previous step.
 pfuser have to create new db named 'profireader'
 $ sudo -u postgres createdb -O pfuser profireader
 
-now virtual environment with all necessary packages have to be created:
+virtual environment (on Python 3) with all necessary packages
+have to be created:
 $ pyvenv env && source env/bin/activate && pip3 install -r requirements.txt
+
+(if you want to create a virtual environment on Python 2 run the following:
+$ virtualenv env2 && . env2/bin/activate && pip install -r requirements.txt )
 
 also you need to install file manager from bower package
 $sudo apt-get install nodejs
 $sudo apt-get install npm
 $ln -s /usr/bin/nodejs /usr/bin/node
 $npm install -g bower
-
-
-
-------------------------------------------------------

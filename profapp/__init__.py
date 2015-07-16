@@ -1,6 +1,7 @@
 #from .db import db
 from flask import Flask, render_template
-from profapp.controllers.views import article_bp, index , filemanager_bp
+from profapp.controllers.views import article_bp, index, filemanager_bp
+from profapp.controllers.users_blueprint import users_bp
 #from profapp import views
 
 def create_app(config='config.ProductionDevelopmentConfig'):
@@ -11,7 +12,9 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     app.add_url_rule('/', 'index', index)
 
     app.register_blueprint(article_bp, url_prefix='/articles')
-    app.register_blueprint(filemanager_bp, url_prefix='/filemanager')
+    app.register_blueprint(users_bp, url_prefix='/users')
+    app.register_blueprint(filemanager_bp, url_prefix='/filemanager')\
+
     return app
 
 
