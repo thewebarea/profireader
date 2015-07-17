@@ -1,3 +1,4 @@
+# install into environment 'future' package (see requirements.txt)
 # It works as for Py2 as for Py3!!!
 #
 # http://python-future.org/quickstart.html
@@ -36,19 +37,26 @@ def list_routes():
     to use it run: python manage.py list_routes"""
     import urllib.parse
     output = []
-    st = '{:30s} {:25s} {}'
+    st = '{:30s} {:25s} {:35s} {}'
     for rule in app.url_map.iter_rules():
         methods = ','.join(rule.methods)
+        options = {}
+        for arg in rule.arguments:
+            options[arg] = "[{0}]".format(arg)
         try:
-            options = {}
-            for arg in rule.arguments:
-                options[arg] = "[{0}]".format(arg)
-
-            url = url_for(rule.endpoint, **options)
-            line = urllib.parse.unquote(st.format(rule.endpoint, methods, url))
+            with app.app_context():
+                # see this:
+                # http://flask.pocoo.org/docs/0.10/config/ (SERVER_NAME variable)
+                # and this:
+                # http://kronosapiens.github.io/blog/2014/08/14/understanding-contexts-in-flask.html
+                # we also have to add line
+                # 0.0.0.0    profireader.a
+                # to /etc/hosts
+                url = url_for(rule.endpoint, **options)
         except:
-            line = urllib.parse.unquote(st.format(rule.endpoint,
-                                                  methods, rule))
+            url = None
+        line = urllib.parse.unquote(st.format(rule.endpoint,
+                                              methods, str(rule), url))
         output.append(line)
 
     for line in sorted(output):

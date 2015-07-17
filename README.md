@@ -19,6 +19,10 @@ Though, running `mcedit /etc/hosts` add following line:
 ip    db.prof
 where ip is a value derived on previous step.
 
+we also have to add line
+0.0.0.0    profireader.a
+to /etc/hosts
+
 pfuser have to create new db named 'profireader'
 $ sudo -u postgres createdb -O pfuser profireader
 

@@ -9,6 +9,17 @@ def database_uri(host, username, password, db_name):
 
 
 class Config(object):
+    # see this:
+    # http://flask.pocoo.org/docs/0.10/config/ (SERVER_NAME variable)
+    # and this:
+    # http://kronosapiens.github.io/blog/2014/08/14/understanding-contexts-in-flask.html
+    # see also http://flask.pocoo.org/docs/0.10/config/
+    # SERVER_NAME variable.
+    # we also have to add line
+    # 0.0.0.0    profireader.a
+    # to /etc/hosts
+    SERVER_NAME = 'profireader.a:8080'
+
     # Statement for enabling the development environment
     DEBUG = False
     TESTING = False
@@ -49,6 +60,8 @@ class ProductionDevelopmentConfig(Config):
     username = os.getenv('PRODUCTION_SERVER_DB_USERNAME', Config.username)
     password = os.getenv('PRODUCTION_SERVER_DB_PASSWORD', Config.password)
     db_name = os.getenv('PRODUCTION_SERVER_DB_NAME', 'profireader')
+
+    #SERVER_NAME = os.getenv('PRODUCTION_SERVER_NAME', Config.SERVER_NAME)
 
     # Define production database
     SQLALCHEMY_DATABASE_URI = \
