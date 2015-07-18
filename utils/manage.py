@@ -53,7 +53,7 @@ def list_routes():
                 # 0.0.0.0    profireader.a
                 # to /etc/hosts
                 url = url_for(rule.endpoint, **options)
-        except:
+        except ValueError:
             url = None
         line = urllib.parse.unquote(st.format(rule.endpoint,
                                               methods, str(rule), url))
