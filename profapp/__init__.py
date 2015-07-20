@@ -2,7 +2,9 @@
 from flask import Flask, render_template
 from profapp.controllers.views import article_bp, index, filemanager_bp
 from profapp.controllers.users_blueprint import users_bp
-#from profapp import views
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 def create_app(config='config.ProductionDevelopmentConfig'):
     app = Flask(__name__)
