@@ -1,11 +1,11 @@
 from flask import jsonify
-from .users_blueprint import users_bp
+from .blueprints import user_bp
 
-@users_bp.route('/signup/', methods=['GET', 'POST'])
+@user_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
     return jsonify({'a': 'b'})
 
 
-@users_bp.route('/login/', methods=['GET', 'POST'])
+@user_bp.route('/login/', methods=['GET', 'POST'])
 def login():
     return jsonify({'c': 'd'})

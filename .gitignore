@@ -66,3 +66,6 @@ target/
 
 # all backup files
 *~
+
+# secret data
+secret_data.py

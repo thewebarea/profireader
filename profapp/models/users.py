@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DATETIME, SMALLINT
+from sqlalchemy import Column, Integer, String, TIMESTAMP, SMALLINT
 #from db_connect import sql_session, metadata
-from profapp import Base
+from database import Base
 
 class User(Base):
     __tablename__ = 'users'
@@ -15,9 +15,9 @@ class User(Base):
     twitter_uid = Column(Integer)
     linkedin_uid = Column(Integer)
     email_conf_key = Column(String(100))
-    email_conf_tm = Column(DATETIME)
+    email_conf_tm = Column(TIMESTAMP)
     pass_reset_key = Column(String(100))
-    pass_reset_conf_tm = Column(DATETIME)
+    pass_reset_conf_tm = Column(TIMESTAMP)
     registered_via = Column(SMALLINT)
 
     def __init__(self, email='guest@profireader.com', first_name=None,

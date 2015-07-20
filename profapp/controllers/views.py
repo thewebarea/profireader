@@ -4,12 +4,19 @@ from profapp.models.articles import Article, ArticleHistory
 from profapp.models.users import User
 from profapp.models.company import Company
 from db_connect import sql_session
-#from config import POSTS_PER_PAGE
+from .blueprints import article_bp, filemanager_bp
 
-from flask import Blueprint
+from .blueprints import user_bp
+from flask import jsonify
 
-article_bp = Blueprint('articles', __name__)
-filemanager_bp = Blueprint('filemanager', __name__)
+@user_bp.route('/signup/', methods=['GET', 'POST'])
+def signup():
+    return jsonify({'a': 'b'})
+
+
+@user_bp.route('/login/', methods=['GET', 'POST'])
+def login():
+    return jsonify({'c': 'd'})
 
 @article_bp.route('/article/', methods=['GET','POST'])
 @article_bp.route('/article/<int:page>', methods=['GET', 'POST'])
