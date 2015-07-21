@@ -10,7 +10,9 @@ $ sudo apt-get install python3-venv python3-pip
 
 create new postgresql user 'pfuser':
 $ sudo -u postgres createuser -D -A -P pfuser
-(here system asks a password for just created user. Password: min~Kovski)
+(here system asks a password for just created user. Password can be found in
+secret_data.py file as DEV_DB_PASSWORD constant)
+#ALTER USER pfuser WITH PASSWORD '<newpassword>'
 
 you need to add ip of db host (db.prof) to file /etc/hosts
 If db is located on postgres.d server then its ip can be found with

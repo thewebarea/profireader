@@ -1,4 +1,5 @@
 import os
+import secret_data
 
 def database_uri(host, username, password, db_name):
     return 'postgresql+psycopg2://{username}:{password}@{host}/{db_name}'. \
@@ -43,14 +44,14 @@ class Config(object):
 
     host = 'db.prof'
     username = 'pfuser'
-    password = 'min~Kovski'
+    password = secret_data.DEV_DB_PASSWORD
 
     # Secret key for signing cookies
-    SECRET_KEY = '(sd0f@r^&37#W0y!kf<5'
+    SECRET_KEY = secret_data.SECRET_KEY
 
     # Facebook settings
-    CONSUMER_KEY = ''
-    CONSUMER_SECRET = ''
+    CONSUMER_KEY_FB = secret_data.CONSUMER_KEY_FB
+    CONSUMER_SECRET_FB = secret_data.CONSUMER_SECRET_FB
 
 
 class ProductionDevelopmentConfig(Config):
@@ -77,10 +78,10 @@ class ProductionDevelopmentConfig(Config):
     SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', 'Profireader')
 
     # Facebook settings
-    CONSUMER_KEY = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
-                             Config.CONSUMER_KEY)
-    CONSUMER_SECRET = os.getenv('PRODUCTION_SERVER_CONSUMER_SECRET',
-                                Config.CONSUMER_SECRET)
+    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
+                             Config.CONSUMER_KEY_FB)
+    CONSUMER_SECRET_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_SECRET',
+                                Config.CONSUMER_SECRET_FB)
 
     if 'PRODUCTION_SERVER_DB_HOST' not in os.environ.keys():
 
@@ -112,5 +113,5 @@ class TestingConfig(Config):
     SITE_TITLE = "TEST"
 
     # Facebook settings
-    CONSUMER_KEY = Config.CONSUMER_KEY
-    CONSUMER_SECRET = Config.CONSUMER_SECRET
+    CONSUMER_KEY_FB = Config.CONSUMER_KEY_FB
+    CONSUMER_SECRET_FB = Config.CONSUMER_SECRET_FB

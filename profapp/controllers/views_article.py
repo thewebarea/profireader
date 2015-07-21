@@ -4,19 +4,7 @@ from profapp.models.articles import Article, ArticleHistory
 from profapp.models.users import User
 from profapp.models.company import Company
 from db_connect import sql_session
-from .blueprints import article_bp, filemanager_bp
-
-from .blueprints import user_bp
-from flask import jsonify
-
-@user_bp.route('/signup/', methods=['GET', 'POST'])
-def signup():
-    return jsonify({'a': 'b'})
-
-
-@user_bp.route('/login/', methods=['GET', 'POST'])
-def login():
-    return jsonify({'c': 'd'})
+from .blueprints import article_bp
 
 @article_bp.route('/article/', methods=['GET','POST'])
 @article_bp.route('/article/<int:page>', methods=['GET', 'POST'])
@@ -46,12 +34,3 @@ def article(page=1):
             form.article.data=post.article_text
 
     return render_template('article.html', form=form, posts=posts)
-
-
-@article_bp.route('/')
-def index():
-    return render_template('index.html')
-
-@filemanager_bp.route('/filemanager')
-def filemanager():
-    return render_template('filemanager.html')
