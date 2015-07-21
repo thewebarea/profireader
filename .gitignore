@@ -8,7 +8,7 @@ __pycache__/
 Virtualenviroment/
 # C extensions
 *.so
-
+.bowerrc
 # Distribution / packaging
 .Python
 env/
