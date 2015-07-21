@@ -23,12 +23,4 @@ $ sudo -u postgres createdb -O pfuser profireader
 now virtual environment with all necessary packages have to be created:
 $ pyvenv env && source env/bin/activate && pip3 install -r requirements.txt
 
-also you need to install file manager from bower package
-$sudo apt-get install nodejs
-$sudo apt-get install npm
-$ln -s /usr/bin/nodejs /usr/bin/node
-$npm install -g bower
-
-
-
 ------------------------------------------------------
