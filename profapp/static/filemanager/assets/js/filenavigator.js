@@ -8,7 +8,7 @@
         var FileNavigator = function() {
             this.requesting = false;
             this.fileList = [];
-            this.currentPath = [];
+            this.currentPath =[];
             this.history = [];
             this.error = '';
         };
