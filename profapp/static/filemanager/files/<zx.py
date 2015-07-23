@@ -1,1 +1,0 @@
-i__author__ = 'viktor'

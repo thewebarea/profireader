@@ -57,9 +57,7 @@ class ProductionDevelopmentConfig(Config):
     # Use a secure, unique and absolutely secret key for
     # signing the data.
     CSRF_SESSION_KEY = os.getenv('PRODUCTION_SERVER_CSRF_SESSION_KEY', None)
-    UPLOAD_FOLDER = os.getcwd()+'/profapp/static/filemanager/files'
-# These are the extension that we are accepting to be uploaded
-    ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
 
     # Secret key for signing cookies
     SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)
