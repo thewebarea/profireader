@@ -1,13 +1,13 @@
 import os
 from time import gmtime, strftime
 from stat import ST_MTIME, ST_SIZE
-from flask import jsonify, request, Blueprint, send_file
+from flask import jsonify, request, Blueprint, send_from_directory, flash
 from shutil import copy2, SameFileError
 static_bp = Blueprint('static', __name__, static_url_path='', static_folder='/static/filemanager/files')
 root = os.getcwd()+'/profapp/static/filemanager/files'
 json_result = {"result": {"success": True, "error": None}}
 
-@static_bp.route('/filemanager/bridges/python/ctrl_filemanager.py', methods=['GET', 'POST'])
+@static_bp.route('/filemanager', methods=['GET', 'POST'])
 def ctrl_filemanager():
 
     if request.method != 'GET':
@@ -28,14 +28,15 @@ def ctrl_filemanager():
                 elif params['mode'] == 'copy':
                     return jsonify(copy_paste(params['path'], params['newPath'], json_result))
         except AttributeError:
-            print(request.files)
-
             return jsonify(upload(json_result))
     get_mode = request.args.get('mode')
     get_path = request.args.get('path')
     if get_mode == 'download':
-        return send_file(root+get_path)
-    return json_result
+        filename = get_path.split('/')
+        filename = filename[-1]
+        get_file_path = root+get_path.replace(filename, '')
+        return send_from_directory(get_file_path, filename)
+
 
 
 def listing(folder_path):
@@ -122,5 +123,13 @@ def upload(result):
 
     file = request.files['file-1']
     filename = file.filename
-    file.save(os.path.join(root, filename))
+    if not os.path.exists(root+'/'+filename):
+        file.save(os.path.join(root, filename))
+        return result
+    else:
+        result = {"result": {
+                  "success": False,
+                  "error": "This name already exist"}
+                  }
+
     return result
