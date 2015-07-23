@@ -6,4 +6,4 @@ users_table = Table('user', metadata, Column('id', Integer, primary_key=True))
 class User(object):
     query = sql_session.query_property()
 
-mapper(User,users_table)
+mapper(User, users_table)

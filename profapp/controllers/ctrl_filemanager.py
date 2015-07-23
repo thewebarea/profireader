@@ -3,7 +3,7 @@ from time import gmtime, strftime
 from stat import ST_MTIME, ST_SIZE
 from flask import jsonify, request, Blueprint, send_from_directory, flash
 from shutil import copy2, SameFileError
-static_bp = Blueprint('static', __name__, static_url_path='', static_folder='/static/filemanager/files')
+static_bp = Blueprint('static', __name__, static_url_path='')
 root = os.getcwd()+'/profapp/static/filemanager/files'
 json_result = {"result": {"success": True, "error": None}}
 
@@ -110,6 +110,7 @@ def create_folder(name, folder_path, result):
     return result
 
 def copy_paste(file_path, new_file_path, result):
+
     try:
         copy2(root+file_path, root+new_file_path)
     except SameFileError:
@@ -131,5 +132,4 @@ def upload(result):
                   "success": False,
                   "error": "This name already exist"}
                   }
-
     return result
