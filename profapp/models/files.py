@@ -14,7 +14,6 @@ files_table = Table('files', metadata,
                     Column('md_tm', TIMESTAMP),
                     Column('ac_tm', TIMESTAMP)
                     )
-
 class Files(object):
 
     def __init__(self, parent_id=None, name=None, mime=None, content=None, size=None, user_id=None, cr_tm=None, md_tm=None, ac_tm=None):
