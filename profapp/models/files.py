@@ -17,7 +17,7 @@ files_table = Table('files', metadata,
 
 class Files(object):
 
-    def __init__(self, parent_id, name, mime, content, size, user_id, cr_tm, md_tm, ac_tm):
+    def __init__(self, parent_id=None, name=None, mime=None, content=None, size=None, user_id=None, cr_tm=None, md_tm=None, ac_tm=None):
         self.parent_id = parent_id
         self.name = name
         self.mime = mime
