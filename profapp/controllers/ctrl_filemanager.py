@@ -3,7 +3,7 @@ from time import gmtime, strftime
 from stat import *
 from flask import jsonify, request, Blueprint
 
-files = os.listdir('/home/viktor/Downloads')
+files = os.listdir('./')
 static_bp = Blueprint('static', __name__)
 
 @static_bp.route('/filemanager/bridges/python/ctrl_filemanager.py', methods=['GET', 'POST'])
