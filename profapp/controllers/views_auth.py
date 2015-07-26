@@ -1,25 +1,70 @@
 from .blueprints import user_bp
-from flask import jsonify
+from flask import jsonify, make_response, g, session, request, redirect, \
+    url_for
+from authomatic.adapters import WerkzeugAdapter
+from ..models.users import User
+#from urllib.parse import quote
+#import urllib.parse
+from urllib.parse import quote
 
 @user_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
     return jsonify({'a': 'b'})
 
-@user_bp.route('/login/', methods=['GET', 'POST'])
-def login():
-    return jsonify({'c': 'd'})
-
-@user_bp.route('/login/fb', methods=['GET', 'POST'])
-def login_fb():
-    return jsonify({'c': 'd'})
-
+#@user_bp.route('/login', methods=['GET', 'POST'])
+#def login():
+#    return jsonify({'c': 'd'})
 
 #def _session_saver():
 #    session.modified = True
-#
-#
+
+
+from authomatic import Authomatic
+from config import Config
+authomatic = Authomatic(Config.OAUTH_CONFIG,
+                        Config.SECRET_KEY, report_errors=True)  # app.config['SECRET_KEY']
+
+import re
+from authomatic.adapters import WerkzeugAdapter
+
+from flask import redirect, make_response
+from flask.ext.login import LoginManager, login_user
+
+
+EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
+
+
+#provider_name:
+# 1) facebook +-
+# 2) linkedin +
+# 3) google +
+# 4) twitter +
+# 5) microsoft +
+# 6) email !!!
+
+
+@user_bp.route('/login/<provider_name>', methods=['GET', 'POST'])
+def login(provider_name):
+    response = make_response()
+    try:
+        result = authomatic.login(WerkzeugAdapter(request, response),
+                                  provider_name)
+        if result:
+            if result.user:
+                result.user.update()
+                email = result.user.email
+                if email and EMAIL_REGEX.match(email):
+                    user = User.query.filter_by(email=email).first()
+                    if user:
+                        login_user(user)
+                        return redirect(url_for('index'))
+    except:
+        raise
+    return response
+
+
 #@user_bp.route('/login/fb/', methods=['GET', 'POST'])
-#def login():
+#def login_fb():
 #    response = make_response()
 #    result = g.authomatic.login(WerkzeugAdapter(request, response), 'fb',
 #                                session=session,
@@ -33,8 +78,8 @@ def login_fb():
 #                            result.user.last_name,
 #                            result.user.id,
 #                            result.user.email)
-#                db.session.add(user)
-#                db.session.commit()
+#                #db.session.add(user)
+#                #db.session.commit()
 #            session['user_id'] = user.id
 #            return redirect('/')
 #
@@ -42,6 +87,8 @@ def login_fb():
 #            redirect_path = '#/?msg={}'.format(quote('Facebook login failed.'))
 #            return redirect(redirect_path)
 #    return response
+
+
 #
 #
 #@user_bp.route('/user-info/', methods=['GET'])  # user profile

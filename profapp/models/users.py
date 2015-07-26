@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, TIMESTAMP, SMALLINT
 from database import Base
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     email = Column(String(300))
     first_name = Column(String(300))

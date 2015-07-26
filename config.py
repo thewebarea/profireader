@@ -19,6 +19,7 @@ class Config(object):
     # we also have to add line
     # 0.0.0.0    profireader.a
     # to /etc/hosts
+    #SERVER_NAME = 'aprofi.d.ntaxa.com'
     SERVER_NAME = 'profireader.a:8080'
 
     # Statement for enabling the development environment
@@ -49,10 +50,7 @@ class Config(object):
     # Secret key for signing cookies
     SECRET_KEY = secret_data.SECRET_KEY
 
-    # Facebook settings
-    CONSUMER_KEY_FB = secret_data.CONSUMER_KEY_FB
-    CONSUMER_SECRET_FB = secret_data.CONSUMER_SECRET_FB
-
+    OAUTH_CONFIG = secret_data.OAUTH_CONFIG
 
 class ProductionDevelopmentConfig(Config):
 
@@ -78,10 +76,10 @@ class ProductionDevelopmentConfig(Config):
     SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', 'Profireader')
 
     # Facebook settings
-    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
-                             Config.CONSUMER_KEY_FB)
-    CONSUMER_SECRET_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_SECRET',
-                                Config.CONSUMER_SECRET_FB)
+#    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
+#                                Config.CONSUMER_KEY_FB)
+#    CONSUMER_SECRET_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_SECRET',
+#                                   Config.CONSUMER_SECRET_FB)
 
     if 'PRODUCTION_SERVER_DB_HOST' not in os.environ.keys():
 
@@ -107,11 +105,8 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = \
         database_uri(Config.host, Config.username, Config.password, db_name)
 
-    # Secret key for signing cookies
-    SECRET_KEY = Config.SECRET_KEY
-
     SITE_TITLE = "TEST"
 
     # Facebook settings
-    CONSUMER_KEY_FB = Config.CONSUMER_KEY_FB
-    CONSUMER_SECRET_FB = Config.CONSUMER_SECRET_FB
+#    CONSUMER_KEY_FB = Config.CONSUMER_KEY_FB
+#    CONSUMER_SECRET_FB = Config.CONSUMER_SECRET_FB
