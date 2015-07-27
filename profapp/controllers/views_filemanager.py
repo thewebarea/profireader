@@ -2,7 +2,7 @@ import os
 import time
 from time import gmtime, strftime
 from stat import ST_SIZE
-from flask import jsonify, request, Blueprint, render_template
+from flask import jsonify, request, render_template
 from db_init import db_session
 from profapp.models.files import File
 from .blueprints import filemanager_bp, static_bp
@@ -47,6 +47,30 @@ def listing(folder_path):
 
 def upload(result):
 
+    for l in range(len(request.files)):
+        file = request.files['file-%s' % (l+1)]
+        filename = file.filename
+        file_db = File()
+        file.save(os.path.join(root, filename))
+        for tmp_file in os.listdir(root):
+            st = os.stat(root+'/'+filename)
+            file_db.name = filename
+            file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename))
+            file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename))
+            file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+            file_db.size = st[ST_SIZE]
+            if os.path.isfile(root+'/'+tmp_file):
+                file_db.mime = 'file'
+            else:
+                file_db.mime = 'dir'
+        binary_out = open(root+'/'+filename, 'rb')
+        file_db.content = binary_out.read()
+        binary_out.close()
+        if os.path.isfile(root+'/'+filename):
+            os.remove(root+'/'+filename)
+        else:
+            os.removedirs(root+'/'+filename)
+        db_session.add(file_db)
     file = request.files['file-1']
     filename = file.filename
     file_db = File()
@@ -75,7 +99,7 @@ def upload(result):
     except PermissionError:
         result = {"result": {
                 "success": False,
-                "error": "Access denied to remove file"}
+                "error": "Access denied to upload file"}
             }
         db_session.rollback()
 
