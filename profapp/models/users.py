@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, TIMESTAMP, SMALLINT
-#from db_connect import sql_session, metadata
-from database import Base
+from db_init import Base
 
 class User(Base):
     __tablename__ = 'user'
@@ -24,7 +23,7 @@ class User(Base):
                  second_name=None, password=None, pass_salt=None, fb_uid=None,
                  google_uid=None, twitter_uid=None, linkedin_uid=None,
                  email_conf_key=None, email_conf_tm=None, pass_reset_key=None,
-                 pass_reset_conf_tm=None, registered_via=None,):
+                 pass_reset_conf_tm=None, registered_via=None, ):
         self.email = email
         self.first_name = first_name
         self.second_name = second_name

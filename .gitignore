@@ -8,14 +8,13 @@ __pycache__/
 Virtualenviroment/
 # C extensions
 *.so
-
+.bowerrc
 # Distribution / packaging
 .Python
 env/
 env2/
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -69,3 +68,4 @@ target/
 
 # secret data
 secret_data.py
+.venv/

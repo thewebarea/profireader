@@ -1,7 +1,6 @@
-from db_connect import sql_session, metadata
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, \
     Boolean
-from database import Base
+from db_init import Base
 
 class ArticleHistory(Base):
     __tablename__ = 'article_history'
