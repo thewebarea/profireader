@@ -58,6 +58,7 @@ class ProductionDevelopmentConfig(Config):
     # signing the data.
     CSRF_SESSION_KEY = os.getenv('PRODUCTION_SERVER_CSRF_SESSION_KEY', None)
 
+
     # Secret key for signing cookies
     SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)
 

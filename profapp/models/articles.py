@@ -1,5 +1,5 @@
 from db_connect import sql_session, metadata
-from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String
+from sqlalchemy import Table, Column, Integer, Text, ForeignKey
 from sqlalchemy.orm import mapper
 
 article_history_table = Table('article_history', metadata,
