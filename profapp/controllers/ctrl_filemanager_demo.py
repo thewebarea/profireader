@@ -1,7 +1,7 @@
 import os
 from time import gmtime, strftime
 from stat import ST_MTIME, ST_SIZE
-from flask import jsonify, request, Blueprint, send_from_directory, flash
+from flask import jsonify, request, Blueprint, send_from_directory, send_file
 from shutil import copy2, SameFileError
 static_bp = Blueprint('static', __name__, static_url_path='')
 root = os.getcwd()+'/profapp/static/filemanager/files'
