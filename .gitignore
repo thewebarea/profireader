@@ -12,6 +12,7 @@ Virtualenviroment/
 # Distribution / packaging
 .Python
 env/
+env2/
 build/
 develop-eggs/
 downloads/
@@ -65,4 +66,6 @@ target/
 # all backup files
 *~
 
+# secret data
+secret_data.py
 .venv/

@@ -1,0 +1,100 @@
+<div id="content" class="snippet-hidden">
+            
+<div id="mainbar-full" class="login-page" data-login="true">
+    <div class="subheader">
+        <div id="tabs" style="float: left;">
+            <a href="https://stackoverflow.com/users/login" title="Log in to Stack Overflow" class="youarehere">Log in</a>
+            <a href="https://stackoverflow.com/users/signup" title="Sign up to Stack Overflow">Sign up</a>
+        </div>
+    </div>
+    <div>
+            <h2 class="title">Log in using any of the following services:</h2>
+            <div id="openid-buttons">
+                    <div class="preferred-login google-login" data-provider="google" data-oauthserver="https://accounts.google.com/o/oauth2/auth" data-oauthversion="2.0">
+                        <p>
+                            <span class="icon" style="background-position: 0px 0px; "></span>
+                            <span>Log in using Google</span>
+                        </p>
+                    </div>
+                    <div class="preferred-login facebook-login" data-provider="facebook" data-oauthserver="https://www.facebook.com/v2.0/dialog/oauth" data-oauthversion="2.0">
+                        <p>
+                            <span class="icon" style="background-position: -18px 0px; "></span>
+                            <span>Log in using Facebook</span>
+                        </p>
+                    </div>
+            </div>
+            <div id="se-login" class="preferred-login">
+                <a style="display: none;" href="https://stackoverflow.com/users/account-recovery" id="forgot-password">forgot password</a>
+                <form id="se-login-form" action="/users/login" method="POST">
+                    <input name="fkey" value="b6c073e106f31992a787241e77fa80f1" type="hidden">
+                    <div id="se-signup-legend">
+                        <p>
+                            <span class="icon stackexchange-signup" style="background-position: -38px 0"></span>
+                            <span>Log in using Stack Exchange</span>
+                        </p>
+                    </div>
+                    <div class="form-bottom">
+                        <div>
+                            <input value="an.andrusyk@gmail.com" style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDiEFu6xIcAAAAXhJREFUOMvNk8FLVFEUxn/ffRdmIAla1CbBFDGCpoiQWYlBLty7UHAvEq2HYLhveDMws2/TIly6E9SdIEj+AVYgRaTgXhe2C968x2nhTOjow8pNZ/ede/ide893Lvx3UavVhkMIk30dQqiGECpF9e68CCG8LpfL3yStAAIk6Z2kT3Ect68C+AGdSroFVEII82aWSXoGYGYHVwE0qOM43pU0BXw3s1zSI2AnSZKXhYB6vT7inLvd7XZ/eu8fOOe2JEW9zjkwZ2bHkoayLDtpt9ufLzzBe/8GWC6VSpc7nIE2pLPLeu/fA0uDQ3T/6pp6039uZnfN7Ieke1EUrQOu3/VawPloNBrbwIyZ7TvnLvg/+mKOJ3xk88NR4R4sADM92fp9MDRMdXaRxenHVMbuFy8SMAFkZval2Wyu9ZN3Hk4zWx0nAtKsWwxotVrNNE2f5nn+CrB+/nRvlSR5y2EK0TWbSKfT+fo3Lribfr4bA/yfl56y2kkuZX8BjXVyqMs8oFcAAAAASUVORK5CYII=&quot;); background-repeat: no-repeat; background-attachment: scroll; background-position: right center;" name="email" placeholder="Email" size="30" maxlength="100" type="email">
+                        </div>
+                        <div><input style="background-image: url(&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QsPDiEFu6xIcAAAAXhJREFUOMvNk8FLVFEUxn/ffRdmIAla1CbBFDGCpoiQWYlBLty7UHAvEq2HYLhveDMws2/TIly6E9SdIEj+AVYgRaTgXhe2C968x2nhTOjow8pNZ/ede/ide893Lvx3UavVhkMIk30dQqiGECpF9e68CCG8LpfL3yStAAIk6Z2kT3Ect68C+AGdSroFVEII82aWSXoGYGYHVwE0qOM43pU0BXw3s1zSI2AnSZKXhYB6vT7inLvd7XZ/eu8fOOe2JEW9zjkwZ2bHkoayLDtpt9ufLzzBe/8GWC6VSpc7nIE2pLPLeu/fA0uDQ3T/6pp6039uZnfN7Ieke1EUrQOu3/VawPloNBrbwIyZ7TvnLvg/+mKOJ3xk88NR4R4sADM92fp9MDRMdXaRxenHVMbuFy8SMAFkZval2Wyu9ZN3Hk4zWx0nAtKsWwxotVrNNE2f5nn+CrB+/nRvlSR5y2EK0TWbSKfT+fo3Lribfr4bA/yfl56y2kkuZX8BjXVyqMs8oFcAAAAASUVORK5CYII=&quot;); background-repeat: no-repeat; background-attachment: scroll; background-position: right center;" name="password" placeholder="Password" value="" type="password"></div>
+
+                        <div class="form-submit cbt">
+                            <input id="submit-button" name="submit-button" value="Log In" type="button">
+                            <a href="https://stackoverflow.com/users/account-recovery">forgot password</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <a id="more-options-link">More login options</a>
+            <form id="openid_form" action="/users/authenticate" method="POST">
+                <input name="fkey" value="b6c073e106f31992a787241e77fa80f1" type="hidden">
+                
+                <input id="oauth_version" name="oauth_version" type="hidden">
+                <input id="oauth_server" name="oauth_server" type="hidden">
+                <div>
+                    <noscript>
+                        <p class="noscript-notice">
+                            Open ID is a service that allows you to log on to many different websites using a single identity. Find out <a href="http://openid.net/what/">more about OpenId</a> and <a href="http://openid.net/get/">how to get an OpenID-enabled account</a>.
+                        </p>
+                    </noscript>
+                </div>
+                <div style="display: none;" id="show-more-options">
+                    <div id="more-openid-options" class="script-only">
+                            <a title="Login with Yahoo" href="javascript:openid.signin($('#more-openid-options%20a.yahoo'));" data-provider="yahoo" data-url="https://me.yahoo.com/" style="background-position: -27px -300px" class="yahoo openid_small_btn"></a>
+                            <a title="Login with LiveJournal" href="javascript:openid.signin($('#more-openid-options%20a.livejournal'));" data-provider="livejournal" data-label="Enter your LiveJournal username" data-url="http://{username}.livejournal.com/" style="background-position: -1px -352px" class="livejournal openid_small_btn"></a>
+                            <a title="Login with WordPress" href="javascript:openid.signin($('#more-openid-options%20a.wordpress'));" data-provider="wordpress" data-label="Enter your WordPress username" data-url="http://{username}.wordpress.com/" style="background-position: -1px -404px" class="wordpress openid_small_btn"></a>
+                            <a title="Login with Blogger" href="javascript:openid.signin($('#more-openid-options%20a.blogger'));" data-provider="blogger" data-label="Enter your Blogger username" data-url="https://{username}.blogspot.com/" style="background-position: -1px -249px" class="blogger openid_small_btn"></a>
+                            <a title="Login with Verisign" href="javascript:openid.signin($('#more-openid-options%20a.verisign'));" data-provider="verisign" data-label="Enter your Verisign username" data-url="https://{username}.pip.verisignlabs.com/" style="background-position: -1px -378px" class="verisign openid_small_btn"></a>
+                            <a title="Login with AOL" href="javascript:openid.signin($('#more-openid-options%20a.aol'));" data-provider="aol" data-label="Enter your AOL username" data-url="https://openid.aol.com/{username}" style="background-position: -27px -249px" class="aol openid_small_btn"></a>
+                    </div>
+                    <div id="simple-openid-selector">
+                        <div id="openid_input_area" class="script-only">
+                            <p id="openid_provider_label"></p>
+                            <input id="openid_username" name="openid_username" type="text">
+                            <input id="openid_submit" value="Log In" type="submit">
+                        </div>
+                        <div id="openid-url-input-area">
+                            <noscript>
+                                <p class="noscript-notice">Because JavaScript is disabled, you can only log in by entering your OpenID URL manually:</p>
+                            </noscript>
+                            <div class="vt large">
+                                <input id="openid_identifier" name="openid_identifier" placeholder="Or, you can manually enter your OpenId" class="openid-identifier" style="height: 28px; width: 500px;" type="text">
+                                <input id="submit-button" name="submit-button" value="Submit" type="submit">
+                            </div>
+                        </div>
+                    </div>         
+                </div>
+            </form>
+    </div>
+</div>
+<script>
+    $(function() {
+        openid.init(/* isSignupPage */ false, /* isLoginPage */ true, /* isAddLoginPage */ false, /* isPasswordPage */ false, /* needsCaptcha */ false);
+
+        StackExchange.using("gps", function() { StackExchange.gps.sendPending(); });
+
+    });
+</script>
+
+        </div>
