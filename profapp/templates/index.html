@@ -5,17 +5,8 @@
 {% endblock head %}
 
 {% block base_portal %}
-    <div class="contentWrapper">
-        <a href="http://stackexchange.com/"><h1>Stack Exchange</h1></a>
-        <ul class="navMain">
-            <li><a href="http://stackexchange.com/sites">All Sites</a></li>
-            <li><a href="http://stackexchange.com/leagues">Top Users</a></li>
-            <li><a href="http://stackexchange.com/newsletters">Newsletters</a></li>
-            <li><a href="http://stackexchange.com/blogs">Blogs</a></li>
-        </ul>
-    </div>
+    {% include 'partials/portal_base_Profireader.html' %}
 {% endblock base_portal %}
-
 
 {% block content %}
 
@@ -516,8 +507,6 @@ codegolf                </a>
         </div>
     </footer>
 
-
-
     <noscript>
         <div id="noscript-warning">Stack Exchange works best with JavaScript enabled</div>
     </noscript>
@@ -531,5 +520,5 @@ codegolf                </a>
         });
     </script>
 
-    <iframe scrolling="no" class="igtranslator-iframe" src="a.html" frameborder="0"></iframe><div title="Click to Show Translation" style="background-image: url(resource://jid1-dgnibwqga0sibw-at-jetpack/igtranslator/data/content_script/icon.png)" class="igtranslator-activator-icon"></div></body></html>
+    <iframe scrolling="no" class="igtranslator-iframe" src="a.html" frameborder="0"></iframe><div title="Click to Show Translation" style="background-image: url(resource://jid1-dgnibwqga0sibw-at-jetpack/igtranslator/data/content_script/icon.png)" class="igtranslator-activator-icon"></div>
 {% endblock footer %}

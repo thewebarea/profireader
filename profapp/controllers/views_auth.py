@@ -1,19 +1,11 @@
 from .blueprints import user_bp
 from flask import jsonify, make_response, g, session, request, redirect, \
-    url_for
+    url_for, render_template
 from authomatic.adapters import WerkzeugAdapter
 from ..models.users import User
 #from urllib.parse import quote
 #import urllib.parse
 from urllib.parse import quote
-
-@user_bp.route('/signup/', methods=['GET', 'POST'])
-def signup():
-    return jsonify({'a': 'b'})
-
-#@user_bp.route('/login', methods=['GET', 'POST'])
-#def login():
-#    return jsonify({'c': 'd'})
 
 #def _session_saver():
 #    session.modified = True
@@ -43,8 +35,16 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 # 6) email !!!
 
 
+@user_bp.route('/signup/', methods=['GET', 'POST'])
+def signup():
+    return render_template('signup.html')
+
+@user_bp.route('/login/', methods=['GET', 'POST'])
+def login():
+    return render_template('login.html')
+
 @user_bp.route('/login/<provider_name>', methods=['GET', 'POST'])
-def login(provider_name):
+def login_particular(provider_name):
     response = make_response()
     try:
         result = authomatic.login(WerkzeugAdapter(request, response),
