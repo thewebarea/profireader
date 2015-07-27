@@ -10,7 +10,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     #db.init_app(app)
 
     app.add_url_rule('/', 'index', index)
-    app.register_blueprint(static_bp,url_prefix='/static')
+    app.register_blueprint(static_bp, url_prefix='/static')
     app.register_blueprint(article_bp, url_prefix='/articles')
     app.register_blueprint(filemanager_bp, url_prefix='/filemanager')
     return app
