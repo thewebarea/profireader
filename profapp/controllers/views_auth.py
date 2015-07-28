@@ -57,7 +57,8 @@ def login_particular(provider_name):
                     user = User.query.filter_by(email=email).first()
                     if user:
                         login_user(user)
-                        return redirect(url_for('index'))
+                        return redirect(url_for('general.index'))
+                    return redirect(url_for('general.index'))  # delete this page
     except:
         raise
     return response
