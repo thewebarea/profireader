@@ -37,7 +37,7 @@ def listing(folder_path):
         params['name'] = file.name
         params['rights'] = 'drwxr-xr-x'
         params['id'] = file.id
-        if file.mime == 'directory':
+        if file.mime == 'dir':
             params['type'] = 'dir'
         else:
             params['type'] = 'file'
@@ -59,10 +59,10 @@ def upload(result):
             file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename))
             file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
             file_db.size = st[ST_SIZE]
-            if os.path.isfile(root+'/'+tmp_file):
-                file_db.mime = 'file'
-            else:
+            if os.path.isdir(root+'/'+tmp_file):
                 file_db.mime = 'dir'
+            else:
+                file_db.mime = file.mimetype
         binary_out = open(root+'/'+filename, 'rb')
         file_db.content = binary_out.read()
         binary_out.close()
@@ -71,29 +71,6 @@ def upload(result):
         else:
             os.removedirs(root+'/'+filename)
         db_session.add(file_db)
-    file = request.files['file-1']
-    filename = file.filename
-    file_db = File()
-    file.save(os.path.join(root, filename))
-    for tmp_file in os.listdir(root):
-        st = os.stat(root+'/'+filename)
-        file_db.name = filename
-        file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename))
-        file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename))
-        file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-        file_db.size = st[ST_SIZE]
-        if os.path.isfile(root+'/'+tmp_file):
-            file_db.mime = 'file'
-        else:
-            file_db.mime = 'dir'
-    binary_out = open(root+'/'+filename, 'rb')
-    file_db.content = binary_out.read()
-    binary_out.close()
-    if os.path.isfile(root+'/'+filename):
-        os.remove(root+'/'+filename)
-    else:
-        os.removedirs(root+'/'+filename)
-    db_session.add(file_db)
     try:
         db_session.commit()
     except PermissionError:
