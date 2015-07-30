@@ -29,16 +29,8 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="javascript:void(0);">Cropper</a>
+        <a class="navbar-brand" href="javascript:void(0);">Profireader</a>
       </div>
-      <nav class="collapse navbar-collapse" id="navbar-collapse-1" role="navigation">
-        <p class="navbar-text">A simple jQuery image cropping plugin.</p>
-        <ul class="nav navbar-nav navbar-right">
-          <li><a href="http://github.com/fengyuanchen/cropper/blob/master/README.md">Docs</a></li>
-          <li><a href="http://github.com/fengyuanchen/cropper">Github</a></li>
-          <li><a href="http://chenfengyuan.com">About</a></li>
-        </ul>
-      </nav>
     </div>
   </header>
 
@@ -61,32 +53,36 @@
         </div>
 
         <!-- <h3 class="page-header">Data:</h3> -->
+
         <div class="docs-data">
+          <form class="coordinates" action="/image_editor/editor" method="post">
           <div class="input-group">
             <label class="input-group-addon" for="dataX">X</label>
-            <input class="form-control" id="dataX" type="text" placeholder="x">
+            <input class="form-control" id="dataX" type="text" name="x" placeholder="x">
             <span class="input-group-addon">px</span>
           </div>
           <div class="input-group">
             <label class="input-group-addon" for="dataY">Y</label>
-            <input class="form-control" id="dataY" type="text" placeholder="y">
+            <input class="form-control" id="dataY" type="text" name="y" placeholder="y">
             <span class="input-group-addon">px</span>
           </div>
           <div class="input-group">
             <label class="input-group-addon" for="dataWidth">Width</label>
-            <input class="form-control" id="dataWidth" type="text" placeholder="width">
+            <input class="form-control" id="dataWidth" type="text" name="width" placeholder="width">
             <span class="input-group-addon">px</span>
           </div>
           <div class="input-group">
             <label class="input-group-addon" for="dataHeight">Height</label>
-            <input class="form-control" id="dataHeight" type="text" placeholder="height">
+            <input class="form-control" id="dataHeight" type="text" name="height" placeholder="height">
             <span class="input-group-addon">px</span>
           </div>
           <div class="input-group">
             <label class="input-group-addon" for="dataRotate">Rotate</label>
-            <input class="form-control" id="dataRotate" type="text" placeholder="rotate">
+            <input class="form-control" id="dataRotate" type="text" name="rotate" placeholder="rotate">
             <span class="input-group-addon">deg</span>
           </div>
+            <button type="submit">Crop</button>
+          </form>
         </div>
       </div>
     </div>
@@ -246,156 +242,13 @@
       <div class="col-md-3 docs-toggles">
         <!-- <h3 class="page-header">Toggles:</h3> -->
         <div class="btn-group btn-group-justified" data-toggle="buttons">
-          <label class="btn btn-primary active" data-method="setAspectRatio" data-option="1.7777777777777777" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio1" name="aspestRatio" value="1.7777777777777777" type="radio">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, 16 / 9)">
-              16:9
-            </span>
-          </label>
-          <label class="btn btn-primary" data-method="setAspectRatio" data-option="1.3333333333333333" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio2" name="aspestRatio" value="1.3333333333333333" type="radio">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, 4 / 3)">
-              4:3
-            </span>
-          </label>
-          <label class="btn btn-primary" data-method="setAspectRatio" data-option="1" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio3" name="aspestRatio" value="1" type="radio">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, 1 / 1)">
-              1:1
-            </span>
-          </label>
-          <label class="btn btn-primary" data-method="setAspectRatio" data-option="0.6666666666666666" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio4" name="aspestRatio" value="0.6666666666666666" type="radio">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, 2 / 3)">
-              2:3
-            </span>
-          </label>
-          <label class="btn btn-primary" data-method="setAspectRatio" data-option="NaN" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio5" name="aspestRatio" value="NaN" type="radio">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, NaN)">
-              Free
-            </span>
-          </label>
-        </div>
+          <label class="btn btn-primary active" data-method="setAspectRatio" data-option="{{ ratio }}" title="Set Aspect Ratio">
+            <input class="sr-only" id="aspestRatio" name="aspestRatio" value="{{ ratio }}" type="radio">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, {{ ratio }})">
+              </span>
+            </label>
 
-        <div class="dropdown dropup docs-options">
-          <button class="btn btn-primary btn-block dropdown-toggle" id="toggleOptions" type="button" data-toggle="dropdown" aria-expanded="true">
-            Toggle Options
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu" role="menu" aria-labelledby="toggleOptions">
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="strict" checked>
-                strict
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="responsive" checked>
-                responsive
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="checkImageOrigin" checked>
-                checkImageOrigin
-              </label>
-            </li>
 
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="modal" checked>
-                modal
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="guides" checked>
-                guides
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="center" checked>
-                center
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="highlight" checked>
-                highlight
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="background" checked>
-                background
-              </label>
-            </li>
-
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="autoCrop" checked>
-                autoCrop
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="dragCrop" checked>
-                dragCrop
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="movable" checked>
-                movable
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="rotatable" checked>
-                rotatable
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="zoomable" checked>
-                zoomable
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="touchDragZoom" checked>
-                touchDragZoom
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="mouseWheelZoom" checked>
-                mouseWheelZoom
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="cropBoxMovable" checked>
-                cropBoxMovable
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="cropBoxResizable" checked>
-                cropBoxResizable
-              </label>
-            </li>
-            <li role="presentation">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="option" value="doubleClickToggle" checked>
-                doubleClickToggle
-              </label>
-            </li>
-          </ul>
-        </div><!-- /.dropdown -->
       </div><!-- /.docs-toggles -->
     </div>
   </div>
@@ -403,10 +256,11 @@
   <!-- Alert -->
   <div class="docs-alert"><span class="warning message"></span></div>
 
-  <!-- Scripts -->
+  <!-- Scripts --></div>
   <script src="../static/image_editor/assets/js/jquery.min.js"></script>
   <script src="../static/image_editor/assets/js/bootstrap.min.js"></script>
   <script src="../static/image_editor/dist/cropper.js"></script>
   <script src="../static/image_editor/demo/js/main.js"></script>
+  <script>jQuery(function(){jQuery('#aspestRatio').click();});</script>
 </body>
 </html>

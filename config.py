@@ -31,7 +31,8 @@ class Config(object):
     # incoming requests using one and performing background
     # operations using the other.
     THREADS_PER_PAGE = 2
-
+    #Ratio for image_editor, can be : 1.7777777777777777, 1.3333333333333333, 0.6666666666666666, 1
+    IMAGE_EDITOR_RATIO = 1.3333333333333333
     # Define the application directory
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     #UPLOAD_FOLDER = os.path.join(BASE_DIR, 'media')
