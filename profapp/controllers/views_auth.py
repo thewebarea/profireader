@@ -4,9 +4,10 @@ from flask import jsonify, make_response, g, session, request, redirect, \
 from authomatic.adapters import WerkzeugAdapter
 from ..models.users import User
 from db_init import db_session
-from ..constants.USER_REGISTERED import DB_ALIAS_UID, REGISTERED_WITH_FLIPPED
-#from urllib.parse import quote
-#import urllib.parse
+from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED
+from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS
+import sqlalchemy.exc as sqlalchemy_exc
+
 from urllib.parse import quote
 
 #def _session_saver():
@@ -23,12 +24,13 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
 
 #provider_name:
+# 0) profireader!
 # 1) facebook +-
-# 2) linkedin +
+# 2) linkedin -
 # 3) google +
 # 4) twitter +
 # 5) microsoft +
-# 6) email !!!
+# 6) yahoo -
 
 
 @user_bp.route('/signup/', methods=['GET', 'POST'])
@@ -39,8 +41,33 @@ def signup():
 def login():
     return render_template('login.html')
 
+
+# TODO: just complete this
+# TODO: if registration was via email
+# TODO: we should make validation!
+
+# TODO: consider the situation when
+# TODO: we have really profile_completed = True
+# TODO: it is only possible when user was registered
+# TODO: via email
+# email_conf_key=None, email_conf_tm=None, pass_reset_key=None,
+# pass_reset_conf_tm=None, registered_via=None, ):
+@user_bp.route('/login/profireader', methods=['GET', 'POST'])
+def login_profireader():
+    #  email = result.user.email
+    #  if email and EMAIL_REGEX.match(email):
+    #      user = User.query.filter_by(email=email).first()
+    #      if user:
+    #          login_user(user)
+    #          return redirect(url_for('general.index'))
+    #      return redirect(url_for('general.index'))  #  delete this redirect
+    return render_template('login.html')
+
+
+# it is valid only if registration was via soc network
+# do we need some validation here?
 @user_bp.route('/login/<provider_name>', methods=['GET', 'POST'])
-def login_particular(provider_name):
+def login_soc_network(provider_name):
     response = make_response()
     try:
         result = g.authomatic.login(WerkzeugAdapter(request, response),
@@ -49,69 +76,33 @@ def login_particular(provider_name):
             if result.user:
                 result.user.update()
                 result_user = result.user
-                pass
-                #user = db_session.query(User).\
-                #    filter(
-                #    getattr(User, DB_ALIAS_UID[provider_name])
-                #    == result_user.id
-                #).first()
-                #if not user:
-    # email='guest@profireader.com', first_name=None,
-    # second_name=None, password=None, pass_salt=None, fb_uid=None,
-    # google_uid=None, twitter_uid=None, linkedin_uid=None,
-    # email_conf_key=None, email_conf_tm=None, pass_reset_key=None,
-    # pass_reset_conf_tm=None, registered_via=None, ):
-                #    user = User(first_name=res_user_unified.first_name,
-                #                second_name=res_user_unified.second_name,
-                #                registered_via=
-                #                REGISTERED_WITH_FLIPPED[provider_name]
-                #                )
-                #    setattr(user, DB_ALIAS_UID[provider_name], result_user.id)
-                #    setattr(user, res_user_unified.email[attr],
-                #            res_user_unified.email[value])
-                #    db_session.add(user)
-                #    db_session.commit()
-                #session['user_id'] = user.id
-                ##  create a flag showing the profile is not complete!!!
-                return redirect('/')
+                db_fields = DB_FIELDS[provider_name.upper()]
+                user = db_session.query(User).\
+                    filter(getattr(User, db_fields['ID']) == result_user.id)\
+                    .first()
+                if not user:
+                    user = User(
+                        registered_via=REGISTERED_WITH_FLIPPED[provider_name]
+                    )
+                    for elem in SOC_NET_FIELDS:
+                        setattr(user, db_fields[elem],
+                                getattr(result_user, elem.lower()))
+                    db_session.add(user)
+                    db_session.commit()
+                session['user_id'] = user.id
 
-                #  email = result.user.email
-                #  if email and EMAIL_REGEX.match(email):
-                #      user = User.query.filter_by(email=email).first()
-                #      if user:
-                #          login_user(user)
-                #          return redirect(url_for('general.index'))
-                #      return redirect(url_for('general.index'))  #  delete this redirect
+                return redirect('/')  # #  http://aprofi.d.ntaxa.com/
+                #return redirect('https://www.yahoo.com', code=302)
+            elif result.error:
+                redirect_path = '#/?msg={}'.\
+                    format(quote(provider_name + 'login failed.'))
+                return redirect(redirect_path)
+
     except:
+        import sys
+        print(sys.exc_info())
         raise
     return response
-
-
-#@user_bp.route('/login/fb/', methods=['GET', 'POST'])
-#def login_fb():
-#    response = make_response()
-#    result = g.authomatic.login(WerkzeugAdapter(request, response), 'fb',
-#                                session=session,
-#                                session_saver=_session_saver)
-#    if result:
-#        if result.user:
-#            result.user.update()
-#            user = User.query.filter_by(fb_id=result.user.id).first()
-#            if not user:
-#                user = User(result.user.first_name,
-#                            result.user.last_name,
-#                            result.user.id,
-#                            result.user.email)
-#                #db.session.add(user)
-#                #db.session.commit()
-#            session['user_id'] = user.id
-#            return redirect('/')
-#
-#        elif result.error:
-#            redirect_path = '#/?msg={}'.format(quote('Facebook login failed.'))
-#            return redirect(redirect_path)
-#    return response
-
 
 #
 #
@@ -127,6 +118,7 @@ def login_particular(provider_name):
 #    return jsonify(res)
 #
 #
+
 #@user_bp.route('/logout/', methods=['GET'])
 #def logout():
 #    session.pop('authomatic:fb:state', None)

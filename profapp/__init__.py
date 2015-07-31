@@ -10,16 +10,9 @@ from profapp.models.users import User
 
 
 def setup_authomatic(app):
-    # authomatic = Authomatic(Config.OAUTH_CONFIG, Config.SECRET_KEY, report_errors=True)
     authomatic = Authomatic(app.config['OAUTH_CONFIG'],
-                            app.config['SECRET_KEY'], report_errors=True)
-
-    # authomatic = Authomatic(
-    #     {'fb': {'consumer_key': app.config['CONSUMER_KEY'],
-    #             'consumer_secret': app.config['CONSUMER_SECRET'],
-    #             'class_': oauth2.Facebook,
-    #             'scope': [], }},
-    #     app.config['SECRET_KEY'], report_errors=False)
+                            app.config['SECRET_KEY'],
+                            report_errors=True)
 
     def func():
         g.authomatic = authomatic
