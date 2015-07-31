@@ -4,6 +4,7 @@ import profapp.controllers.views_article as views_art
 import profapp.controllers.views_auth as views_auth
 import profapp.controllers.views_filemanager as views_fileman
 import profapp.controllers.views_index as views_ind
+import profapp.controllers.views_image_editor as views_imged
 from authomatic.providers import oauth2
 from authomatic import Authomatic
 from profapp.models.users import User
@@ -38,11 +39,13 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     app.register_blueprint(views_fileman.filemanager_bp,
                            url_prefix='/filemanager')
     app.register_blueprint(views_fileman.static_bp, url_prefix='/static')
+    app.register_blueprint(views_imged.image_editor_bp, url_prefix='/image_editor')
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
     # Flask will automatically remove database sessions at the end of the request
     # or when the application shuts down:
     from db_init import db_session
+
     @app.teardown_appcontext
     def shutdown_session(exception=None):
         db_session.remove()
