@@ -1,20 +1,22 @@
 from sqlalchemy import Integer, String, TIMESTAMP, SMALLINT, BOOLEAN
 
+id_type = String(50)
+
 USER_TABLE_TYPES = {'ID': Integer,
-                    'GOOGLE_ID': String(50),
-                    'FACEBOOK_ID': String(50),
-                    'LINKEDIN_ID': String(50),
-                    'TWITTER_ID': String(50),
-                    'MICROSOFT_ID': String(50),
-                    'YAHOO_ID': String(50),
+                    'GOOGLE_ID': id_type,
+                    'FACEBOOK_ID': id_type,
+                    'LINKEDIN_ID': id_type,
+                    'TWITTER_ID': id_type,
+                    'MICROSOFT_ID': id_type,
+                    'YAHOO_ID': id_type,
 
                     'EMAIL': String(300),
                     'FIRST_NAME':  String(300),
                     'LAST_NAME': String(300),
                     'NAME': String(601),
                     'GENDER': String(10),
-                    'LINK': String(200),
-                    'PHONE': String(25),
+                    'LINK': String(600),
+                    'PHONE': String(30),
 
                     'ABOUT_ME': String(6000),
                     'PASSWORD': String(100),

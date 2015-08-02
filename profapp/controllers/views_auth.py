@@ -24,13 +24,13 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
 
 #provider_name:
-# 0) profireader!
+# 0) profireader+
 # 1) facebook +-
-# 2) linkedin -
+# 2) linkedin +
 # 3) google +
 # 4) twitter +
 # 5) microsoft +
-# 6) yahoo -
+# 6) yahoo +
 
 
 @user_bp.route('/signup/', methods=['GET', 'POST'])
@@ -95,7 +95,7 @@ def login_soc_network(provider_name):
                 #return redirect('https://www.yahoo.com', code=302)
             elif result.error:
                 redirect_path = '#/?msg={}'.\
-                    format(quote(provider_name + 'login failed.'))
+                    format(quote(provider_name + ' login failed.'))
                 return redirect(redirect_path)
 
     except:
