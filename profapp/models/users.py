@@ -3,7 +3,9 @@ from db_init import Base
 
 from ..constants.TABLE_TYPES import USER_TABLE_TYPES
 
-from ..constants.SOCIAL_NETWORKS import SOC_NET_NONE
+from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
+from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
+    REGISTERED_WITH
 
 class User(Base):
     __tablename__ = 'user'
@@ -188,6 +190,24 @@ class User(Base):
         self.yahoo_gender = YAHOO_ALL['GENDER']
         self.yahoo_link = YAHOO_ALL['LINK']
         self.yahoo_phone = YAHOO_ALL['PHONE']
+
+    def logged_in_via(self):
+        via = None
+        if self.profireader_email:
+            via = 0
+        else:
+            short_soc_net = SOCIAL_NETWORKS[1:]
+            for soc_net in short_soc_net:
+                x = soc_net.lower()+'_id'
+                if getattr(self, x):
+                    via = REGISTERED_WITH_FLIPPED[soc_net.lower()]
+                    break
+        return via
+
+    def user_name(self):
+        via = self.logged_in_via()
+        name = getattr(self, REGISTERED_WITH[via] + '_name')
+        return name
 
     def __repr__(self):
         return "<User(e_mail = '%s', id = '%d', name='%s')>" % (

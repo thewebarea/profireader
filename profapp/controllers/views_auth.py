@@ -35,11 +35,29 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
 @user_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    uid = '0'
+    name = None
+    user = g.user
+    if user:
+        uid = str(user.id)
+        name = user.user_name()
+        #user_params = json.dumps({'id': uid, 'name': name})
+    return render_template('signup.html',
+                           id=uid,
+                           name=name)
 
 @user_bp.route('/login/', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    uid = '0'
+    name = None
+    user = g.user
+    if user:
+        uid = str(user.id)
+        name = user.user_name()
+        #user_params = json.dumps({'id': uid, 'name': name})
+    return render_template('login.html',
+                           id=uid,
+                           name=name)
 
 
 # TODO: just complete this
@@ -65,7 +83,6 @@ def login_profireader():
 
 
 # it is valid only if registration was via soc network
-# do we need some validation here?
 @user_bp.route('/login/<provider_name>', methods=['GET', 'POST'])
 def login_soc_network(provider_name):
     response = make_response()
