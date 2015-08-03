@@ -71,16 +71,17 @@ def login():
 # email_conf_key=None, email_conf_tm=None, pass_reset_key=None,
 # pass_reset_conf_tm=None, registered_via=None, ):
 # important: http://flask.pocoo.org/snippets/62/
-@user_bp.route('/login/profireader', methods=['GET', 'POST'])
-def login_profireader():
-    #  email = result.user.email
-    #  if email and EMAIL_REGEX.match(email):
-    #      user = User.query.filter_by(email=email).first()
-    #      if user:
-    #          login_user(user)
-    #          return redirect(url_for('general.index'))
-    #      return redirect(url_for('general.index'))  #  delete this redirect
-    return render_template('login.html')
+#@user_bp.route('/login/profireader', methods=['GET', 'POST'])
+#def login_profireader():
+#    email = .....email
+#    if email and EMAIL_REGEX.match(email):
+#          user = User.query.filter_by(email=email).first()
+#          if user:
+#              login_user(user)
+#              return redirect(url_for('general.index'))
+#    #      return redirect(url_for('general.index'))  #  delete this redirect
+#    user.pass_salt_generation
+#    return render_template(url_for('general.index'))
 
 
 # it is valid only if registration was via soc network

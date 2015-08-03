@@ -1,5 +1,6 @@
 from sqlalchemy import Column
 from db_init import Base
+from os import urandom
 
 from ..constants.TABLE_TYPES import USER_TABLE_TYPES
 
@@ -208,6 +209,12 @@ class User(Base):
         via = self.logged_in_via()
         name = getattr(self, REGISTERED_WITH[via] + '_name')
         return name
+
+    def pass_salt_generation(self):
+        # we use SHA256.
+        # https://crackstation.net/hashing-security.htm
+        # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
+        return urandom(32)
 
     def __repr__(self):
         return "<User(e_mail = '%s', id = '%d', name='%s')>" % (
