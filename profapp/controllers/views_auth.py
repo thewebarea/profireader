@@ -70,6 +70,7 @@ def login():
 # TODO: via email
 # email_conf_key=None, email_conf_tm=None, pass_reset_key=None,
 # pass_reset_conf_tm=None, registered_via=None, ):
+# important: http://flask.pocoo.org/snippets/62/
 @user_bp.route('/login/profireader', methods=['GET', 'POST'])
 def login_profireader():
     #  email = result.user.email
@@ -134,10 +135,10 @@ def login_soc_network(provider_name):
 #             'email': g.user.email})
 #    return jsonify(res)
 #
-#
 
-#@user_bp.route('/logout/', methods=['GET'])
-#def logout():
-#    session.pop('authomatic:fb:state', None)
-#    session.pop('user_id', None)
-#    return jsonify({}), 200
+@user_bp.route('/logout/', methods=['GET'])
+def logout():
+    session.pop('user_id', None)
+    #return redirect(request.url)  # it should be corrected
+    return redirect('/')
+    #return jsonify({}), 200

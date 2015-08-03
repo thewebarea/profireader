@@ -3,13 +3,6 @@ from .blueprints import general_bp
 from ..constants.USER_REGISTERED import REGISTERED_WITH
 #import json
 
-#@general_bp.route('/')
-#def hello_world():
-#    return render_template('index.html',
-#                           id='445548158',
-#                           nickname='godsdog',
-#                           name='Andriy')
-
 
 @general_bp.route('')
 def index():

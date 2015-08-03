@@ -107,14 +107,15 @@ your communities        </h3>
         <div class="topbar-links">
             <div class="links-container">
                 <span ng-app="Profireader" ng-controller="UserLoginController" class="topbar-menu-links">
-                        <span ng-hide="{{ '{{' }}user.id{{ '}}' }}">
-                            <a href="/users/login/">log in</a>
-                            <a href="/users/signup/">signup</a>
-                        </span>
-                        <span ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                            <a href="/users/profile/{{ '{{' }}user.id{{ '}}' }}">{{ '{{' }}user.name{{ '}}' }}</a>
-                            <a href="/users/logout/">logout</a>
-                        </span>
+                    <!-- ng-cloak: https://docs.angularjs.org/api/ng/directive/ngCloak-->
+                    <span ng-cloak ng-hide="{{ '{{' }}user.id{{ '}}' }}">
+                        <a href="/users/login/">log in</a>
+                        <a href="/users/signup/">signup</a>
+                    </span>
+                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                        <a href="/users/profile/{{ '{{' }}user.id{{ '}}' }}">{{ '{{' }}user.name{{ '}}' }}</a>
+                        <a href="/users/logout/">logout</a>
+                    </span>
                     <a data-loc="2" class="tour-link" href="http://stackexchange.com/tour">tour</a>
                     <a href="http://stackexchange.com/about">about us</a>
                     <a href="http://meta.stackexchange.com/">meta</a>

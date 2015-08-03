@@ -20,6 +20,7 @@ def login_required(fn):
             return fn(*args, **kw)
         else:
             flash('Please log in first...', 'error')
+            #  read this: http://flask.pocoo.org/snippets/62/
             next_url = request.url
             login_url = '%s?next=%s' % (url_for('user.login'), next_url)
             return redirect(login_url)
