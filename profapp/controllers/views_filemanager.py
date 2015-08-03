@@ -63,9 +63,8 @@ def upload(result):
                 file_db.mime = 'dir'
             else:
                 file_db.mime = file.mimetype
-        binary_out = open(root+'/'+filename, 'r')
-        file_db.content = binary_out.read()
-        binary_out.close()
+        with open(root+'/'+filename, 'rb') as f:
+            file_db.content = bytearray(f.read())
         if os.path.isfile(root+'/'+filename):
             os.remove(root+'/'+filename)
         else:
