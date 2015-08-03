@@ -63,7 +63,7 @@ def upload(result):
                 file_db.mime = 'dir'
             else:
                 file_db.mime = file.mimetype
-        binary_out = open(root+'/'+filename, 'rb')
+        binary_out = open(root+'/'+filename, 'r')
         file_db.content = binary_out.read()
         binary_out.close()
         if os.path.isfile(root+'/'+filename):
