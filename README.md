@@ -41,3 +41,4 @@ $sudo apt-get install npm
 $ln -s /usr/bin/nodejs /usr/bin/node
 $npm install -g bower
 
+# hello test
