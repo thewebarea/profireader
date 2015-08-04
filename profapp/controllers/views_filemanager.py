@@ -2,35 +2,35 @@ import os
 import time
 from time import gmtime, strftime
 from stat import ST_SIZE
-from flask import jsonify, request, render_template
-from db_init import db_session
-from profapp.models.files import File
+from flask import jsonify, request, render_template, make_response, send_file
+from db_init import db_session, engine
+from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp, static_bp
+from io import BytesIO
 from .request_wrapers import json, parent_folder
 
 root = os.getcwd()+'/profapp/static/filemanager/tmp'
 json_result = {"result": {"success": True, "error": None}}
 
-
-@filemanager_bp.route('/', methods=['GET', 'POST'])
+@filemanager_bp.route('/')
 def filemanager():
     return render_template('filemanager.html')
 
 
-@filemanager_bp.route('/list/', methods=['POST'])
 @json
 @parent_folder
+@filemanager_bp.route('/list/', methods=['POST'])
 def list(parent_id=None):
     return File.list(parent_id = parent_id)
 
-@filemanager_bp.route('/createdir/', methods=['POST'])
 @json
 @parent_folder
+@filemanager_bp.route('/createdir/', methods=['POST'])
 def createdir(parent_id=None):
     return File.createdir(name = request.json['params']['name'],  parent_id = parent_id)
 
-@filemanager_bp.route('/upload/', methods=['POST'])
 @json
+@filemanager_bp.route('/upload/', methods=['POST'])
 def upload():
     parent_id = (None if (request.form['parent_id'] == '') else (request.form['parent_id']))
     return File.upload(file = request.files['file-0'], parent_id = parent_id)
@@ -72,3 +72,20 @@ def upload():
 #         db_session.rollback#(# )
 #
 #     return result
+
+@filemanager_bp.route('/get/<string:id>')
+def get(id):
+    image_query = file_query(id, File)
+    image_query_content = file_query(id, FileContent)
+    response = make_response()
+    response.headers['Content-Type'] = image_query.mime
+    response.headers['Content-Disposition'] = 'filename=%s' % image_query.name
+    return send_file(BytesIO(image_query_content.content), mimetype=image_query.mime, as_attachment=False)
+
+def file_query(id, table):
+    if db_session.query(table).filter_by(id=id).first():
+        query = db_session.query(table).filter_by(id=id).first()
+
+        return query
+    else:
+        return "404 error", 404

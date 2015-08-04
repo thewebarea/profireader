@@ -9,7 +9,6 @@ class File(Base):
     parent_id = Column(String(36))
     name = Column(String(100))
     mime = Column(String(30), default='text/plain')
-    content = Column(Binary)
     description = Column(String(1000), default='')
     size = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey('user.id'))
@@ -17,11 +16,10 @@ class File(Base):
     md_tm = Column(TIMESTAMP)
     ac_tm = Column(TIMESTAMP)
 
-    def __init__(self, parent_id=None, name=None, mime='text/plain', content=None, size=None, user_id=None, cr_tm=None, md_tm=None, ac_tm=None, company_id=None, copyright='', author=''):
+    def __init__(self, parent_id=None, name=None, mime='text/plain', size=None, user_id=None, cr_tm=None, md_tm=None, ac_tm=None, company_id=None, copyright='', author=''):
         self.parent_id = parent_id
         self.name = name
         self.mime = mime
-        self.content = content
         self.size = size
         self.user_id = user_id
         # if cr_tm: self.cr_tm = cr_tm
@@ -94,4 +92,12 @@ class File(Base):
         # return result
         return True
 
+class FileContent(Base):
+    __tablename__ = 'file_content'
 
+    content = Column(Binary)
+    id = Column(Integer, ForeignKey('file.id'), primary_key=True)
+
+    def __init__(self, content=None, file_id=None):
+        self.content = content
+        self.file_id = file_id
