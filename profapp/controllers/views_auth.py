@@ -24,22 +24,40 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
 
 #provider_name:
-# 0) profireader!
+# 0) profireader+
 # 1) facebook +-
-# 2) linkedin -
+# 2) linkedin +
 # 3) google +
 # 4) twitter +
 # 5) microsoft +
-# 6) yahoo -
+# 6) yahoo +
 
 
 @user_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    uid = '0'
+    name = None
+    user = g.user
+    if user:
+        uid = str(user.id)
+        name = user.user_name()
+        #user_params = json.dumps({'id': uid, 'name': name})
+    return render_template('signup.html',
+                           id=uid,
+                           name=name)
 
 @user_bp.route('/login/', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    uid = '0'
+    name = None
+    user = g.user
+    if user:
+        uid = str(user.id)
+        name = user.user_name()
+        #user_params = json.dumps({'id': uid, 'name': name})
+    return render_template('login.html',
+                           id=uid,
+                           name=name)
 
 
 # TODO: just complete this
@@ -52,20 +70,21 @@ def login():
 # TODO: via email
 # email_conf_key=None, email_conf_tm=None, pass_reset_key=None,
 # pass_reset_conf_tm=None, registered_via=None, ):
-@user_bp.route('/login/profireader', methods=['GET', 'POST'])
-def login_profireader():
-    #  email = result.user.email
-    #  if email and EMAIL_REGEX.match(email):
-    #      user = User.query.filter_by(email=email).first()
-    #      if user:
-    #          login_user(user)
-    #          return redirect(url_for('general.index'))
-    #      return redirect(url_for('general.index'))  #  delete this redirect
-    return render_template('login.html')
+# important: http://flask.pocoo.org/snippets/62/
+#@user_bp.route('/login/profireader', methods=['GET', 'POST'])
+#def login_profireader():
+#    email = .....email
+#    if email and EMAIL_REGEX.match(email):
+#          user = User.query.filter_by(email=email).first()
+#          if user:
+#              login_user(user)
+#              return redirect(url_for('general.index'))
+#    #      return redirect(url_for('general.index'))  #  delete this redirect
+#    user.pass_salt_generation
+#    return render_template(url_for('general.index'))
 
 
 # it is valid only if registration was via soc network
-# do we need some validation here?
 @user_bp.route('/login/<provider_name>', methods=['GET', 'POST'])
 def login_soc_network(provider_name):
     response = make_response()
@@ -95,7 +114,7 @@ def login_soc_network(provider_name):
                 #return redirect('https://www.yahoo.com', code=302)
             elif result.error:
                 redirect_path = '#/?msg={}'.\
-                    format(quote(provider_name + 'login failed.'))
+                    format(quote(provider_name + ' login failed.'))
                 return redirect(redirect_path)
 
     except:
@@ -103,6 +122,33 @@ def login_soc_network(provider_name):
         print(sys.exc_info())
         raise
     return response
+
+
+#@user_bp.route('/login/fb/', methods=['GET', 'POST'])
+#def login_fb():
+#    response = make_response()
+#    result = g.authomatic.login(WerkzeugAdapter(request, response), 'fb',
+#                                session=session,
+#                                session_saver=_session_saver)
+#    if result:
+#        if result.user:
+#            result.user.update()
+#            user = User.query.filter_by(fb_id=result.user.id).first()
+#            if not user:
+#                user = User(result.user.first_name,
+#                            result.user.last_name,
+#                            result.user.id,
+#                            result.user.email)
+#                #db.session.add(user)
+#                #db.session.commit()
+#            session['user_id'] = user.id
+#            return redirect('/')
+#
+#        elif result.error:
+#            redirect_path = '#/?msg={}'.format(quote('Facebook login failed.'))
+#            return redirect(redirect_path)
+#    return response
+
 
 #
 #
@@ -117,10 +163,10 @@ def login_soc_network(provider_name):
 #             'email': g.user.email})
 #    return jsonify(res)
 #
-#
 
-#@user_bp.route('/logout/', methods=['GET'])
-#def logout():
-#    session.pop('authomatic:fb:state', None)
-#    session.pop('user_id', None)
-#    return jsonify({}), 200
+@user_bp.route('/logout/', methods=['GET'])
+def logout():
+    session.pop('user_id', None)
+    #return redirect(request.url)  # it should be corrected
+    return redirect('/')
+    #return jsonify({}), 200
