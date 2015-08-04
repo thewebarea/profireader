@@ -7,6 +7,8 @@ from db_init import db_session, engine
 from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp, static_bp
 from io import BytesIO
+from .request_wrapers import json, parent_folder
+
 root = os.getcwd()+'/profapp/static/filemanager/tmp'
 json_result = {"result": {"success": True, "error": None}}
 
@@ -14,73 +16,63 @@ json_result = {"result": {"success": True, "error": None}}
 def filemanager():
     return render_template('filemanager.html')
 
-@static_bp.route('/filemanager', methods=['GET', 'POST'])
-def ctrl_filemanager():
-
-        try:
-            if request.method != 'GET':
-                for params in request.json.values():
-                    if params['mode'] == 'list':
-                        return jsonify(listing(params['path']))
-        except AttributeError:
-            return jsonify(upload(json_result))
+@filemanager_bp.route('/list/', methods=['POST'])
+@json
+@parent_folder
+def list(parent_id=None):
+    return File.list(parent_id = parent_id)
 
 
-def listing(folder_path):
 
-    info = []
-    for file in db_session.query(File).filter():
-        date = str(file.md_tm)
-        date = date.split('.')
-        params = dict()
-        params['size'] = file.size
-        params['date'] = date[0]
-        params['name'] = file.name
-        params['rights'] = 'drwxr-xr-x'
-        params['id'] = file.id
-        if file.mime == 'dir':
-            params['type'] = 'dir'
-        else:
-            params['type'] = 'file'
-        info.append(params)
-    result = {"result": info}
-    return result
+@filemanager_bp.route('/createdir/', methods=['POST'])
+@json
+@parent_folder
+def createdir(parent_id=None):
+    return File.createdir(name = request.json['params']['name'],  parent_id = parent_id)
 
-def upload(result):
+@filemanager_bp.route('/upload/', methods=['POST'])
+@json
+def upload():
+    parent_id = (None if (request.form['parent_id'] == '') else (request.form['parent_id']))
+    return File.upload(file = request.files['file-0'], parent_id = parent_id)
 
-    for l in range(len(request.files)):
-        file = request.files['file-%s' % (l+1)]
-        filename = file.filename
-        file_db = File()
-        file.save(os.path.join(root, filename))
-        for tmp_file in os.listdir(root):
-            st = os.stat(root+'/'+filename)
-            file_db.name = filename
-            file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename))
-            file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename))
-            file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-            file_db.size = st[ST_SIZE]
-            if os.path.isdir(root+'/'+tmp_file):
-                file_db.mime = 'dir'
-            else:
-                file_db.mime = file.mimetype
-        with open(root+'/'+filename, 'rb') as f:
-            file_db.content = bytearray(f.read())
-        if os.path.isfile(root+'/'+filename):
-            os.remove(root+'/'+filename)
-        else:
-            os.removedirs(root+'/'+filename)
-        db_session.add(file_db)
-    try:
-        db_session.commit()
-    except PermissionError:
-        result = {"result": {
-                "success": False,
-                "error": "Access denied to upload file"}
-            }
-        db_session.rollback()
-
-    return result
+# # # #
+#
+# def upload(result#)# :
+#
+#     file = request.files['file-1# ']
+#     filename = file.filena# me
+#     file_db = File# ()
+#     file.save(os.path.join(root, filename# ))
+#     for tmp_file in os.listdir(root# ):
+#         st = os.stat(root+'/'+filenam# e)
+#         file_db.name = filena# me
+#         file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename# ))
+#         file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename# ))
+#         file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime(# ))
+#         file_db.size = st[ST_SIZ# E]
+#         if os.path.isfile(root+'/'+tmp_file# ):
+#             file_db.mime = 'fil# e'
+#         els# e:
+#             file_db.mime = 'di# r'
+#     binary_out = open(root+'/'+filename, 'rb# ')
+#     file_db.content = binary_out.read# ()
+#     binary_out.close# ()
+#     if os.path.isfile(root+'/'+filename# ):
+#         os.remove(root+'/'+filenam# e)
+#     els# e:
+#         os.removedirs(root+'/'+filenam# e)
+#     db_session.add(file_d# b)
+#     tr# y:
+#         db_session.commit# ()
+#     except PermissionErro# r:
+#         result = {"result":#  {
+#                 "success": Fals# e,
+#                 "error": "Access denied to remove file# "}
+#            #  }
+#         db_session.rollback#(# )
+#
+#     return result
 
 @filemanager_bp.route('/get/<string:id>')
 def get(id):

@@ -36,8 +36,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     app.register_blueprint(views_ind.general_bp, url_prefix='/')
     app.register_blueprint(views_art.article_bp, url_prefix='/articles')
     app.register_blueprint(views_auth.user_bp, url_prefix='/users')
-    app.register_blueprint(views_fileman.filemanager_bp,
-                           url_prefix='/filemanager')
+    app.register_blueprint(views_fileman.filemanager_bp, url_prefix='/filemanager')
     app.register_blueprint(views_fileman.static_bp, url_prefix='/static')
     app.register_blueprint(views_imged.image_editor_bp, url_prefix='/image_editor')
 
