@@ -25,6 +25,7 @@ def ctrl_filemanager():
         except AttributeError:
             return jsonify(upload(json_result))
 
+
 def listing(folder_path):
 
     info = []
