@@ -32,7 +32,11 @@ class Config(object):
     # incoming requests using one and performing background
     # operations using the other.
     THREADS_PER_PAGE = 2
-
+    #Ratio for image_editor, can be : 1.7777777777777777, 1.3333333333333333, 0.6666666666666666, 1
+    IMAGE_EDITOR_RATIO = 1.3333333333333333
+    HEIGHT_IMAGE = 300   # px
+    ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'JPEG2000', 'MSP', 'PCX', 'PNG', 'PPM', 'SPIDER',
+                             'TIFF', 'WebP', 'XBM', 'XV Thumbnails']
     # Define the application directory
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     #UPLOAD_FOLDER = os.path.join(BASE_DIR, 'media')
@@ -70,7 +74,6 @@ class ProductionDevelopmentConfig(Config):
     # Use a secure, unique and absolutely secret key for
     # signing the data.
     CSRF_SESSION_KEY = os.getenv('PRODUCTION_SERVER_CSRF_SESSION_KEY', None)
-
 
     # Secret key for signing cookies
     SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)

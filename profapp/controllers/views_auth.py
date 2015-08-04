@@ -123,6 +123,33 @@ def login_soc_network(provider_name):
         raise
     return response
 
+
+#@user_bp.route('/login/fb/', methods=['GET', 'POST'])
+#def login_fb():
+#    response = make_response()
+#    result = g.authomatic.login(WerkzeugAdapter(request, response), 'fb',
+#                                session=session,
+#                                session_saver=_session_saver)
+#    if result:
+#        if result.user:
+#            result.user.update()
+#            user = User.query.filter_by(fb_id=result.user.id).first()
+#            if not user:
+#                user = User(result.user.first_name,
+#                            result.user.last_name,
+#                            result.user.id,
+#                            result.user.email)
+#                #db.session.add(user)
+#                #db.session.commit()
+#            session['user_id'] = user.id
+#            return redirect('/')
+#
+#        elif result.error:
+#            redirect_path = '#/?msg={}'.format(quote('Facebook login failed.'))
+#            return redirect(redirect_path)
+#    return response
+
+
 #
 #
 #@user_bp.route('/user-info/', methods=['GET'])  # user profile
