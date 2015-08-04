@@ -2,11 +2,11 @@ import os
 import time
 from time import gmtime, strftime
 from stat import ST_SIZE
-from flask import jsonify, request, render_template
-from db_init import db_session
-from profapp.models.files import File
+from flask import jsonify, request, render_template, make_response, send_file
+from db_init import db_session, engine
+from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp, static_bp
-
+from io import BytesIO
 root = os.getcwd()+'/profapp/static/filemanager/tmp'
 json_result = {"result": {"success": True, "error": None}}
 
@@ -81,3 +81,20 @@ def upload(result):
         db_session.rollback()
 
     return result
+
+@filemanager_bp.route('/get/<string:id>')
+def get(id):
+    image_query = file_query(id, File)
+    image_query_content = file_query(id, FileContent)
+    response = make_response()
+    response.headers['Content-Type'] = image_query.mime
+    response.headers['Content-Disposition'] = 'filename=%s' % image_query.name
+    return send_file(BytesIO(image_query_content.content), mimetype=image_query.mime, as_attachment=False)
+
+def file_query(id, table):
+    if db_session.query(table).filter_by(id=id).first():
+        query = db_session.query(table).filter_by(id=id).first()
+
+        return query
+    else:
+        return "404 error", 404

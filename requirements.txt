@@ -12,3 +12,4 @@ psycopg2==2.6.1
 Authomatic==0.1.0.post1
 alembic==0.7.6
 Flask-Login==0.2.11
+Pillow==2.9.0

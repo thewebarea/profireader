@@ -3,3 +3,6 @@ class Error(Exception):
 
 class BadCoordinates(Error):
     pass
+
+class BadFormatFile(Error):
+    pass
