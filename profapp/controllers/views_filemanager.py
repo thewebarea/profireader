@@ -2,21 +2,15 @@ import os
 import time
 from time import gmtime, strftime
 from stat import ST_SIZE
-from flask import jsonify, request, Blueprint, render_template
+from flask import jsonify, request, render_template
+from db_init import db_session
 from profapp.models.files import File
 from .blueprints import filemanager_bp, static_bp
-from functools import wraps
+from .request_wrapers import json, parent_folder
 
 root = os.getcwd()+'/profapp/static/filemanager/tmp'
 json_result = {"result": {"success": True, "error": None}}
 
-def parent_folder(func):
-   @wraps(func)
-   def function_with_parent(*args, **kwargs):
-       parent_id = (None if (request.json['params']['parent_id'] == '') else (request.json['params']['parent_id']))
-       kwargs['parent_id'] = parent_id
-       return jsonify({'result': func(*args, **kwargs)})
-   return function_with_parent
 
 @filemanager_bp.route('/', methods=['GET', 'POST'])
 def filemanager():
@@ -24,22 +18,22 @@ def filemanager():
 
 
 @filemanager_bp.route('/list/', methods=['POST'])
+@json
 @parent_folder
 def list(parent_id=None):
     return File.list(parent_id = parent_id)
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
+@json
 @parent_folder
 def createdir(parent_id=None):
     return File.createdir(name = request.json['params']['name'],  parent_id = parent_id)
 
 @filemanager_bp.route('/upload/', methods=['POST'])
+@json
 def upload():
     parent_id = (None if (request.form['parent_id'] == '') else (request.form['parent_id']))
-    return jsonify({'result': File.upload(file = request.files['file-0'], parent_id = parent_id)})
-
-
-
+    return File.upload(file = request.files['file-0'], parent_id = parent_id)
 
 # # # #
 #

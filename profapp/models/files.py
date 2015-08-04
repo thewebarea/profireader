@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP
 from db_init import db_session as db
 from db_init import Base
+import re
 
 class File(Base):
     __tablename__ = 'file'
@@ -35,8 +36,15 @@ class File(Base):
     def is_directory(file_id):
         return db.query(File).filter(id=file_id)[0].mime == 'directory'
 
+    def is_cropable(file):
+        return File.is_graphics(file)
+
+    def is_graphics(file):
+        return re.match('^image/.*', file.mime)
+
     def list(parent_id=None):
         return list({'size': file.size, 'name': file.name, 'id': file.id,
+                                'cropable': True if File.is_cropable(file) else False,
                                 'type': 'dir' if file.mime == 'directory' else 'file',
                                 'date': str(file.md_tm).split('.')[0]}
                                         for file in db.query(File).filter(File.parent_id == parent_id))
@@ -45,10 +53,45 @@ class File(Base):
         f = File(parent_id=parent_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author)
         db.add(f)
         db.commit()
-        pass
-        return True;
+        return f.id;
 
-    def upload(parent_id=None, file = None):
+    def upload(parent_id=None, file = None, company_id=None, copyright='', author=''):
+        f = File(parent_id=parent_id, name=file.filename, company_id=company_id, copyright=copyright, author=author)
+        f.content = file.stream.read(-1)
+        db.add(f)
+        db.commit()
+        return f.id;
+
+        # file.save(os.path.join(root, filename# ))
+        # for tmp_file in os.listdir(root# ):
+        #     st = os.stat(root+'/'+filenam# e)
+        #     file_db.name = filena# me
+        #     file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename# ))
+        #     file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename# ))
+        #     file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime(# ))
+        #     file_db.size = st[ST_SIZ# E]
+        #     if os.path.isfile(root+'/'+tmp_file# ):
+        #         file_db.mime = 'fil# e'
+        #     els# e:
+        #         file_db.mime = 'di# r'
+
+        #
+        # binary_out.close# ()
+        # if os.path.isfile(root+'/'+filename# ):
+        #     os.remove(root+'/'+filenam# e)
+        # els# e:
+        #     os.removedirs(root+'/'+filenam# e)
+        # db_session.add(file_d# b)
+        # tr# y:
+        #     db_session.commit# ()
+        # except PermissionErro# r:
+        #     result = {"result":#  {
+        #             "success": Fals# e,
+        #             "error": "Access denied to remove file# "}
+        #        #  }
+        #     db_session.rollback#(# )
+        #
+        # return result
         return True
 
 

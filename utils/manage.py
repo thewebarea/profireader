@@ -55,8 +55,9 @@ def list_routes():
                 url = url_for(rule.endpoint, **options)
         except ValueError:
             url = None
-        line = urllib.parse.unquote(st.format(rule.endpoint,
-                                              methods, str(rule), url))
+        line = urllib.parse.unquote(
+            st.format(rule.endpoint, methods, str(rule), url)
+        )
         output.append(line)
 
     for line in sorted(output):
