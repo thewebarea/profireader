@@ -4,10 +4,11 @@ from flask import jsonify, request
 def json(func):
     @wraps(func)
     def function_with_parent(*args, **kwargs):
-        try:
+        # try:
             return jsonify({'ok': True, 'result': func(*args, **kwargs)})
-        except Exception:
-            return jsonify({'ok': False, 'error': 0, 'result': "unknown error"})
+        # except Exception:
+        #     return jsonify({'ok': False, 'error': 0, 'result': "unknown error"})
+    return function_with_parent
 
 
 def parent_folder(func):

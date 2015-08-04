@@ -16,21 +16,22 @@ json_result = {"result": {"success": True, "error": None}}
 def filemanager():
     return render_template('filemanager.html')
 
-
+@filemanager_bp.route('/list/', methods=['POST'])
 @json
 @parent_folder
-@filemanager_bp.route('/list/', methods=['POST'])
 def list(parent_id=None):
     return File.list(parent_id = parent_id)
 
+
+
+@filemanager_bp.route('/createdir/', methods=['POST'])
 @json
 @parent_folder
-@filemanager_bp.route('/createdir/', methods=['POST'])
 def createdir(parent_id=None):
     return File.createdir(name = request.json['params']['name'],  parent_id = parent_id)
 
-@json
 @filemanager_bp.route('/upload/', methods=['POST'])
+@json
 def upload():
     parent_id = (None if (request.form['parent_id'] == '') else (request.form['parent_id']))
     return File.upload(file = request.files['file-0'], parent_id = parent_id)
