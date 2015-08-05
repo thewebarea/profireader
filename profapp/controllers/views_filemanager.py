@@ -79,8 +79,8 @@ def upload(result):
             db_session.add(file_content)
             db_session.commit()
         else:
-            raise PermissionError
             db_session.rollback()
+            raise PermissionError
 
     return result
 

@@ -43,7 +43,7 @@ def image_editor(img_id, new_name):
             thumbnail_content.file_id = thumbnail.id
             db_session.add(thumbnail_content)
             db_session.commit()
-            image_id = thumbnail_content.file_id
+            image_id = thumbnail.id
 
         else:
             db_session.rollback()

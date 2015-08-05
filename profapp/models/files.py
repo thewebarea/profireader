@@ -7,7 +7,6 @@ class File(Base):
     parent_id = Column(Integer)
     name = Column(String(100))
     mime = Column(String(30))
-
     size = Column(Float)
     user_id = Column(Integer, ForeignKey('user.id'))
     cr_tm = Column(TIMESTAMP)
