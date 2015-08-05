@@ -48,10 +48,12 @@ def listing(folder_path):
 
 def upload(result):
 
+
     for l in range(len(request.files)):
+        file_content = FileContent()
+        file_db = File()
         file = request.files['file-%s' % (l+1)]
         filename = file.filename
-        file_db = File()
         file.save(os.path.join(root, filename))
         for tmp_file in os.listdir(root):
             st = os.stat(root+'/'+filename)
@@ -65,27 +67,27 @@ def upload(result):
             else:
                 file_db.mime = file.mimetype
         with open(root+'/'+filename, 'rb') as f:
-            file_db.content = bytearray(f.read())
+            file_content.content = bytearray(f.read())
         if os.path.isfile(root+'/'+filename):
             os.remove(root+'/'+filename)
         else:
             os.removedirs(root+'/'+filename)
         db_session.add(file_db)
-    try:
-        db_session.commit()
-    except PermissionError:
-        result = {"result": {
-                "success": False,
-                "error": "Access denied to upload file"}
-            }
-        db_session.rollback()
+        if True:
+            db_session.commit()
+            file_content.file_id = file_db.id
+            db_session.add(file_content)
+            db_session.commit()
+        else:
+            raise PermissionError
+            db_session.rollback()
 
     return result
 
 @filemanager_bp.route('/get/<string:id>')
 def get(id):
     image_query = file_query(id, File)
-    image_query_content = file_query(id, FileContent)
+    image_query_content = db_session.query(FileContent).filter_by(file_id=id).first()
     response = make_response()
     response.headers['Content-Type'] = image_query.mime
     response.headers['Content-Disposition'] = 'filename=%s' % image_query.name

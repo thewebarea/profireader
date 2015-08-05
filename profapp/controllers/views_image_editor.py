@@ -15,13 +15,13 @@ def image_editor(img_id, new_name):
     ratio = Config.IMAGE_EDITOR_RATIO
     height = Config.HEIGHT_IMAGE
     thumbnail = File()
-    thumbnail_content = FileContent
+    thumbnail_content = FileContent()
     size = (int(ratio*height), height)
     image_id = img_id
 
     if request.method != 'GET':
         image_query = file_query(image_id, File)
-        image_content = file_query(image_id, FileContent)
+        image_content = db_session.query(FileContent).filter_by(file_id=image_id).first()
         image = Image.open(BytesIO(image_content.content))
 
         area = [int(y) for x, y in sorted(zip(request.form.keys(), request.form.values()))
@@ -40,9 +40,10 @@ def image_editor(img_id, new_name):
             db_session.add(thumbnail)
             db_session.commit()
             thumbnail_content.content = bytes_file.getvalue()
-            thumbnail_content.id = thumbnail.id
-            image_id = thumbnail_content.id
-
+            thumbnail_content.file_id = thumbnail.id
+            db_session.add(thumbnail_content)
+            db_session.commit()
+            image_id = thumbnail_content.file_id
 
         else:
             db_session.rollback()
@@ -54,7 +55,3 @@ def image_editor(img_id, new_name):
                            new_name=new_name,
                            image=url_for('filemanager.get', id=image_id)
                            )
-
-
-
-

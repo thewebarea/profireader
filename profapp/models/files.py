@@ -27,9 +27,9 @@ class File(Base):
 
 class FileContent(Base):
     __tablename__ = 'file_content'
-
+    id = Column(Integer, primary_key=True)
     content = Column(Binary)
-    id = Column(Integer, ForeignKey('file.id'), primary_key=True)
+    file_id = Column(Integer, ForeignKey('file.id'))
 
     def __init__(self, content=None, file_id=None):
         self.content = content
