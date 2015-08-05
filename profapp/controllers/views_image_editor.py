@@ -23,14 +23,18 @@ def image_editor(img_id, new_name):
         image_query = file_query(image_id, File)
         image_content = db_session.query(FileContent).filter_by(id=image_id).first()
         image = Image.open(BytesIO(image_content.content))
-
         area = [int(y) for x, y in sorted(zip(request.form.keys(), request.form.values()))
-                if int(y) >= 0 and int(y) <= max(image.size)]
+                if int(y) >= 0 and int(y) <= max(image.size) and x != "5rotate"]
         if area:
-
+            angle = int(request.form["5rotate"])*-1
             area[2] = (area[0]+area[2])
             area[3] = (area[1]+area[3])
-            cropped = image.crop(area).resize(size)
+            if angle == 0:
+                cropped = image.crop(area).resize(size)
+            else:
+                rotated = image.rotate(angle)
+                cropped = rotated.crop(area).resize(size)
+
             bytes_file = BytesIO()
             cropped.save(bytes_file, image_query.mime.split('/')[-1].upper())
             thumbnail.md_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())

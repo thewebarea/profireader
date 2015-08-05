@@ -6,7 +6,7 @@ from config import ProductionDevelopmentConfig
 
 # see this: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
 # engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-engine = create_engine(ProductionDevelopmentConfig.SQLALCHEMY_DATABASE_URI, echo=True)
+engine = create_engine(ProductionDevelopmentConfig.SQLALCHEMY_DATABASE_URI)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
