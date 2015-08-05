@@ -1,26 +1,6 @@
+<a href="{{ url_for('user.login') }}" title="Log in to Profireader" class="youarehere">Log in</a>
+<a href="{{ url_for('user.signup') }}" title="Sign up to Profireader">Sign up</a>
 
-
-
-
-
-
-            <a href="/users/login/" title="Log in to Stack Overflow" class="youarehere">Log in</a>
-            <a href="/users/signup/" title="Sign up to Stack Overflow">Sign up</a>
-
-
-
-            <h2>Log in using any of the following services:</h2>
-            {% include 'partials/Signup Log in - Soc Networks.html' %}
-            {% include 'partials/Log in - Profireader.html' %}
-
-            <form id="openid_form" action="/users/authenticate" method="POST">
-                <input name="fkey" value="b6c073e106f31992a787241e77fa80f1" type="hidden">
-
-                <input id="oauth_version" name="oauth_version" type="hidden">
-                <input id="oauth_server" name="oauth_server" type="hidden">
-
-
-            </form>
-
-
-
+<h2>Log in using any of the following services:</h2>
+{% include 'partials/Signup Log in - Soc Networks.html' %}
+{% include 'partials/Log in - Profireader.html' %}
