@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP
-from db_init import db_session as db
-from db_init import Base
+from db_init import Base, db_session as db
 import re
 
 class File(Base):
@@ -8,9 +7,9 @@ class File(Base):
     id = Column(String(36), primary_key=True)
     parent_id = Column(String(36))
     name = Column(String(100))
-    mime = Column(String(30), default='text/plain')
-    description = Column(String(1000), default='')
-    size = Column(Integer, default=0)
+    mime = Column(String(30))
+
+    size = Column(Float)
     user_id = Column(Integer, ForeignKey('user.id'))
     cr_tm = Column(TIMESTAMP)
     md_tm = Column(TIMESTAMP)
@@ -22,10 +21,9 @@ class File(Base):
         self.mime = mime
         self.size = size
         self.user_id = user_id
-        # if cr_tm: self.cr_tm = cr_tm
-        # if cr_tm: self.cr_tm = cr_tm
-        # self.md_tm = md_tm
-        # self.ac_tm = ac_tm
+        self.cr_tm = cr_tm
+        self.md_tm = md_tm
+        self.ac_tm = ac_tm
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
@@ -48,7 +46,7 @@ class File(Base):
                                         for file in db.query(File).filter(File.parent_id == parent_id))
 
     def createdir(parent_id=None, name=None, company_id=None, copyright='', author=''):
-        f = File(parent_id=parent_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author)
+        f = File(parent_id=parent_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
         db.add(f)
         db.commit()
         return f.id;
@@ -94,10 +92,9 @@ class File(Base):
 
 class FileContent(Base):
     __tablename__ = 'file_content'
-
+    id = Column(String(36), ForeignKey('file.id'), primary_key=True)
     content = Column(Binary)
-    id = Column(Integer, ForeignKey('file.id'), primary_key=True)
 
-    def __init__(self, content=None, file_id=None):
+    def __init__(self, content=None, id=None):
         self.content = content
-        self.file_id = file_id
+        self.id = id

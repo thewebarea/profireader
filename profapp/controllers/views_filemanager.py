@@ -20,21 +20,20 @@ def filemanager():
 @json
 @parent_folder
 def list(parent_id=None):
-    return File.list(parent_id = parent_id)
-
+    return File.list(parent_id=parent_id)
 
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @json
 @parent_folder
 def createdir(parent_id=None):
-    return File.createdir(name = request.json['params']['name'],  parent_id = parent_id)
+    return File.createdir(name=request.json['params']['name'],  parent_id=parent_id)
 
 @filemanager_bp.route('/upload/', methods=['POST'])
 @json
 def upload():
     parent_id = (None if (request.form['parent_id'] == '') else (request.form['parent_id']))
-    return File.upload(file = request.files['file-0'], parent_id = parent_id)
+    return File.upload(file=request.files['file-0'], parent_id=parent_id)
 
 # # # #
 #
@@ -77,7 +76,7 @@ def upload():
 @filemanager_bp.route('/get/<string:id>')
 def get(id):
     image_query = file_query(id, File)
-    image_query_content = file_query(id, FileContent)
+    image_query_content = db_session.query(FileContent).filter_by(id=id).first()
     response = make_response()
     response.headers['Content-Type'] = image_query.mime
     response.headers['Content-Disposition'] = 'filename=%s' % image_query.name
