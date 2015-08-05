@@ -12,6 +12,7 @@ import sys
 
 @image_editor_bp.route('/<string:img_id>/<string:new_name>', methods=['GET', 'POST'])
 def image_editor(img_id, new_name):
+
     ratio = Config.IMAGE_EDITOR_RATIO
     height = Config.HEIGHT_IMAGE
     thumbnail = File()
@@ -20,6 +21,7 @@ def image_editor(img_id, new_name):
     image_id = img_id
 
     if request.method != 'GET':
+        print(request.json)
         image_query = file_query(image_id, File)
         image_content = db_session.query(FileContent).filter_by(id=image_id).first()
         image = Image.open(BytesIO(image_content.content))
@@ -29,11 +31,8 @@ def image_editor(img_id, new_name):
             angle = int(request.form["5rotate"])*-1
             area[2] = (area[0]+area[2])
             area[3] = (area[1]+area[3])
-            if angle == 0:
-                cropped = image.crop(area).resize(size)
-            else:
-                rotated = image.rotate(angle)
-                cropped = rotated.crop(area).resize(size)
+            rotated = image.rotate(angle)
+            cropped = rotated.crop(area).resize(size)
 
             bytes_file = BytesIO()
             cropped.save(bytes_file, image_query.mime.split('/')[-1].upper())

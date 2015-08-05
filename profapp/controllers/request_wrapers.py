@@ -5,11 +5,10 @@ def json(func):
     @wraps(func)
     def function_with_parent(*args, **kwargs):
         # try:
-            return jsonify({'ok': True, 'result': func(*args, **kwargs)})
+            return jsonify({'ok': True, 'error_code': 'ERROR_NO_ERROR', 'result': func(*args, **kwargs)})
         # except Exception:
-        #     return jsonify({'ok': False, 'error': 0, 'result': "unknown error"})
+        #     return jsonify({'ok': False, 'error_code': -1, 'result': "unknown error"})
     return function_with_parent
-
 
 def parent_folder(func):
     @wraps(func)
