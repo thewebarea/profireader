@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     {% block head %}
-        <meta name="globalsign-domain-verification" content="ZjrAvK_A6dWV7rk42ZzORiOAGOfHsDCi8viChOIoKF">
         <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
         <title>
             {% block title %}{% endblock %}
@@ -10,18 +9,18 @@
         {% include 'partials/imports_profireader.html' %}
     {% endblock head %}
 </head>
-<body>
-    <noscript><div id="noscript-padding"></div></noscript>
-    <div class="wrapper">
-        <div id="overlay-header"></div>
+<body ng-app="Profireader" >
+
+
+
         {% include 'partials/base_profireader.html' %}
-        <script src="../static/js/topbar.js"></script>
+
         <header>
             {% block portal_base %}{% endblock portal_base %}
         </header>
 
         {% block content %}{% endblock content %}
-    </div> <!-- end wrapper -->
+
 
 {% block footer %}
 {% endblock footer %}
