@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP
-from db_init import Base
+from db_init import Base, db_session as db
+import re
 
 class File(Base):
     __tablename__ = 'file'
@@ -45,7 +46,7 @@ class File(Base):
                                         for file in db.query(File).filter(File.parent_id == parent_id))
 
     def createdir(parent_id=None, name=None, company_id=None, copyright='', author=''):
-        f = File(parent_id=parent_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author)
+        f = File(parent_id=parent_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
         db.add(f)
         db.commit()
         return f.id;
@@ -91,10 +92,9 @@ class File(Base):
 
 class FileContent(Base):
     __tablename__ = 'file_content'
-    id = Column(String(36), primary_key=True)
+    id = Column(String(36), ForeignKey('file.id'), primary_key=True)
     content = Column(Binary)
-    file_id = Column(String(36), ForeignKey('file.id'))
 
-    def __init__(self, content=None, file_id=None):
+    def __init__(self, content=None, id=None):
         self.content = content
-        self.file_id = file_id
+        self.id = id

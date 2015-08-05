@@ -76,7 +76,7 @@ def upload():
 @filemanager_bp.route('/get/<string:id>')
 def get(id):
     image_query = file_query(id, File)
-    image_query_content = db_session.query(FileContent).filter_by(file_id=id).first()
+    image_query_content = db_session.query(FileContent).filter_by(id=id).first()
     response = make_response()
     response.headers['Content-Type'] = image_query.mime
     response.headers['Content-Disposition'] = 'filename=%s' % image_query.name

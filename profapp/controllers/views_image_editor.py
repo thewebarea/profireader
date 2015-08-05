@@ -21,7 +21,7 @@ def image_editor(img_id, new_name):
 
     if request.method != 'GET':
         image_query = file_query(image_id, File)
-        image_content = db_session.query(FileContent).filter_by(file_id=image_id).first()
+        image_content = db_session.query(FileContent).filter_by(id=image_id).first()
         image = Image.open(BytesIO(image_content.content))
 
         area = [int(y) for x, y in sorted(zip(request.form.keys(), request.form.values()))
@@ -40,7 +40,7 @@ def image_editor(img_id, new_name):
             db_session.add(thumbnail)
             db_session.commit()
             thumbnail_content.content = bytes_file.getvalue()
-            thumbnail_content.file_id = thumbnail.id
+            thumbnail_content.id = thumbnail.id
             db_session.add(thumbnail_content)
             db_session.commit()
             image_id = thumbnail.id
