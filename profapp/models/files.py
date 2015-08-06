@@ -49,14 +49,14 @@ class File(Base):
         f = File(parent_id=parent_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
         db.add(f)
         db.commit()
-        return f.id;
+        return f.id
 
     def upload(parent_id=None, file = None, company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, name=file.filename, company_id=company_id, copyright=copyright, author=author)
         f.content = file.stream.read(-1)
         db.add(f)
         db.commit()
-        return f.id;
+        return f.id
 
         # file.save(os.path.join(root, filename# ))
         # for tmp_file in os.listdir(root# ):
@@ -88,7 +88,7 @@ class File(Base):
         #     db_session.rollback#(# )
         #
         # return result
-        return True
+        # return True
 
 class FileContent(Base):
     __tablename__ = 'file_content'

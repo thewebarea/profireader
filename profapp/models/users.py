@@ -216,6 +216,6 @@ class User(Base):
         # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
         return urandom(32)
 
-    def __repr__(self):
-        return "<User(e_mail = '%s', id = '%d', name='%s')>" % (
-            self.email, self.id, self.name)
+    #def __repr__(self):
+    #    return "<User(e_mail = '%s', id = '%d', name='%s')>" % (
+    #        self.profireader_email, self.id, self.profireader_name)

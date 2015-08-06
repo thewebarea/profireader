@@ -9,6 +9,7 @@ from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS
 import sqlalchemy.exc as sqlalchemy_exc
 
 from urllib.parse import quote
+import json
 
 #def _session_saver():
 #    session.modified = True
@@ -37,27 +38,36 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 def signup():
     uid = '0'
     name = None
-    user = g.user
-    if user:
-        uid = str(user.id)
-        name = user.user_name()
-        #user_params = json.dumps({'id': uid, 'name': name})
-    return render_template('signup.html',
-                           id=uid,
-                           name=name)
+    g_user = g.user
+    if g_user:
+        uid = g_user.id
+        name = g_user.user_name()
+    user = {'id': uid, 'name': name}
+    return render_template('signup.html', user=user)
+
+@user_bp.route('/profile/<user_id>', methods=['GET', 'POST'])
+def profile(user_id):
+    user_subject = db_session.query(User).filter(User.id == user_id).first()
+    name = user_subject.user_name()
+    user = {'id': user_id, 'name': name}
+    return render_template('index.html', user=user)
+
+
+# @user_bp.route('/delete/<int:x>', methods=['GET', 'POST'])
+# def delete(x):
+#     return render_template('profile.html', x=x)
+
 
 @user_bp.route('/login/', methods=['GET', 'POST'])
 def login():
     uid = '0'
     name = None
-    user = g.user
-    if user:
-        uid = str(user.id)
-        name = user.user_name()
-        #user_params = json.dumps({'id': uid, 'name': name})
-    return render_template('login.html',
-                           id=uid,
-                           name=name)
+    g_user = g.user
+    if g_user:
+        uid = g_user.id
+        name = g_user.user_name()
+    user = {'id': uid, 'name': name}
+    return render_template('login.html', user=user)
 
 
 # TODO: just complete this

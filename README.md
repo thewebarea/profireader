@@ -21,7 +21,7 @@ Though, running `mcedit /etc/hosts` add following line:
 ip    db.prof
 where ip is a value derived on previous step.
 
-we also have to add line
+we also have to add lines
 0.0.0.0    profireader.a
 to /etc/hosts
 
@@ -40,5 +40,3 @@ $sudo apt-get install nodejs
 $sudo apt-get install npm
 $ln -s /usr/bin/nodejs /usr/bin/node
 $npm install -g bower
-
-# hello test

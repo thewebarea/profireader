@@ -10,12 +10,9 @@
     }]);
 
     module.controller('UserLoginController', ['$scope', '$modal',  function($scope, $modal) {
-        $scope.user = {
-            id: {{ id|tojson|safe }},
-            name: {{ name|tojson|safe }}
-        };
+        $scope.user = {{ user|tojson|safe }};
 
-            $scope.open_filemanager = function() {
+        $scope.open_filemanager = function() {
 var modalInstance = $modal.open({
             templateUrl: 'filemanager.html',
             controller: 'filemanagerCtrl',
@@ -42,22 +39,14 @@ var modalInstance = $modal.open({
 </script>
                     <!-- ng-cloak: https://docs.angularjs.org/api/ng/directive/ngCloak-->
                     <span ng-cloak ng-hide="{{ '{{' }}user.id{{ '}}' }}">
-                        <a href="/users/login/">log in</a>
-                        <a href="/users/signup/">signup</a>
+                        <a href="{{ url_for('user.login') }}">log in</a>
+                        <a href="{{ url_for('user.signup') }}">signup</a>
                     </span>
                     <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                        <a href="/users/profile/{{ '{{' }}user.id{{ '}}' }}">{{ '{{' }}user.name{{ '}}' }}</a>
-                        <a href="/users/logout/">logout</a>
+                        <a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">{{ '{{' }} user.name {{ '}}' }}</a>
+                        <a href="{{ url_for('user.logout') }}">logout</a>
                     </span>
                     <a href="">tour</a>
                     <a href="">about us</a>
                     <a href="#" ng-click="open_filemanager()">file manager</a>
                 </span>
-
-
-
-
-
-
-
-

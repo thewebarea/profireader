@@ -1,7 +1,6 @@
-
-    <a href="/users/login/google">google</a><br/>
-    <a href="/users/login/facebook">facebook</a><br/>
-    <a href="/users/login/linkedin">linkedin</a><br/>
-    <a href="/users/login/twitter">twitter</a><br/>
-    <a href="/users/login/microsoft">microsoft</a><br/>
-    <a href="/users/login/yahoo">yahoo</a><br/>
+<p><a href="{{ url_for('user.login_soc_network', provider_name='google') }}">google</a></p>
+<p><a href="{{ url_for('user.login_soc_network', provider_name='facebook') }}">facebook</a></p>
+<p><a href="{{ url_for('user.login_soc_network', provider_name='linkedin') }}">linkedin</a></p>
+<p><a href="{{ url_for('user.login_soc_network', provider_name='twitter') }}">twitter</a></p>
+<p><a href="{{ url_for('user.login_soc_network', provider_name='microsoft') }}">microsoft</a></p>
+<p><a href="{{ url_for('user.login_soc_network', provider_name='yahoo') }}">yahoo</a></p>
