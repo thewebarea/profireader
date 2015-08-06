@@ -6,6 +6,7 @@ STAFF = 3
 CONTRIBUTOR = 4
 USER = 5
 GUEST = 6
+READER = 7
 
 ROLE = {
     OWNER: 'owner',
@@ -15,4 +16,5 @@ ROLE = {
     CONTRIBUTOR: 'contributor',
     USER: 'user',
     GUEST: 'guest',
+    READER: 'reader'
 }
