@@ -16,7 +16,7 @@ def article(page=1):
     posts = ArticleHistory.query.filter(ArticleHistory.id == page)
 
     if form.validate_on_submit():
-        article_history=ArticleHistory(form.name.data,form.article.data, 0,
+        article_history = ArticleHistory(form.name.data, form.article.data, 0,
                                        User.query.first().id)
         db_session.add(article_history)
         db_session.commit()

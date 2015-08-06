@@ -19,6 +19,8 @@ class Config(object):
     # we also have to add line
     # 0.0.0.0    profireader.a
     # to /etc/hosts
+
+    #SERVER_NAME = 'aprofi.a.ntaxa.com'
     SERVER_NAME = 'aprofi.d.ntaxa.com'
     #SERVER_NAME = 'profireader.a:8080'
     #SERVER_NAME = 'profireader.net:8080'
