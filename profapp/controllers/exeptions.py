@@ -6,3 +6,6 @@ class BadCoordinates(Error):
 
 class BadFormatFile(Error):
     pass
+
+class EmptyFieldName(Error):
+    pass
