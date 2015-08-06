@@ -4,7 +4,7 @@ from authomatic import Authomatic
 from profapp.models.users import User
 from profapp.controllers.blueprints import register as register_blueprints
 from flask import url_for
-
+from profapp.controllers.errors import csrf
 
 def setup_authomatic(app):
     authomatic = Authomatic(app.config['OAUTH_CONFIG'],
@@ -40,6 +40,8 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     app.before_request(setup_authomatic(app))
     app.before_request(load_user)
     register_blueprints(app)
+
+    csrf.init_app(app)
 
     # read this: http://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)

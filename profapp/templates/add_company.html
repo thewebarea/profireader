@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+      <script src="{{ url_for('static', filename = 'image_editor/assets/js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'image_editor/assets/js/bootstrap.min.js') }}"></script>
+</head>
+<body>
+
+  <form class="send coordinates" action="{{ url_for('company.add_company') }}" onsubmit="return AjaxPost()" id="add" method="post">
+<h3><p>New company Account</p></h3>
+<p>Logo<input type="text" id="logo" placeholder="logo"></p>
+<p>Company name<input type="text" id="name" placeholder="name"></p>
+<p>Country<input type="text" id="country" placeholder="country"></p>
+<p>Region<input type="text" id="region" placeholder="region"></p>
+<p>Adress<input type="text" id="adress" placeholder="adress"></p>
+<p>Phone<input type="text" id="phone" placeholder="phone"></p>
+<p>Email<input type="text" id="email" placeholder="email"></p>
+<p>Short Description<input type="text" id="description" placeholder="text"></p>
+<input type="submit" value="submit">
+      </form>
+      <script type="text/javascript">
+
+
+ function AjaxPost() {
+  $.post('', {
+             'logo': $("#logo").val(),
+      'name': $("#name").val(),
+             'country': $("#country").val(),
+             'region': $("#region").val(),
+             'adress': $("#adress").val(),
+            'phone': $("#phone").val(),
+              'email': $("#email").val(),
+              'description': $("#description").val()
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return true;
+ };
+
+</script>
+
+</body>
+</html>

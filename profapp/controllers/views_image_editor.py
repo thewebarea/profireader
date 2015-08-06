@@ -2,7 +2,7 @@ from .blueprints import image_editor_bp
 from flask import render_template, request, url_for, redirect
 from config import Config
 from PIL import Image
-from .exeptions import BadCoordinates, EmptyFieldName
+from .errors import BadCoordinates, EmptyFieldName
 from profapp.models.files import File, FileContent
 from db_init import db_session
 from io import BytesIO
@@ -23,7 +23,7 @@ def image_editor(img_id):
 
     if request.method != 'GET':
         image_query = file_query(image_id, File)
-        image_content = db_session.query(FileContent).filter_by(id=image_id).first()
+        image_content = file_query(image_id, FileContent)
         image = Image.open(BytesIO(image_content.content))
         #area = [int(y) for x, y in sorted(zip(request.form.keys(), request.form.values()))
         #        if int(y) in range(0, max(image.size)) and x != "5rotate" and x != "6name"]
