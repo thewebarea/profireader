@@ -54,6 +54,10 @@ class Config(object):
     username = 'pfuser'
     password = secret_data.DEV_DB_PASSWORD
 
+    # Secret key for wtforms
+    #WTF_CSRF_SECRET_KEY = secret_data.WTF_CSRF_SECRET_KEY
+    #WTF_CSRF_ENABLED = False
+
     # Secret key for signing cookies
     SECRET_KEY = secret_data.SECRET_KEY
 

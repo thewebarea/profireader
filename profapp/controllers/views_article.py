@@ -17,22 +17,21 @@ def article(page=1):
 
     if form.validate_on_submit():
         article_history = ArticleHistory(form.name.data, form.article.data, 0,
-                                       User.query.first().id)
+                                         User.query.first().id)
         db_session.add(article_history)
         db_session.commit()
 
-        if len(list(ArticleHistory.query.filter(
-                        article_history.name == ArticleHistory.name))) <= 1:
+        if len(list(ArticleHistory.query.filter(article_history.name == ArticleHistory.name))) <= 1:
             article = Article(User.query.first().id,
-                              Company.query.first().id,
-                              article_history.id)
+            Company.query.first().id,
+            article_history.id)
             db_session.add(article)
             db_session.commit()
         return redirect(url_for('article', page=article_history.id))
-    elif request.method!='POST':
+    elif request.method != 'POST':
 
         for post in posts:
-            form.name.data=post.name
-            form.article.data=post.article_text
+            form.name.data = post.name
+            form.article.data = post.article_text
 
     return render_template('article.html', form=form, posts=posts)

@@ -10,6 +10,7 @@
 </head>
 <body>
 <form action="" name="article" method="post">
+     {{ form.csrf_token }}
     {{ form.hidden_tag() }}
     <div>
         <p>
