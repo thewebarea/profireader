@@ -7,6 +7,7 @@ filemanager_bp = Blueprint('filemanager', __name__)
 static_bp = Blueprint('static', __name__, static_url_path='')
 #  static_bp = Blueprint('static', __name__)
 image_editor_bp = Blueprint('image_editor', __name__)
+company_bp = Blueprint('company', __name__)
 
 
 def register(app):
@@ -28,3 +29,6 @@ def register(app):
 
     from . import views_image_editor
     app.register_blueprint(image_editor_bp, url_prefix='/image_editor')
+
+    from . import views_company
+    app.register_blueprint(company_bp, url_prefix='/company')
