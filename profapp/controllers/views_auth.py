@@ -1,6 +1,6 @@
 from .blueprints import user_bp
 from flask import jsonify, make_response, g, session, request, redirect, \
-    url_for, render_template
+    url_for, render_template, flash
 from authomatic.adapters import WerkzeugAdapter
 from ..models.users import User
 from db_init import db_session
@@ -9,6 +9,7 @@ from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS
 import sqlalchemy.exc as sqlalchemy_exc
 
 from urllib.parse import quote
+from ..models.users import User
 import json
 
 #def _session_saver():
@@ -19,6 +20,7 @@ from authomatic.adapters import WerkzeugAdapter
 
 from flask import redirect, make_response
 from flask.ext.login import login_user
+from ..constants.SOCIAL_NETWORKS import SOC_NET_NONE
 
 
 EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
@@ -36,14 +38,46 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
 @user_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
-    uid = '0'
-    name = None
-    g_user = g.user
-    if g_user:
-        uid = g_user.id
-        name = g_user.user_name()
-    user = {'id': uid, 'name': name}
-    return render_template('signup.html', user=user)
+    if request.method == 'GET':
+        uid = '0'
+        name = None
+        g_user = g.user
+        if g_user:
+            uid = g_user.id
+            name = g_user.user_name()
+        user = {'id': uid, 'name': name}
+        return render_template('signup.html', user=user)
+    else:
+        user_name = request.form['display-name']
+        user_email = request.form['email']
+        user_password = request.form['password']
+        user_password2 = request.form['password2']
+        if user_password != user_password2:
+            flash('your password confirmation doesnt coincides with password',
+                  'error')
+            return redirect(url_for('user.signup'))
+        user = db_session.query(User).\
+                    filter((User.profireader_email) == user_email).first()
+        if user:
+            flash('such email is already registered', 'error')
+            return redirect(url_for('user.signup'))
+
+        profireader_all = SOC_NET_NONE['PROFIREADER']
+        profireader_all['EMAIL'] = user_email
+        profireader_all['NAME'] = user_name
+        user = User(
+            registered_via=REGISTERED_WITH_FLIPPED['profireader'],
+            PROFIREADER_ALL=profireader_all,
+            password=user_password,
+        )
+
+        db_session.add(user)
+        db_session.commit()
+        session['user_id'] = user.id
+
+        return redirect('/')  # #  http://aprofi.d.ntaxa.com/
+
+
 
 @user_bp.route('/profile/<user_id>', methods=['GET', 'POST'])
 def profile(user_id):
@@ -58,17 +92,32 @@ def profile(user_id):
 #     return render_template('profile.html', x=x)
 
 
+# TODO: make a logic when login is possible only if user is NOT logged
 @user_bp.route('/login/', methods=['GET', 'POST'])
 def login():
-    uid = '0'
-    name = None
-    g_user = g.user
-    if g_user:
-        uid = g_user.id
-        name = g_user.user_name()
-    user = {'id': uid, 'name': name}
-    return render_template('login.html', user=user)
+    if request.method == 'GET':
+        uid = '0'
+        name = None
+        g_user = g.user
+        if g_user:
+            uid = g_user.id
+            name = g_user.user_name()
+        user = {'id': uid, 'name': name}
+        return render_template('login.html', user=user)
+    else:
+        user_email = request.form['email']
+        user_password = request.form['password']
 
+        user = db_session.query(User).\
+            filter(User.profireader_email == user_email).first()
+
+        if user:
+            if user_password == user.password:
+                session['user_id'] = user.id
+                return redirect('/')  # #  http://aprofi.d.ntaxa.com/
+
+        flash('email or password is incorrect', 'error')
+        return redirect(url_for('user.login'))
 
 # TODO: just complete this
 # TODO: if registration was via email

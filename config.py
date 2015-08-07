@@ -19,6 +19,8 @@ class Config(object):
     # we also have to add line
     # 0.0.0.0    profireader.a
     # to /etc/hosts
+
+    #SERVER_NAME = 'aprofi.a.ntaxa.com'
     SERVER_NAME = 'aprofi.d.ntaxa.com'
     #SERVER_NAME = 'profireader.a:8080'
     #SERVER_NAME = 'profireader.net:8080'
@@ -53,8 +55,8 @@ class Config(object):
     password = secret_data.DEV_DB_PASSWORD
 
     # Secret key for wtforms
-    WTF_CSRF_SECRET_KEY = secret_data.WTF_CSRF_SECRET_KEY
-    WTF_CSRF_ENABLED = False
+    #WTF_CSRF_SECRET_KEY = secret_data.WTF_CSRF_SECRET_KEY
+    #WTF_CSRF_ENABLED = False
 
     # Secret key for signing cookies
     SECRET_KEY = secret_data.SECRET_KEY
