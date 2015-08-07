@@ -32,7 +32,7 @@ class User(Base):
     pass_reset_key = Column(_T['PASS_RESET_KEY'])
     pass_reset_conf_tm = Column(_T['PASS_RESET_CONF_TM'])
 
-    registered_via = Column(_T['REGISTERED_VIA'])
+    # registered_via = Column(_T['REGISTERED_VIA'])
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['PROFIREADER', 'GOOGLE', 'FACEBOOK', 'LINKEDIN', 'TWITTER', 'MICROSOFT', 'YAHOO']
@@ -114,8 +114,7 @@ class User(Base):
                  email_conf_tm=None,
                  pass_reset_key=None,
                  pass_reset_conf_tm=None,
-
-                 registered_via=None,):
+                 ):
 
         self.profireader_email = PROFIREADER_ALL['EMAIL']
         self.profireader_first_name = PROFIREADER_ALL['FIRST_NAME']
@@ -133,8 +132,6 @@ class User(Base):
         self.email_conf_tm = email_conf_tm
         self.pass_reset_key = pass_reset_key
         self.pass_reset_conf_tm = pass_reset_conf_tm
-
-        self.registered_via = registered_via
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 
@@ -195,7 +192,7 @@ class User(Base):
     def logged_in_via(self):
         via = None
         if self.profireader_email:
-            via = 0
+            via = REGISTERED_WITH_FLIPPED['profireader']
         else:
             short_soc_net = SOCIAL_NETWORKS[1:]
             for soc_net in short_soc_net:
@@ -215,6 +212,7 @@ class User(Base):
         # https://crackstation.net/hashing-security.htm
         # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
         return urandom(32)
+
 
     #def __repr__(self):
     #    return "<User(e_mail = '%s', id = '%d', name='%s')>" % (

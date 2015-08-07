@@ -10,6 +10,7 @@ import sqlalchemy.exc as sqlalchemy_exc
 
 from urllib.parse import quote
 from ..models.users import User
+from ..utils import login_required
 import json
 
 #def _session_saver():
@@ -66,7 +67,6 @@ def signup():
         profireader_all['EMAIL'] = user_email
         profireader_all['NAME'] = user_name
         user = User(
-            registered_via=REGISTERED_WITH_FLIPPED['profireader'],
             PROFIREADER_ALL=profireader_all,
             password=user_password,
         )
@@ -85,7 +85,6 @@ def profile(user_id):
     name = user_subject.user_name()
     user = {'id': user_id, 'name': name}
     return render_template('index.html', user=user)
-
 
 # @user_bp.route('/delete/<int:x>', methods=['GET', 'POST'])
 # def delete(x):
@@ -159,9 +158,7 @@ def login_soc_network(provider_name):
                     filter(getattr(User, db_fields['ID']) == result_user.id)\
                     .first()
                 if not user:
-                    user = User(
-                        registered_via=REGISTERED_WITH_FLIPPED[provider_name]
-                    )
+                    user = User()
                     for elem in SOC_NET_FIELDS:
                         setattr(user, db_fields[elem],
                                 getattr(result_user, elem.lower()))
@@ -223,9 +220,11 @@ def login_soc_network(provider_name):
 #    return jsonify(res)
 #
 
+
 @user_bp.route('/logout/', methods=['GET'])
+@login_required   # Only logged in user can be logged out
 def logout():
     session.pop('user_id', None)
-    #return redirect(request.url)  # it should be corrected
-    return redirect('/')
+    #return redirect(request.url)  # # it should be corrected
+    return redirect(url_for('general.index'))
     #return jsonify({}), 200
