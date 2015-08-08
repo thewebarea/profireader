@@ -6,6 +6,8 @@ from ..models.users import User
 from db_init import db_session
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED
 from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS
+from flask.ext.login import login_user, logout_user, current_user, \
+    login_required
 import sqlalchemy.exc as sqlalchemy_exc
 
 from urllib.parse import quote
@@ -58,7 +60,7 @@ def signup():
                   'error')
             return redirect(url_for('user.signup'))
         user = db_session.query(User).\
-                    filter((User.profireader_email) == user_email).first()
+                    filter(User.profireader_email == user_email).first()
         if user:
             flash('such email is already registered', 'error')
             return redirect(url_for('user.signup'))
@@ -91,6 +93,7 @@ def profile(user_id):
 #     return render_template('profile.html', x=x)
 
 
+# read: flask.ext.login
 # TODO: make a logic when login is possible only if user is NOT logged
 @user_bp.route('/login/', methods=['GET', 'POST'])
 def login():

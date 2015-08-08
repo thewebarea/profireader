@@ -30,13 +30,13 @@ USER_TABLE_TYPES = {'ID': id_profireader_type,
                     'PHONE': phone_type,
 
                     'ABOUT_ME': String(6000),
-                    'PASSWORD': String(100),
-                    'PASS_SALT': String(100),
+                    'PASSWORD_HASH': String(64),  # String(128) SHA-256
+
+                    'REGISTERED_ON': TIMESTAMP,
 
                     'EMAIL_CONF_KEY': String(100),
                     'EMAIL_CONF_TM': TIMESTAMP,
                     'PASS_RESET_KEY': String(100),
                     'PASS_RESET_CONF_TM': TIMESTAMP,
-                    #'REGISTERED_VIA': SMALLINT,
                     'PROFILE_COMPLETED': BOOLEAN
                     }
