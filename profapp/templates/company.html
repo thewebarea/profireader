@@ -7,9 +7,9 @@
 <body>
 <form>
 {% for comp in companies %}
-    <a href="{{ url_for('company.company',id=comp.user_id)}}">{{ comp.name }}</a>
+    <a href="{{ flask_endpoint_to_angular('company.company_profile',id=comp.id)}}">{{ comp.name }}</a>
     {% endfor %}
 </form>
-<h2><a href="{{ url_for('company.add_company') }}">ADD COMPANY</a></h2>
+<h2><a href="{{ flask_endpoint_to_angular('company.add_company') }}">ADD COMPANY</a></h2>
 </body>
 </html>
