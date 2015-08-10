@@ -9,6 +9,7 @@ class Company(Base):
     __tablename__ = 'company'
     id = Column(String(36), primary_key=True)
     name = Column(String(100), unique=True)
+    logo_file = Column(String(36), ForeignKey('file.id'))
     portal_consist = Column(Boolean)
     user_id = Column(String(36), ForeignKey('user.id'))
     country = Column(String(100))
@@ -19,12 +20,12 @@ class Company(Base):
     email = Column(String(100))
     short_description = Column(TEXT)
 
-    def __init__(self, name=None, portal_consist=False, user_id=None, logo=None, country=None, region=None,
+    def __init__(self, name=None, portal_consist=False, user_id=None, logo_file=None, country=None, region=None,
                  adress=None, phone=None, phone2=None, email=None, short_description=None):
         self.name = name
         self.portal_consist = portal_consist
         self.user_id = user_id
-        self.logo = logo
+        self.logo_file = logo_file
         self.country = country
         self.region = region
         self.adress = adress
@@ -43,38 +44,39 @@ class Company(Base):
 
     def query_company(self, id):
 
-        company = db_session.query(Company).filter_by(id=id).first()
+        company = db_session.query(Company).filter_by(id=id).first_or_404()
         return company
 
     def add_comp(self, data):
 
         if db_session.query(Company).filter_by(name=data.get('name')).first() or data.get('name') == None:
 
-            redirect(url_for('company.company', id=g.user.id))
+            redirect(url_for('company.show_company', id=g.user_dict.id))
 
         else:
             company = Company()
             for x, y in zip(data.keys(), data.values()):
-                if x == 'name':
-                    company.name = y
-                elif x == 'short_description':
-                    company.short_description = y
-                elif x == 'logo':
-                    company.logo = y
-                elif x == 'phone':
-                    company.phone = y
-                elif x == 'phone2':
-                    company.phone2 = y
-                elif x == 'country':
-                    company.country = y
-                elif x == 'region':
-                    company.region = y
-                elif x == 'adress':
-                    company.adress = y
-                elif x == 'email':
-                    company.email = y
+                Company.__table__.insert().execute({x: y})
+                # if x == 'name':
+                #     company.name = y
+                # elif x == 'short_description':
+                #     company.short_description = y
+                # elif x == 'logo':
+                #     company.logo = y
+                # elif x == 'phone':
+                #     company.phone = y
+                # elif x == 'phone2':
+                #     company.phone2 = y
+                # elif x == 'country':
+                #     company.country = y
+                # elif x == 'region':
+                #     company.region = y
+                # elif x == 'adress':
+                #     company.adress = y
+                # elif x == 'email':
+                #     company.email = y
 
-            company.user_id = g.user.id
+            company.user_id = g.user_dict.id
             db_session.add(company)
             db_session.commit()
 

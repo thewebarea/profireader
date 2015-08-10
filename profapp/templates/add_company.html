@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<form class="send coordinates" action="{{ url_for('company.add_company') }}" onsubmit="return AjaxPost()" id="add" method="post">
+<form class="send coordinates" action="{{ flask_endpoint_to_angular('company.add_company') }}" onsubmit="return AjaxPost()" id="add" method="post">
 <h3><p>New company Account</p></h3>
 <p>Logo<input type="text" id="logo" placeholder="logo"></p>
 <p>Company name<input type="text" id="name" placeholder="name" name="name"></p>
@@ -22,7 +22,7 @@
 <input type="submit" value="submit">
       </form>
         </form>
-  <form action="{{ url_for('company.show_company', user_id=id) }}" id="cancel">
+  <form action="{{ flask_endpoint_to_angular('company.show_company', user_id=id) }}" id="cancel">
   <input type="submit" name="cancel" value="cancel">
       </form>
       <script type="text/javascript">

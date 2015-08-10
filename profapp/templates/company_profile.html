@@ -5,7 +5,7 @@
     <title></title>
 </head>
 <body>
-<a href="{{ url_for('company.edit', id=comp.id) }}">Edit company</a>
+<a href="{{ flask_endpoint_to_angular('company.edit', id=comp.id) }}">Edit company</a>
 
 </body>
 </html>
