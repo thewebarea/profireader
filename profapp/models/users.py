@@ -1,3 +1,4 @@
+from flask import request
 from sqlalchemy import Column
 from db_init import Base
 from os import urandom
@@ -116,7 +117,6 @@ class User(Base, UserMixin):
 
                  about_me='',
                  password=None,
-                 pass_salt=None,
 
                  email_conf_key=None,
                  email_conf_tm=None,
@@ -133,10 +133,9 @@ class User(Base, UserMixin):
         self.profireader_phone = PROFIREADER_ALL['PHONE']
 
         self.about_me = about_me
-        self.password = password
-        self.pas_salt = pass_salt
+        #self.password = password
 
-        self.registered_on = datetime.utcnow()   # here problems are possible
+        self.registered_on = datetime.datetime.utcnow()   # here problems are possible
 
         self.email_conf_key = email_conf_key
         self.email_conf_tm = email_conf_tm
@@ -227,10 +226,11 @@ class User(Base, UserMixin):
     # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
     @password.setter
     def password(self, password):
-        self.password_hash = \
-            generate_password_hash(password,
-                                   method='pbkdf2:sha256',
-                                   salt_length=32)  # salt_length=8
+        if request.endpoint == 'user.signup':
+            self.password_hash = \
+                generate_password_hash(password,
+                                       method='pbkdf2:sha256',
+                                       salt_length=32)  # salt_length=8
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)

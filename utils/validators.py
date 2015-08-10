@@ -20,7 +20,7 @@ def validate_int(value):   # is it correct?
 
 
 def validate_string(value):
-    assert isinstance(value, str)
+    assert (isinstance(value, str) or (value is None))
     return value
 
 

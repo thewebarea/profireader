@@ -12,7 +12,7 @@ import sqlalchemy.exc as sqlalchemy_exc
 
 from urllib.parse import quote
 from ..models.users import User
-from ..utils import login_required
+#from ..utils import login_required
 import json
 
 #def _session_saver():
@@ -41,28 +41,26 @@ EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
 @user_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
+    if g.user_init and g.user_init.is_authenticated():
+        if request.url:
+            return redirect(request.url)
+        return redirect(url_for('general.index'))
+
     if request.method == 'GET':
-        uid = '0'
-        name = None
-        g_user = g.user
-        if g_user:
-            uid = g_user.id
-            name = g_user.user_name()
-        user = {'id': uid, 'name': name}
-        return render_template('signup.html', user=user)
+        return render_template('signup.html', user=g.user_dict)
     else:
         user_name = request.form['display-name']
         user_email = request.form['email']
         user_password = request.form['password']
         user_password2 = request.form['password2']
         if user_password != user_password2:
-            flash('your password confirmation doesnt coincides with password',
+            flash('your password confirmation doesnt match the password',
                   'error')
             return redirect(url_for('user.signup'))
         user = db_session.query(User).\
                     filter(User.profireader_email == user_email).first()
         if user:
-            flash('such email is already registered', 'error')
+            flash('such user is already registered')
             return redirect(url_for('user.signup'))
 
         profireader_all = SOC_NET_NONE['PROFIREADER']
@@ -70,9 +68,8 @@ def signup():
         profireader_all['NAME'] = user_name
         user = User(
             PROFIREADER_ALL=profireader_all,
-            password=user_password,
         )
-
+        user.password = user_password  # pass here is authomatically hashed
         db_session.add(user)
         db_session.commit()
         session['user_id'] = user.id
@@ -95,18 +92,24 @@ def profile(user_id):
 
 # read: flask.ext.login
 # TODO: make a logic when login is possible only if user is NOT logged
+# On a production server, the login route must be made available over
+# secure HTTP so that the form data transmitted to the server is en‐
+# crypted. Without secure HTTP, the login credentials can be intercep‐
+# ted during transit, defeating any efforts put into securing passwords
+# in the server.
+#
+# read this before push!!!: http://flask.pocoo.org/snippets/62/
 @user_bp.route('/login/', methods=['GET', 'POST'])
 def login():
+    if g.user_init and g.user_init.is_authenticated():
+        if request.url:
+            return redirect(request.url)
+        return redirect(url_for('general.index'))
+
     if request.method == 'GET':
-        uid = '0'
-        name = None
-        g_user = g.user
-        if g_user:
-            uid = g_user.id
-            name = g_user.user_name()
-        user = {'id': uid, 'name': name}
-        return render_template('login.html', user=user)
+        return render_template('login.html', user=g.user_dict)
     else:
+        # add code here to validate input data
         user_email = request.form['email']
         user_password = request.form['password']
 
@@ -114,11 +117,14 @@ def login():
             filter(User.profireader_email == user_email).first()
 
         if user:
-            if user_password == user.password:
+            if user.verify_password(user_password):
                 session['user_id'] = user.id
-                return redirect('/')  # #  http://aprofi.d.ntaxa.com/
 
-        flash('email or password is incorrect', 'error')
+                #  the code below should be tuned.
+                return redirect(request.args.get('next') or
+                                url_for('general.index'))
+
+        flash('Invalid username or password.')
         return redirect(url_for('user.login'))
 
 # TODO: just complete this
@@ -146,17 +152,17 @@ def login():
 
 
 # it is valid only if registration was via soc network
-@user_bp.route('/login/<provider_name>', methods=['GET', 'POST'])
-def login_soc_network(provider_name):
+@user_bp.route('/login/<soc_network_name>', methods=['GET', 'POST'])
+def login_soc_network(soc_network_name):
     response = make_response()
     try:
         result = g.authomatic.login(WerkzeugAdapter(request, response),
-                                    provider_name)
+                                    soc_network_name)
         if result:
             if result.user:
                 result.user.update()
                 result_user = result.user
-                db_fields = DB_FIELDS[provider_name.upper()]
+                db_fields = DB_FIELDS[soc_network_name.upper()]
                 user = db_session.query(User).\
                     filter(getattr(User, db_fields['ID']) == result_user.id)\
                     .first()
@@ -170,10 +176,9 @@ def login_soc_network(provider_name):
                 session['user_id'] = user.id
 
                 return redirect('/')  # #  http://aprofi.d.ntaxa.com/
-                #return redirect('https://www.yahoo.com', code=302)
             elif result.error:
                 redirect_path = '#/?msg={}'.\
-                    format(quote(provider_name + ' login failed.'))
+                    format(quote(soc_network_name + ' login failed.'))
                 return redirect(redirect_path)
 
     except:
@@ -227,7 +232,9 @@ def login_soc_network(provider_name):
 @user_bp.route('/logout/', methods=['GET'])
 @login_required   # Only logged in user can be logged out
 def logout():
-    session.pop('user_id', None)
-    #return redirect(request.url)  # # it should be corrected
+    # session.pop('user_id', None)
+    # flash('You have been logged out.')
+
+    #  from flask.ext.login import logout_user, login_required
+    logout_user()
     return redirect(url_for('general.index'))
-    #return jsonify({}), 200

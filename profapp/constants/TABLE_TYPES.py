@@ -6,7 +6,7 @@ id_soc_net_type = String(50)
 # read this about UUID:
 # http://stackoverflow.com/questions/183042/how-can-i-use-uuids-in-sqlalchemy
 # http://stackoverflow.com/questions/20532531/how-to-set-a-column-default-to-a-postgresql-function-using-sqlalchemy
-id_profireader_type = id_soc_net_type
+id_profireader_type = Integer
 phone_type = PhoneNumberType(country_code='UA')  #(country_code='UA')
 #http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.url
 # read also https://github.com/gruns/furl
@@ -30,7 +30,7 @@ USER_TABLE_TYPES = {'ID': id_profireader_type,
                     'PHONE': phone_type,
 
                     'ABOUT_ME': String(6000),
-                    'PASSWORD_HASH': String(64),  # String(128) SHA-256
+                    'PASSWORD_HASH': String(128),  # String(128) SHA-256
 
                     'REGISTERED_ON': TIMESTAMP,
 
