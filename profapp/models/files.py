@@ -1,20 +1,25 @@
+from _ast import In
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP
 from db_init import Base, db_session as db
 import re
-from ..constants.TABLE_TYPES import USER_TABLE_TYPES
+from ..constants.TABLE_TYPES import TABLE_TYPES
 
 class File(Base):
     __tablename__ = 'file'
-    id = Column(String(36), primary_key=True)
-    parent_id = Column(String(36))
-    name = Column(String(100))
-    mime = Column(String(30))
-
-    size = Column(Float)
-    user_id = Column(USER_TABLE_TYPES['ID'], ForeignKey('user.id'))
-    cr_tm = Column(TIMESTAMP)
-    md_tm = Column(TIMESTAMP)
-    ac_tm = Column(TIMESTAMP)
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    parent_id = TABLE_TYPES['file_column'],
+    name = Column(TABLE_TYPES['name'], nullable=False)
+    mime = Column(String(30), default='text/plain', nullable=False)
+    description = Column(TABLE_TYPES['text'], default='', nullable=False)
+    copyright = Column(TABLE_TYPES['text'], default='', nullable=False)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
+    author_name = Column(TABLE_TYPES['name'], default='', nullable=False)
+    ac_count = Column(Integer, default=0, nullable=False)
+    size = Column(Integer)
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
+    cr_tm = Column(TABLE_TYPES['timestamp'])
+    md_tm = Column(TABLE_TYPES['timestamp'])
+    ac_tm = Column(TABLE_TYPES['timestamp'])
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=None, user_id=None, cr_tm=None, md_tm=None, ac_tm=None, company_id=None, copyright='', author=''):
         self.parent_id = parent_id
@@ -93,7 +98,7 @@ class File(Base):
 
 class FileContent(Base):
     __tablename__ = 'file_content'
-    id = Column(String(36), ForeignKey('file.id'), primary_key=True)
+    id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), primary_key=True)
     content = Column(Binary)
 
     def __init__(self, content=None, id=None):

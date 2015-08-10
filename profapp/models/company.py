@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Boolean, ForeignKey
 from db_init import Base
-from ..constants.TABLE_TYPES import USER_TABLE_TYPES
+from ..constants.TABLE_TYPES import TABLE_TYPES
 
 
 class Company(Base):
@@ -8,7 +8,7 @@ class Company(Base):
     id = Column(String(36), primary_key=True)
     name = Column(String(60))
     portal_consist = Column(Boolean)
-    user_id = Column(USER_TABLE_TYPES['ID'], ForeignKey('user.id'))
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
 
     # SELECT * FROM comnapny WHERE user_has_role_in_company('user_id', comnapny.id, ['owner'])
 

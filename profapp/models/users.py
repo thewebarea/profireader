@@ -1,9 +1,9 @@
 from flask import request
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from db_init import Base
 from os import urandom
 
-from ..constants.TABLE_TYPES import USER_TABLE_TYPES
+from ..constants.TABLE_TYPES import TABLE_TYPES
 
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
@@ -18,31 +18,30 @@ from sqlalchemy import String
 
 class User(Base, UserMixin):
     __tablename__ = 'user'
-    _T = USER_TABLE_TYPES
 
     # PROFIREADER REGISTRATION DATA
-    id = Column(_T['ID'], primary_key=True)
-    profireader_email = Column(_T['EMAIL'], unique=True)
-    profireader_first_name = Column(_T['FIRST_NAME'])
-    profireader_last_name = Column(_T['LAST_NAME'])
-    profireader_name = Column(_T['NAME'])
-    profireader_gender = Column(_T['GENDER'])
-    profireader_link = Column(_T['LINK'])
-    profireader_phone = Column(_T['PHONE'])
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    profireader_email = Column(TABLE_TYPES['email'], unique=True)
+    profireader_first_name = Column(TABLE_TYPES['name'])
+    profireader_last_name = Column(TABLE_TYPES['name'])
+    profireader_name = Column(TABLE_TYPES['name'])
+    profireader_gender = Column(TABLE_TYPES['gender'])
+    profireader_link = Column(TABLE_TYPES['link'])
+    profireader_phone = Column(TABLE_TYPES['phone'])
+    profireader_avatar_file_id = TABLE_TYPES['file_column']
 
-    about_me = Column(_T['ABOUT_ME'])
+    about_me = Column(TABLE_TYPES['text'])
     # SECURITY DATA
 
-    password_hash = Column(_T['PASSWORD_HASH'])
+    password_hash = Column(TABLE_TYPES['password_hash'])
 
-    registered_on = Column(_T['REGISTERED_ON'],
-                           default=datetime.datetime.utcnow)
+    registered_tm = Column(TABLE_TYPES['timestamp'], default=datetime.datetime.utcnow)
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
-    email_conf_key = Column(_T['EMAIL_CONF_KEY'])
-    email_conf_tm = Column(_T['EMAIL_CONF_TM'])
-    pass_reset_key = Column(_T['PASS_RESET_KEY'])
-    pass_reset_conf_tm = Column(_T['PASS_RESET_CONF_TM'])
+    email_conf_token = Column(TABLE_TYPES['token'])
+    email_conf_tm = Column(TABLE_TYPES['timestamp'])
+    pass_reset_token = Column(TABLE_TYPES['token'])
+    pass_reset_conf_tm = Column(TABLE_TYPES['timestamp'])
 
     # registered_via = Column(_T['REGISTERED_VIA'])
 
@@ -50,64 +49,64 @@ class User(Base, UserMixin):
 # SOCIAL_NETWORKS = ['PROFIREADER', 'GOOGLE', 'FACEBOOK', 'LINKEDIN', 'TWITTER', 'MICROSOFT', 'YAHOO']
 
     # GOOGLE
-    google_id = Column(_T['GOOGLE_ID'], unique=True)
-    google_email = Column(_T['EMAIL'], unique=True)
-    google_first_name = Column(_T['FIRST_NAME'])
-    google_last_name = Column(_T['LAST_NAME'])
-    google_name = Column(_T['NAME'])
-    google_gender = Column(_T['GENDER'])
-    google_link = Column(_T['LINK'])
-    google_phone = Column(_T['PHONE'])
+    google_id = Column(TABLE_TYPES['id_soc_net'])
+    google_email = Column(TABLE_TYPES['email'], unique=True)
+    google_first_name = Column(TABLE_TYPES['name'])
+    google_last_name = Column(TABLE_TYPES['name'])
+    google_name = Column(TABLE_TYPES['name'])
+    google_gender = Column(TABLE_TYPES['gender'])
+    google_link = Column(TABLE_TYPES['link'])
+    google_phone = Column(TABLE_TYPES['phone'])
 
     # FACEBOOK
-    facebook_id = Column(_T['FACEBOOK_ID'], unique=True)
-    facebook_email = Column(_T['EMAIL'], unique=True)
-    facebook_first_name = Column(_T['FIRST_NAME'])
-    facebook_last_name = Column(_T['LAST_NAME'])
-    facebook_name = Column(_T['NAME'])
-    facebook_gender = Column(_T['GENDER'])
-    facebook_link = Column(_T['LINK'])
-    facebook_phone = Column(_T['PHONE'])
+    facebook_id = Column(TABLE_TYPES['id_soc_net'])
+    facebook_email = Column(TABLE_TYPES['email'], unique=True)
+    facebook_first_name = Column(TABLE_TYPES['name'])
+    facebook_last_name = Column(TABLE_TYPES['name'])
+    facebook_name = Column(TABLE_TYPES['name'])
+    facebook_gender = Column(TABLE_TYPES['gender'])
+    facebook_link = Column(TABLE_TYPES['link'])
+    facebook_phone = Column(TABLE_TYPES['phone'])
 
     # LINKEDIN
-    linkedin_id = Column(_T['LINKEDIN_ID'], unique=True)
-    linkedin_email = Column(_T['EMAIL'], unique=True)
-    linkedin_first_name = Column(_T['FIRST_NAME'])
-    linkedin_last_name = Column(_T['LAST_NAME'])
-    linkedin_name = Column(_T['NAME'])
-    linkedin_gender = Column(_T['GENDER'])
-    linkedin_link = Column(_T['LINK'])
-    linkedin_phone = Column(_T['PHONE'])
+    linkedin_id = Column(TABLE_TYPES['id_soc_net'])
+    linkedin_email = Column(TABLE_TYPES['email'], unique=True)
+    linkedin_first_name = Column(TABLE_TYPES['name'])
+    linkedin_last_name = Column(TABLE_TYPES['name'])
+    linkedin_name = Column(TABLE_TYPES['name'])
+    linkedin_gender = Column(TABLE_TYPES['gender'])
+    linkedin_link = Column(TABLE_TYPES['link'])
+    linkedin_phone = Column(TABLE_TYPES['phone'])
 
     # TWITTER
-    twitter_id = Column(_T['TWITTER_ID'], unique=True)
-    twitter_email = Column(_T['EMAIL'], unique=True)
-    twitter_first_name = Column(_T['FIRST_NAME'])
-    twitter_last_name = Column(_T['LAST_NAME'])
-    twitter_name = Column(_T['NAME'])
-    twitter_gender = Column(_T['GENDER'])
-    twitter_link = Column(_T['LINK'])
-    twitter_phone = Column(_T['PHONE'])
+    twitter_id = Column(TABLE_TYPES['id_soc_net'])
+    twitter_email = Column(TABLE_TYPES['email'], unique=True)
+    twitter_first_name = Column(TABLE_TYPES['name'])
+    twitter_last_name = Column(TABLE_TYPES['name'])
+    twitter_name = Column(TABLE_TYPES['name'])
+    twitter_gender = Column(TABLE_TYPES['gender'])
+    twitter_link = Column(TABLE_TYPES['link'])
+    twitter_phone = Column(TABLE_TYPES['phone'])
 
     # MICROSOFT
-    microsoft_id = Column(_T['MICROSOFT_ID'], unique=True)
-    microsoft_email = Column(_T['EMAIL'], unique=True)
-    microsoft_first_name = Column(_T['FIRST_NAME'])
-    microsoft_last_name = Column(_T['LAST_NAME'])
-    microsoft_name = Column(_T['NAME'])
-    microsoft_gender = Column(_T['GENDER'])
-    microsoft_link = Column(_T['LINK'])
-    microsoft_phone = Column(_T['PHONE'])
+    microsoft_id = Column(TABLE_TYPES['id_soc_net'])
+    microsoft_email = Column(TABLE_TYPES['email'], unique=True)
+    microsoft_first_name = Column(TABLE_TYPES['name'])
+    microsoft_last_name = Column(TABLE_TYPES['name'])
+    microsoft_name = Column(TABLE_TYPES['name'])
+    microsoft_gender = Column(TABLE_TYPES['gender'])
+    microsoft_link = Column(TABLE_TYPES['link'])
+    microsoft_phone = Column(TABLE_TYPES['phone'])
 
     # YAHOO
-    yahoo_id = Column(_T['YAHOO_ID'], unique=True)
-    yahoo_email = Column(_T['EMAIL'], unique=True)
-    yahoo_first_name = Column(_T['FIRST_NAME'])
-    yahoo_last_name = Column(_T['LAST_NAME'])
-    yahoo_name = Column(_T['NAME'])
-    yahoo_gender = Column(_T['GENDER'])
-    yahoo_link = Column(_T['LINK'])
-    yahoo_phone = Column(_T['PHONE'])
+    yahoo_id = Column(TABLE_TYPES['id_soc_net'])
+    yahoo_email = Column(TABLE_TYPES['email'], unique=True)
+    yahoo_first_name = Column(TABLE_TYPES['name'])
+    yahoo_last_name = Column(TABLE_TYPES['name'])
+    yahoo_name = Column(TABLE_TYPES['name'])
+    yahoo_gender = Column(TABLE_TYPES['gender'])
+    yahoo_link = Column(TABLE_TYPES['link'])
+    yahoo_phone = Column(TABLE_TYPES['phone'])
 
     def __init__(self,
                  PROFIREADER_ALL=SOC_NET_NONE['PROFIREADER'],
@@ -138,7 +137,7 @@ class User(Base, UserMixin):
         self.about_me = about_me
         #self.password = password
 
-        self.registered_on = datetime.datetime.utcnow()   # here problems are possible
+        self.registered_tm = datetime.datetime.utcnow()   # here problems are possible
 
         self.email_conf_key = email_conf_key
         self.email_conf_tm = email_conf_tm

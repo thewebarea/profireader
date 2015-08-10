@@ -1,11 +1,11 @@
 from sqlalchemy import Column, String, ForeignKey
 from db_init import Base
-from ..constants.TABLE_TYPES import USER_TABLE_TYPES
+from ..constants.TABLE_TYPES import TABLE_TYPES
 
 class UserCompanyRole(Base):
     __tablename__ = 'user_company_role'
     id = Column(String(36), primary_key=True)
-    user_id = Column(USER_TABLE_TYPES['ID'], ForeignKey('user.id'))
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
     company_id = Column(String(36), ForeignKey('company.id'))
     role_id = Column(String(36), ForeignKey('company_role.id'))
 

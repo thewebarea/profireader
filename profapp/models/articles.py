@@ -1,16 +1,18 @@
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, \
     Boolean
 from db_init import Base
-from ..constants.TABLE_TYPES import USER_TABLE_TYPES
+from ..constants.TABLE_TYPES import TABLE_TYPES
 
 class ArticleHistory(Base):
     __tablename__ = 'article_history'
-    id = Column(Integer, primary_key=True)
-    article_text = Column(Text)
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    article_text = Column(TABLE_TYPES['text_long'])
+    status = Column(TABLE_TYPES['text_long'])
+    contributor_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
     status = Column(Integer)
-    contributor_user_id = Column(USER_TABLE_TYPES['ID'], ForeignKey('user.id'))
 
-    def __init__(self, name, article_text, status, contributor_user_id):
+
+    def __init__(self, name, article_text, contributor_user_id, status):
         self.name = name
         self.article_text = article_text
         self.status = status
@@ -20,7 +22,7 @@ class ArticleHistory(Base):
 class Article(Base):
     __tablename__ = 'article'
     id = Column(Integer, primary_key=True)
-    author_user_id = Column(USER_TABLE_TYPES['ID'], ForeignKey('user.id'))
+    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
     company_id = Column(String(36), ForeignKey('company.id'))
 
     def __init__(self, author_user_id, company_id):
