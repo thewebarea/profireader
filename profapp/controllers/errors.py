@@ -15,6 +15,9 @@ class BadFormatFile(Error):
 class EmptyFieldName(Error):
     pass
 
+class UserNotFoundError(Error):
+    pass
+
 class DublicateName(Error):
     pass
 

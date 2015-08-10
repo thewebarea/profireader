@@ -1,13 +1,16 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
+from db_init import db_session
 from ..models.company import Company
+from ..models.users import User
+from .views_filemanager import file_query
+from ..models.user_company_role import UserCompanyRole
 
-
-@company_bp.route('/<string:id>/', methods=['GET', 'POST'])
-def company(id):
+@company_bp.route('/<string:user_id>', methods=['GET', 'POST'])
+def show_company(user_id):
 
     company = Company()
-    companies = company.query_all_companies(id=id)
+    companies = company.query_all_companies(id=user_id)
 
     return render_template('company.html',
                            companies=companies
@@ -20,9 +23,9 @@ def add_company():
         company = Company()
         company.add_comp(data=request.form)
 
-        return redirect(url_for('company.company', id=g.user.id))
+        return redirect(url_for('company.show_company', id=g.user_dict.id))
 
-    return render_template('add_company.html', id=g.user.id)
+    return render_template('add_company.html', id=g.user_dict.id)
 
 @company_bp.route('/company_profile/<string:id>/')
 def company_profile(id):

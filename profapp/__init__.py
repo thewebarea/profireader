@@ -1,10 +1,13 @@
-from flask import Flask, session, g
+from flask import Flask, session, g, request, redirect
 from authomatic.providers import oauth2
 from authomatic import Authomatic
 from profapp.models.users import User
 from profapp.controllers.blueprints import register as register_blueprints
 from flask import url_for
 from profapp.controllers.errors import csrf
+from flask.ext.login import LoginManager, \
+    login_user, logout_user, current_user, \
+    login_required
 
 def setup_authomatic(app):
     authomatic = Authomatic(app.config['OAUTH_CONFIG'],
@@ -17,9 +20,35 @@ def setup_authomatic(app):
 
 
 def load_user():
-    g.user = None
-    if 'user_id' in session.keys():
-        g.user = User.query.filter_by(id=session['user_id']).first()
+    user_init = current_user
+
+    uid = '0'
+    name = None
+    user = None
+
+    if user_init.is_authenticated():
+        uid = user_init.get_id()
+        user = User.query.filter_by(id=uid).first()
+        name = user.user_name()
+
+    user_dict = {'id': uid, 'name': name}
+
+    g.user_init = user_init
+    g.user = user
+    g.user_dict = user_dict
+
+
+#def load_user():
+#    g.user = None
+#    if 'user_id' in session.keys():
+#        g.user = User.query.filter_by(id=session['user_id']).first()
+
+
+def user_confirmed():
+    if current_user.is_authenticated() \
+        and not current_user.confirmed \
+            and request.endpoint[:5] != 'auth.':
+        return redirect(url_for('auth.unconfirmed'))
 
 
 def flask_endpoint_to_angular(endpoint, **kwargs):
@@ -40,6 +69,18 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     app.before_request(setup_authomatic(app))
     app.before_request(load_user)
     register_blueprints(app)
+
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+    login_manager.session_protection = 'strong'
+    #  The login_view attribute sets the endpoint for the login page.
+    #  I am not sure that it is necessary
+    login_manager.login_view = 'user.login'
+
+    @login_manager.user_loader
+    def load_user_manager(id):
+        return User.query.get(int(id))
+        #return User.query.get(id)
 
     csrf.init_app(app)
 

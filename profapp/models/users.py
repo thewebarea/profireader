@@ -1,4 +1,5 @@
-from sqlalchemy import Column, String, ForeignKey
+from flask import request
+from sqlalchemy import Column
 from db_init import Base
 from os import urandom
 
@@ -7,12 +8,18 @@ from ..constants.TABLE_TYPES import USER_TABLE_TYPES
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
     REGISTERED_WITH
+from flask.ext.login import LoginManager, UserMixin, current_user, \
+    login_user, logout_user
+import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
-class User(Base):
+from sqlalchemy import String
+
+
+class User(Base, UserMixin):
     __tablename__ = 'user'
     _T = USER_TABLE_TYPES
 
-    avatar_file_id = Column(String(36), ForeignKey('file.id'))
     # PROFIREADER REGISTRATION DATA
     id = Column(_T['ID'], primary_key=True)
     profireader_email = Column(_T['EMAIL'], unique=True)
@@ -25,15 +32,19 @@ class User(Base):
 
     about_me = Column(_T['ABOUT_ME'])
     # SECURITY DATA
-    password = Column(_T['PASSWORD'])
-    pass_salt = Column(_T['PASS_SALT'])
+
+    password_hash = Column(_T['PASSWORD_HASH'])
+
+    registered_on = Column(_T['REGISTERED_ON'],
+                           default=datetime.datetime.utcnow)
+    #status_id = Column(Integer, db.ForeignKey('status.id'))
 
     email_conf_key = Column(_T['EMAIL_CONF_KEY'])
     email_conf_tm = Column(_T['EMAIL_CONF_TM'])
     pass_reset_key = Column(_T['PASS_RESET_KEY'])
     pass_reset_conf_tm = Column(_T['PASS_RESET_CONF_TM'])
 
-    registered_via = Column(_T['REGISTERED_VIA'])
+    # registered_via = Column(_T['REGISTERED_VIA'])
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['PROFIREADER', 'GOOGLE', 'FACEBOOK', 'LINKEDIN', 'TWITTER', 'MICROSOFT', 'YAHOO']
@@ -109,14 +120,12 @@ class User(Base):
 
                  about_me='',
                  password=None,
-                 pass_salt=None,
 
                  email_conf_key=None,
                  email_conf_tm=None,
                  pass_reset_key=None,
                  pass_reset_conf_tm=None,
-
-                 registered_via=None,):
+                 ):
 
         self.profireader_email = PROFIREADER_ALL['EMAIL']
         self.profireader_first_name = PROFIREADER_ALL['FIRST_NAME']
@@ -127,15 +136,14 @@ class User(Base):
         self.profireader_phone = PROFIREADER_ALL['PHONE']
 
         self.about_me = about_me
-        self.password = password
-        self.pas_salt = pass_salt
+        #self.password = password
+
+        self.registered_on = datetime.datetime.utcnow()   # here problems are possible
 
         self.email_conf_key = email_conf_key
         self.email_conf_tm = email_conf_tm
         self.pass_reset_key = pass_reset_key
         self.pass_reset_conf_tm = pass_reset_conf_tm
-
-        self.registered_via = registered_via
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 
@@ -196,7 +204,7 @@ class User(Base):
     def logged_in_via(self):
         via = None
         if self.profireader_email:
-            via = 0
+            via = REGISTERED_WITH_FLIPPED['profireader']
         else:
             short_soc_net = SOCIAL_NETWORKS[1:]
             for soc_net in short_soc_net:
@@ -211,12 +219,29 @@ class User(Base):
         name = getattr(self, REGISTERED_WITH[via] + '_name')
         return name
 
-    def pass_salt_generation(self):
-        # we use SHA256.
-        # https://crackstation.net/hashing-security.htm
-        # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
-        return urandom(32)
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
 
-    #def __repr__(self):
-    #    return "<User(e_mail = '%s', id = '%d', name='%s')>" % (
-    #        self.profireader_email, self.id, self.profireader_name)
+
+    # we use SHA256.
+    # https://crackstation.net/hashing-security.htm
+    # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
+    #
+    # another (simplier) approach can be user here.
+    # see: http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.password
+    # https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#full-integration-example
+    @password.setter
+    def password(self, password):
+        if request.endpoint == 'user.signup':
+            self.password_hash = \
+                generate_password_hash(password,
+                                       method='pbkdf2:sha256',
+                                       salt_length=32)  # salt_length=8
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+    def __repr__(self):
+        return "<User(id = %r)>" % self.id

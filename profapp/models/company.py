@@ -4,6 +4,7 @@ from flask import g, redirect, url_for
 from db_init import db_session
 from .user_company_role import UserCompanyRole
 
+
 class Company(Base):
     __tablename__ = 'company'
     id = Column(String(36), primary_key=True)
