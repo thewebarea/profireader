@@ -51,7 +51,7 @@ class File(Base):
         db.commit()
         return f.id
 
-    def upload(parent_id=None, file = None, company_id=None, copyright='', author=''):
+    def upload(parent_id=None, file=None, company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, name=file.filename, company_id=company_id, copyright=copyright, author=author)
         f.content = file.stream.read(-1)
         db.add(f)

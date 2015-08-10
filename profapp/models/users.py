@@ -1,4 +1,4 @@
-from sqlalchemy import Column
+from sqlalchemy import Column, String, ForeignKey
 from db_init import Base
 from os import urandom
 
@@ -12,6 +12,7 @@ class User(Base):
     __tablename__ = 'user'
     _T = USER_TABLE_TYPES
 
+    avatar_file_id = Column(String(36), ForeignKey('file.id'))
     # PROFIREADER REGISTRATION DATA
     id = Column(_T['ID'], primary_key=True)
     profireader_email = Column(_T['EMAIL'], unique=True)
