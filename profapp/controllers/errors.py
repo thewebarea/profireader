@@ -15,6 +15,9 @@ class BadFormatFile(Error):
 class EmptyFieldName(Error):
     pass
 
+class DublicateName(Error):
+    pass
+
 @csrf.error_handler
 def csrf_error(reason):
     return render_template('errors.html', reason=reason), 400

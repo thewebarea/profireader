@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, ForeignKey, TEXT
+from sqlalchemy import Column, String, Boolean, ForeignKey, TEXT, update
 from db_init import Base
 from flask import g, redirect, url_for
 from db_init import db_session
@@ -7,7 +7,7 @@ from .user_company_role import UserCompanyRole
 class Company(Base):
     __tablename__ = 'company'
     id = Column(String(36), primary_key=True)
-    name = Column(String(100))
+    name = Column(String(100), unique=True)
     portal_consist = Column(Boolean)
     user_id = Column(String(36), ForeignKey('user.id'))
     country = Column(String(100))
@@ -16,7 +16,7 @@ class Company(Base):
     phone = Column(String(100))
     phone2 = Column(String(100))
     email = Column(String(100))
-    short_description = Column(String(100)), TEXT
+    short_description = Column(TEXT)
 
     def __init__(self, name=None, portal_consist=False, user_id=None, logo=None, country=None, region=None,
                  adress=None, phone=None, phone2=None, email=None, short_description=None):
@@ -40,13 +40,17 @@ class Company(Base):
             companies = companies+db_session.query(Company).filter_by(id=x.company_id).all()
         return companies
 
+    def query_company(self, id):
+
+        company = db_session.query(Company).filter_by(id=id).first()
+        return company
+
     def add_comp(self, data):
 
-        if data.get('name') == None:
-            db_session.rollback()
-            return False
-        elif db_session.query(Company).filter_by(name=data.get('name')).first():
+        if db_session.query(Company).filter_by(name=data.get('name')).first() or data.get('name') == None:
+
             redirect(url_for('company.company', id=g.user.id))
+
         else:
             company = Company()
             for x, y in zip(data.keys(), data.values()):
@@ -71,4 +75,10 @@ class Company(Base):
 
             company.user_id = g.user.id
             db_session.add(company)
+            db_session.commit()
+
+    def update_comp(self, id, data):
+
+        for x, y in zip(data.keys(), data.values()):
+            db_session.query(Company).filter_by(id=id).update({x: y})
             db_session.commit()
