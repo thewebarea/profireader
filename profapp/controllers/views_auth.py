@@ -99,8 +99,13 @@ def profile(user_id):
 # in the server.
 #
 # read this before push!!!: http://flask.pocoo.org/snippets/62/
-@user_bp.route('/login/', methods=['GET', 'POST'])
+@user_bp.route('/login/', methods=['GET'])
 def login():
+    return render_template('login.html', user=g.user_dict)
+
+
+@user_bp.route('/login/profireader/', methods=['POST'])
+def login_profireader():
     if g.user_init and g.user_init.is_authenticated():
         if request.url:
             return redirect(request.url)
@@ -126,6 +131,7 @@ def login():
 
         flash('Invalid username or password.')
         return redirect(url_for('user.login'))
+
 
 # TODO: just complete this
 # TODO: if registration was via email
