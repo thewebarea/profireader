@@ -1,10 +1,7 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
-from db_init import db_session
 from ..models.company import Company
-from ..models.users import User
-from .views_filemanager import file_query
-from ..models.user_company_role import UserCompanyRole
+
 
 @company_bp.route('/<string:id>/', methods=['GET', 'POST'])
 def company(id):
