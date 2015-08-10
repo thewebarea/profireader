@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP
 from db_init import Base, db_session as db
 import re
+from ..constants.TABLE_TYPES import USER_TABLE_TYPES
 
 class File(Base):
     __tablename__ = 'file'
@@ -10,7 +11,7 @@ class File(Base):
     mime = Column(String(30))
 
     size = Column(Float)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(USER_TABLE_TYPES['ID'], ForeignKey('user.id'))
     cr_tm = Column(TIMESTAMP)
     md_tm = Column(TIMESTAMP)
     ac_tm = Column(TIMESTAMP)
