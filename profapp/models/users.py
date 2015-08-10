@@ -13,6 +13,8 @@ from flask.ext.login import LoginManager, UserMixin, current_user, \
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from sqlalchemy import String
+
 
 class User(Base, UserMixin):
     __tablename__ = 'user'
@@ -35,6 +37,7 @@ class User(Base, UserMixin):
 
     registered_on = Column(_T['REGISTERED_ON'],
                            default=datetime.datetime.utcnow)
+    #status_id = Column(Integer, db.ForeignKey('status.id'))
 
     email_conf_key = Column(_T['EMAIL_CONF_KEY'])
     email_conf_tm = Column(_T['EMAIL_CONF_TM'])
@@ -224,6 +227,10 @@ class User(Base, UserMixin):
     # we use SHA256.
     # https://crackstation.net/hashing-security.htm
     # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
+    #
+    # another (simplier) approach can be user here.
+    # see: http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.password
+    # https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#full-integration-example
     @password.setter
     def password(self, password):
         if request.endpoint == 'user.signup':

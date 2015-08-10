@@ -40,3 +40,5 @@ USER_TABLE_TYPES = {'ID': id_profireader_type,
                     'PASS_RESET_CONF_TM': TIMESTAMP,
                     'PROFILE_COMPLETED': BOOLEAN
                     }
+
+USER_STATUS_TABLE_TYPES = {'ID': SMALLINT, 'GOOGLE_ID': id_soc_net_type}

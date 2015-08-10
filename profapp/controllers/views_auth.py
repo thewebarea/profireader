@@ -239,8 +239,8 @@ def login_soc_network(soc_network_name):
 @login_required   # Only logged in user can be logged out
 def logout():
     # session.pop('user_id', None)
-    # flash('You have been logged out.')
 
-    #  from flask.ext.login import logout_user, login_required
+    # from flask.ext.login import logout_user, login_required
     logout_user()
+    flash('You have been logged out.')
     return redirect(url_for('general.index'))

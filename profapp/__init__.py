@@ -72,11 +72,15 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.session_protection = "strong"
+    login_manager.session_protection = 'strong'
+    #  The login_view attribute sets the endpoint for the login page.
+    #  I am not sure that it is necessary
+    login_manager.login_view = 'user.login'
 
     @login_manager.user_loader
     def load_user_manager(id):
         return User.query.get(int(id))
+        #return User.query.get(id)
 
     csrf.init_app(app)
 
