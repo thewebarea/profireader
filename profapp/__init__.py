@@ -79,7 +79,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     @login_manager.user_loader
     def load_user_manager(id):
-        return User.query.get(int(id))
+        return User.query.get(id)
         #return User.query.get(id)
 
     csrf.init_app(app)

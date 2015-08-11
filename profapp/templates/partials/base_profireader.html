@@ -48,6 +48,6 @@ var modalInstance = $modal.open({
                     <a href="">about us</a>
                     <a href="#" ng-click="open_filemanager()">file manager</a>
                     <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('company.show_company', user_id='user.id') }}">company</a>
+                       <a href="{{ url_for('company.show_company') }}">company</a>
                     </span>
                 </span>

@@ -17,3 +17,14 @@ def parent_folder(func):
         kwargs['parent_id'] = parent_id
         return func(*args, **kwargs)
     return function_with_parent
+
+def replace_brackets(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if kwargs:
+            for ch in ['{', '}', ' ']:
+                for key in kwargs:
+                    if ch in kwargs[key]:
+                        kwargs[key] = kwargs[key].replace(ch, "")
+        return func(*args, **kwargs)
+    return wrapper

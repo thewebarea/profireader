@@ -81,5 +81,5 @@ def get(id):
 
 def file_query(id, table):
 
-    query = db_session.query(table).filter_by(id=id).first_or_404()
+    query = db_session.query(table).filter_by(id=id).first()
     return query
