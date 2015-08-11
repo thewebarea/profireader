@@ -83,9 +83,7 @@ def get(id):
     return send_file(BytesIO(image_query_content.content), mimetype=image_query.mime, as_attachment=False)
 
 def file_query(id, table):
-    if db_session.query(table).filter_by(id=id).first():
-        query = db_session.query(table).filter_by(id=id).first()
 
-        return query
-    else:
-        return "404 error", 404
+    query = db_session.query(table).filter_by(id=id).first_or_404()
+    return query
+

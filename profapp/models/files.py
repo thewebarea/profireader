@@ -1,5 +1,5 @@
 from _ast import In
-from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP
+from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
 from db_init import Base, db_session as db
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -7,19 +7,21 @@ from ..constants.TABLE_TYPES import TABLE_TYPES
 class File(Base):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    parent_id = TABLE_TYPES['file_column'],
-    name = Column(TABLE_TYPES['name'], nullable=False)
+    parent_id = Column(String(36), ForeignKey('file.id'))
+    name = Column(TABLE_TYPES['name'], default='', nullable=False)
     mime = Column(String(30), default='text/plain', nullable=False)
     description = Column(TABLE_TYPES['text'], default='', nullable=False)
     copyright = Column(TABLE_TYPES['text'], default='', nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
     author_name = Column(TABLE_TYPES['name'], default='', nullable=False)
     ac_count = Column(Integer, default=0, nullable=False)
-    size = Column(Integer)
-    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
-    cr_tm = Column(TABLE_TYPES['timestamp'])
-    md_tm = Column(TABLE_TYPES['timestamp'])
-    ac_tm = Column(TABLE_TYPES['timestamp'])
+    size = Column(Integer, default=0, nullable=False)
+    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    cr_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
+    md_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
+    ac_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
+
+    UniqueConstraint('name', 'parent_id', name='inique_name_in_folder')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=None, user_id=None, cr_tm=None, md_tm=None, ac_tm=None, company_id=None, copyright='', author=''):
         self.parent_id = parent_id
@@ -57,7 +59,7 @@ class File(Base):
         db.commit()
         return f.id
 
-    def upload(parent_id=None, file = None, company_id=None, copyright='', author=''):
+    def upload(parent_id=None, file=None, company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, name=file.filename, company_id=company_id, copyright=copyright, author=author)
         f.content = file.stream.read(-1)
         db.add(f)

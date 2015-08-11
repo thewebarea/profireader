@@ -8,7 +8,7 @@ static_bp = Blueprint('static', __name__, static_url_path='')
 #  static_bp = Blueprint('static', __name__)
 image_editor_bp = Blueprint('image_editor', __name__)
 company_bp = Blueprint('company', __name__)
-
+error_bp = Blueprint('error', __name__)
 
 def register(app):
     from . import views_index
@@ -32,3 +32,6 @@ def register(app):
 
     from . import views_company
     app.register_blueprint(company_bp, url_prefix='/company')
+
+    from . import errors
+    app.register_blueprint(error_bp, url_prefix='/error')

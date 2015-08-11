@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, TIMESTAMP, SMALLINT, BOOLEAN, Column, ForeignKey
+from sqlalchemy import Integer, String, TIMESTAMP, SMALLINT, BOOLEAN, Column, ForeignKey, UnicodeText
 from sqlalchemy_utils.types.phone_number import PhoneNumberType
 from sqlalchemy_utils import URLType
 
@@ -9,12 +9,19 @@ from sqlalchemy_utils import URLType
 
 TABLE_TYPES = {
     'id_profireader': String(36),
-    'file_column': Column(String(36), ForeignKey('file.id')),
+    # 'file_column': Column(String(36), ForeignKey('file.id')),
+    # 'id_column': Column(String(36), primary_key=True),
+    # 'user_column': Column(String(36), ForeignKey('user.id'), nullable=False),
+    # 'company_column': Column(String(36), ForeignKey('company.id'), nullable=False),
+
 
     'password_hash': String(128),
     'token': String(128),
     'timestamp': TIMESTAMP,
     'id_soc_net': String(50),
+    'role': String(36),
+
+    'boolean': BOOLEAN,
 
     'phone': PhoneNumberType(country_code='UA'),  # (country_code='UA')
     # http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.url
@@ -23,7 +30,7 @@ TABLE_TYPES = {
     'email': String(100),
     'name': String(100),
     'text': String(666),
-    'text_long': String(66666),
+    'text_long': UnicodeText,
     'gender': String(10),
 
 

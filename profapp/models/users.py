@@ -28,7 +28,7 @@ class User(Base, UserMixin):
     profireader_gender = Column(TABLE_TYPES['gender'])
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
-    profireader_avatar_file_id = TABLE_TYPES['file_column']
+    profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
 
     about_me = Column(TABLE_TYPES['text'])
     # SECURITY DATA
