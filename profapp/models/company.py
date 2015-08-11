@@ -1,9 +1,10 @@
 from sqlalchemy import Column, String, ForeignKey, update
-from db_init import Base, engine
+from db_init import Base
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from flask import g, redirect, url_for
 from db_init import db_session
 from .user_company_role import UserCompanyRole
+from ..constants.STATUS import STATUS
 
 
 
@@ -38,10 +39,14 @@ class Company(Base):
 
     def query_all_companies(self, id):
 
+        status = STATUS()
         companies = db_session.query(Company).filter_by(author_user_id=id).all()
-        query_companies = db_session.query(UserCompanyRole).filter_by(user_id=id).all()
+        query_companies = db_session.query(UserCompanyRole).filter_by(user_id=id).\
+            filter_by(status=status.ACTIVE()).all()
         for x in query_companies:
-            companies = companies+db_session.query(Company).filter_by(id=x.company_id).all()
+            for y in companies:
+                if y.author_user_id!=x.user_id:
+                    companies = companies+db_session.query(Company).filter_by(id=x.company_id).all()
         return companies
 
     def query_company(self, id):
@@ -60,9 +65,6 @@ class Company(Base):
             for x, y in zip(data.keys(), data.values()):
                 #Company.__table__.insert().execute({x: y})
 
-                    # session.add(users.insert().values(name="some name"))
-                #
-                #
                 if x == 'name':
                     company.name = y
                 elif x == 'short_description':

@@ -1,8 +1,11 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
+from db_init import db_session
 from ..models.company import Company
+from ..models.user_company_role import UserCompanyRole
 from .request_wrapers import replace_brackets
 # from phonenumbers import NumberParseException
+from ..constants.STATUS import STATUS
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show_company():
@@ -31,9 +34,13 @@ def company_profile(id):
 
     company = Company()
     query = company.query_company(id=id)
+    comp_role = UserCompanyRole()
+    non_active_subscribers = comp_role.query_non_active(id=id)
+
 
     return render_template('company_profile.html',
-                           comp=query
+                           comp=query,
+                           non_active_subscribers=non_active_subscribers
                            )
 
 @company_bp.route('/edit/<string:id>/', methods=['GET', 'POST'])
@@ -50,3 +57,21 @@ def edit(id):
     return render_template('company_edit.html',
                            comp=query
                            )
+
+@company_bp.route('/subscribe/', methods=['GET', 'POST'])
+@replace_brackets
+def subscribe():
+
+    data = request.form
+    id = data['company']
+    comp_role = UserCompanyRole()
+    comp_role.subscribe_to_company(id)
+
+    return redirect(url_for('company.company_profile', id=id))
+
+@company_bp.route('/add_subscriber/<string:user_id>/<string:comp_id>', methods=['GET', 'POST'])
+@replace_brackets
+def add_subscriber(user_id, comp_id):
+    comp_role = UserCompanyRole()
+    comp_role.apply_request(comp_id=comp_id, user_id=user_id)
+    return redirect(url_for('company.company_profile', id=comp_id))
