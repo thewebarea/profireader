@@ -1,15 +1,15 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
-from db_init import db_session
 from ..models.company import Company
 from ..models.user_company_role import UserCompanyRole
 from .request_wrapers import replace_brackets
 # from phonenumbers import NumberParseException
-from ..constants.STATUS import STATUS
+company = Company()
+comp_role = UserCompanyRole()
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show_company():
-    company = Company()
+
     companies = company.query_all_companies(g.user.id)
 
     return render_template('company.html',
@@ -20,7 +20,6 @@ def show_company():
 def add_company():
 
     if request.method != 'GET':
-        company = Company()
         # We have to catch NumberParseException
         company.add_comp(data=request.form)
 
@@ -32,9 +31,7 @@ def add_company():
 @replace_brackets
 def company_profile(id):
 
-    company = Company()
     query = company.query_company(id=id)
-    comp_role = UserCompanyRole()
     non_active_subscribers = comp_role.query_non_active(id=id)
 
 
@@ -47,7 +44,6 @@ def company_profile(id):
 @replace_brackets
 def edit(id):
 
-    company = Company()
     query = company.query_company(id=id)
     if request.method != 'GET':
         # We have to catch NumberParseException
@@ -64,7 +60,6 @@ def subscribe():
 
     data = request.form
     id = data['company']
-    comp_role = UserCompanyRole()
     comp_role.subscribe_to_company(id)
 
     return redirect(url_for('company.company_profile', id=id))
@@ -72,6 +67,6 @@ def subscribe():
 @company_bp.route('/add_subscriber/<string:user_id>/<string:comp_id>', methods=['GET', 'POST'])
 @replace_brackets
 def add_subscriber(user_id, comp_id):
-    comp_role = UserCompanyRole()
+
     comp_role.apply_request(comp_id=comp_id, user_id=user_id)
     return redirect(url_for('company.company_profile', id=comp_id))
