@@ -110,7 +110,7 @@ class TestingConfig(Config):
     CSRF_ENABLED = False
 
     #Define database connection parameters
-    db_name = 'profireader_test'
+    db_name = 'profireader'
 
     # Define the database - we are working with
     SQLALCHEMY_DATABASE_URI = \
