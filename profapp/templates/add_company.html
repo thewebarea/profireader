@@ -22,7 +22,7 @@
 <input type="submit" value="submit">
       </form>
         </form>
-  <form action="{{ flask_endpoint_to_angular('company.show_company', user_id=id) }}" id="cancel">
+  <form action="{{ url_for('company.show_company') }}" id="cancel">
   <input type="submit" name="cancel" value="cancel">
       </form>
       <script type="text/javascript">
