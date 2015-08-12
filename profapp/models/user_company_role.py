@@ -5,7 +5,9 @@ from flask import g
 from ..constants.USER_ROLES import ROLES
 from ..constants.STATUS import STATUS
 from .users import User
+from ..controllers.errors import StatusNonActivate
 statuses = STATUS()
+
 
 class UserCompanyRole(Base):
     __tablename__ = 'user_company_role'
@@ -21,26 +23,37 @@ class UserCompanyRole(Base):
         self.role_id = role_id
         self.status = status
 
-    def subscribe_to_company(self, id):
+    @staticmethod
+    def subscribe_to_company(id):
 
         role = ROLES()
-        db_session.add(UserCompanyRole(user_id=g.user.id, company_id=id,
-                                       role_id=role.READER(), status=statuses.NONACTIVE()))
-        db_session.commit()
+        if not db_session.query(UserCompanyRole).filter_by(user_id=g.user_dict['id']).filter_by(company_id=id).first():
+            db_session.add(UserCompanyRole(user_id=g.user_dict['id'], company_id=id,
+                                           role_id=role.ADMIN(), status=statuses.NONACTIVE()))
+            db_session.commit()
+        else:
+            raise StatusNonActivate
 
-    def query_non_active(self, id):
+    @staticmethod
+    def check_member(id):
 
+        non_active_subscribers = []
         query = db_session.query(UserCompanyRole).filter_by(status=statuses.NONACTIVE()).\
             filter_by(company_id=id).all()
-        non_active_subscribers = []
         for user in query:
             non_active_subscribers.append(db_session.query(User).filter_by(id=user.user_id).first())
         return non_active_subscribers
 
-    def apply_request(self, comp_id, user_id):
+    @staticmethod
+    def apply_request(comp_id, user_id, bool):
+
+        if bool == 'True':
+            stat = statuses.ACTIVE()
+        else:
+            stat = statuses.REJECT()
 
         db_session.query(UserCompanyRole).filter_by(status=statuses.NONACTIVE()).\
-            filter_by(company_id=comp_id).filter_by(user_id=user_id).update({'status': statuses.ACTIVE()})
+            filter_by(company_id=comp_id).filter_by(user_id=user_id).update({'status': stat})
         db_session.commit()
 
 class CompanyRole(Base):

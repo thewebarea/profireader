@@ -1,19 +1,22 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company
+from ..models.users import User
 from ..models.user_company_role import UserCompanyRole
 from .request_wrapers import replace_brackets
 # from phonenumbers import NumberParseException
+from .errors import SubscribeToOwn
 company = Company()
 comp_role = UserCompanyRole()
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show_company():
 
-    companies = company.query_all_companies(g.user.id)
+    companies = company.query_all_companies(g.user_dict['id'])
 
     return render_template('company.html',
-                           companies=companies
+                           companies=companies,
+                           user=g.user_dict
                            )
 
 @company_bp.route('/add_company/', methods=['GET', 'POST'])
@@ -25,19 +28,23 @@ def add_company():
 
         return redirect(url_for('company.show_company'))
 
-    return render_template('add_company.html', id=g.user.id)
+    return render_template('add_company.html',
+                           id=g.user_dict['id'],
+                           user=g.user_dict)
 
-@company_bp.route('/company_profile/<string:id>/')
+@company_bp.route('/company_profile/<string:id>/', methods=['GET', 'POST'])
 @replace_brackets
 def company_profile(id):
 
     query = company.query_company(id=id)
-    non_active_subscribers = comp_role.query_non_active(id=id)
-
+    non_active_subscribers = company.query_non_active(id=id)
+    user_name = [x.user_name() for x in non_active_subscribers]
 
     return render_template('company_profile.html',
                            comp=query,
-                           non_active_subscribers=non_active_subscribers
+                           non_active_subscribers=non_active_subscribers,
+                           user=g.user_dict,
+                           user_name=user_name
                            )
 
 @company_bp.route('/edit/<string:id>/', methods=['GET', 'POST'])
@@ -51,7 +58,8 @@ def edit(id):
         return redirect(url_for('company.company_profile', id=id))
 
     return render_template('company_edit.html',
-                           comp=query
+                           comp=query,
+                           user=g.user_dict
                            )
 
 @company_bp.route('/subscribe/', methods=['GET', 'POST'])
@@ -60,13 +68,18 @@ def subscribe():
 
     data = request.form
     id = data['company']
-    comp_role.subscribe_to_company(id)
+    if g.user_dict['id'] != company.query_company(id).author_user_id:
+        comp_role.subscribe_to_company(id)
+    else:
+        raise SubscribeToOwn
 
     return redirect(url_for('company.company_profile', id=id))
 
-@company_bp.route('/add_subscriber/<string:user_id>/<string:comp_id>', methods=['GET', 'POST'])
+@company_bp.route('/add_subscriber/', methods=['GET', 'POST'])
 @replace_brackets
-def add_subscriber(user_id, comp_id):
+def add_subscriber():
 
-    comp_role.apply_request(comp_id=comp_id, user_id=user_id)
-    return redirect(url_for('company.company_profile', id=comp_id))
+    data = request.form
+    comp_role.apply_request(comp_id=data['comp_id'], user_id=data['user_id'], bool=data['req'])
+
+    return redirect(url_for('company.company_profile', id=data['comp_id']))

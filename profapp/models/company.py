@@ -6,7 +6,8 @@ from db_init import db_session
 from .user_company_role import UserCompanyRole
 from ..constants.STATUS import STATUS
 
-
+statuses = STATUS()
+ucr = UserCompanyRole()
 
 class Company(Base):
     __tablename__ = 'company'
@@ -37,24 +38,25 @@ class Company(Base):
         self.email = email
         self.short_description = short_description
 
-    def query_all_companies(self, id):
+    @staticmethod
+    def query_all_companies(id):
 
         status = STATUS()
         companies = db_session.query(Company).filter_by(author_user_id=id).all()
         query_companies = db_session.query(UserCompanyRole).filter_by(user_id=id).\
             filter_by(status=status.ACTIVE()).all()
         for x in query_companies:
-            for y in companies:
-                if y.author_user_id!=x.user_id:
-                    companies = companies+db_session.query(Company).filter_by(id=x.company_id).all()
+            companies = companies+db_session.query(Company).filter_by(id=x.company_id).all()
         return companies
 
-    def query_company(self, id):
+    @staticmethod
+    def query_company(id):
 
         company = db_session.query(Company).filter_by(id=id).first()
         return company
 
-    def add_comp(self, data):
+    @staticmethod
+    def add_comp(data):
 
         if db_session.query(Company).filter_by(name=data.get('name')).first() or data.get('name') == None:
 
@@ -84,12 +86,22 @@ class Company(Base):
                 elif x == 'email':
                     company.email = y
 
-            company.author_user_id = g.user.id
+            company.author_user_id = g.user_dict['id']
             db_session.add(company)
             db_session.commit()
 
-    def update_comp(self, id, data):
+    @staticmethod
+    def update_comp(id, data):
 
         for x, y in zip(data.keys(), data.values()):
             db_session.query(Company).filter_by(id=id).update({x: y})
             db_session.commit()
+
+    def query_non_active(self, id):
+        if db_session.query(UserCompanyRole).filter_by(status=statuses.ACTIVE()).\
+                filter_by(company_id=id).filter_by(user_id=g.user_dict['id']).first() or\
+                db_session.query(Company).filter_by(author_user_id=g.user_dict['id']).\
+                filter_by(id=id).first():
+            non_active = ucr.check_member(id)
+            return non_active
+        return []

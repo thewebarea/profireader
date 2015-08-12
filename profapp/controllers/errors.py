@@ -22,6 +22,12 @@ class UserNotFoundError(Error):
 class DublicateName(Error):
     pass
 
+class StatusNonActivate(Error):
+    pass
+
+class SubscribeToOwn(Error):
+    pass
+
 @csrf.error_handler
 def csrf_error(reason):
     return render_template('404.html',

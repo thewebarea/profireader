@@ -1,15 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-<a href="{{ flask_endpoint_to_angular('company.edit', id=comp.id) }}">Edit company</a>
+{% extends "index_layout.html" %}
+{% block title %}Profireader{% endblock title %}
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
+{% block company_base %}
+{% include 'company_base.html' %}
+{% endblock company_base %}
+
+
+
+{% block content %}
+<p><h3><a href="{{ url_for('company.edit', id=comp.id) }}">Edit company</a></h3></p>
+
+
 
 {% for subscriber in non_active_subscribers %}
-<a href="{{ flask_endpoint_to_angular('company.add_subscriber', user_id=subscriber.id, comp_id=comp.id) }}">{{ subscriber.facebook_name }}</a>
-{% endfor %}
+{% for name in user_name %}
+      <form class="add_subscriber" action="{{ url_for('company.add_subscriber') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
+      <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
+          <input type="hidden" id="req" name="req" value="True">
+          <input type="submit" id="apply" value="Apply {{ name }}">
+      </form>
 
-</body>
-</html>
+          <form class="add_subscriber" action="{{ url_for('company.add_subscriber') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
+      <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
+              <input type="hidden" id="req" name="req" value='False'>
+          <input type="submit" id="reject" value="Reject {{ name }}">
+      </form>
+{% endfor %}
+{% endfor %}
+      <script type="text/javascript">
+
+
+ function AjaxPost() {
+  $.post('', {
+             'comp_id': $("#comp_id").val(),
+      'user_id': $("#user_id").val(),
+             'req': $("#req").val()
+
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return true;
+ };
+
+</script>
+{% endblock content %}
+
+{% block footer %}
+    {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock footer %}
