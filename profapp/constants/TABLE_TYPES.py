@@ -23,6 +23,7 @@ TABLE_TYPES = {
 
     'boolean': BOOLEAN,
     'status': String(36),
+    'rights': String(300),
 
     'phone': PhoneNumberType(country_code='UA'),  # (country_code='UA')
     # http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.url

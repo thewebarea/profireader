@@ -17,4 +17,12 @@
                                                     <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
                        <a href="{{ url_for('company.company_profile', id=comp.id)}}">Profile</a>
                     </span>
+                {% if comp.author_user_id==g.user['id'] %}
+                <span></span>
+
+                {% else %}
+                                                                  <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.subscribe', id=comp.id)}}">Subscribe to this company</a>
+                    </span>
+                {% endif %}
                 </span>

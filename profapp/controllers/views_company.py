@@ -1,13 +1,13 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company
-from ..models.users import User
-from ..models.user_company_role import UserCompanyRole
+from ..models.user_company_role import UserCompanyRole, Right
 from .request_wrapers import replace_brackets
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
 company = Company()
 comp_role = UserCompanyRole()
+r = Right()
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show_company():
@@ -33,7 +33,6 @@ def add_company():
                            user=g.user_dict)
 
 @company_bp.route('/company_profile/<string:id>/', methods=['GET', 'POST'])
-@replace_brackets
 def company_profile(id):
 
     query = company.query_company(id=id)
@@ -62,13 +61,13 @@ def edit(id):
                            user=g.user_dict
                            )
 
-@company_bp.route('/subscribe/', methods=['GET', 'POST'])
-@replace_brackets
-def subscribe():
+@company_bp.route('/subscribe/<string:id>/', methods=['GET', 'POST'])
+def subscribe(id):
 
-    data = request.form
-    id = data['company']
-    if g.user_dict['id'] != company.query_company(id).author_user_id:
+    if request.method!='GET':
+        data = request.form
+        id = data['company']
+    if g.user_dict['id'] != company.query_company(id=id).author_user_id:
         comp_role.subscribe_to_company(id)
     else:
         raise SubscribeToOwn
@@ -76,7 +75,6 @@ def subscribe():
     return redirect(url_for('company.company_profile', id=id))
 
 @company_bp.route('/add_subscriber/', methods=['GET', 'POST'])
-@replace_brackets
 def add_subscriber():
 
     data = request.form

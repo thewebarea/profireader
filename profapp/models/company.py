@@ -9,6 +9,9 @@ from ..constants.STATUS import STATUS
 statuses = STATUS()
 ucr = UserCompanyRole()
 
+def db(*args, **kwargs):
+    return db_session.query(args[0]).filter_by(**kwargs)
+
 class Company(Base):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -42,23 +45,24 @@ class Company(Base):
     def query_all_companies(id):
 
         status = STATUS()
-        companies = db_session.query(Company).filter_by(author_user_id=id).all()
-        query_companies = db_session.query(UserCompanyRole).filter_by(user_id=id).\
-            filter_by(status=status.ACTIVE()).all()
+        companies = db(Company, author_user_id=id).all()
+        query_companies = db(UserCompanyRole, user_id=id, status=status.ACTIVE()).all()
+
         for x in query_companies:
-            companies = companies+db_session.query(Company).filter_by(id=x.company_id).all()
+            companies = companies+db(Company, id=x.company_id).all()
+
         return companies
 
     @staticmethod
     def query_company(id):
 
-        company = db_session.query(Company).filter_by(id=id).first()
+        company = db(Company, id=id).first()
         return company
 
     @staticmethod
     def add_comp(data):
 
-        if db_session.query(Company).filter_by(name=data.get('name')).first() or data.get('name') == None:
+        if db(Company, name=data.get('name')).first() or data.get('name') == None:
 
             redirect(url_for('company.show_company'))
 
@@ -94,14 +98,18 @@ class Company(Base):
     def update_comp(id, data):
 
         for x, y in zip(data.keys(), data.values()):
-            db_session.query(Company).filter_by(id=id).update({x: y})
+            db(Company, id=id).update({x: y})
             db_session.commit()
 
+    def query_owner_or_member(self, id):
+
+        if db(UserCompanyRole, status=statuses.ACTIVE(), company_id=id, user_id=g.user_dict['id']).first() or\
+                db(Company, author_user_id=g.user_dict['id'], id=id).first():
+            return True
+        return False
+
     def query_non_active(self, id):
-        if db_session.query(UserCompanyRole).filter_by(status=statuses.ACTIVE()).\
-                filter_by(company_id=id).filter_by(user_id=g.user_dict['id']).first() or\
-                db_session.query(Company).filter_by(author_user_id=g.user_dict['id']).\
-                filter_by(id=id).first():
+        if self.query_owner_or_member(id):
             non_active = ucr.check_member(id)
             return non_active
         return []

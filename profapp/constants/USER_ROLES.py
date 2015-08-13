@@ -25,3 +25,32 @@ class ROLES:
 
     def READER(self):
         return '58xe13c1-f2cd-4001-a53a-6d085611e8f7'
+
+class RIGHTS:
+
+    def COMMENT(self):
+        return 'comment'
+
+    def PUBLISH(self):
+        return 'publish'
+
+    def UNPUBLISH(self):
+        return 'unpublish'
+
+    def WRITE_ARTICLES(self):
+        return 'write_articles'
+
+    def MODERATE_COMMENTS(self):
+        return 'moderate_comments'
+
+    def MANAGE_CONTENT(self):
+        return 'manage_content'
+
+    def MANAGE_MEMBERS(self):
+        return 'manage_members'
+
+    def MANAGE_ACCESS(self):
+        return 'manage_access'
+
+    def TRANSFER_OWNERSHIP(self):
+        return 'transfer_ownership'
