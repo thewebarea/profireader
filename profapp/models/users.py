@@ -260,6 +260,7 @@ class User(Base, UserMixin):
             return False
         self.confirmed = True
         db_session.add(self)
+        db_session.commit()
         return True
 
     def generate_reset_token(self, expiration=3600):

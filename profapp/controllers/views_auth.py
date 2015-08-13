@@ -77,18 +77,14 @@ def signup():
 # in the server.
 #
 # read this before push!!!: http://flask.pocoo.org/snippets/62/
-@user_bp.route('/login/', methods=['GET'])
+@user_bp.route('/login/', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html', user=g.user_dict)
-
-
-@user_bp.route('/login/profireader/', methods=['POST'])
-def login_profireader():
     # (Andriy) I suppose it is not necessary
     if g.user_init and g.user_init.is_authenticated():
-        raise BadDataProvided
+        flash('You are already logged in.')
 
     form = LoginForm()
+
     if form.validate_on_submit():
         user = db_session.query(User).\
             filter(User.profireader_email == form.email.data).first()
@@ -99,7 +95,7 @@ def login_profireader():
                             url_for('general.index'))
         flash('Invalid username or password.')
         return redirect(url_for('user.login'))
-
+    return render_template('auth/login.html', form=form, user=g.user_dict)
 
 @user_bp.route('/login/<soc_network_name>', methods=['GET', 'POST'])
 def login_soc_network(soc_network_name):
