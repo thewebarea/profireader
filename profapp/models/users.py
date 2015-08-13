@@ -46,8 +46,6 @@ class User(Base, UserMixin):
     pass_reset_key = Column(_T['PASS_RESET_KEY'])
     pass_reset_conf_tm = Column(_T['PASS_RESET_CONF_TM'])
 
-    # registered_via = Column(_T['REGISTERED_VIA'])
-
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['PROFIREADER', 'GOOGLE', 'FACEBOOK', 'LINKEDIN', 'TWITTER', 'MICROSOFT', 'YAHOO']
 
