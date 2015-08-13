@@ -13,6 +13,7 @@ db_session = scoped_session(sessionmaker(autocommit=False,
                                          bind=engine))
 Base = declarative_base()
 
+
 # this event is called whenever an attribute
 # on a class is instrumented
 @event.listens_for(Base, 'attribute_instrument')

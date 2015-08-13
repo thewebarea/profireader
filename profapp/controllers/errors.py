@@ -18,6 +18,9 @@ class EmptyFieldName(Error):
 class UserNotFoundError(Error):
     pass
 
+class BadDataProvided(Error):
+    pass
+
 @csrf.error_handler
 def csrf_error(reason):
     return render_template('errors.html', reason=reason), 400

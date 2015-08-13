@@ -29,6 +29,8 @@ USER_TABLE_TYPES = {'ID': id_profireader_type,
                     'LINK': link_type,
                     'PHONE': phone_type,
 
+                    'CONFIRMED': BOOLEAN,
+
                     'ABOUT_ME': String(6000),
                     'PASSWORD_HASH': String(128),  # String(128) SHA-256
 

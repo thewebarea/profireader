@@ -15,7 +15,7 @@ def register(app):
 
     app.register_blueprint(general_bp, url_prefix='/')
 
-    from . import views_auth
+    from . import views_auth, views_user
     # we can not change this url_prefix due to soc-network authentication
     app.register_blueprint(user_bp, url_prefix='/users')
 
