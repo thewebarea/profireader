@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<a href="{{ flask_endpoint_to_angular('company.edit', id=comp.id) }}">Edit company</a>
+
+{% for subscriber in non_active_subscribers %}
+<a href="{{ flask_endpoint_to_angular('company.add_subscriber', user_id=subscriber.id, comp_id=comp.id) }}">{{ subscriber.facebook_name }}</a>
+{% endfor %}
+
+</body>
+</html>

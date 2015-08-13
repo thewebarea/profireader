@@ -11,6 +11,7 @@ from flask.ext.login import LoginManager, \
 
 from flask.ext.mail import Mail
 
+
 def setup_authomatic(app):
     authomatic = Authomatic(app.config['OAUTH_CONFIG'],
                             app.config['SECRET_KEY'],
@@ -89,7 +90,6 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     @login_manager.user_loader
     def load_user_manager(id):
-        #return User.query.get(int(id))
         return User.query.get(id)
 
     csrf.init_app(app)

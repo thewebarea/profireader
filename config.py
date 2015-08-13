@@ -78,6 +78,7 @@ class Config(object):
 
     OAUTH_CONFIG = secret_data.OAUTH_CONFIG
 
+
 class ProductionDevelopmentConfig(Config):
 
     #Define database connection parameters
@@ -130,6 +131,3 @@ class TestingConfig(Config):
 
     SITE_TITLE = "TEST"
 
-    # Facebook settings
-#    CONSUMER_KEY_FB = Config.CONSUMER_KEY_FB
-#    CONSUMER_SECRET_FB = Config.CONSUMER_SECRET_FB
