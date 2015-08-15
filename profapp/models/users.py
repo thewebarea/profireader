@@ -37,6 +37,8 @@ class User(Base, UserMixin):
 
     registered_tm = Column(TABLE_TYPES['timestamp'],
                            default=datetime.datetime.utcnow)
+    last_seen = Column(TABLE_TYPES['timestamp'],
+                       default=datetime.datetime.utcnow)
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
     email_conf_token = Column(TABLE_TYPES['token'])
@@ -201,6 +203,11 @@ class User(Base, UserMixin):
         self.yahoo_link = YAHOO_ALL['LINK']
         self.yahoo_phone = YAHOO_ALL['PHONE']
 
+    def ping(self):
+        self.last_seen = datetime.datetime.utcnow()
+        db_session.add(self)
+        db_session.commit()
+
     def logged_in_via(self):
         via = None
         if self.profireader_email:
@@ -233,7 +240,7 @@ class User(Base, UserMixin):
     # https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#full-integration-example
     @password.setter
     def password(self, password):
-        if request.endpoint == 'user.signup':
+        if request.endpoint == 'auth.signup':
             self.password_hash = \
                 generate_password_hash(password,
                                        method='pbkdf2:sha256',
