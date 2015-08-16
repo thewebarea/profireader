@@ -203,7 +203,7 @@ def password_reset_request():
         return redirect(url_for('general.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(profireader_email=form.email.data).first()
         if user:
             token = user.generate_reset_token()
             send_email(user.profireader_email, 'Reset Your Password',
@@ -223,7 +223,7 @@ def password_reset(token):
         return redirect(url_for('general.index'))
     form = PasswordResetForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(profireader_email=form.email.data).first()
         if user is None:
             return redirect(url_for('general.index'))
         if user.reset_password(token, form.password.data):
@@ -231,8 +231,8 @@ def password_reset(token):
             return redirect(url_for('auth.login'))
         else:
             return redirect(url_for('general.index'))
-    return render_template('auth/reset_password.html', form=form,
-                           user=g.user_dict)
+    return render_template('auth/reset_password_token.html', form=form,
+                           user=g.user_dict, token=token)
 
 
 @auth_bp.route('/change-email', methods=['GET', 'POST'])

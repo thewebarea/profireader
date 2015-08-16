@@ -240,11 +240,10 @@ class User(Base, UserMixin):
     # https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#full-integration-example
     @password.setter
     def password(self, password):
-        if request.endpoint == 'auth.signup':
-            self.password_hash = \
-                generate_password_hash(password,
-                                       method='pbkdf2:sha256',
-                                       salt_length=32)  # salt_length=8
+        self.password_hash = \
+            generate_password_hash(password,
+                                   method='pbkdf2:sha256',
+                                   salt_length=32)  # salt_length=8
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -280,6 +279,7 @@ class User(Base, UserMixin):
             return False
         self.password = new_password
         db_session.add(self)
+        db_session.commit()
         return True
 
     def generate_email_change_token(self, new_email, expiration=3600):
