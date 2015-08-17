@@ -35,10 +35,10 @@ class SubscribeToOwn(Error):
 
 @csrf.error_handler
 def csrf_error(reason):
-    return render_template('404.html',
+    return render_template('errors/404.html',
                            reason=reason), 400
 
 @error_bp.errorhandler(404)
 def page_not_found(reason):
-    return render_template('404.html',
+    return render_template('errors/404.html',
                            reason=reason), 404

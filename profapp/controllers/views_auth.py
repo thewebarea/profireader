@@ -5,7 +5,7 @@ from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS
 from flask.ext.login import logout_user, current_user, login_required
 from urllib.parse import quote
 from ..models.users import User
-from ..forms.user import LoginForm, RegistrationForm, ChangePasswordForm, \
+from ..forms.auth import LoginForm, RegistrationForm, ChangePasswordForm, \
     PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
 from .errors import BadDataProvided
 from ..utils.email import send_email

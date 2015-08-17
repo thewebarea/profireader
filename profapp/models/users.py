@@ -7,12 +7,15 @@ from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
     REGISTERED_WITH
+from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
 from flask.ext.login import UserMixin
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from sqlalchemy import String
+import hashlib
+from flask.ext.login import UserMixin, AnonymousUserMixin
 
 
 class User(Base, UserMixin):
@@ -30,6 +33,7 @@ class User(Base, UserMixin):
     profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
 
     about_me = Column(TABLE_TYPES['text'])
+    location = Column(TABLE_TYPES['location'])
     # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])
@@ -39,6 +43,8 @@ class User(Base, UserMixin):
                            default=datetime.datetime.utcnow)
     last_seen = Column(TABLE_TYPES['timestamp'],
                        default=datetime.datetime.utcnow)
+    avatar_hash = Column(TABLE_TYPES['avatar_hash'])
+
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
     email_conf_token = Column(TABLE_TYPES['token'])
@@ -210,6 +216,24 @@ class User(Base, UserMixin):
         db_session.add(self)
         db_session.commit()
 
+    def gravatar(self, size=100, default='identicon', rating='g'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        hash = self.avatar_hash or hashlib.md5(
+            self.profireader_email.encode('utf-8')).hexdigest()
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+            url=url, hash=hash, size=size, default=default, rating=rating)
+
+    def profile_completed(self):
+        completeness = True
+        for field in PROFILE_NECESSARY_FIELDS:
+            if not getattr(self, field):
+                completeness = False
+                break
+        return completeness
+
     def logged_in_via(self):
         via = None
         if self.profireader_email:
@@ -304,7 +328,3 @@ class User(Base, UserMixin):
             return False
         self.profireader_email = new_email
         return True
-
-
-    def __repr__(self):
-        return "<User(id = %r)>" % self.id
