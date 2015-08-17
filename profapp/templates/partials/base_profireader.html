@@ -51,9 +51,9 @@ var modalInstance = $modal.open({
                             <ul>
                                 <li><a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">{{ '{{' }} user.name {{ '}}' }} Profile</a></li>
                                 <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
-                                <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
                                 <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
                                 <li><a href="{{ url_for('company.show_company') }}">company</a></li>
+                                <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
                             </ul>
                         </li>
                     </ul>
