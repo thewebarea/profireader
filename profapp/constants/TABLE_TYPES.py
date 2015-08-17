@@ -17,6 +17,7 @@ TABLE_TYPES = {
     'timestamp': TIMESTAMP,
     'id_soc_net': String(50),
     'role': String(36),
+    'location': String(64),
 
     'boolean': BOOLEAN,
     'status': String(36),
@@ -29,9 +30,8 @@ TABLE_TYPES = {
     'name': String(100),
     'text': String(666),
     'text_long': UnicodeText,
-    'gender': String(10),
-
-
+    'gender': String(6),
+    'avatar_hash': String(32),
 }
 #
 #

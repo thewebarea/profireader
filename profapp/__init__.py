@@ -10,6 +10,8 @@ from flask.ext.login import LoginManager, \
     login_required
 
 from flask.ext.mail import Mail
+import hashlib
+from flask.ext.login import AnonymousUserMixin
 
 
 def setup_authomatic(app):
@@ -64,6 +66,24 @@ login_manager.session_protection = 'strong'
 #  The login_view attribute sets the endpoint for the login page.
 #  I am not sure that it is necessary
 login_manager.login_view = 'auth.login'
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def gravatar(self, size=100, default='identicon', rating='g'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        hash = hashlib.md5(
+            'guest@profireader.com'.encode('utf-8')).hexdigest()
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+            url=url, hash=hash, size=size, default=default, rating=rating)
+
+    def __repr__(self):
+        return "<User(id = %r)>" % self.id
+
+login_manager.anonymous_user = AnonymousUser
+
 
 
 def create_app(config='config.ProductionDevelopmentConfig'):
