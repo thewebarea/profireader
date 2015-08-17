@@ -19,6 +19,11 @@ class EmptyFieldName(Error):
 class UserNotFoundError(Error):
     pass
 
+
+class BadDataProvided(Error):
+    pass
+
+
 class DublicateName(Error):
     pass
 
