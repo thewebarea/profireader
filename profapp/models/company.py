@@ -5,9 +5,12 @@ from flask import g, redirect, url_for
 from db_init import db_session
 from .user_company_role import UserCompanyRole
 from ..constants.STATUS import STATUS
+from ..constants.USER_ROLES import COMPANY_OWNER
+from .users import User
 
 statuses = STATUS()
 ucr = UserCompanyRole()
+user = User()
 
 def db(*args, **kwargs):
     return db_session.query(args[0]).filter_by(**kwargs)
@@ -45,13 +48,14 @@ class Company(Base):
     def query_all_companies(id):
 
         status = STATUS()
-        companies = db(Company, author_user_id=id).all()
+        # companies = db(Company, author_user_id=id).all()
+        companies = []
         query_companies = db(UserCompanyRole, user_id=id, status=status.ACTIVE()).all()
 
         for x in query_companies:
             companies = companies+db(Company, id=x.company_id).all()
 
-        return companies
+        return set(companies)
 
     @staticmethod
     def query_company(id):
@@ -93,6 +97,16 @@ class Company(Base):
             company.author_user_id = g.user_dict['id']
             db_session.add(company)
             db_session.commit()
+            user = db(User, id=company.author_user_id).first()
+            for right in COMPANY_OWNER:
+
+                user_rbac = UserCompanyRole(user_id=company.author_user_id,
+                                            company_id=company.id,
+                                            status=statuses.ACTIVE(),
+                                            right_id=right,
+                                            user_rights=user)
+                db_session.add(user_rbac)
+                db_session.commit()
 
     @staticmethod
     def update_comp(id, data):
@@ -101,7 +115,25 @@ class Company(Base):
             db(Company, id=id).update({x: y})
             db_session.commit()
 
-    def query_owner_or_member(self, id):
+    @staticmethod
+    def query_subscriber_all_status(comp_id):
+        return db(UserCompanyRole, company_id=comp_id, user_id=g.user_dict['id']).first()
+
+    @staticmethod
+    def query_subscriber_active_status(comp_id):
+        user = db(UserCompanyRole, company_id=comp_id, status=statuses.ACTIVE(), user_id=g.user_dict['id']).first()
+
+        if not user:
+
+            user = db(Company, id=comp_id, author_user_id=g.user_dict['id']).first()
+            if user:
+                return user.author_user_id
+            else:
+                return
+        return user.user_id
+
+    @staticmethod
+    def query_owner_or_member(id):
 
         if db(UserCompanyRole, status=statuses.ACTIVE(), company_id=id, user_id=g.user_dict['id']).first() or\
                 db(Company, author_user_id=g.user_dict['id'], id=id).first():

@@ -1,10 +1,10 @@
 from flask import request
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from db_init import Base
 from os import urandom
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
-
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
     REGISTERED_WITH

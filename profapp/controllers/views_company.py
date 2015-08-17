@@ -38,27 +38,50 @@ def company_profile(id):
     query = company.query_company(id=id)
     non_active_subscribers = company.query_non_active(id=id)
     user_name = [x.user_name() for x in non_active_subscribers]
+    user_query = company.query_subscriber_all_status(comp_id=id)
+    user_active = company.query_subscriber_active_status(comp_id=id)
 
     return render_template('company_profile.html',
                            comp=query,
                            non_active_subscribers=non_active_subscribers,
                            user=g.user_dict,
-                           user_name=user_name
+                           user_name=user_name,
+                           user_query=user_query,
+                           user_active=user_active
+                           )
+
+@company_bp.route('/employees/<string:comp_id>/', methods=['GET', 'POST'])
+def employees(comp_id):
+
+    show_rights = r.show_rights(comp_id=comp_id)
+    query = company.query_company(id=comp_id)
+    companies = []
+    for c in show_rights:
+        companies.append(company.query_all_companies(c))
+    print(companies)
+
+    return render_template('company_employees.html',
+                           rights=show_rights,
+                           user=g.user_dict,
+                           comp=query,
+                           companies=companies
                            )
 
 @company_bp.route('/edit/<string:id>/', methods=['GET', 'POST'])
 @replace_brackets
 def edit(id):
 
-    query = company.query_company(id=id)
+    comp_query = company.query_company(id=id)
+    user_query = company.query_subscriber_all_status(comp_id=id)
     if request.method != 'GET':
         # We have to catch NumberParseException
         company.update_comp(id=id, data=request.form)
         return redirect(url_for('company.company_profile', id=id))
 
     return render_template('company_edit.html',
-                           comp=query,
-                           user=g.user_dict
+                           comp=comp_query,
+                           user=g.user_dict,
+                           user_query=user_query
                            )
 
 @company_bp.route('/subscribe/<string:id>/', methods=['GET', 'POST'])

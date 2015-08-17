@@ -14,8 +14,13 @@
 
 
 {% block content %}
+<span ng-cloak ng-show="{{ user_active }}">
 <p><h3><a href="{{ url_for('company.edit', id=comp.id) }}">Edit company</a></h3></p>
+</span>
 
+
+   <p><h4> About us </h4></p>
+    <h5>{{ comp.short_description }}</h5>
 
 
 {% for subscriber in non_active_subscribers %}

@@ -18,6 +18,9 @@ ROLE = {
     GUEST: 'guest',
     READER: 'reader'
 }
+COMPANY_OWNER = ['comment', 'publish', 'unpublish', 'write_articles', 'moderate_comments', 'manage_content',
+        'manage_members', 'manage_access', 'transfer_ownership']
+
 class ROLES:
 
     def ADMIN(self):
