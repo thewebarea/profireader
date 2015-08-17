@@ -221,8 +221,13 @@ class User(Base, UserMixin):
             url = 'https://secure.gravatar.com/avatar'
         else:
             url = 'http://www.gravatar.com/avatar'
+
+        email = 'guest@profireader.com'
+        if self.profireader_email:
+            email = self.profireader_email
+
         hash = self.avatar_hash or hashlib.md5(
-            self.profireader_email.encode('utf-8')).hexdigest()
+            email.encode('utf-8')).hexdigest()
         return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
             url=url, hash=hash, size=size, default=default, rating=rating)
 
