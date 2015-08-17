@@ -28,13 +28,15 @@ def load_user():
     uid = '0'
     name = None
     user = None
+    logged_via = None
 
     if user_init.is_authenticated():
         uid = user_init.get_id()
         user = User.query.filter_by(id=uid).first()
         name = user.user_name()
+        logged_via = user.logged_in_via()
 
-    user_dict = {'id': uid, 'name': name}
+    user_dict = {'id': uid, 'name': name, 'logged_via': logged_via}
 
     g.user_init = user_init
     g.user = user

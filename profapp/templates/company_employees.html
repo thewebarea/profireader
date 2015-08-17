@@ -1,0 +1,52 @@
+{% extends "index_layout.html" %}
+{% block title %}Profireader{% endblock title %}
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
+{% block company_base %}
+{% include 'company_base.html' %}
+{% endblock company_base %}
+{% block content %}
+
+      <form class="add_subscriber" action="{{ url_for('company.employees', comp_id=comp.id) }}" onsubmit="return AjaxPost()" id="rights" method="post">
+
+{% for key in rights %}
+
+            <dt>{{ rights[key]['name'] }}</dt>
+
+          {% for r in rights[key]['rights'] %}
+
+          <br><input type="checkbox" id="right" name="right" value="{{ r }}" checked="checked">{{ r }}
+      {% endfor %}
+{% endfor %}
+          <input type="submit" id="apply" value="Apply rights">
+      </form>
+
+      <script type="text/javascript">
+
+
+ function AjaxPost() {
+  $.post('', {
+             'right': $("#right").val(),
+      'name': $("#name").val(),
+              'id': $("#id").val(),
+             'req': $("#req").val()
+
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return true;
+ };
+
+</script>
+
+{% endblock content %}
+
+{% block footer %}
+    {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock footer %}

@@ -1,0 +1,30 @@
+            <span ng-controller="UserLoginController" class="topbar-menu-links">
+                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.show_company') }}">Meterials</a>
+                    </span>
+                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.show_company') }}">Publications</a>
+                    </span>
+                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.show_company') }}">Readers</a>
+                    </span>
+                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.show_company') }}">Subscribers</a>
+                    </span>
+                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.employees', comp_id=comp.id) }}">Employees</a>
+                    </span>
+                                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.company_profile', id=comp.id)}}">Profile</a>
+                    </span>
+                {% if comp.author_user_id==user['id'] %}
+                <span></span>
+                    {% elif user_query.user_id==user['id'] %}
+                    <span></span>
+
+                {% else %}
+                                                                  <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+                       <a href="{{ url_for('company.subscribe', id=comp.id)}}">Subscribe to this company</a>
+                    </span>
+                {% endif %}
+                </span>
