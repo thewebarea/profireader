@@ -1,4 +1,4 @@
-from flask import request, current_app
+from flask import request
 from sqlalchemy import Column, ForeignKey
 from db_init import Base, db_session
 
@@ -51,6 +51,8 @@ class User(Base, UserMixin):
     email_conf_tm = Column(TABLE_TYPES['timestamp'])
     pass_reset_token = Column(TABLE_TYPES['token'])
     pass_reset_conf_tm = Column(TABLE_TYPES['timestamp'])
+
+    # registered_via = Column(_T['REGISTERED_VIA'])
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['PROFIREADER', 'GOOGLE', 'FACEBOOK', 'LINKEDIN', 'TWITTER', 'MICROSOFT', 'YAHOO']

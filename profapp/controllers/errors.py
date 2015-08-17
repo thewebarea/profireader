@@ -4,22 +4,17 @@ from .blueprints import error_bp
 
 csrf = CsrfProtect()
 
-
 class Error(Exception):
     pass
-
 
 class BadCoordinates(Error):
     pass
 
-
 class BadFormatFile(Error):
     pass
 
-
 class EmptyFieldName(Error):
     pass
-
 
 class UserNotFoundError(Error):
     pass
@@ -32,12 +27,16 @@ class BadDataProvided(Error):
 class DublicateName(Error):
     pass
 
+class StatusNonActivate(Error):
+    pass
+
+class SubscribeToOwn(Error):
+    pass
 
 @csrf.error_handler
 def csrf_error(reason):
     return render_template('errors/404.html',
                            reason=reason), 400
-
 
 @error_bp.errorhandler(404)
 def page_not_found(reason):

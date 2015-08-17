@@ -2,6 +2,8 @@ from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, \
     Boolean
 from db_init import Base
 from ..constants.TABLE_TYPES import TABLE_TYPES
+from ..constants.STATUS import STATUS
+from db_init import db_session
 
 class ArticleHistory(Base):
     __tablename__ = 'article_history'
@@ -26,3 +28,10 @@ class Article(Base):
     def __init__(self, author_user_id, company_id):
         self.author_user_id = author_user_id
         self.company_id = company_id
+
+    def query_all_articles(id):
+
+        status = STATUS()
+        articles = db_session.query(Article).filter_by(author_user_id=id).all()
+
+        return articles

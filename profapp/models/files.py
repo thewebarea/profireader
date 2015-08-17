@@ -1,8 +1,10 @@
 from _ast import In
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
-from db_init import Base, db_session as db
+from db_init import Base, db_session
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
+def db(*args, **kwargs):
+    return db_session.query(args[0]).filter_by(**kwargs)
 
 class File(Base):
     __tablename__ = 'file'
@@ -38,7 +40,7 @@ class File(Base):
                                 self.name, self.mime, self.id, self.parend_id)
 
     def is_directory(file_id):
-        return db.query(File).filter(id=file_id)[0].mime == 'directory'
+        return db(File, id=file_id)[0].mime == 'directory'
 
     def is_cropable(file):
         return File.is_graphics(file)
@@ -51,19 +53,19 @@ class File(Base):
                                 'cropable': True if File.is_cropable(file) else False,
                                 'type': 'dir' if file.mime == 'directory' else 'file',
                                 'date': str(file.md_tm).split('.')[0]}
-                                        for file in db.query(File).filter(File.parent_id == parent_id))
+                                        for file in db(File, File.parent_id == parent_id))
 
     def createdir(parent_id=None, name=None, company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
-        db.add(f)
-        db.commit()
+        db_session.add(f)
+        db_session.commit()
         return f.id
 
     def upload(parent_id=None, file=None, company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, name=file.filename, company_id=company_id, copyright=copyright, author=author)
         f.content = file.stream.read(-1)
-        db.add(f)
-        db.commit()
+        db_session.add(f)
+        db_session.commit()
         return f.id
 
         # file.save(os.path.join(root, filename# ))

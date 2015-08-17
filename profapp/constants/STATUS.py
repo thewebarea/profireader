@@ -14,3 +14,6 @@ class STATUS:
 
     def BANED(self):
         return '51ca12h1-f2cd-4001-a53a-6d085600zxs7'
+
+    def REJECT(self):
+        return '50cx31h1-f2cd-4001-a53a-6d085600zxm9'
