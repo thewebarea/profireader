@@ -39,12 +39,21 @@
 {% endblock navbar %}
 
 {% block content %}
-    <header>
-        {% block portal_base %}{% endblock portal_base %}
-    </header>
-    {% block portal_content %}
-    {% endblock portal_content %}
-    <br/>
-    {% block portal_footer %}
-    {% endblock portal_footer %}
+    <div class="container">
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+        </div>
+        {% endfor %}
+        <header>
+            {% block portal_base %}{% endblock portal_base %}
+        </header>
+        {% block portal_content %}
+            Portal Content
+        {% endblock portal_content %}
+        <br/>
+        {% block portal_footer %}
+        {% endblock portal_footer %}
+    </div>
 {% endblock content %}
