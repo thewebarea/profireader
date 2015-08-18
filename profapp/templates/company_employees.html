@@ -11,15 +11,23 @@
 {% include 'company_base.html' %}
 {% endblock company_base %}
 {% block content %}
+                {% if comp.author_user_id==user['id'] %}
+                <span></span>
+                    {% elif user_query.user_id==user['id'] %}
+                    <span></span>
 
-      <form class="add_subscriber" action="{{ url_for('company.employees', comp_id=comp.id) }}" onsubmit="return AjaxPost()" id="rights" method="post">
+                {% else %}
+                                                                  <span ng-cloak ng-show="{{ user['id'] }}">
+                       <a href="{{ url_for('company.subscribe', company_id=comp.id)}}">Subscribe to this company</a>
+                    </span>
+                {% endif %}
+      <form class="add_rights" action="{{ url_for('company.employees', comp_id=comp.id) }}" onsubmit="return AjaxPost()" id="rights" method="post">
 
 {% for key in rights %}
 
             <dt>{{ rights[key]['name'] }}</dt>
 
           {% for r in rights[key]['rights'] %}
-
           <br><input type="checkbox" id="right" name="right" value="{{ r }}" checked="checked">{{ r }}
       {% endfor %}
 {% endfor %}
@@ -44,9 +52,43 @@
  };
 
 </script>
+    {% for subscriber in non_active_subscribers %}
+{% for name in user_name %}
+      <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
+      <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
+          <input type="hidden" id="req1" name="req" value="True">
+          <input type="submit" id="apply" value="Apply {{ name }}">
+      </form>
 
+          <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
+      <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
+              <input type="hidden" id="req1" name="req" value='False'>
+          <input type="submit" id="reject" value="Reject {{ name }}">
+      </form>
+{% endfor %}
+{% endfor %}
+      <script type="text/javascript">
+
+
+ function AjaxPost2() {
+  $.post('', {
+             'comp_id': $("#comp_id").val(),
+      'user_id': $("#user_id").val(),
+             'req': $("#req1").val()
+
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return true;
+ };
+</script>
+<br>
 {% endblock content %}
 
 {% block footer %}
     {% include 'partials/portal_footer_Profireader.html' %}
 {% endblock footer %}
+

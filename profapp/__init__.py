@@ -70,6 +70,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     app.before_request(setup_authomatic(app))
     app.before_request(load_user)
+
     register_blueprints(app)
 
     login_manager = LoginManager()

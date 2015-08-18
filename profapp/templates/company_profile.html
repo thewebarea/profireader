@@ -14,8 +14,12 @@
 
 
 {% block content %}
-<span ng-cloak ng-show="{{ user_active }}">
-<p><h3><a href="{{ url_for('company.edit', id=comp.id) }}">Edit company</a></h3></p>
+<span ng-cloak ng-show="{{ user_rights.right }}">
+{% for right in user_rights.right %}
+{% if right.company_right_id=='manage_access' %}
+<p><h3><a href="{{ url_for('company.edit', company_id=comp.id) }}">Edit company</a></h3></p>
+    {% endif %}
+{% endfor %}
 </span>
 
 
@@ -23,40 +27,7 @@
     <h5>{{ comp.short_description }}</h5>
 
 
-{% for subscriber in non_active_subscribers %}
-{% for name in user_name %}
-      <form class="add_subscriber" action="{{ url_for('company.add_subscriber') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
-      <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
-          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
-          <input type="hidden" id="req" name="req" value="True">
-          <input type="submit" id="apply" value="Apply {{ name }}">
-      </form>
 
-          <form class="add_subscriber" action="{{ url_for('company.add_subscriber') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
-      <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
-          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
-              <input type="hidden" id="req" name="req" value='False'>
-          <input type="submit" id="reject" value="Reject {{ name }}">
-      </form>
-{% endfor %}
-{% endfor %}
-      <script type="text/javascript">
-
-
- function AjaxPost() {
-  $.post('', {
-             'comp_id': $("#comp_id").val(),
-      'user_id': $("#user_id").val(),
-             'req': $("#req").val()
-
- }, function (resp) {
-             console.log(resp);
-           },
-   'json');
-   return true;
- };
-
-</script>
 {% endblock content %}
 
 {% block footer %}

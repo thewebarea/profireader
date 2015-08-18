@@ -1,12 +1,11 @@
 from sqlalchemy import Column, String, ForeignKey, update
 from db_init import Base
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from flask import g, redirect, url_for
+from flask import g
 from db_init import db_session
-from .user_company_role import UserCompanyRole
+from .user_company_role import UserCompany, Right
 from ..constants.STATUS import STATUS
 from ..constants.USER_ROLES import COMPANY_OWNER
-from .users import User
 
 def db(*args, **kwargs):
     return db_session.query(args[0]).filter_by(**kwargs)
@@ -41,89 +40,67 @@ class Company(Base):
         self.short_description = short_description
 
     @staticmethod
-    def query_all_companies(id):
+    def query_all_companies(user_id):
 
         status = STATUS()
-        # companies = db(Company, author_user_id=id).all()
         companies = []
-        query_companies = db(UserCompanyRole, user_id=id, status=status.ACTIVE()).all()
-
+        query_companies = db(UserCompany, user_id=user_id, status=status.ACTIVE()).all()
         for x in query_companies:
             companies = companies+db(Company, id=x.company_id).all()
-
         return set(companies)
 
     @staticmethod
-    def query_company(id):
+    def query_company(company_id):
 
-        company = db(Company, id=id).first()
+        company = db(Company, id=company_id).first()
         return company
 
     @staticmethod
-    def add_comp(data):
+    # create_company
+    def create_company(data):
 
-        if db(Company, name=data.get('name')).first() or data.get('name') == None:
-
-            redirect(url_for('company.show_company'))
-
-        else:
-            comp_dict = {'author_user_id': g.user_dict['id']}
-            status = STATUS()
-
-            for x, y in zip(data.keys(), data.values()):
-                comp_dict[x] = y
-            company = Company(**comp_dict)
-            db_session.add(company)
-            db_session.commit()
-            user = db(User, id=company.author_user_id).first()
-            for right in COMPANY_OWNER:
-
-                user_rbac = UserCompanyRole(user_id=company.author_user_id,
-                                            company_id=company.id,
-                                            status=status.ACTIVE(),
-                                            right_id=right,
-                                            user_rights=user)
-                db_session.add(user_rbac)
-                db_session.commit()
+        comp_dict = {'author_user_id': g.user_dict['id']}
+        status = STATUS()
+        for x, y in zip(data.keys(), data.values()):
+            comp_dict[x] = y
+        company = Company(**comp_dict)
+        db_session.add(company)
+        db_session.commit()
+        user_rbac = UserCompany(user_id=company.author_user_id,
+                                company_id=company.id,
+                                status=status.ACTIVE())
+        db_session.add(user_rbac)
+        db_session.commit()
+        r = Right()
+        r.add_rights(company.author_user_id, company.id, COMPANY_OWNER)
 
     @staticmethod
-    def update_comp(id, data):
+    def update_comp(company_id, data):
 
         for x, y in zip(data.keys(), data.values()):
-            db(Company, id=id).update({x: y})
+            db(Company, id=company_id).update({x: y})
             db_session.commit()
 
     @staticmethod
-    def query_subscriber_all_status(comp_id):
-        return db(UserCompanyRole, company_id=comp_id, user_id=g.user_dict['id']).first()
+    def query_employee(comp_id):
 
-    @staticmethod
-    def query_subscriber_active_status(comp_id):
-
-        status = STATUS()
-        user = db(UserCompanyRole, company_id=comp_id, status=status.ACTIVE(), user_id=g.user_dict['id']).first()
-
-        if not user:
-
-            user = db(Company, id=comp_id, author_user_id=g.user_dict['id']).first()
-            if user:
-                return user.author_user_id
-            else:
-                return
-        return user.user_id
-
-    @staticmethod
-    def query_owner_or_member(id):
-
-        status = STATUS()
-        if db(UserCompanyRole, status=status.ACTIVE(), company_id=id, user_id=g.user_dict['id']).first() or\
-                db(Company, author_user_id=g.user_dict['id'], id=id).first():
-            return True
+        employee = db(UserCompany, company_id=comp_id, user_id=g.user_dict['id']).first()
+        if employee:
+            return employee
         return False
 
-    def query_non_active(self, id):
-        ucr = UserCompanyRole()
-        if self.query_owner_or_member(id):
-            non_active = ucr.check_member(id)
+    def query_owner_or_member(self, company_id):
+
+        status = STATUS()
+        employee = self.query_employee(company_id)
+        if not employee:
+            return False
+        if employee.status == status.ACTIVE():
+            return True
+
+    def query_non_active(self, company_id):
+        ucr = UserCompany()
+        if self.query_owner_or_member(company_id):
+            non_active = ucr.check_member(company_id)
             return non_active
         return []

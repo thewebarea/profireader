@@ -39,6 +39,9 @@ class Config(object):
     HEIGHT_IMAGE = 300   # px
     ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'JPEG2000', 'MSP', 'PCX', 'PNG', 'PPM', 'SPIDER',
                              'TIFF', 'WebP', 'XBM', 'XV Thumbnails']
+
+    #Base rights will added when user is confirmed in company
+    BASE_RIGHT_IN_COMPANY = ['comment']
     # Define the application directory
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     #UPLOAD_FOLDER = os.path.join(BASE_DIR, 'media')

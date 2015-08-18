@@ -1,6 +1,7 @@
 from flask import request
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relationship
 from db_init import Base
 from os import urandom
 
@@ -12,7 +13,6 @@ from flask.ext.login import LoginManager, UserMixin, current_user, \
     login_user, logout_user
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-
 from sqlalchemy import String
 
 
@@ -29,9 +29,11 @@ class User(Base, UserMixin):
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
     profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
-
+    fk_user_right_in_company = Column(TABLE_TYPES['id_profireader'], ForeignKey('user_company.id'))
+    user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
     # SECURITY DATA
+
 
     password_hash = Column(TABLE_TYPES['password_hash'])
 
@@ -109,6 +111,8 @@ class User(Base, UserMixin):
     yahoo_phone = Column(TABLE_TYPES['phone'])
 
     def __init__(self,
+                 fk_user_right_in_company=None,
+                 user_right_in_company=None,
                  PROFIREADER_ALL=SOC_NET_NONE['PROFIREADER'],
                  GOOGLE_ALL=SOC_NET_NONE['GOOGLE'],
                  FACEBOOK_ALL=SOC_NET_NONE['FACEBOOK'],
@@ -125,7 +129,8 @@ class User(Base, UserMixin):
                  pass_reset_key=None,
                  pass_reset_conf_tm=None,
                  ):
-
+        self.fk_user_right_in_company = fk_user_right_in_company
+        self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['EMAIL']
         self.profireader_first_name = PROFIREADER_ALL['FIRST_NAME']
         self.profireader_last_name = PROFIREADER_ALL['LAST_NAME']
