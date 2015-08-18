@@ -8,7 +8,7 @@ from ..constants.STATUS import STATUS
 from .users import User
 from ..controllers.errors import StatusNonActivate
 from sqlalchemy.orm import relationship, backref
-statuses = STATUS()
+
 r = RIGHTS()
 
 def db(*args, **kwargs):
@@ -34,9 +34,10 @@ class UserCompanyRole(Base):
     @staticmethod
     def subscribe_to_company(id):
 
+        status = STATUS()
         if not db(UserCompanyRole, user_id=g.user_dict['id'], company_id=id).first():
             db_session.add(UserCompanyRole(user_id=g.user_dict['id'], company_id=id,
-                                           status=statuses.NONACTIVE(), user_rights=g.user))
+                                           status=status.NONACTIVE(), user_rights=g.user))
             db_session.commit()
         else:
             raise StatusNonActivate
@@ -44,8 +45,9 @@ class UserCompanyRole(Base):
     @staticmethod
     def check_member(id):
 
+        status = STATUS()
         non_active_subscribers = []
-        query = db(UserCompanyRole, status=statuses.NONACTIVE(), company_id=id).all()
+        query = db(UserCompanyRole, status=status.NONACTIVE(), company_id=id).all()
         for user in query:
             non_active_subscribers.append(db(User, id=user.user_id).first())
         return non_active_subscribers
@@ -53,12 +55,13 @@ class UserCompanyRole(Base):
     @staticmethod
     def apply_request(comp_id, user_id, bool):
 
+        status = STATUS()
         if bool == 'True':
-            stat = statuses.ACTIVE()
+            stat = status.ACTIVE()
 
         else:
-            stat = statuses.REJECT()
-        db(UserCompanyRole, status=statuses.NONACTIVE(), company_id=comp_id, user_id=user_id).\
+            stat = status.REJECT()
+        db(UserCompanyRole, status=status.NONACTIVE(), company_id=comp_id, user_id=user_id).\
             update({'status': stat, 'right_id': 'comment'})
         db_session.commit()
 
@@ -80,7 +83,8 @@ class Right(Base):
     @staticmethod
     def add_rights(user_id, comp_id, right):
 
-        user_right = UserCompanyRole(user_id=user_id, company_id=comp_id, status=statuses.ACTIVE(), right_id=right).\
+        status = STATUS()
+        user_right = UserCompanyRole(user_id=user_id, company_id=comp_id, status=status.ACTIVE(), right_id=right).\
             first()
 
         # right = Right
@@ -95,13 +99,14 @@ class Right(Base):
     def show_rights(comp_id):
 
         rights = {}
+        status = STATUS()
         for x in db(UserCompanyRole, company_id=comp_id).all():
             if x.user_id not in rights:
                 user = db(User, id=x.user_id).first()
                 rights[x.user_id] = {'name': user.user_name(), 'rights': [], 'companies': []}
             rights[x.user_id]['rights'].append(x.right_id)
             rights[x.user_id]['companies'] = [comp.id for comp in db(UserCompanyRole, user_id=x.user_id,
-                                                                     status=statuses.ACTIVE()).all()]
+                                                                     status=status.ACTIVE()).all()]
 
         # rights = [dict(t) for t in set([tuple(d.items()) for d in rights])]
         return rights

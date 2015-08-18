@@ -17,7 +17,7 @@
 
   <form class="send coordinates" action="{{ url_for('company.edit', id=comp.id) }}" onsubmit="return AjaxPost()" id="edit" method="post">
 <h3><p>Edit Company</p></h3>
-<p>Logo<input type="text" id="logo" placeholder="logo" value="{{ comp.logo }}"></p>
+<p>Logo<input type="text" id="logo_file" placeholder="logo" value="{{ comp.logo_file }}"></p>
 <p>Company name<input type="text" id="name" placeholder="name" name="name" value="{{ comp.name }}"></p>
 <p>Country<input type="text" id="country" placeholder="country" name="country" value="{{ comp.country }}"></p>
 <p>Region<input type="text" id="region" placeholder="region" name="region" value="{{ comp.region }}"></p>
@@ -36,7 +36,7 @@
 
  function AjaxPost() {
   $.post('', {
-             'logo': $("#logo").val(),
+             'logo_file': $("#logo_file").val(),
       'name': $("#name").val(),
              'country': $("#country").val(),
              'region': $("#region").val(),

@@ -15,7 +15,7 @@
 
 <form class="send coordinates" action="{{ flask_endpoint_to_angular('company.add_company') }}" onsubmit="return AjaxPost()" id="add" method="post">
 <h3><p>New company Account</p></h3>
-<p>Logo<input type="text" id="logo" placeholder="logo"></p>
+<p>Logo<input type="text" id="logo_file" placeholder="logo"></p>
 <p>Company name<input type="text" id="name" placeholder="name" name="name"></p>
 <p>Country<input type="text" id="country" placeholder="country" name="country"></p>
 <p>Region<input type="text" id="region" placeholder="region" name="region"></p>
@@ -35,7 +35,7 @@
 
  function AjaxPost() {
   $.post('', {
-             'logo': $("#logo").val(),
+             'logo_file': $("#logo_file").val(),
       'name': $("#name").val(),
              'country': $("#country").val(),
              'region': $("#region").val(),

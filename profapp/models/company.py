@@ -8,10 +8,6 @@ from ..constants.STATUS import STATUS
 from ..constants.USER_ROLES import COMPANY_OWNER
 from .users import User
 
-statuses = STATUS()
-ucr = UserCompanyRole()
-user = User()
-
 def db(*args, **kwargs):
     return db_session.query(args[0]).filter_by(**kwargs)
 
@@ -71,30 +67,12 @@ class Company(Base):
             redirect(url_for('company.show_company'))
 
         else:
-            company = Company()
+            comp_dict = {'author_user_id': g.user_dict['id']}
+            status = STATUS()
+
             for x, y in zip(data.keys(), data.values()):
-                #Company.__table__.insert().execute({x: y})
-
-                if x == 'name':
-                    company.name = y
-                elif x == 'short_description':
-                    company.short_description = y
-                elif x == 'logo':
-                    company.logo = y
-                elif x == 'phone':
-                    company.phone = y
-                elif x == 'phone2':
-                    company.phone2 = y
-                elif x == 'country':
-                    company.country = y
-                elif x == 'region':
-                    company.region = y
-                elif x == 'address':
-                    company.address = y
-                elif x == 'email':
-                    company.email = y
-
-            company.author_user_id = g.user_dict['id']
+                comp_dict[x] = y
+            company = Company(**comp_dict)
             db_session.add(company)
             db_session.commit()
             user = db(User, id=company.author_user_id).first()
@@ -102,7 +80,7 @@ class Company(Base):
 
                 user_rbac = UserCompanyRole(user_id=company.author_user_id,
                                             company_id=company.id,
-                                            status=statuses.ACTIVE(),
+                                            status=status.ACTIVE(),
                                             right_id=right,
                                             user_rights=user)
                 db_session.add(user_rbac)
@@ -121,7 +99,9 @@ class Company(Base):
 
     @staticmethod
     def query_subscriber_active_status(comp_id):
-        user = db(UserCompanyRole, company_id=comp_id, status=statuses.ACTIVE(), user_id=g.user_dict['id']).first()
+
+        status = STATUS()
+        user = db(UserCompanyRole, company_id=comp_id, status=status.ACTIVE(), user_id=g.user_dict['id']).first()
 
         if not user:
 
@@ -135,12 +115,14 @@ class Company(Base):
     @staticmethod
     def query_owner_or_member(id):
 
-        if db(UserCompanyRole, status=statuses.ACTIVE(), company_id=id, user_id=g.user_dict['id']).first() or\
+        status = STATUS()
+        if db(UserCompanyRole, status=status.ACTIVE(), company_id=id, user_id=g.user_dict['id']).first() or\
                 db(Company, author_user_id=g.user_dict['id'], id=id).first():
             return True
         return False
 
     def query_non_active(self, id):
+        ucr = UserCompanyRole()
         if self.query_owner_or_member(id):
             non_active = ucr.check_member(id)
             return non_active
