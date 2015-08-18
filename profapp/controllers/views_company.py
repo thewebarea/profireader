@@ -55,16 +55,17 @@ def employees(comp_id):
 
     show_rights = r.show_rights(comp_id=comp_id)
     query = company.query_company(id=comp_id)
+    user_query = company.query_subscriber_all_status(comp_id=comp_id)
     companies = []
     for c in show_rights:
         companies.append(company.query_all_companies(c))
-    print(companies)
 
     return render_template('company_employees.html',
                            rights=show_rights,
                            user=g.user_dict,
                            comp=query,
-                           companies=companies
+                           companies=companies,
+                           user_query=user_query
                            )
 
 @company_bp.route('/edit/<string:id>/', methods=['GET', 'POST'])
@@ -87,7 +88,7 @@ def edit(id):
 @company_bp.route('/subscribe/<string:id>/', methods=['GET', 'POST'])
 def subscribe(id):
 
-    if request.method!='GET':
+    if request.method != 'GET':
         data = request.form
         id = data['company']
     if g.user_dict['id'] != company.query_company(id=id).author_user_id:

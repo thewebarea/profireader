@@ -36,7 +36,7 @@ class UserCompanyRole(Base):
 
         if not db(UserCompanyRole, user_id=g.user_dict['id'], company_id=id).first():
             db_session.add(UserCompanyRole(user_id=g.user_dict['id'], company_id=id,
-                                           status=statuses.NONACTIVE()))
+                                           status=statuses.NONACTIVE(), user_rights=g.user))
             db_session.commit()
         else:
             raise StatusNonActivate
@@ -59,7 +59,7 @@ class UserCompanyRole(Base):
         else:
             stat = statuses.REJECT()
         db(UserCompanyRole, status=statuses.NONACTIVE(), company_id=comp_id, user_id=user_id).\
-            update({'status': stat, 'right_id': 'comment', 'user_rights': db(User, id=user_id)})
+            update({'status': stat, 'right_id': 'comment'})
         db_session.commit()
 
 class Right(Base):
