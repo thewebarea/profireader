@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, current_app
 from sqlalchemy import Column, ForeignKey
 from db_init import Base, db_session
 
@@ -280,6 +280,7 @@ class User(Base, UserMixin):
         return check_password_hash(self.password_hash, password)
 
     def generate_confirmation_token(self, expiration=3600):
+        #with app.app_context
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'confirm': self.id})
 

@@ -5,6 +5,8 @@ from profapp.models.users import User
 from profapp.controllers.blueprints import register as register_blueprints
 from flask import url_for
 from profapp.controllers.errors import csrf
+from flask.ext.bootstrap import Bootstrap
+from flask.ext.moment import Moment
 from flask.ext.login import LoginManager, \
     login_user, logout_user, current_user, \
     login_required
@@ -63,6 +65,9 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
 
 
 mail = Mail()
+moment = Moment()
+bootstrap = Bootstrap()
+
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 #  The login_view attribute sets the endpoint for the login page.
@@ -96,7 +101,9 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     app.before_request(load_user)
     register_blueprints(app)
 
+    bootstrap.init_app(app)
     mail.init_app(app)
+    moment.init_app(app)
     login_manager.init_app(app)
 
     #if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
