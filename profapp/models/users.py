@@ -2,18 +2,22 @@ from flask import request
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
-from db_init import Base
 from os import urandom
+from db_init import Base, db_session
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
     REGISTERED_WITH
-from flask.ext.login import LoginManager, UserMixin, current_user, \
-    login_user, logout_user
+from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
+from flask.ext.login import UserMixin
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
 from sqlalchemy import String
+import hashlib
+from flask.ext.login import UserMixin, AnonymousUserMixin
 
 
 class User(Base, UserMixin):
@@ -32,12 +36,18 @@ class User(Base, UserMixin):
     fk_user_right_in_company = Column(TABLE_TYPES['id_profireader'], ForeignKey('user_company.id'))
     user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
+    location = Column(TABLE_TYPES['location'])
     # SECURITY DATA
 
-
     password_hash = Column(TABLE_TYPES['password_hash'])
+    confirmed = Column(TABLE_TYPES['boolean'], default=False)
 
-    registered_tm = Column(TABLE_TYPES['timestamp'], default=datetime.datetime.utcnow)
+    registered_tm = Column(TABLE_TYPES['timestamp'],
+                           default=datetime.datetime.utcnow)
+    last_seen = Column(TABLE_TYPES['timestamp'],
+                       default=datetime.datetime.utcnow)
+    avatar_hash = Column(TABLE_TYPES['avatar_hash'])
+
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
     email_conf_token = Column(TABLE_TYPES['token'])
@@ -122,7 +132,8 @@ class User(Base, UserMixin):
                  YAHOO_ALL=SOC_NET_NONE['YAHOO'],
 
                  about_me='',
-                 password=None,
+                 #password=None,
+                 confirmed=False,
 
                  email_conf_key=None,
                  email_conf_tm=None,
@@ -141,6 +152,7 @@ class User(Base, UserMixin):
 
         self.about_me = about_me
         #self.password = password
+        self.confirmed = confirmed
 
         self.registered_tm = datetime.datetime.utcnow()   # here problems are possible
 
@@ -205,6 +217,34 @@ class User(Base, UserMixin):
         self.yahoo_link = YAHOO_ALL['LINK']
         self.yahoo_phone = YAHOO_ALL['PHONE']
 
+    def ping(self):
+        self.last_seen = datetime.datetime.utcnow()
+        db_session.add(self)
+        db_session.commit()
+
+    def gravatar(self, size=100, default='identicon', rating='g'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+
+        email = 'guest@profireader.com'
+        if self.profireader_email:
+            email = self.profireader_email
+
+        hash = self.avatar_hash or hashlib.md5(
+            email.encode('utf-8')).hexdigest()
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+            url=url, hash=hash, size=size, default=default, rating=rating)
+
+    def profile_completed(self):
+        completeness = True
+        for field in PROFILE_NECESSARY_FIELDS:
+            if not getattr(self, field):
+                completeness = False
+                break
+        return completeness
+
     def logged_in_via(self):
         via = None
         if self.profireader_email:
@@ -237,15 +277,66 @@ class User(Base, UserMixin):
     # https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#full-integration-example
     @password.setter
     def password(self, password):
-        if request.endpoint == 'user.signup':
-            self.password_hash = \
-                generate_password_hash(password,
-                                       method='pbkdf2:sha256',
-                                       salt_length=32)  # salt_length=8
+        self.password_hash = \
+            generate_password_hash(password,
+                                   method='pbkdf2:sha256',
+                                   salt_length=32)  # salt_length=8
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def generate_confirmation_token(self, expiration=3600):
+        #with app.app_context
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'confirm': self.id})
 
-    def __repr__(self):
-        return "<User(id = %r)>" % self.id
+    def confirm(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data.get('confirm') != self.id:
+            return False
+        self.confirmed = True
+        db_session.add(self)
+        db_session.commit()
+        return True
+
+    def generate_reset_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'reset': self.id})
+
+    def reset_password(self, token, new_password):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data.get('reset') != self.id:
+            return False
+        self.password = new_password
+        db_session.add(self)
+        db_session.commit()
+        return True
+
+    def generate_email_change_token(self, new_email, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'change_email': self.id, 'new_email': new_email})
+
+    def change_email(self, token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return False
+        if data.get('change_email') != self.id:
+            return False
+        new_email = data.get('new_email')
+        if new_email is None:
+            return False
+        if self.query.filter_by(profireader_email=new_email).first() \
+                is not None:
+            return False
+        self.profireader_email = new_email
+        return True

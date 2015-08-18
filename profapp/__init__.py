@@ -5,9 +5,16 @@ from profapp.models.users import User
 from profapp.controllers.blueprints import register as register_blueprints
 from flask import url_for
 from profapp.controllers.errors import csrf
+from flask.ext.bootstrap import Bootstrap
+from flask.ext.moment import Moment
 from flask.ext.login import LoginManager, \
     login_user, logout_user, current_user, \
     login_required
+
+from flask.ext.mail import Mail
+import hashlib
+from flask.ext.login import AnonymousUserMixin
+
 
 def setup_authomatic(app):
     authomatic = Authomatic(app.config['OAUTH_CONFIG'],
@@ -46,13 +53,6 @@ def load_user():
 #        g.user = User.query.filter_by(id=session['user_id']).first()
 
 
-def user_confirmed():
-    if current_user.is_authenticated() \
-        and not current_user.confirmed \
-            and request.endpoint[:5] != 'auth.':
-        return redirect(url_for('auth.unconfirmed'))
-
-
 def flask_endpoint_to_angular(endpoint, **kwargs):
     options = {}
     for kw in kwargs:
@@ -64,6 +64,35 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     return url
 
 
+mail = Mail()
+moment = Moment()
+bootstrap = Bootstrap()
+
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+#  The login_view attribute sets the endpoint for the login page.
+#  I am not sure that it is necessary
+login_manager.login_view = 'auth.login'
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def gravatar(self, size=100, default='identicon', rating='g'):
+        if request.is_secure:
+            url = 'https://secure.gravatar.com/avatar'
+        else:
+            url = 'http://www.gravatar.com/avatar'
+        hash = hashlib.md5(
+            'guest@profireader.com'.encode('utf-8')).hexdigest()
+        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+            url=url, hash=hash, size=size, default=default, rating=rating)
+
+    def __repr__(self):
+        return "<User(id = %r)>" % self.id
+
+login_manager.anonymous_user = AnonymousUser
+
+
+
 def create_app(config='config.ProductionDevelopmentConfig'):
     app = Flask(__name__)
     app.config.from_object(config)
@@ -73,17 +102,18 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     register_blueprints(app)
 
-    login_manager = LoginManager()
+    bootstrap.init_app(app)
+    mail.init_app(app)
+    moment.init_app(app)
     login_manager.init_app(app)
-    login_manager.session_protection = 'strong'
-    #  The login_view attribute sets the endpoint for the login page.
-    #  I am not sure that it is necessary
-    login_manager.login_view = 'user.login'
+
+    #if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
+    #    from flask.ext.sslify import SSLify
+    #    sslify = SSLify(app)
 
     @login_manager.user_loader
     def load_user_manager(id):
         return User.query.get(id)
-        #return User.query.get(id)
 
     csrf.init_app(app)
 
