@@ -51,6 +51,7 @@ def unconfirmed():
         return redirect(url_for('general.index'))
     return render_template('auth/unconfirmed.html', user=g.user_dict)
 
+
 @auth_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
     # (Andriy) I suppose it is not necessary
@@ -156,8 +157,6 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('general.index'))
 
-# ************************************************************************
-
 
 @auth_bp.route('/confirm/<token>')
 @login_required
@@ -189,6 +188,7 @@ def change_password():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.password.data
             db_session.add(current_user)
+            db_session.commit()
             flash('Your password has been updated.')
             return redirect(url_for('general.index'))
         else:
@@ -260,6 +260,8 @@ def change_email_request():
 def change_email(token):
     if current_user.change_email(token):
         flash('Your email address has been updated.')
+        db_session.add(current_user)
+        db_session.commit()
     else:
         flash('Invalid request.')
     return redirect(url_for('general.index'))
