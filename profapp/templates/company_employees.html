@@ -13,7 +13,7 @@
 {% endblock company_base %}
 {% for key in company_user_rights %}
 
-                {% if company_user_rights[key] != g.user_dict['id'] %}
+                {% if key != g.user_dict['id'] %}
                     <span ng-cloak ng-show="{{ g.user_dict['id'] }}">
                        <a href="{{ url_for('company.subscribe', company_id=comp.id)}}">Subscribe to this company</a>
                     </span>
