@@ -23,7 +23,7 @@
     {% endfor %}
       <form class="add_rights" action="{{ url_for('company.employees', comp_id=comp.id) }}" onsubmit="return AjaxPost()" id="rights" method="post">
 {% for key in company_user_rights %}
-            <dt>{{ company_user_rights[key]['name'] }}</dt>
+            <dt><img src="{{ company_user_rights[key]['user'].gravatar() }}">{{ company_user_rights[key]['name'] }}</dt>
           {% for r in company_user_rights[key]['rights'] %}
           <br><input type="checkbox" id="right" name="right" value="{{ r }}" checked="checked">{{ r }}
       {% endfor %}
@@ -55,8 +55,9 @@
           <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
           <input type="hidden" id="req1" name="req" value="True">
           <input type="submit" id="apply" value="Apply {{ company_user_rights[key]['name'] }}">
-      </form>
-
+      </form>{% endif %}
+{% for r in company_user_rights[key]['rights'] %}
+{% if r == 'manage_members' %}
           <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
       <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
           <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
@@ -64,6 +65,7 @@
           <input type="submit" id="reject" value="Reject {{ company_user_rights[key]['name'] }}">
       </form>{% endif %}
 {% endfor %}
+    {% endfor %}
       <script type="text/javascript">
 
 
