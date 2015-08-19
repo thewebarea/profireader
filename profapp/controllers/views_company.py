@@ -1,7 +1,6 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company
-from ..models.user_company_role import UserCompanyRight, Right
+from ..models.company import Company, UserCompanyRight, Right
 from .request_wrapers import replace_brackets
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
@@ -14,8 +13,8 @@ def show():
     companies = company.query_all_companies(g.user_dict['id'])
 
     return render_template('company.html',
-                           companies=companies,
-                           user=g.user_dict)
+                           companies=companies
+                           )
 
 @company_bp.route('/add/')
 def add():
@@ -31,42 +30,31 @@ def confirm_add():
 
     return redirect(url_for('company.show'))
 
-
 @company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
 def profile(company_id):
 
     company = Company()
+    r = Right()
+    r.show_rights(company_id)
     comp = company.query_company(company_id=company_id)
     user_rights = company.query_employee(comp_id=company_id)
 
     return render_template('company_profile.html',
                            comp=comp,
-                           user=g.user_dict,
                            user_rights=user_rights
                            )
 
 @company_bp.route('/employees/<string:comp_id>/', methods=['GET', 'POST'])
 def employees(comp_id):
 
-    r = Right()
     company = Company()
-    non_active_subscribers = company.query_non_active(company_id=comp_id)
-    user_name = [x.user_name() for x in non_active_subscribers]
-    show_rights = r.show_rights(comp_id=comp_id)
-    query = company.query_company(company_id=comp_id)
-    companies = []
-    user_query = company.query_employee(comp_id=comp_id)
-    for c in show_rights:
-        companies.append(company.query_all_companies(c))
+    r = Right()
+    company_user_rights = r.show_rights(comp_id)
+    current_company = company.query_company(company_id=comp_id)
 
     return render_template('company_employees.html',
-                           rights=show_rights,
-                           user=g.user_dict,
-                           comp=query,
-                           companies=companies,
-                           user_query=user_query,
-                           user_name=user_name,
-                           non_active_subscribers=non_active_subscribers
+                           comp=current_company,
+                           company_user_rights=company_user_rights
                            )
 
 @company_bp.route('/edit/<string:company_id>/')
@@ -78,7 +66,6 @@ def edit(company_id):
 
     return render_template('company_edit.html',
                            comp=comp_query,
-                           user=g.user_dict,
                            user_query=user_query
                            )
 

@@ -11,31 +11,26 @@
     {% block company_base %}
 {% include 'company_base.html' %}
 {% endblock company_base %}
-                {% if comp.author_user_id==user['id'] %}
-                <span></span>
-                    {% elif user_query.user_id==user['id'] %}
-                    <span></span>
+{% for key in company_user_rights %}
 
-                {% else %}
-                                                                  <span ng-cloak ng-show="{{ user['id'] }}">
+                {% if company_user_rights[key] != g.user_dict['id'] %}
+                    <span ng-cloak ng-show="{{ g.user_dict['id'] }}">
                        <a href="{{ url_for('company.subscribe', company_id=comp.id)}}">Subscribe to this company</a>
                     </span>
+                    {% else %}
+                    <span></span>
                 {% endif %}
+    {% endfor %}
       <form class="add_rights" action="{{ url_for('company.employees', comp_id=comp.id) }}" onsubmit="return AjaxPost()" id="rights" method="post">
-
-{% for key in rights %}
-
-            <dt>{{ rights[key]['name'] }}</dt>
-
-          {% for r in rights[key]['rights'] %}
+{% for key in company_user_rights %}
+            <dt>{{ company_user_rights[key]['name'] }}</dt>
+          {% for r in company_user_rights[key]['rights'] %}
           <br><input type="checkbox" id="right" name="right" value="{{ r }}" checked="checked">{{ r }}
       {% endfor %}
 {% endfor %}
           <input type="submit" id="apply" value="Apply rights">
       </form>
-
       <script type="text/javascript">
-
 
  function AjaxPost() {
   $.post('', {
@@ -52,22 +47,22 @@
  };
 
 </script>
-    {% for subscriber in non_active_subscribers %}
-{% for name in user_name %}
+    {% for key in company_user_rights %}
+                {% if company_user_rights[key]['status'] != 'active' %}
+
       <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
       <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
-          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
+          <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
           <input type="hidden" id="req1" name="req" value="True">
-          <input type="submit" id="apply" value="Apply {{ name }}">
+          <input type="submit" id="apply" value="Apply {{ company_user_rights[key]['name'] }}">
       </form>
 
           <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
       <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
-          <input type="hidden" id="user_id" name="user_id" value="{{ subscriber.id }}">
+          <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
               <input type="hidden" id="req1" name="req" value='False'>
-          <input type="submit" id="reject" value="Reject {{ name }}">
-      </form>
-{% endfor %}
+          <input type="submit" id="reject" value="Reject {{ company_user_rights[key]['name'] }}">
+      </form>{% endif %}
 {% endfor %}
       <script type="text/javascript">
 

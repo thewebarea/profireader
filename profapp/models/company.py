@@ -1,12 +1,14 @@
 from sqlalchemy import Column, String, ForeignKey, update
-from db_init import Base
+from sqlalchemy.orm import relationship
+from db_init import Base, db_session
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from flask import g
-from db_init import db_session
-from .user_company_role import UserCompany, Right
+from config import Config
 from ..constants.STATUS import STATUS
 from ..constants.USER_ROLES import COMPANY_OWNER
 from utils.db_utils import db
+from .users import User
+from ..controllers.errors import StatusNonActivate
 
 class Company(Base):
     __tablename__ = 'company'
@@ -22,9 +24,10 @@ class Company(Base):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
+    user_company_rs = relationship('UserCompany', backref='company')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
-                 address=None, phone=None, phone2=None, email=None, short_description=None):
+                 address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
         self.name = name
         self.portal_consist = portal_consist
         self.author_user_id = author_user_id
@@ -36,6 +39,7 @@ class Company(Base):
         self.phone2 = phone2
         self.email = email
         self.short_description = short_description
+        self.user_company_rs = user_company_rs
 
     @staticmethod
     def query_all_companies(user_id):
@@ -96,9 +100,94 @@ class Company(Base):
         if employee.status == status.ACTIVE():
             return True
 
-    def query_non_active(self, company_id):
-        ucr = UserCompany()
-        if self.query_owner_or_member(company_id):
-            non_active = ucr.check_member(company_id)
-            return non_active
-        return []
+class UserCompanyRight(Base):
+    __tablename__ = 'user_company_right'
+    id = Column(TABLE_TYPES['bigint'], primary_key=True)
+    user_company_id = Column(TABLE_TYPES['bigint'], ForeignKey('user_company.id', onupdate='cascade'))
+    company_right_id = Column(TABLE_TYPES['rights'], ForeignKey('company_right.id'))
+
+    def __init__(self, user_company_id=None, company_right_id=None):
+        self.user_company_id = user_company_id
+        self.company_right_id = company_right_id
+
+    @staticmethod
+    def subscribe_to_company(company_id):
+
+        status = STATUS()
+        if not db(UserCompany, user_id=g.user_dict['id'], company_id=company_id).first():
+            user_rbac = UserCompany(user_id=g.user_dict['id'], company_id=company_id,
+                                    status=status.NONACTIVE())
+            user_rbac.user = db(User, id=g.user_dict['id']).first()
+            db_session.add(user_rbac)
+            db_session.commit()
+
+        else:
+            raise StatusNonActivate
+
+    @staticmethod
+    def apply_request(comp_id, user_id, bool):
+
+        status = STATUS()
+        r = Right()
+        if bool == 'True':
+            stat = status.ACTIVE()
+            r.add_rights(user_id, comp_id, Config.BASE_RIGHT_IN_COMPANY)
+        else:
+            stat = status.REJECT()
+        db(UserCompany, company_id=comp_id, user_id=user_id,
+           status=status.NONACTIVE()).update({'status': stat})
+        db_session.commit()
+
+class UserCompany(Base):
+
+    __tablename__ = 'user_company'
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    status = Column(TABLE_TYPES['id_profireader'])
+    right = relationship(UserCompanyRight, backref='user_company')
+
+    def __init__(self, user_id=None, company_id=None, status=None, right=[]):
+        self.user_id = user_id
+        self.company_id = company_id
+        self.status = status
+        self.right = right
+
+class Right(Base):
+    __tablename__ = 'company_right'
+
+    id = Column(TABLE_TYPES['rights'], primary_key=True)
+
+    @staticmethod
+    def add_rights(user_id, comp_id, rights):
+
+        ucr = []
+        user = db(User, id=user_id).first()
+        for right in rights:
+            ucr.append(UserCompanyRight(company_right_id=right))
+        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).first()
+        user_right.user = user
+        user_right.company = db(Company, id=comp_id).first()
+        user.companies.append(user_right.company)
+        user_right.right = ucr
+        db_session.commit()
+
+    @staticmethod
+    def remove_rights(user_id, comp_id, rights):
+
+        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).first()
+        for right in rights:
+            user_right.right.remove(UserCompanyRight(company_right_id=right))
+            db_session.commit()
+
+    @staticmethod
+    def show_rights(comp_id):
+
+        rights = {}
+        for x in db(UserCompany, company_id=comp_id).all():
+            if x.user_id not in rights:
+                rights[x.user_id] = {'name': x.user.user_name(), 'user': x.user, 'rights': [], 'companies': [],
+                                     'status': x.status}
+            rights[x.user_id]['rights'] = [y.company_right_id for y in x.right]
+            rights[x.user_id]['companies'] = [x.user.companies]
+        return rights
