@@ -7,13 +7,11 @@
 {% block portal_base %}
     {% include 'partials/portal_base_Profireader.html' %}
 {% endblock portal_base %}
-{% block company_base %}
-{% include 'company_base.html' %}
-{% endblock company_base %}
-
-
 
 {% block content %}
+    {% block company_base %}
+{% include 'company_base.html' %}
+{% endblock company_base %}
 <span ng-cloak ng-show="{{ user_rights.right }}">
 {% for right in user_rights.right %}
 {% if right.company_right_id=='manage_access' %}

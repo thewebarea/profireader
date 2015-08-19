@@ -13,7 +13,7 @@
 
 {% block content %}
 
-<form class="send coordinates" action="{{ flask_endpoint_to_angular('company.add') }}" onsubmit="return AjaxPost()" id="add" method="post">
+<form class="send coordinates" action="{{ flask_endpoint_to_angular('company.confirm_add') }}" onsubmit="return AjaxPost()" id="add" method="post">
 <h3><p>New company Account</p></h3>
 <p>Logo<input type="text" id="logo_file" placeholder="logo"></p>
 <p>Company name<input type="text" id="name" placeholder="name" name="name"></p>

@@ -6,9 +6,7 @@ from db_init import db_session
 from .user_company_role import UserCompany, Right
 from ..constants.STATUS import STATUS
 from ..constants.USER_ROLES import COMPANY_OWNER
-
-def db(*args, **kwargs):
-    return db_session.query(args[0]).filter_by(**kwargs)
+from utils.db_utils import db
 
 class Company(Base):
     __tablename__ = 'company'

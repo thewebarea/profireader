@@ -7,15 +7,15 @@
 {% block portal_base %}
     {% include 'partials/portal_base_Profireader.html' %}
 {% endblock portal_base %}
-{% block company_base %}
-{% include 'company_base.html' %}
-{% endblock company_base %}
+
 
 
 
 {% block content %}
-
-  <form class="send coordinates" action="{{ url_for('company.edit', company_id=comp.id) }}" onsubmit="return AjaxPost()" id="edit" method="post">
+{% block company_base %}
+{% include 'company_base.html' %}
+{% endblock company_base %}
+  <form class="send coordinates" action="{{ url_for('company.confirm_edit', company_id=comp.id) }}" onsubmit="return AjaxPost()" id="edit" method="post">
 <h3><p>Edit Company</p></h3>
 <p>Logo<input type="text" id="logo_file" placeholder="logo" value="{{ comp.logo_file }}"></p>
 <p>Company name<input type="text" id="name" placeholder="name" name="name" value="{{ comp.name }}"></p>

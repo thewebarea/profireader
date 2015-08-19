@@ -8,10 +8,7 @@ from .users import User
 from ..controllers.errors import StatusNonActivate
 from sqlalchemy.orm import relationship
 from config import Config
-
-
-def db(*args, **kwargs):
-    return db_session.query(args[0]).filter_by(**kwargs)
+from utils.db_utils import db
 
 class UserCompanyRight(Base):
     __tablename__ = 'user_company_right'

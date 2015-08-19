@@ -23,7 +23,7 @@
 
     <h2><a href="{{ url_for('company.add') }}">ADD COMPANY</a></h2>
 
-  <form class="subscribe" action="{{ url_for('company.subscribe', company_id='None') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
+  <form class="subscribe" action="{{ url_for('company.subscribe_search_form') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
 <h3><p>Subscribe to company</p></h3>
 <p>Enter company id<input type="text" id="company" placeholder="ID" name="company"></p>
 <input type="submit" value="submit">

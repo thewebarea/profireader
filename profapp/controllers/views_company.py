@@ -17,19 +17,20 @@ def show():
                            companies=companies,
                            user=g.user_dict)
 
-@company_bp.route('/add/', methods=['GET', 'POST'])
+@company_bp.route('/add/')
 def add():
 
-    company = Company()
-    if request.method != 'GET':
-        # We have to catch NumberParseException
-        company.create_company(data=request.form)
-
-        return redirect(url_for('company.show'))
-
-    return render_template('add_company.html',
-                           id=g.user_dict['id'],
+    return render_template('company_add.html',
                            user=g.user_dict)
+
+@company_bp.route('/confirm_add/', methods=['POST'])
+def confirm_add():
+
+    company = Company()
+    company.create_company(data=request.form)
+
+    return redirect(url_for('company.show'))
+
 
 @company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
 def profile(company_id):
@@ -68,17 +69,12 @@ def employees(comp_id):
                            non_active_subscribers=non_active_subscribers
                            )
 
-@company_bp.route('/edit/<string:company_id>/', methods=['GET', 'POST'])
-@replace_brackets
+@company_bp.route('/edit/<string:company_id>/')
 def edit(company_id):
 
     company = Company()
     comp_query = company.query_company(company_id=company_id)
     user_query = company.query_employee(comp_id=company_id)
-    if request.method != 'GET':
-        # We have to catch NumberParseException
-        company.update_comp(company_id=company_id, data=request.form)
-        return redirect(url_for('company.profile', company_id=company_id))
 
     return render_template('company_edit.html',
                            comp=comp_query,
@@ -86,22 +82,34 @@ def edit(company_id):
                            user_query=user_query
                            )
 
-@company_bp.route('/subscribe/<string:company_id>/', methods=['GET', 'POST'])
+@company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
+def confirm_edit(company_id):
+
+    company = Company()
+    company.update_comp(company_id=company_id, data=request.form)
+    return redirect(url_for('company.profile', company_id=company_id))
+
+@company_bp.route('/subscribe/<string:company_id>/')
 def subscribe(company_id):
 
     comp_role = UserCompanyRight()
-    company = Company()
-    if request.method != 'GET':
-        data = request.form
-        company_id = data['company']
-    if g.user_dict['id'] != company.query_company(company_id=company_id).author_user_id:
-        comp_role.subscribe_to_company(company_id)
-    else:
-        raise SubscribeToOwn
+    comp_role.subscribe_to_company(company_id)
 
     return redirect(url_for('company.profile', company_id=company_id))
 
-@company_bp.route('/add_subscriber/', methods=['GET', 'POST'])
+@company_bp.route('/subscribe_search/', methods=['POST'])
+def subscribe_search_form():
+
+    comp_role = UserCompanyRight()
+    company = Company()
+    data = request.form
+    if not company.query_employee(comp_id=data['company']):
+        comp_role.subscribe_to_company(data['company'])
+    else:
+        raise SubscribeToOwn
+    return redirect(url_for('company.profile', company_id=data['company']))
+
+@company_bp.route('/add_subscriber/', methods=['POST'])
 def confirm_subscriber():
 
     comp_role = UserCompanyRight()
