@@ -252,10 +252,18 @@ class User(Base, UserMixin):
                     break
         return via
 
+    @property
     def user_name(self):
         via = self.logged_in_via()
         name = getattr(self, REGISTERED_WITH[via] + '_name')
         return name
+
+    @property
+    def user_attribute_getter(self, attr):
+        via = self.logged_in_via()
+        attr_value = getattr(self, REGISTERED_WITH[via] + '_' + attr)
+        return attr_value
+
 
     @property
     def password(self):

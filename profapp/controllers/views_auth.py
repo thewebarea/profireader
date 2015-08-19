@@ -49,7 +49,7 @@ def before_request():
 def unconfirmed():
     if current_user.is_anonymous() or current_user.confirmed:
         return redirect(url_for('general.index'))
-    return render_template('auth/unconfirmed.html', user=g.user_dict)
+    return render_template('auth/unconfirmed.html')
 
 
 @auth_bp.route('/signup/', methods=['GET', 'POST'])
@@ -75,7 +75,7 @@ def signup():
                    'auth/email/confirm', user=user, token=token)
         flash('A confirmation email has been sent to you by email.')
         return redirect(url_for('auth.login'))
-    return render_template('auth/signup.html', form=form, user=g.user_dict)
+    return render_template('auth/signup.html', form=form)
 
 
 # read: flask.ext.login
@@ -105,7 +105,7 @@ def login():
                             url_for('general.index'))
         flash('Invalid username or password.')
         return redirect(url_for('auth.login'))
-    return render_template('auth/login.html', form=form, user=g.user_dict)
+    return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/login/<soc_network_name>', methods=['GET', 'POST'])
 def login_soc_network(soc_network_name):
@@ -193,8 +193,7 @@ def change_password():
             return redirect(url_for('general.index'))
         else:
             flash('Invalid password.')
-    return render_template("auth/change_password.html", form=form,
-                           user=g.user_dict)
+    return render_template("auth/change_password.html", form=form)
 
 
 @auth_bp.route('/reset', methods=['GET', 'POST'])
@@ -213,8 +212,7 @@ def password_reset_request():
         flash('An email with instructions to reset your password has been '
               'sent to you.')
         return redirect(url_for('auth.login'))
-    return render_template('auth/reset_password.html', form=form,
-                           user=g.user_dict)
+    return render_template('auth/reset_password.html', form=form)
 
 
 @auth_bp.route('/reset/<token>', methods=['GET', 'POST'])
@@ -232,7 +230,7 @@ def password_reset(token):
         else:
             return redirect(url_for('general.index'))
     return render_template('auth/reset_password_token.html', form=form,
-                           user=g.user_dict, token=token)
+                           token=token)
 
 
 @auth_bp.route('/change-email', methods=['GET', 'POST'])
@@ -251,8 +249,7 @@ def change_email_request():
             return redirect(url_for('general.index'))
         else:
             flash('Invalid email or password.')
-    return render_template("auth/change_email.html", form=form,
-                           user=g.user_dict)
+    return render_template("auth/change_email.html", form=form)
 
 
 @auth_bp.route('/change-email/<token>')
