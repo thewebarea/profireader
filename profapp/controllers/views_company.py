@@ -37,7 +37,7 @@ def company_profile(id):
 
     query = company.query_company(id=id)
     non_active_subscribers = company.query_non_active(id=id)
-    user_name = [x.user_name() for x in non_active_subscribers]
+    user_name = [x.user_name for x in non_active_subscribers]
     user_query = company.query_subscriber_all_status(comp_id=id)
     user_active = company.query_subscriber_active_status(comp_id=id)
 

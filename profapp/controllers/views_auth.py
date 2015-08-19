@@ -60,9 +60,9 @@ def signup():
 
     form = RegistrationForm()
     if form.validate_on_submit():  # # pass1 == pass2
-        profireader_all = SOC_NET_NONE['PROFIREADER'].copy()
-        profireader_all['EMAIL'] = form.email.data
-        profireader_all['NAME'] = form.displayname.data
+        profireader_all = SOC_NET_NONE['profireader'].copy()
+        profireader_all['email'] = form.email.data
+        profireader_all['name'] = form.displayname.data
         user = User(
             PROFIREADER_ALL=profireader_all
         )
@@ -120,15 +120,15 @@ def login_soc_network(soc_network_name):
             if result.user:
                 result.user.update()
                 result_user = result.user
-                db_fields = DB_FIELDS[soc_network_name.upper()]
+                db_fields = DB_FIELDS[soc_network_name]
                 user = db_session.query(User).\
-                    filter(getattr(User, db_fields['ID']) == result_user.id)\
+                    filter(getattr(User, db_fields['id']) == result_user.id)\
                     .first()
                 if not user:
                     user = User()
                     for elem in SOC_NET_FIELDS:
                         setattr(user, db_fields[elem],
-                                getattr(result_user, elem.lower()))
+                                getattr(result_user, elem))
                     db_session.add(user)
                     user.confirmed = True
                     db_session.commit()

@@ -10,10 +10,11 @@ from flask.ext.moment import Moment
 from flask.ext.login import LoginManager, \
     login_user, logout_user, current_user, \
     login_required
-
 from flask.ext.mail import Mail
 import hashlib
 from flask.ext.login import AnonymousUserMixin
+from .constants.SOCIAL_NETWORKS import INFO_ITEMS_NONE, SOC_NET_FIELDS
+from .constants.USER_REGISTERED import REGISTERED_WITH
 
 
 def setup_authomatic(app):
@@ -28,23 +29,35 @@ def setup_authomatic(app):
 
 def load_user():
     user_init = current_user
-
-    uid = '0'
-    name = None
     user = None
-    logged_via = None
+
+    user_dict = INFO_ITEMS_NONE.copy()
+    user_dict['logged_via'] = None
+    #  ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 
     if user_init.is_authenticated():
-        uid = user_init.get_id()
-        user = User.query.filter_by(id=uid).first()
-        name = user.user_name()
-        logged_via = user.logged_in_via()
+        id = user_init.get_id()
+        user = User.query.filter_by(id=id).first()
+        logged_via = REGISTERED_WITH[user.logged_in_via()]
+        user_dict['logged_via'] = logged_via
 
-    user_dict = {'id': uid, 'name': name, 'logged_via': logged_via}
+        for attr in SOC_NET_FIELDS:
+            if attr == 'link':
+                user_dict[attr] = \
+                    str(user.attribute_getter(logged_via,  attr))
+            else:
+                user_dict[attr] = \
+                    user.attribute_getter(logged_via,  attr)
+        user_dict['id'] = id
+        #name = user.user_name
+
+
+    #user_dict = {'id': id, 'name': name, 'logged_via': logged_via}
 
     g.user_init = user_init
     g.user = user
     g.user_dict = user_dict
+    pass
 
 
 #def load_user():
