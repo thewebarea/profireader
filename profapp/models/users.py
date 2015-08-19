@@ -258,12 +258,13 @@ class User(Base, UserMixin):
         name = getattr(self, REGISTERED_WITH[via] + '_name')
         return name
 
+    # attr below is one of the
+    # ['email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
     @property
     def user_attribute_getter(self, attr):
         via = self.logged_in_via()
         attr_value = getattr(self, REGISTERED_WITH[via] + '_' + attr)
         return attr_value
-
 
     @property
     def password(self):
