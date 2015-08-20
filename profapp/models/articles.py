@@ -8,8 +8,11 @@ from db_init import db_session
 
 from flask import g
 
-def db():
+def _A():
     return db_session.query(Article)
+
+def _V():
+    return db_session.query(ArticleVersion)
 
 
 class Article(Base):
@@ -22,11 +25,19 @@ class Article(Base):
 
     @staticmethod
     def list(user_id=None, before_id = None):
-        session.query(A).filter(A.b.any())
-        ret = db().filter(ArticleVersion.author_user_id.any())
+        ret = _A().all()
         return ret
 
+    @staticmethod
+    def get_versions(article_id=None):
+        return _A().filter(Article.id == article_id).one().versions
+
+    @staticmethod
+    def get_one_version(article_version_id=None):
+        return _V().filter(ArticleVersion.id == article_version_id).one()
+
 class ArticleVersion(Base):
+
     __tablename__ = 'article_version'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
 
@@ -39,21 +50,22 @@ class ArticleVersion(Base):
     short =  Column(TABLE_TYPES['text'], nullable=False)
     long =  Column(TABLE_TYPES['text'], nullable=False)
 
-    article = relationship('Article', backref=backref('history'))
+    article = relationship('Article', backref=backref('versions', order_by='desc(ArticleVersion.id)'))
 
-    def __init__(self, author_user_id, company_id = None, created_from_article_id = None, name = '', short = '', long=''):
-        if created_from_article_id ==  None:
-            self.article_bulk = Article(created_from_article_id)
-            self.created_from_article_id = created_from_article_id
-        else:
-            self.article_bulk = Article()
+    def __init__(self, created_from_version_id, author_user_id=None, company_id=None, name='', short='', long=''):
 
-        self.author_user_id = author_user_id
-        self.company_id = company_id
+        self.author_user_id = author_user_id if author_user_id is not None else g.user_dict['id']
 
         self.name = name
         self.short = short
         self.long = long
+        self.article = Article() if created_from_version_id is None else _A().filter(Article.id == Article.get_one_version(created_from_version_id).article_id).one()
+
+    def save(self):
+        db_session.add(self)
+        db_session.commit()
+        return self
+
 
 
     def create(self):

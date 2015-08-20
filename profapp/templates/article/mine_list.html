@@ -6,15 +6,11 @@
 </head>
 <body>
 
-{{ articles }}
+<h2><a href="{{ url_for('article.show_form_create') }}">Create article</a></h2>
 
-{#{% for article in articles %}#}
-{#    <a href="{{ flask_endpoint_to_angular('article.article_edit',id=article.id)}}">{{ article.id }}</a>#}
-{#{% endfor %}#}
-
-<h2><a href="{{ flask_endpoint_to_angular('article.edit_form') }}">Create article</a></h2>
-
-
+{% for article in articles %}
+    <a href="{{ url_for('article.versions', article_id=article.id) }}">{{ article.versions[0]['name'] }}</a><br/>
+{% endfor %}
 
 </body>
 </html>
