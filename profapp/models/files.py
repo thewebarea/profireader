@@ -3,8 +3,7 @@ from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMES
 from db_init import Base, db_session
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
-def db(*args, **kwargs):
-    return db_session.query(args[0]).filter_by(**kwargs)
+from utils.db_utils import db
 
 class File(Base):
     __tablename__ = 'file'

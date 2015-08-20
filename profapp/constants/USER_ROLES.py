@@ -19,15 +19,7 @@ ROLE = {
     READER: 'reader'
 }
 COMPANY_OWNER = ['comment', 'publish', 'unpublish', 'write_articles', 'moderate_comments', 'manage_content',
-        'manage_members', 'manage_access', 'transfer_ownership']
-
-class ROLES:
-
-    def ADMIN(self):
-        return '55ca12c1-f2cd-4001-a53a-6d085600e8f9'
-
-    def READER(self):
-        return '58xe13c1-f2cd-4001-a53a-6d085611e8f7'
+                 'manage_members', 'manage_access', 'transfer_ownership']
 
 class RIGHTS:
 

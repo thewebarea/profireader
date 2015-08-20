@@ -1,9 +1,11 @@
 from flask import request, current_app
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relationship
+from os import urandom
 from db_init import Base, db_session
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
-
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
     REGISTERED_WITH
@@ -31,9 +33,10 @@ class User(Base, UserMixin):
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
     profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
-
+    user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
+    companies = relationship('Company', backref='users')
     # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])
@@ -118,6 +121,9 @@ class User(Base, UserMixin):
     yahoo_phone = Column(TABLE_TYPES['phone'])
 
     def __init__(self,
+                 companies=[],
+                 fk_user_right_in_company=None,
+                 user_right_in_company=[],
                  PROFIREADER_ALL=SOC_NET_NONE['profireader'],
                  GOOGLE_ALL=SOC_NET_NONE['google'],
                  FACEBOOK_ALL=SOC_NET_NONE['facebook'],
@@ -135,7 +141,9 @@ class User(Base, UserMixin):
                  pass_reset_key=None,
                  pass_reset_conf_tm=None,
                  ):
-
+        self.companies = companies
+        self.fk_user_right_in_company = fk_user_right_in_company
+        self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['email']
         self.profireader_first_name = PROFIREADER_ALL['first_name']
         self.profireader_last_name = PROFIREADER_ALL['last_name']
