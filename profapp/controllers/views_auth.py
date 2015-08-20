@@ -49,7 +49,8 @@ def before_request():
 def unconfirmed():
     if current_user.is_anonymous() or current_user.confirmed:
         return redirect(url_for('general.index'))
-    return render_template('auth/unconfirmed.html', user=g.user_dict)
+    return render_template('auth/unconfirmed.html')
+
 
 @auth_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
@@ -59,9 +60,9 @@ def signup():
 
     form = RegistrationForm()
     if form.validate_on_submit():  # # pass1 == pass2
-        profireader_all = SOC_NET_NONE['PROFIREADER'].copy()
-        profireader_all['EMAIL'] = form.email.data
-        profireader_all['NAME'] = form.displayname.data
+        profireader_all = SOC_NET_NONE['profireader'].copy()
+        profireader_all['email'] = form.email.data
+        profireader_all['name'] = form.displayname.data
         user = User(
             PROFIREADER_ALL=profireader_all
         )
@@ -74,7 +75,7 @@ def signup():
                    'auth/email/confirm', user=user, token=token)
         flash('A confirmation email has been sent to you by email.')
         return redirect(url_for('auth.login'))
-    return render_template('auth/signup.html', form=form, user=g.user_dict)
+    return render_template('auth/signup.html', form=form)
 
 
 # read: flask.ext.login
@@ -104,7 +105,7 @@ def login():
                             url_for('general.index'))
         flash('Invalid username or password.')
         return redirect(url_for('auth.login'))
-    return render_template('auth/login.html', form=form, user=g.user_dict)
+    return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/login/<soc_network_name>', methods=['GET', 'POST'])
 def login_soc_network(soc_network_name):
@@ -119,15 +120,15 @@ def login_soc_network(soc_network_name):
             if result.user:
                 result.user.update()
                 result_user = result.user
-                db_fields = DB_FIELDS[soc_network_name.upper()]
+                db_fields = DB_FIELDS[soc_network_name]
                 user = db_session.query(User).\
-                    filter(getattr(User, db_fields['ID']) == result_user.id)\
+                    filter(getattr(User, db_fields['id']) == result_user.id)\
                     .first()
                 if not user:
                     user = User()
                     for elem in SOC_NET_FIELDS:
                         setattr(user, db_fields[elem],
-                                getattr(result_user, elem.lower()))
+                                getattr(result_user, elem))
                     db_session.add(user)
                     user.confirmed = True
                     db_session.commit()
@@ -155,8 +156,6 @@ def logout():
     logout_user()
     flash('You have been logged out.')
     return redirect(url_for('general.index'))
-
-# ************************************************************************
 
 
 @auth_bp.route('/confirm/<token>')
@@ -189,12 +188,12 @@ def change_password():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.password.data
             db_session.add(current_user)
+            db_session.commit()
             flash('Your password has been updated.')
             return redirect(url_for('general.index'))
         else:
             flash('Invalid password.')
-    return render_template("auth/change_password.html", form=form,
-                           user=g.user_dict)
+    return render_template("auth/change_password.html", form=form)
 
 
 @auth_bp.route('/reset', methods=['GET', 'POST'])
@@ -213,8 +212,7 @@ def password_reset_request():
         flash('An email with instructions to reset your password has been '
               'sent to you.')
         return redirect(url_for('auth.login'))
-    return render_template('auth/reset_password.html', form=form,
-                           user=g.user_dict)
+    return render_template('auth/reset_password.html', form=form)
 
 
 @auth_bp.route('/reset/<token>', methods=['GET', 'POST'])
@@ -232,7 +230,7 @@ def password_reset(token):
         else:
             return redirect(url_for('general.index'))
     return render_template('auth/reset_password_token.html', form=form,
-                           user=g.user_dict, token=token)
+                           token=token)
 
 
 @auth_bp.route('/change-email', methods=['GET', 'POST'])
@@ -251,8 +249,7 @@ def change_email_request():
             return redirect(url_for('general.index'))
         else:
             flash('Invalid email or password.')
-    return render_template("auth/change_email.html", form=form,
-                           user=g.user_dict)
+    return render_template("auth/change_email.html", form=form)
 
 
 @auth_bp.route('/change-email/<token>')
@@ -260,6 +257,8 @@ def change_email_request():
 def change_email(token):
     if current_user.change_email(token):
         flash('Your email address has been updated.')
+        db_session.add(current_user)
+        db_session.commit()
     else:
         flash('Invalid request.')
     return redirect(url_for('general.index'))

@@ -98,7 +98,7 @@ class Right(Base):
         for x in db(UserCompanyRole, company_id=comp_id).all():
             if x.user_id not in rights:
                 user = db(User, id=x.user_id).first()
-                rights[x.user_id] = {'name': user.user_name(), 'rights': [], 'companies': []}
+                rights[x.user_id] = {'name': user.user_name, 'rights': [], 'companies': []}
             rights[x.user_id]['rights'].append(x.right_id)
             rights[x.user_id]['companies'] = [comp.id for comp in db(UserCompanyRole, user_id=x.user_id,
                                                                      status=statuses.ACTIVE()).all()]
