@@ -64,6 +64,7 @@ class Company(Base):
         return company
 
     @staticmethod
+
     def add_comp(data):
 
         if db(Company, name=data.get('name')).first() or data.get('name') == None:

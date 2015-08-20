@@ -84,3 +84,12 @@ CREATE TRIGGER id
 	EXECUTE PROCEDURE row_id();
 
 
+INSERT INTO company_right VALUES ('comment');
+INSERT INTO company_right VALUES ('publish');
+INSERT INTO company_right VALUES ('unpublish');
+INSERT INTO company_right VALUES ('write_articles');
+INSERT INTO company_right VALUES ('moderate_comments');
+INSERT INTO company_right VALUES ('manage_content');
+INSERT INTO company_right VALUES ('manage_members');
+INSERT INTO company_right VALUES ('manage_access');
+INSERT INTO company_right VALUES ('transfer_ownership');
