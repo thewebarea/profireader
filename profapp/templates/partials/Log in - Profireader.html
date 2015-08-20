@@ -3,7 +3,7 @@
 <form action="{{ url_for('auth.login', next=request.args.get('next')) }}" method="POST" >
     {{ form.email(placeholder='yourname@email.com') }} <br/>
     {{ form.password(placeholder='Password') }} <br/>
-    {{ form.submit(type="submit", value="Sign Up") }}<br/>
+    {{ form.submit(type="submit", value="login") }}<br/>
     <!-- <input name="submit" type="submit" /> <br> -->
     {{ form.csrf_token }}
 </form>

@@ -4,4 +4,4 @@ from ..models.users import User
 
 @blueprints.general_bp.route('')
 def index():
-    return render_template('index.html', user=g.user_dict)
+    return render_template('index.html')
