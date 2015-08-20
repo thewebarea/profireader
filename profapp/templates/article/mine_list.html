@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<h2><a href="{{ url_for('article.show_form_create') }}">Create article</a></h2>
+
+{% for article in articles %}
+    <a href="{{ url_for('article.versions', article_id=article.id) }}">{{ article.versions[0]['name'] }}</a><br/>
+{% endfor %}
+
+</body>
+</html>
