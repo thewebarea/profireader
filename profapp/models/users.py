@@ -265,6 +265,11 @@ class User(Base, UserMixin):
         name = getattr(self, REGISTERED_WITH[via] + '_name')
         return name
 
+    def phone_number(self):
+        via = self.logged_in_via()
+        phone = getattr(self, REGISTERED_WITH[via] + '_phone')
+        return phone
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
