@@ -25,6 +25,7 @@ class User(Base, UserMixin):
 
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    personal_folder_file_id  = Column(String(36), ForeignKey('file.id'))
     profireader_email = Column(TABLE_TYPES['email'], unique=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])

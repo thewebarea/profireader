@@ -6,7 +6,12 @@ from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.STATUS import STATUS
 from db_init import db_session
 
+from ..controllers.errors import BadDataProvided
+
 from flask import g
+
+def _Q(cls):
+    return db_session.query(cls)
 
 def _A():
     return db_session.query(Article)
@@ -15,26 +20,9 @@ def _V():
     return db_session.query(ArticleVersion)
 
 
-class Article(Base):
-    __tablename__ = 'article'
-    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
 
 
-    def __init__(self, id = None):
-        self.id = id
 
-    @staticmethod
-    def list(user_id=None, before_id = None):
-        ret = _A().all()
-        return ret
-
-    @staticmethod
-    def get_versions(article_id=None):
-        return _A().filter(Article.id == article_id).one().versions
-
-    @staticmethod
-    def get_one_version(article_version_id=None):
-        return _V().filter(ArticleVersion.id == article_version_id).one()
 
 class ArticleVersion(Base):
 
@@ -50,7 +38,7 @@ class ArticleVersion(Base):
     short =  Column(TABLE_TYPES['text'], nullable=False)
     long =  Column(TABLE_TYPES['text'], nullable=False)
 
-    article = relationship('Article', backref=backref('versions', order_by='desc(ArticleVersion.id)'))
+    article = relationship('Article')
 
     def __init__(self, created_from_version_id, author_user_id=None, company_id=None, name='', short='', long=''):
 
@@ -72,6 +60,30 @@ class ArticleVersion(Base):
         pass
 
 
-    # def articles_for_user(user_id = g., after_id = None, search = None, count = 10):
-    #     articles = db_session.query(Article).filter_by(author_user_id=id, ).all()
-    #     return articles
+class Article(Base):
+
+    __tablename__ = 'article'
+    versions = relationship('ArticleVersion', primaryjoin="Article.id==ArticleVersion.article_id", order_by='desc(ArticleVersion.id)')
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+
+    @staticmethod
+    def list(user_id=None, company_id = None, before_id = None):
+
+        ret = _A()
+
+        if user_id is not None:
+            ret = ret.filter(Article.versions.any(author_user_id=user_id))
+        if company_id is not None:
+            ret = ret.filter(Article.versions.any(company_id=company_id))
+
+        return ret.all()
+
+    @staticmethod
+    def get_versions(article_id, author_user_id = None):
+        ret = _V().filter_by(article_id=article_id)
+        return (ret if author_user_id is None else ret.filter_by(author_user_id=author_user_id)).all()
+
+
+    @staticmethod
+    def get_one_version(article_version_id=None):
+        return _V().filter(ArticleVersion.id == article_version_id).one()

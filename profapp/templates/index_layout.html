@@ -24,6 +24,10 @@
 
 {%- block head %}
     {{ super() }}
+
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/static/favicon.gif" type="image/gif" />
+
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>
     <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.2.js"></script>
 {#    <script src="{{ url_for('static', filename = 'image_editor/dist/cropper.js') }}"></script>#}
@@ -48,9 +52,7 @@
             {{ message }}
         </div>
         {% endfor %}
-        <header>
-            {% block portal_base %}{% endblock portal_base %}
-        </header>
+
         {% block portal_content %}
             Portal Content
         {% endblock portal_content %}

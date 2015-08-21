@@ -58,7 +58,7 @@ var modalInstance = $modal.open({
            <a href="{{ url_for('auth.signup') }}">signup</a>
                 </span>
         </li>
-        <li class="dropdown" ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+        <li class="dropdown" ng-cloak ng-show="user.id">
             <ul>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown">
