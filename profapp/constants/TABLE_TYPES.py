@@ -30,29 +30,28 @@ TABLE_TYPES = {
     'link': URLType,  # user = User(website=u'www.example.com'),
     'email': String(100),
     'name': String(100),
-    'text': String(666),
-    'text_long': UnicodeText,
+    'text': UnicodeText(length=65535),
     'gender': String(6),
     'avatar_hash': String(32),
     'binary': Binary
 }
 #
 #
-# USER_TABLE_TYPES = {'ID': id_profireader_type,
-#                     'GOOGLE_ID': id_soc_net_type,
-#                     'FACEBOOK_ID': id_soc_net_type,
-#                     'LINKEDIN_ID': id_soc_net_type,
-#                     'TWITTER_ID': id_soc_net_type,
-#                     'MICROSOFT_ID': id_soc_net_type,
-#                     'YAHOO_ID': id_soc_net_type,
+# USER_TABLE_TYPES = {'id': id_profireader_type,
+#                     'google_id': id_soc_net_type,
+#                     'facebook_id': id_soc_net_type,
+#                     'linkedin_id': id_soc_net_type,
+#                     'twitter_id': id_soc_net_type,
+#                     'microsoft_id': id_soc_net_type,
+#                     'yahoo_id': id_soc_net_type,
 #
-#                     'EMAIL': email_type,
-#                     'FIRST_NAME':  String(300),
-#                     'LAST_NAME': String(300),
-#                     'NAME': String(601),
-#                     'GENDER': String(10),
-#                     'LINK': link_type,
-#                     'PHONE': phone_type,
+#                     'email': email_type,
+#                     'first_name':  String(300),
+#                     'last_name': String(300),
+#                     'name': String(601),
+#                     'gender': String(10),
+#                     'link': link_type,
+#                     'phone': phone_type,
 #
 #                     'ABOUT_ME': String(6000),
 #                     'PASSWORD_HASH': String(128),  # String(128) SHA-256
@@ -66,4 +65,4 @@ TABLE_TYPES = {
 #                     'PROFILE_COMPLETED': BOOLEAN
 #                     }
 
-# USER_STATUS_TABLE_TYPES = {'ID': SMALLINT, 'GOOGLE_ID': id_soc_net_type}
+# USER_STATUS_TABLE_TYPES = {'id': SMALLINT, 'google_id': id_soc_net_type}

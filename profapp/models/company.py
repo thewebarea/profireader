@@ -13,11 +13,12 @@ from .files import File
 from ..constants.FILES_FOLDERS import FOLDER_AND_FILE
 
 class Company(Base):
-
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
     logo_file = Column(String(36))
+    # journalist_folder_file_id = Column(String(36), ForeignKey('file.id'))
+    # corporate_folder_file_id = Column(String(36), ForeignKey('file.id'))
     portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     country = Column(TABLE_TYPES['name'])
@@ -186,9 +187,9 @@ class Right(Base):
         user = db(User, id=user_id).first()
         for right in rights:
             ucr.append(UserCompanyRight(company_right_id=right))
-        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).first()
+        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
         user_right.user = user
-        user_right.company = db(Company, id=comp_id).first()
+        user_right.company = db(Company, id=comp_id).one()
         user.companies.append(user_right.company)
         user_right.right = ucr
         db_session.commit()
@@ -196,7 +197,7 @@ class Right(Base):
     @staticmethod
     def remove_rights(user_id, comp_id, rights):
 
-        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).first()
+        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
         for right in rights:
             user_right.right.remove(UserCompanyRight(company_right_id=right))
             db_session.commit()
@@ -207,7 +208,7 @@ class Right(Base):
         rights = {}
         for x in db(UserCompany, company_id=comp_id).all():
             if x.user_id not in rights:
-                rights[x.user_id] = {'name': x.user.user_name(), 'user': x.user, 'rights': [], 'companies': [],
+                rights[x.user_id] = {'name': x.user.user_name, 'user': x.user, 'rights': [], 'companies': [],
                                      'status': x.status}
             rights[x.user_id]['rights'] = [y.company_right_id for y in x.right]
             rights[x.user_id]['companies'] = [x.user.companies]

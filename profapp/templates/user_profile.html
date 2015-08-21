@@ -1,5 +1,5 @@
 {% extends "index_layout.html" %}
-{% block title %}Profireader - {{ user.profireader_name }}{% endblock title %}
+{% block title %}Profireader - {{ current_user.profireader_name }}{% endblock title %}
 {% block head %}
     {{ super() }}
 {% endblock head %}
@@ -11,19 +11,19 @@
 {% block portal_content %}
 
 <div>
-    <img src="{{ user.gravatar(size=256) }}">
+    <img src="{{ '{{' }}user.gravatar(size=256){{ '}}' }}">
     <div>
-        <h1>{{ user.profireader_name }}</h1>
-        Your email: {{ user.profireader_email }}<br>
-        Your display name: {{ user.profireader_name }}<br>
-        Your first name: {{ user.profireader_first_name }}<br>
-        Your last name: {{ user.profireader_last_name }}<br>
-        Gender: {{ user.profireader_gender }}<br>
-        Your web-page: {{ user.profireader_link }}<br>
-        Phone:  {{ user.profireader_phone }}<br>
-        Your location: {{ user.location }}<br>
-        About: {{ user.about_me }}<br>
-        <p>Member since {{ moment(user.registered_tm).format('L') }}.</p>
+        <h1>{{ '{{' }} user.profireader_name {{ '}}' }}</h1>
+        Your email: {{ '{{' }} user.profireader_email {{ '}}' }}<br>
+        Your display name: {{ '{{' }} user.profireader_name {{ '}}' }}<br>
+        Your first name: {{ '{{' }} user.profireader_first_name {{ '}}' }}<br>
+        Your last name: {{ '{{' }} user.profireader_last_name {{ '}}' }}<br>
+        Gender: {{ '{{' }} user.profireader_gender {{ '}}' }}<br>
+        Your web-page: {{ '{{' }} user.profireader_link {{ '}}' }}<br>
+        Phone:  {{ '{{' }} user.profireader_phone {{ '}}' }}<br>
+        Your location: {{ '{{' }} user.location {{ '}}' }}<br>
+        About: {{ '{{' }} user.about_me {{ '}}' }}<br>
+        <p>Member since {{ '{{' }} moment(user.registered_tm).format('L') {{ '}}' }}.</p>
     </div>
 </div>
 
