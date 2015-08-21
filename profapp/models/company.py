@@ -9,6 +9,7 @@ from ..constants.USER_ROLES import COMPANY_OWNER
 from utils.db_utils import db
 from .users import User
 from ..controllers.errors import StatusNonActivate
+from .files import File
 
 class Company(Base):
     __tablename__ = 'company'
@@ -27,7 +28,7 @@ class Company(Base):
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
     user_company_rs = relationship('UserCompany', backref='company')
-
+    # company_folder = relationship('File')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
                  address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
@@ -57,12 +58,10 @@ class Company(Base):
     @staticmethod
     def query_company(company_id):
 
-        company = db(Company, id=company_id).first()
+        company = db(Company, id=company_id).one()
         return company
 
-    @staticmethod
-    # create_company
-    def create_company(data):
+    def create_company(self, data, file):
 
         comp_dict = {'author_user_id': g.user_dict['id']}
         status = STATUS()
@@ -71,20 +70,31 @@ class Company(Base):
         company = Company(**comp_dict)
         db_session.add(company)
         db_session.commit()
+
         user_rbac = UserCompany(user_id=company.author_user_id,
                                 company_id=company.id,
                                 status=status.ACTIVE())
+        db(Company, id=company.id).update({'logo_file': File.upload(file=file, company_id=company.id,
+                                                                    parent_id=company.corporate_folder_file_id,
+                                                                    author=g.user_dict['name'],
+                                                                    author_user_id=g.user_dict['id'])})
         db_session.add(user_rbac)
         db_session.commit()
         r = Right()
         r.add_rights(company.author_user_id, company.id, COMPANY_OWNER)
 
     @staticmethod
-    def update_comp(company_id, data):
+    def update_comp(company_id, data, file):
 
+        comp = db(Company, id=company_id)
         for x, y in zip(data.keys(), data.values()):
-            db(Company, id=company_id).update({x: y})
-            db_session.commit()
+            comp.update({x: y})
+        if file.filename:
+            comp.update({'logo_file': File.upload(file=file, company_id=company_id,
+                                                  parent_id=comp.corporate_folder_file_id,
+                                                  author=g.user_dict['name'],
+                                                  author_user_id=g.user_dict['id'])})
+        db_session.commit()
 
     @staticmethod
     def query_employee(comp_id):
@@ -120,7 +130,7 @@ class UserCompanyRight(Base):
         if not db(UserCompany, user_id=g.user_dict['id'], company_id=company_id).first():
             user_rbac = UserCompany(user_id=g.user_dict['id'], company_id=company_id,
                                     status=status.NONACTIVE())
-            user_rbac.user = db(User, id=g.user_dict['id']).first()
+            user_rbac.user = db(User, id=g.user_dict['id']).one()
             db_session.add(user_rbac)
             db_session.commit()
 
@@ -165,12 +175,12 @@ class Right(Base):
     def add_rights(user_id, comp_id, rights):
 
         ucr = []
-        user = db(User, id=user_id).first()
+        user = db(User, id=user_id).one()
         for right in rights:
             ucr.append(UserCompanyRight(company_right_id=right))
-        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).first()
+        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
         user_right.user = user
-        user_right.company = db(Company, id=comp_id).first()
+        user_right.company = db(Company, id=comp_id).one()
         user.companies.append(user_right.company)
         user_right.right = ucr
         db_session.commit()
@@ -178,7 +188,7 @@ class Right(Base):
     @staticmethod
     def remove_rights(user_id, comp_id, rights):
 
-        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).first()
+        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
         for right in rights:
             user_right.right.remove(UserCompanyRight(company_right_id=right))
             db_session.commit()
@@ -189,7 +199,7 @@ class Right(Base):
         rights = {}
         for x in db(UserCompany, company_id=comp_id).all():
             if x.user_id not in rights:
-                rights[x.user_id] = {'name': x.user.user_name(), 'user': x.user, 'rights': [], 'companies': [],
+                rights[x.user_id] = {'name': x.user.user_name, 'user': x.user, 'rights': [], 'companies': [],
                                      'status': x.status}
             rights[x.user_id]['rights'] = [y.company_right_id for y in x.right]
             rights[x.user_id]['companies'] = [x.user.companies]

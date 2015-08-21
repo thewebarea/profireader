@@ -262,6 +262,18 @@ class User(Base, UserMixin):
         return via
 
     @property
+    def phone_number(self):
+        via = self.logged_in_via()
+        phone = getattr(self, REGISTERED_WITH[via] + '_phone')
+        return phone
+
+    @property
+    def show_email(self):
+        via = self.logged_in_via()
+        email = getattr(self, REGISTERED_WITH[via] + '_email')
+        return email
+
+    @property
     def user_name(self):
         via = self.logged_in_via()
         name = getattr(self, REGISTERED_WITH[via] + '_name')
