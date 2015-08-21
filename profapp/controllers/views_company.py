@@ -1,10 +1,10 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
-from .request_wrapers import replace_brackets
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
-
+from ..constants.USER_ROLES import COMPANY_OWNER
+from ..models.files import File
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show():
@@ -26,7 +26,7 @@ def add():
 def confirm_add():
 
     company = Company()
-    company.create_company(data=request.form)
+    company.create_company(data=request.form, file=request.files['logo_file'])
 
     return redirect(url_for('company.show'))
 
@@ -34,14 +34,13 @@ def confirm_add():
 def profile(company_id):
 
     company = Company()
-    r = Right()
-    r.show_rights(company_id)
     comp = company.query_company(company_id=company_id)
     user_rights = company.query_employee(comp_id=company_id)
 
     return render_template('company_profile.html',
                            comp=comp,
-                           user_rights=user_rights
+                           user_rights=user_rights,
+                           image=url_for('filemanager.get', id=comp.logo_file)
                            )
 
 @company_bp.route('/employees/<string:comp_id>/', methods=['GET', 'POST'])
@@ -57,7 +56,8 @@ def employees(comp_id):
     return render_template('company_employees.html',
                            comp=current_company,
                            company_user_rights=company_user_rights,
-                           curr_user=curr_user
+                           curr_user=curr_user,
+                           all_rights=COMPANY_OWNER
                            )
 
 @company_bp.route('/edit/<string:company_id>/')
@@ -76,7 +76,7 @@ def edit(company_id):
 def confirm_edit(company_id):
 
     company = Company()
-    company.update_comp(company_id=company_id, data=request.form)
+    company.update_comp(company_id=company_id, data=request.form, file=request.files['logo_file'])
     return redirect(url_for('company.profile', company_id=company_id))
 
 @company_bp.route('/subscribe/<string:company_id>/')

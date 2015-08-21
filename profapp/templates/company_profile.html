@@ -12,16 +12,24 @@
     {% block company_base %}
 {% include 'company_base.html' %}
 {% endblock company_base %}
-<span ng-cloak ng-show="{{ user_rights.right }}">
-{% for right in user_rights.right %}
-{% if right.company_right_id=='manage_access' %}
-<p><h3><a href="{{ url_for('company.edit', company_id=comp.id) }}">Edit company</a></h3></p>
-    {% endif %}
-{% endfor %}
-</span>
 
-
-   <p><h4> About us </h4></p>
+    <h2><img  src="{{ image }}" height="100" width="100"> {{ comp.name }}
+    <span ng-cloak ng-show="{{ user_rights.right }}">
+        {% for right in user_rights.right %}
+            {% if right.company_right_id=='manage_access' %}
+                <a href="{{ url_for('company.edit', company_id=comp.id) }}">Edit company</a>
+            {% endif %}
+        {% endfor %}
+    </span></h2>
+    <h3>{{ comp.country }}, {{ comp.region }}, {{ comp.address }} </h3>
+    <h5>Phone: {{ comp.phone }} |  Fax:  {{ comp.phone2 }}  |  {{ comp.email }}    <span ng-cloak ng-show="{{ user_rights.right }}">
+        {% for right in user_rights.right %}
+            {% if right.company_right_id=='manage_content' %}
+                <a href="#">Make Portal</a>
+            {% endif %}
+        {% endfor %}
+    </span></h5>
+    <p><h4> Short description </h4></p>
     <h5>{{ comp.short_description }}</h5>
 
 

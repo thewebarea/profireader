@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, TIMESTAMP, SMALLINT, BOOLEAN, Column, ForeignKey, UnicodeText, BigInteger
+from sqlalchemy import Integer, String, TIMESTAMP, SMALLINT, BOOLEAN, Column, ForeignKey, UnicodeText, BigInteger, Binary
 from sqlalchemy_utils.types.phone_number import PhoneNumberType
 from sqlalchemy_utils import URLType
 # read this about UUID:
@@ -34,6 +34,7 @@ TABLE_TYPES = {
     'text_long': UnicodeText,
     'gender': String(6),
     'avatar_hash': String(32),
+    'binary': Binary
 }
 #
 #

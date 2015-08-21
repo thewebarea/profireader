@@ -9,12 +9,15 @@ from ..constants.USER_ROLES import COMPANY_OWNER
 from utils.db_utils import db
 from .users import User
 from ..controllers.errors import StatusNonActivate
+from .files import File
+from ..constants.FILES_FOLDERS import FOLDER_AND_FILE
 
 class Company(Base):
+
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
-    logo_file = Column(String(36), ForeignKey('file.id'))
+    logo_file = Column(String(36))
     portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     country = Column(TABLE_TYPES['name'])
@@ -25,9 +28,11 @@ class Company(Base):
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
     user_company_rs = relationship('UserCompany', backref='company')
+    company_folder = relationship('File')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
-                 address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
+                 address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[],
+                 company_folder=None):
         self.name = name
         self.portal_consist = portal_consist
         self.author_user_id = author_user_id
@@ -57,9 +62,7 @@ class Company(Base):
         company = db(Company, id=company_id).first()
         return company
 
-    @staticmethod
-    # create_company
-    def create_company(data):
+    def create_company(self, data, file):
 
         comp_dict = {'author_user_id': g.user_dict['id']}
         status = STATUS()
@@ -68,20 +71,38 @@ class Company(Base):
         company = Company(**comp_dict)
         db_session.add(company)
         db_session.commit()
+        par_id = File.create_company_dir(company=company,
+                                         name='Corporate Materials')
+        File.create_company_dir(company=company, name='Journalists Materials')
+
         user_rbac = UserCompany(user_id=company.author_user_id,
                                 company_id=company.id,
                                 status=status.ACTIVE())
+        db(Company, id=company.id).update({'logo_file': File.upload(file=file, company_id=company.id,
+                                                                    parent_id=par_id,
+                                                                    author=g.user_dict['name'],
+                                                                    author_user_id=g.user_dict['id'])})
         db_session.add(user_rbac)
         db_session.commit()
         r = Right()
         r.add_rights(company.author_user_id, company.id, COMPANY_OWNER)
 
     @staticmethod
-    def update_comp(company_id, data):
+    def update_comp(company_id, data, file):
 
+        comp = db(Company, id=company_id)
+        par_id = ''
         for x, y in zip(data.keys(), data.values()):
-            db(Company, id=company_id).update({x: y})
-            db_session.commit()
+            comp.update({x: y})
+        for x in comp.one().company_folder:
+            if x.name == 'Corporate Materials':
+                par_id = x.id
+        if file.filename:
+            comp.update({'logo_file': File.upload(file=file, company_id=company_id,
+                                                  parent_id=par_id,
+                                                  author=g.user_dict['name'],
+                                                  author_user_id=g.user_dict['id'])})
+        db_session.commit()
 
     @staticmethod
     def query_employee(comp_id):
