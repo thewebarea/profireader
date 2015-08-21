@@ -67,7 +67,7 @@ var modalInstance = $modal.open({
                         <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">Your Profile</a></li>
+                        <li><a href="{{ flask_endpoint_to_angular('user.profile', user_email='user.email') }}">Your Profile</a></li>
                         <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
                         <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
                         <li><a href="{{ url_for('company.show') }}">company</a></li>

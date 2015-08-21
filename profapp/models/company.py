@@ -10,7 +10,6 @@ from utils.db_utils import db
 from .users import User
 from ..controllers.errors import StatusNonActivate
 from .files import File
-from ..constants.FILES_FOLDERS import FOLDER_AND_FILE
 
 class Company(Base):
     __tablename__ = 'company'

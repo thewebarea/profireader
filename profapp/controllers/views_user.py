@@ -15,22 +15,29 @@ from flask import g
 #    return render_template(url_for('general.index', user=user))
 
 
-@user_bp.route('/profile/<user_id>', methods=['GET', 'POST'])
+@user_bp.route('/profile/<user_email>')
 @login_required
-def profile(user_id):
-    user = db_session.query(User).filter(User.id == user_id).first()
+def profile(user_email):
+    user = db_session.query(User).\
+        filter(User.profireader_email == user_email).first()
     if not user:
         abort(404)
-    #user = User.query.get_or_404(user_id)
     if current_user != user:
         abort(403)
-
     form = EditProfileForm()
     if form.validate_on_submit():
         pass
     pass
     return render_template('user_profile.html', form=form)
 
-# @user_bp.route('/delete/<int:x>', methods=['GET', 'POST'])
-# def delete(x):
-#     return render_template('profile.html', x=x)
+
+@user_bp.route('/edit-profile/<user_email>', methods=['GET', 'POST'])
+@login_required
+def edit_profile(user_email):
+    user = db_session.query(User).\
+        filter(User.profireader_email == user_email).first()
+    if not user:
+        abort(404)
+    if current_user != user:
+        abort(403)
+    return render_template('user_edit_profile.html')
