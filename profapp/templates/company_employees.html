@@ -25,11 +25,21 @@
 
             {% endif %}
 
+            {% for c_user in curr_user %}
+
+
+                {% if curr_user[c_user]['status'] != 'active' %}
+
+
+                    <a href="{{ url_for('company.subscribe', company_id=comp.id)}}">Subscribe to this company</a>
+
+                {% endif %}
+
+            {% endfor %}
     {% endfor %}
     </span>
       <form class="add_rights" action="{{ url_for('company.employees', comp_id=comp.id) }}" onsubmit="return AjaxPost()" id="rights" method="post">
     {% for key in company_user_rights %}
-        {% if company_user_rights[key]['status'] == 'active' %}
             <dt><img src="{{ company_user_rights[key]['user'].gravatar() }}">{{ company_user_rights[key]['name'] }}<br>
             Phone number : {{ company_user_rights[key]['user'].phone_number }}<br>
             Email : {{ company_user_rights[key]['user'].show_email }}
@@ -40,31 +50,26 @@
                 <a href="{{ url_for('company.profile', company_id=c.id)}}">{{ c.name }}</a>
                 {% endfor %}</dt><br>
                  {% if curr_user %}
+                     <dt> Rights in this company: </dt>
                         {% for c_user in curr_user %}
-                            {% if curr_user[c_user]['status']=='active' %}
-                            <dt> Rights in this company: </dt>
-                            {% for r in curr_user[c_user]['rights'] %}
-                                {% if r == 'manage_members' %}
+                                {% if 'manage_access_company' in curr_user[c_user]['rights'] %}
+
                                     {% for right in company_user_rights[key]['rights'] %}
                                         <input type="checkbox" id="right" name="right" value="{{ right }}" checked="checked">{{ right }}<br>
-                                        {% for all_right in all_rights %}
-                                            {% if all_right not in company_user_rights[key]['rights'] %}
-                                            <input type="checkbox" id="right" name="right" value="{{ all_right }}">{{ all_right }}<br>
-                                            {% endif %}
-                                        {% endfor %}
                                     {% endfor %}
+                                    {% for not_allow in company_user_rights[key]['not_allowed'] %}
+                                    <input type="checkbox" id="right" name="right" value="{{ not_allow }}">{{ not_allow }}<br>
+                                    {% endfor %}
+
                                     <input type="submit" id="apply" value="Apply rights">
-                                {% elif not 'manage_members' in curr_user[c_user]['rights'] %}
+                                {% elif not 'manage_access_company' in curr_user[c_user]['rights'] %}
                                     {% for right in company_user_rights[key]['rights'] %}
                                         <input type="checkbox" id="right" name="right" value="{{ right }}" disabled="disabled" checked="checked">{{ right }}<br>
                                     {% endfor %}
                                 {% endif %}
-                            {% endfor %}
-                            {% endif %}
                         {% endfor %}
                  {% endif %}
              {% endfor %}
-        {% endif %}
         </form>
     {% endfor %}<br>
       <script type="text/javascript">
@@ -91,7 +96,7 @@
             {% for r in curr_user[c_user]['rights'] %}
 
 
-                {% if r == 'manage_members' %}
+                {% if r == 'manage_access_company' %}
 
                     {% for key in company_user_rights %}
 

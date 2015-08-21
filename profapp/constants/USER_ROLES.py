@@ -1,4 +1,3 @@
-# User role
 OWNER = 0
 ADMIN = 1
 EDITOR = 2
@@ -18,34 +17,50 @@ ROLE = {
     GUEST: 'guest',
     READER: 'reader'
 }
-COMPANY_OWNER = ['comment', 'publish', 'unpublish', 'write_articles', 'moderate_comments', 'manage_content',
-                 'manage_members', 'manage_access', 'transfer_ownership']
+COMPANY_OWNER = ['owner', 'edit', 'publish', 'un_publish', 'upload_files', 'delete_files', 'add_employee',
+                 'suspend_employee', 'send_publications', 'manage_access_company', 'manage_access_portal',
+                 'article_priority', 'manage_readers', 'manage_companies_partners', 'manage_comments']
 
 class RIGHTS:
 
-    def COMMENT(self):
-        return 'comment'
+    def EDIT(self):
+        return 'edit'
 
     def PUBLISH(self):
         return 'publish'
 
     def UNPUBLISH(self):
-        return 'unpublish'
+        return 'un_publish'
 
-    def WRITE_ARTICLES(self):
-        return 'write_articles'
+    def UPLOAD_FILES(self):
+        return 'upload_files'
 
-    def MODERATE_COMMENTS(self):
-        return 'moderate_comments'
+    def DELETE_FILES(self):
+        return 'delete_files'
 
-    def MANAGE_CONTENT(self):
-        return 'manage_content'
+    def ADD_EMPLOYEE(self):
+        return 'add_employee'
 
-    def MANAGE_MEMBERS(self):
-        return 'manage_members'
+    def SUSPEND_EMPLOYEE(self):
+        return 'suspend_employee'
 
-    def MANAGE_ACCESS(self):
-        return 'manage_access'
+    def SEND_PUBLICATIONS(self):
+        return 'send_publications'
 
-    def TRANSFER_OWNERSHIP(self):
-        return 'transfer_ownership'
+    def MANAGE_ACCESS_COMPANY(self):
+        return 'manage_access_company'
+
+    def MANAGE_ACCESS_PORTAL(self):
+        return 'manage_access_portal'
+
+    def ARTICLE_PRIORITY(self):
+        return 'article_priority'
+
+    def MANAGE_READERS(self):
+        return 'manage_readers'
+
+    def MANAGE_COMPANIES_PARTNERS(self):
+        return 'manage_companies_partners'
+
+    def MANAGE_COMMENTS(self):
+        return 'manage_comments'

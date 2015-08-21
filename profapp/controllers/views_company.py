@@ -53,8 +53,7 @@ def profile(company_id):
 def employees(comp_id):
 
     company = Company()
-    r = Right()
-    company_user_rights = r.show_rights(comp_id)
+    company_user_rights = Right().show_rights(comp_id)
     curr_user = {g.user_dict['id']: company_user_rights[user] for user in company_user_rights
                  if user == g.user_dict['id']}
     current_company = company.query_company(company_id=comp_id)
@@ -62,8 +61,7 @@ def employees(comp_id):
     return render_template('company_employees.html',
                            comp=current_company,
                            company_user_rights=company_user_rights,
-                           curr_user=curr_user,
-                           all_rights=COMPANY_OWNER
+                           curr_user=curr_user
                            )
 
 @company_bp.route('/edit/<string:company_id>/')
