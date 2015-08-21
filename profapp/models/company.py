@@ -15,6 +15,8 @@ class Company(Base):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
     logo_file = Column(String(36), ForeignKey('file.id'))
+    journalist_folder_file_id = Column(String(36), ForeignKey('file.id'))
+    corporate_folder_file_id = Column(String(36), ForeignKey('file.id'))
     portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     country = Column(TABLE_TYPES['name'])
@@ -25,6 +27,7 @@ class Company(Base):
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
     user_company_rs = relationship('UserCompany', backref='company')
+
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
                  address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
