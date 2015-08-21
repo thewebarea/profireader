@@ -10,7 +10,7 @@
 
 {% block portal_content %}
 <h1>User Profile</h1>
-<a href="{{ url_for('user.edit_profile', user_email=g.user.profireader_email) }}">[edit]</a>
+<a href="{{ url_for('user.edit_profile', user_id=g.user.id) }}">[edit]</a>
 
 <div ng-controller="UserLoginController">
     <div>

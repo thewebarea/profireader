@@ -36,7 +36,7 @@ class User(Base, UserMixin):
     profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
     user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
-    location = Column(TABLE_TYPES['location'])
+    location = Column(TABLE_TYPES['location'], default='')
     companies = relationship('Company', backref='users')
     # SECURITY DATA
 
@@ -133,6 +133,7 @@ class User(Base, UserMixin):
                  MICROSOFT_ALL=SOC_NET_NONE['microsoft'],
                  YAHOO_ALL=SOC_NET_NONE['yahoo'],
 
+                 location='',
                  about_me='',
                  #password=None,
                  confirmed=False,
@@ -154,6 +155,7 @@ class User(Base, UserMixin):
         self.profireader_phone = PROFIREADER_ALL['phone']
 
         self.about_me = about_me
+        self.location = location
         #self.password = password
         self.confirmed = confirmed
 
@@ -246,6 +248,9 @@ class User(Base, UserMixin):
             if not getattr(self, field):
                 completeness = False
                 break
+        #self.completeness = completeness
+        #db_session.add(self)
+        #db_session.commit()
         return completeness
 
     def logged_in_via(self):

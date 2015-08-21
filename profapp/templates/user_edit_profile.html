@@ -18,28 +18,28 @@
 <br/>
 
 
-<form action="{{ url_for('user.edit_profile', user_email=g.user.profireader_email) }}" method="post">
-        <p>Your display name: <input type="text" placeholder="name" name="name" value="{{ g.user.profireader_name }}"></p>
-        <p>Your email: {{ g.user.profireader_email }}  <a href="{{ url_for('auth.change_email_request') }}"> [change]</a></p>
-        <p>Your first name: <input type="text" placeholder="first name" name="first_name" value="{{ g.user.profireader_first_name }}"></p>
-        <p>Your second name: <input type="text" placeholder="second name" name="second_name" value="{{ g.user.profireader_second_name }}"></p>
-        <p>Gender:
-            {% if g.user.profireader_gender=='female' %}
-                <label for="male">Male</label>
-                <input type="radio" name="gender" id="male" value="male">
-                <label for="female">Female</label>
-                <input type="radio" name="gender" id="female" value="female" checked>
-            {% else %}
-                <label for="male">Male</label>
-                <input type="radio" name="gender" id="male" value="male" checked>
-                <label for="female">Female</label>
-                <input type="radio" name="gender" id="female" value="female">
-            {% endif %}
-        </p>
-        <p>Your web-page: <input type="text" placeholder="www.your.webpage.com" name="link" value="{{ g.user.profireader_link }}"></p>
-        <p>Phone: <input type="text" placeholder="your phone" name="phone" value="{{ g.user.profireader_phone }}"></p>
-        <p>Location: <input type="text" placeholder="your city" name="location" value="{{ g.user.location }}"></p>
-        <p>About me: <textarea name="about_me" cols="40" rows="8" placeholder="Give us some information about you please">{{ g.user.about_me }}</textarea></p>
+<form action="{{ url_for('user.edit_profile', user_id=g.user.id) }}" method="post">
+    <p>Your display name: <input type="text" placeholder="name" name="name" value="{{ g.user.profireader_name }}"></p>
+    <p>Your email: {{ g.user.profireader_email }}  <a href="{{ url_for('auth.change_email_request') }}"> [change]</a></p>
+    <p>Your first name: <input type="text" placeholder="first name" name="first_name" value="{{ g.user.profireader_first_name }}"></p>
+    <p>Your last name: <input type="text" placeholder="last name" name="last_name" value="{{ g.user.profireader_last_name }}"></p>
+    <p>Gender:
+        {% if g.user.profireader_gender=='female' %}
+            <label for="male">Male</label>
+            <input type="radio" name="gender" id="male" value="male">
+            <label for="female">Female</label>
+            <input type="radio" name="gender" id="female" value="female" checked>
+        {% else %}
+            <label for="male">Male</label>
+            <input type="radio" name="gender" id="male" value="male" checked>
+            <label for="female">Female</label>
+            <input type="radio" name="gender" id="female" value="female">
+        {% endif %}
+    </p>
+    <p>Your web-page: <input type="text" placeholder="www.your.webpage.com" name="link" value="{{ g.user.profireader_link }}"></p>
+    <p>Phone: <input type="text" placeholder="your phone" name="phone" value="{{ g.user.profireader_phone }}"></p>
+    <p>Location: <input type="text" placeholder="your city" name="location" value="{{ g.user.location }}"></p>
+    <p>About me: <textarea name="about_me" cols="40" rows="8" placeholder="Give us some information about you please">{{ g.user.about_me }}</textarea></p>
     <input type="submit" value="Update Profile">
 </form>
 
@@ -54,7 +54,6 @@
 {##}
 {#<input type="submit" value="...">#}
 {#</form>#}
-
 
 {% endblock portal_content %}
 
