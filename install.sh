@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt-get install dialog
+sudo apt-get install dialog
 
 function e {
     echo "$*"
@@ -55,11 +55,11 @@ conf_comm() {
     rd=`tput setaf 1`
     rst=`tput sgr0`
     echo "${rd}"
-    echo "$1" | sed 's/^/    /g'
+    echo "$1" | sed -e 's/"/\"/g' -e 's/^/    sudo bash -c "/g' -e 's/$/";/g'
     echo "${rst}"
     if conf; then
 	e
-        eval "$1"
+        eval `echo "$1" | sed -e 's/"/\"/g' -e 's/^/sudo bash -c "/g' -e 's/$/";/g'`
 	if [[ "$2" == "" ]]; then
 	    ret
 	fi
@@ -120,7 +120,7 @@ function menu_db_user_pass {
     }
 
 
-function menu_environment {
+function menu_hosts {
     conf_comm "sed -i '/\(db\|web\|mail\).profi/d' /etc/hosts
 sed -i '/\(companyportal\|aprofi\).d.ntaxa.com/d' /etc/hosts
 echo '' >> /etc/hosts
@@ -195,12 +195,19 @@ function menu_venv {
 
 next='_'
 
+#a="/bin/ls;
+#/bin/ls"
+
+#eval $a
+
+#exit
+
 while :
 do
 next='exit'
 dialog --title "profireader" --nocancel --default-item $next --menu "Choose an option" 20 78 16 \
 "deb" "install deb packages" \
-"environment" "create virtual domain zone in /etc/hosts" \
+"hosts" "create virtual domain zone in /etc/hosts" \
 "secret_data" "download secret data" \
 "python_3" "install python 3" \
 "venv" "create virtual environment" \
