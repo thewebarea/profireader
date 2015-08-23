@@ -51,8 +51,8 @@ def list_routes():
                 # 0.0.0.0    profireader.a
                 # to /etc/hosts
                 url = url_for(rule.endpoint, **options)
-                kwargs = {'provider_name': 'google'}
-                url = flask_endpoint_to_angular('user.login_soc_network', **kwargs)
+                kwargs = {'soc_network_name': 'google'}
+                url = flask_endpoint_to_angular('auth.login_soc_network', **kwargs)
                 print(url)
                 pass
         except ValueError:

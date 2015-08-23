@@ -18,3 +18,34 @@ ROLE = {
     GUEST: 'guest',
     READER: 'reader'
 }
+COMPANY_OWNER = ['comment', 'publish', 'unpublish', 'write_articles', 'moderate_comments', 'manage_content',
+                 'manage_members', 'manage_access', 'transfer_ownership']
+
+class RIGHTS:
+
+    def COMMENT(self):
+        return 'comment'
+
+    def PUBLISH(self):
+        return 'publish'
+
+    def UNPUBLISH(self):
+        return 'unpublish'
+
+    def WRITE_ARTICLES(self):
+        return 'write_articles'
+
+    def MODERATE_COMMENTS(self):
+        return 'moderate_comments'
+
+    def MANAGE_CONTENT(self):
+        return 'manage_content'
+
+    def MANAGE_MEMBERS(self):
+        return 'manage_members'
+
+    def MANAGE_ACCESS(self):
+        return 'manage_access'
+
+    def TRANSFER_OWNERSHIP(self):
+        return 'transfer_ownership'

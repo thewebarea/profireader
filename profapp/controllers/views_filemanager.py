@@ -1,20 +1,23 @@
 import os
-import time
-from time import gmtime, strftime
-from stat import ST_SIZE
-from flask import jsonify, request, render_template, make_response, send_file
-from db_init import db_session, engine
+from flask import request, render_template, make_response, send_file, g
+from flask.ext.login import current_user
+from db_init import db_session
 from profapp.models.files import File, FileContent
-from .blueprints import filemanager_bp, static_bp
+from .blueprints import filemanager_bp
 from io import BytesIO
 from .request_wrapers import json, parent_folder
+
 
 root = os.getcwd()+'/profapp/static/filemanager/tmp'
 json_result = {"result": {"success": True, "error": None}}
 
 @filemanager_bp.route('/')
 def filemanager():
-    return render_template('filemanager.html')
+    library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
+    for company in g.user.companies:
+        library[company.journalist_folder_file_id]={'name': "%s materisals" % (company.name, ), 'icon': ''}
+        library[company.corporate_folder_file_id]={'name': "%s corporate files" % (company.name, ), 'icon': ''}
+    return render_template('filemanager.html', library = library)
 
 @filemanager_bp.route('/list/', methods=['POST'])
 @json
@@ -83,9 +86,6 @@ def get(id):
     return send_file(BytesIO(image_query_content.content), mimetype=image_query.mime, as_attachment=False)
 
 def file_query(id, table):
-    if db_session.query(table).filter_by(id=id).first():
-        query = db_session.query(table).filter_by(id=id).first()
 
-        return query
-    else:
-        return "404 error", 404
+    query = db_session.query(table).filter_by(id=id).first()
+    return query

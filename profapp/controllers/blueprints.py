@@ -1,21 +1,24 @@
 from flask import Blueprint
 
 general_bp = Blueprint('general', __name__)
+auth_bp = Blueprint('auth', __name__)
 user_bp = Blueprint('user', __name__)
-article_bp = Blueprint('articles', __name__)
+article_bp = Blueprint('article', __name__)
 filemanager_bp = Blueprint('filemanager', __name__)
 static_bp = Blueprint('static', __name__, static_url_path='')
-#  static_bp = Blueprint('static', __name__)
 image_editor_bp = Blueprint('image_editor', __name__)
 company_bp = Blueprint('company', __name__)
+exception_bp = Blueprint('exception', __name__)
 
 
 def register(app):
     from . import views_index
-
     app.register_blueprint(general_bp, url_prefix='/')
 
     from . import views_auth
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+
+    from . import views_user
     # we can not change this url_prefix due to soc-network authentication
     app.register_blueprint(user_bp, url_prefix='/users')
 
@@ -32,3 +35,6 @@ def register(app):
 
     from . import views_company
     app.register_blueprint(company_bp, url_prefix='/company')
+
+    from . import errors
+    app.register_blueprint(exception_bp, url_prefix='/exception')

@@ -13,3 +13,9 @@ Authomatic==0.1.0.post1
 alembic==0.7.6
 Flask-Login==0.2.11
 Pillow==2.9.0
+SQLAlchemy-Utils==0.30.16
+furl==0.4.7
+phonenumbers==7.0.8
+Flask-Mail==0.9.1
+Flask-Moment==0.5.1
+Flask-Bootstrap==3.3.5.6
