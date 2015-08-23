@@ -38,27 +38,40 @@ def login_signup_general(*soc_network_names):
                 result_user = result.user
 
                 db_fields = DB_FIELDS[soc_network_names[-1]]
+                #user = db_session.query(User).\
+                #    filter(getattr(User, db_fields['id']) == result_user.id)\
+                #    .first()
                 user = db_session.query(User).\
-                    filter(getattr(User, db_fields['id']) == result_user.id)\
+                    filter(getattr(User, db_fields['email']) == result_user.email)\
                     .first()
                 if not user:
-                    user = User()
+                    user = db_session.query(User).\
+                        filter(User.profireader_email == result_user.email)\
+                        .first()
+                    ind = False
+                    if not user:
+                        ind = True
+                        user = User()
 
                     for elem in SOC_NET_FIELDS:
                         setattr(user, db_fields[elem],
                                 getattr(result_user, elem))
 
-                    if soc_network_names[0] == 'profireader':
-                        db_fields_profireader = DB_FIELDS['profireader']
-                        for elem in SOC_NET_FIELDS_SHORT:
-                            setattr(user, db_fields_profireader[elem],
-                                    getattr(result_user, elem))
+                    if ind:  # ToDo: introduce field signup_via instead.
+                             # Todo: If signed_up not via profireader then...
+                        if soc_network_names[0] == 'profireader':
+                            db_fields_profireader = DB_FIELDS['profireader']
+                            for elem in SOC_NET_FIELDS_SHORT:
+                                setattr(user, db_fields_profireader[elem],
+                                        getattr(result_user, elem))
 
                     db_session.add(user)
                     user.confirmed = True
                     db_session.commit()
 
+
                 login_user(user)
+                flash('You have successfully logged in.')
 
                 # session['user_id'] = user.id assignment
                 # is automatically executed by login_user(user)
@@ -73,16 +86,6 @@ def login_signup_general(*soc_network_names):
         print(sys.exc_info())
         raise
     return response
-
-
-# provider_name:
-# 0) profireader+
-# 1) facebook +-
-# 2) linkedin +
-# 3) google +
-# 4) twitter +
-# 5) microsoft +
-# 6) yahoo +
 
 
 @auth_bp.before_app_request
@@ -131,7 +134,8 @@ def signup():
 
 @auth_bp.route('/login/<soc_network_name>', methods=['GET', 'POST'])
 def login_soc_network(soc_network_name):
-    return login_signup_general(soc_network_name)
+    #return login_signup_general(soc_network_name)
+    return login_signup_general('profireader', soc_network_name)
 
 
 @auth_bp.route('/signup/<soc_network_name>', methods=['GET', 'POST'])
@@ -218,6 +222,7 @@ def change_password():
 @auth_bp.route('/reset', methods=['GET', 'POST'])
 def password_reset_request():
     if not current_user.is_anonymous():
+        flash('To reset your password logout first please.')
         return redirect(url_for('general.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():

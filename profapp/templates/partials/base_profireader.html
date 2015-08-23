@@ -11,7 +11,6 @@
 
     module.controller('UserLoginController', ['$scope', '$modal',  function($scope, $modal) {
         $scope.user = {{ g.user_dict|tojson|safe }};
-
         $scope.open_filemanager = function() {
 var modalInstance = $modal.open({
             templateUrl: 'filemanager.html',
@@ -54,9 +53,9 @@ var modalInstance = $modal.open({
       <ul class="nav navbar-nav navbar-right">
         <li ng-cloak ng-show="{{ '{{' }}!user.id{{ '}}' }}">
             <span>
-           <a href="{{ url_for('auth.login') }}">log in</a>
-           <a href="{{ url_for('auth.signup') }}">signup</a>
-                </span>
+              <a href="{{ url_for('auth.login') }}">log in</a>
+              <a href="{{ url_for('auth.signup') }}">signup</a>
+            </span>
         </li>
         <li class="dropdown" ng-cloak ng-show="user.id">
             <ul>

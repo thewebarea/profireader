@@ -25,7 +25,7 @@ class User(Base, UserMixin):
 
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    personal_folder_file_id  = Column(String(36), ForeignKey('file.id'))
+    personal_folder_file_id = Column(String(36), ForeignKey('file.id'))
     profireader_email = Column(TABLE_TYPES['email'], unique=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])
@@ -36,7 +36,7 @@ class User(Base, UserMixin):
     profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
     user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
-    location = Column(TABLE_TYPES['location'], default='')
+    location = Column(TABLE_TYPES['location'])
     companies = relationship('Company', backref='users')
     # SECURITY DATA
 
@@ -133,8 +133,8 @@ class User(Base, UserMixin):
                  MICROSOFT_ALL=SOC_NET_NONE['microsoft'],
                  YAHOO_ALL=SOC_NET_NONE['yahoo'],
 
-                 location='',
-                 about_me='',
+                 location=None,
+                 about_me=None,
                  #password=None,
                  confirmed=False,
 
