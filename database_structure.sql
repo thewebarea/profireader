@@ -3,6 +3,7 @@
 --
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -204,7 +205,7 @@ CREATE TABLE article (
 );
 
 
-ALTER TABLE public.article OWNER TO pfuser;
+ALTER TABLE article OWNER TO pfuser;
 
 --
 -- Name: article_version; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -222,7 +223,7 @@ CREATE TABLE article_version (
 );
 
 
-ALTER TABLE public.article_version OWNER TO pfuser;
+ALTER TABLE article_version OWNER TO pfuser;
 
 --
 -- Name: company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -246,7 +247,7 @@ CREATE TABLE company (
 );
 
 
-ALTER TABLE public.company OWNER TO pfuser;
+ALTER TABLE company OWNER TO pfuser;
 
 --
 -- Name: company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -257,7 +258,7 @@ CREATE TABLE company_right (
 );
 
 
-ALTER TABLE public.company_right OWNER TO pfuser;
+ALTER TABLE company_right OWNER TO pfuser;
 
 --
 -- Name: file; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -281,7 +282,7 @@ CREATE TABLE file (
 );
 
 
-ALTER TABLE public.file OWNER TO pfuser;
+ALTER TABLE file OWNER TO pfuser;
 
 --
 -- Name: file_content; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -293,7 +294,7 @@ CREATE TABLE file_content (
 );
 
 
-ALTER TABLE public.file_content OWNER TO pfuser;
+ALTER TABLE file_content OWNER TO pfuser;
 
 --
 -- Name: tst; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
@@ -304,7 +305,7 @@ CREATE TABLE tst (
 );
 
 
-ALTER TABLE public.tst OWNER TO postgres;
+ALTER TABLE tst OWNER TO postgres;
 
 --
 -- Name: user; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -384,7 +385,7 @@ CREATE TABLE "user" (
 );
 
 
-ALTER TABLE public."user" OWNER TO pfuser;
+ALTER TABLE "user" OWNER TO pfuser;
 
 --
 -- Name: COLUMN "user".profireader_avatar_file_id; Type: COMMENT; Schema: public; Owner: pfuser
@@ -405,7 +406,7 @@ CREATE TABLE user_company (
 );
 
 
-ALTER TABLE public.user_company OWNER TO pfuser;
+ALTER TABLE user_company OWNER TO pfuser;
 
 --
 -- Name: user_company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -418,7 +419,7 @@ CREATE TABLE user_company_right (
 );
 
 
-ALTER TABLE public.user_company_right OWNER TO pfuser;
+ALTER TABLE user_company_right OWNER TO pfuser;
 
 --
 -- Name: user_company_right_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
@@ -432,7 +433,7 @@ CREATE SEQUENCE user_company_right_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.user_company_right_id_seq OWNER TO pfuser;
+ALTER TABLE user_company_right_id_seq OWNER TO pfuser;
 
 --
 -- Name: user_company_right_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pfuser
@@ -784,11 +785,12 @@ ALTER TABLE ONLY "user"
 
 
 --
--- Name: public; Type: ACL; Schema: -; Owner: pfuser
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM pfuser;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO pfuser;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 

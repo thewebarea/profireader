@@ -84,13 +84,16 @@ rd=`tput setaf 1`
     fi
 }
 
+function get_profidb {
+    echo `cat secret_data.py | grep 'DB_NAME' | sed -e 's/^\s*DB_NAME\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
+    }
 
 function runsql {
     conf_comm "su postgres -c \"echo \\\"$1\\\" | psql\"" sudo "$2"
     }
 
 function runsql_dump {
-    profidb=`cat secret_data.py | grep 'DB_NAME' | sed -e 's/^\s*DB_NAME\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
+    profidb=$(get_profidb)
     filenam=$(rr "$1" "$2")
     conf_comm "su postgres -c 'cat $filenam | psql $profidb'" sudo "$3"
     }
@@ -118,11 +121,8 @@ function menu_secret_data {
     ntaxapass=$(rr "Enter ntaxa password:")
     conf_comm "wget --user='$ntaxauser' --password='$ntaxapass' http://x.d.ntaxa.com/profireader/secret_data.txt
 if [[ \"\$?\" == \"0\" ]]; then
-    if [[ -f secret_data.py  ]]; then
-	echo 'cp ./secret_data.py ./secret_data.bak.py'
-	cp ./secret_data.py ./secret_data.bak.py
-    fi
-    mv secret_data.txt secret_data.py
+  mv ./secret_data.py ./secret_data.bak.py
+  mv secret_data.txt secret_data.py
 else
   echo 'wget failed!'
 fi" nosudo  python_3
@@ -185,7 +185,7 @@ function menu_db_user_pass {
     }
 
 function menu_db_create {
-    profidb=`cat secret_data.py | grep 'DB_NAME' | sed -e 's/^\s*DB_NAME\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
+    profidb=$(get_profidb)
     psqldb=$(rr 'Enter postgresql database name' $profidb)
     
     profiuser=`cat secret_data.py | grep 'DB_USER' | sed -e 's/^\s*DB_USER\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
@@ -201,13 +201,25 @@ function menu_db_initial {
     }
 
 function menu_db_backup {
-    profidb=`cat secret_data.py | grep 'DB_NAME' | sed -e 's/^\s*DB_NAME\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
-    runsql "ALTER DATABASE $profidb RENAME TO bak_$profidb""_$date" 'exit'
+    profidb=$(get_profidb)
+    runsql "ALTER DATABASE $profidb RENAME TO bak_$profidb""_$date" 'db_save_struct'
     }
 
+function menu_db_save_struct {
+    profidb=$(get_profidb)
+    conf_comm "
+mv database_structure.sql database_structure.sql.bak
+su postgres -c 'pg_dump -s $profidb' > database_structure.sql
+git diff database_structure.sql" sudo db_save_initial
+    }
 
-
-
+function menu_db_save_initial {
+    profidb=$(get_profidb)
+    conf_comm "
+mv database_initial_data.sql database_initial_data.sql.bak
+su postgres -c 'pg_dump --inserts -a -t company_right $profidb' > database_initial_data.sql
+git diff database_initial_data.sql" sudo 'exit'
+    }
 
 
 
@@ -225,7 +237,7 @@ next='_'
 while :
 do
 #next='exit'
-dialog --title "profireader" --nocancel --default-item $next --menu "Choose an option" 20 78 16 \
+dialog --title "profireader" --nocancel --default-item $next --menu "Choose an option" 22 78 17 \
 "deb" "install deb packages" \
 "hosts" "create virtual domain zone in /etc/hosts" \
 "secret_data" "download secret data" \
@@ -238,6 +250,8 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "db_struct" "import database structure from file" \
 "db_initial" "import database initial data" \
 "db_backup" "rename database (create backup)" \
+"db_save_struct" "save database structure to file" \
+"db_save_initial" "save database required for project start" \
 "exit" "Exit" 2> /tmp/selected_menu_
 reset
 date=`date +"%y_%m_%d___%H_%M"`

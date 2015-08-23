@@ -68,4 +68,5 @@ target/
 
 # secret data
 secret_data.*
+database_*.bak
 .venv/
