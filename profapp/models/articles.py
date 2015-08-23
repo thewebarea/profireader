@@ -87,3 +87,5 @@ class Article(Base):
     @staticmethod
     def get_one_version(article_version_id=None):
         return _V().filter(ArticleVersion.id == article_version_id).one()
+
+
