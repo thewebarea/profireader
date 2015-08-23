@@ -58,6 +58,7 @@ def load_user():
     g.user_init = user_init
     g.user = user
     g.user_dict = user_dict
+    g.delete = {'x': None}
     pass
 
 
