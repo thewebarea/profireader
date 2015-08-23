@@ -39,7 +39,7 @@ class File(Base):
         return re.match('^image/.*', file.mime)
 
     def list(parent_id=None):
-        return list({'size': file.size, 'name': file.name, 'id': file.id,
+        return list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'cropable': True if File.is_cropable(file) else False,
                                 'type': 'dir' if file.mime == 'directory' else 'file',
                                 'date': str(file.md_tm).split('.')[0]}
