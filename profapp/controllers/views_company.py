@@ -49,14 +49,13 @@ def profile(company_id):
                            image=url_for('filemanager.get', id=comp.logo_file)
                            )
 
-@company_bp.route('/employees/<string:comp_id>/', methods=['GET', 'POST'])
+@company_bp.route('/employees/<string:comp_id>/')
 def employees(comp_id):
 
     company = Company()
     company_user_rights = Right().show_rights(comp_id)
-    curr_user = {g.user_dict['id']: company_user_rights[user] for user in company_user_rights
-                 if user == g.user_dict['id']}
-    print(request.form)
+    curr_user = {g.user_dict['id']: company_user_rights[user] for user
+                 in company_user_rights if user == g.user_dict['id']}
     current_company = company.query_company(company_id=comp_id)
 
     return render_template('company_employees.html',
@@ -64,6 +63,14 @@ def employees(comp_id):
                            company_user_rights=company_user_rights,
                            curr_user=curr_user
                            )
+
+@company_bp.route('/update_rights', methods=['POST'])
+def update_rights():
+
+    data = request.form
+    Right.update_rights(user_id=data['user_id'], comp_id=data['comp_id'], rights=data.getlist('right'))
+
+    return redirect(url_for('company.employees', comp_id=data['comp_id']))
 
 @company_bp.route('/edit/<string:company_id>/')
 def edit(company_id):

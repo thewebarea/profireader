@@ -29,10 +29,7 @@ class Company(Base):
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
     user_company_rs = relationship('UserCompany', backref='company', lazy='dynamic')
-#TODO
-    # employee = relationship
 
-    # company_folder = relationship('File')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
                  address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
@@ -185,11 +182,11 @@ class Right(Base):
 
         ucr = []
         user = db(User, id=user_id).one()
+        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
         for right in rights:
             ucr.append(UserCompanyRight(company_right_id=right))
-        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
         if user_right.right:
-            db(UserCompany, user_id=user_id, company_id=comp_id).update({'right': ucr})
+            user_right.right = ucr
         else:
             user_right.company = db(Company, id=comp_id).one()
             user.companies.append(user_right.company)
