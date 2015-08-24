@@ -9,7 +9,10 @@
 <h2>Article history</h2>
 
 {% for version in article_versions %}
-    {{ version['name'] }} <a href="{{ url_for('article.update', article_version_id=version['id']) }}">Edit this version</a><br/>
+    {{ version['name'] }}<br/>
+    &nbsp;&nbsp;&nbsp;<a href="{{ url_for('article.update', article_version_id=version['id']) }}">Edit this version</a><br/>
+    <form action="{{ url_for('company.clone_article') }}">&nbsp;&nbsp;&nbsp;send this version to company&nbsp;<input name="send_to_company_id"/>&nbsp;<button>send</button></form>
+    <br/>
 {% endfor %}
 
 </body>

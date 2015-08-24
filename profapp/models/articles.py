@@ -58,15 +58,16 @@ class ArticleVersion(Base):
     def create(self):
         pass
 
-
 class Article(Base):
-
     __tablename__ = 'article'
     versions = relationship('ArticleVersion', primaryjoin="Article.id==ArticleVersion.article_id", order_by='desc(ArticleVersion.id)')
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
 
     @staticmethod
     def list(user_id=None, company_id = None, before_id = None):
+
+        if (user_id is None and  company_id is None):
+            raise BadDataProvided
 
         ret = _A()
 
@@ -82,9 +83,10 @@ class Article(Base):
         ret = _V().filter_by(article_id=article_id)
         return (ret if author_user_id is None else ret.filter_by(author_user_id=author_user_id)).all()
 
-
     @staticmethod
     def get_one_version(article_version_id=None):
         return _V().filter(ArticleVersion.id == article_version_id).one()
+
+
 
 

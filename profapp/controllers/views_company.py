@@ -1,6 +1,7 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
+from ..models.articles import Article
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
 from ..constants.USER_ROLES import COMPANY_OWNER
@@ -113,3 +114,12 @@ def confirm_subscriber():
     comp_role.apply_request(comp_id=data['comp_id'], user_id=data['user_id'], bool=data['req'])
 
     return redirect(url_for('company.profile', company_id=data['comp_id']))
+
+
+@company_bp.route('/clone_article/', methods=['POST'])
+def clone_article():
+    data = request.form
+    company = Company(data['company_id'])
+    article = Article(data['article_id'])
+    article.clone
+    pass
