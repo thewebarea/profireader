@@ -1,7 +1,8 @@
 from .blueprints import auth_bp
 from flask import g, request, url_for, render_template, flash
 from db_init import db_session
-from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS
+from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS, \
+    SOC_NET_FIELDS_SHORT
 from flask.ext.login import logout_user, current_user, login_required
 from urllib.parse import quote
 from ..models.users import User
@@ -10,9 +11,6 @@ from ..forms.auth import LoginForm, RegistrationForm, ChangePasswordForm, \
 from .errors import BadDataProvided
 from ..utils.email import send_email
 
-#def _session_saver():
-#    session.modified = True
-
 import re
 from authomatic.adapters import WerkzeugAdapter
 
@@ -20,18 +18,74 @@ from flask import redirect, make_response
 from flask.ext.login import login_user
 from ..constants.SOCIAL_NETWORKS import SOC_NET_NONE
 
+#def _session_saver():
+#    session.modified = True
 
 EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
 
-#provider_name:
-# 0) profireader+
-# 1) facebook +-
-# 2) linkedin +
-# 3) google +
-# 4) twitter +
-# 5) microsoft +
-# 6) yahoo +
+def login_signup_general(*soc_network_names):
+    if g.user_init and g.user_init.is_authenticated():
+        raise BadDataProvided
+
+    response = make_response()
+    try:
+        result = g.authomatic.login(WerkzeugAdapter(request, response),
+                                    soc_network_names[-1])
+        if result:
+            if result.user:
+                result.user.update()
+                result_user = result.user
+
+                db_fields = DB_FIELDS[soc_network_names[-1]]
+                #user = db_session.query(User).\
+                #    filter(getattr(User, db_fields['id']) == result_user.id)\
+                #    .first()
+                user = db_session.query(User).\
+                    filter(getattr(User, db_fields['email']) == result_user.email)\
+                    .first()
+                if not user:
+                    user = db_session.query(User).\
+                        filter(User.profireader_email == result_user.email)\
+                        .first()
+                    ind = False
+                    if not user:
+                        ind = True
+                        user = User()
+
+                    for elem in SOC_NET_FIELDS:
+                        setattr(user, db_fields[elem],
+                                getattr(result_user, elem))
+
+                    if ind:  # ToDo: introduce field signup_via instead.
+                             # Todo: If signed_up not via profireader then...
+                        if soc_network_names[0] == 'profireader':
+                            db_fields_profireader = DB_FIELDS['profireader']
+                            for elem in SOC_NET_FIELDS_SHORT:
+                                setattr(user, db_fields_profireader[elem],
+                                        getattr(result_user, elem))
+
+                    db_session.add(user)
+                    user.confirmed = True
+                    db_session.commit()
+
+
+                login_user(user)
+                flash('You have successfully logged in.')
+
+                # session['user_id'] = user.id assignment
+                # is automatically executed by login_user(user)
+
+                return redirect('/')  # #  http://aprofi.d.ntaxa.com/
+            elif result.error:
+                redirect_path = '#/?msg={}'.\
+                    format(quote(soc_network_names[-1] + ' login failed.'))
+                return redirect(redirect_path)
+    except:
+        import sys
+        print(sys.exc_info())
+        raise
+    return response
 
 
 @auth_bp.before_app_request
@@ -78,6 +132,17 @@ def signup():
     return render_template('auth/signup.html', form=form)
 
 
+@auth_bp.route('/login/<soc_network_name>', methods=['GET', 'POST'])
+def login_soc_network(soc_network_name):
+    #return login_signup_general(soc_network_name)
+    return login_signup_general('profireader', soc_network_name)
+
+
+@auth_bp.route('/signup/<soc_network_name>', methods=['GET', 'POST'])
+def signup_soc_network(soc_network_name):
+    return login_signup_general('profireader', soc_network_name)
+
+
 # read: flask.ext.login
 # On a production server, the login route must be made available over
 # secure HTTP so that the form data transmitted to the server is en‐
@@ -106,48 +171,6 @@ def login():
         flash('Invalid username or password.')
         return redirect(url_for('auth.login'))
     return render_template('auth/login.html', form=form)
-
-@auth_bp.route('/login/<soc_network_name>', methods=['GET', 'POST'])
-def login_soc_network(soc_network_name):
-    if g.user_init and g.user_init.is_authenticated():
-        raise BadDataProvided
-
-    response = make_response()
-    try:
-        result = g.authomatic.login(WerkzeugAdapter(request, response),
-                                    soc_network_name)
-        if result:
-            if result.user:
-                result.user.update()
-                result_user = result.user
-                db_fields = DB_FIELDS[soc_network_name]
-                user = db_session.query(User).\
-                    filter(getattr(User, db_fields['id']) == result_user.id)\
-                    .first()
-                if not user:
-                    user = User()
-                    for elem in SOC_NET_FIELDS:
-                        setattr(user, db_fields[elem],
-                                getattr(result_user, elem))
-                    db_session.add(user)
-                    user.confirmed = True
-                    db_session.commit()
-                login_user(user)
-
-                # session['user_id'] = user.id assignment
-                # is automatically executed by login_user(user)
-
-                return redirect('/')  # #  http://aprofi.d.ntaxa.com/
-            elif result.error:
-                redirect_path = '#/?msg={}'.\
-                    format(quote(soc_network_name + ' login failed.'))
-                return redirect(redirect_path)
-
-    except:
-        import sys
-        print(sys.exc_info())
-        raise
-    return response
 
 
 @auth_bp.route('/logout/', methods=['GET'])
@@ -199,6 +222,7 @@ def change_password():
 @auth_bp.route('/reset', methods=['GET', 'POST'])
 def password_reset_request():
     if not current_user.is_anonymous():
+        flash('To reset your password logout first please.')
         return redirect(url_for('general.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():

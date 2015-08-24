@@ -18,13 +18,13 @@
         <img class="img-rounded profile-thumbnail" src="{{ g.user.gravatar(size=256) }}"><br>
         Your email: {{ g.user.profireader_email }} <br>
         Your display name: {{ g.user.profireader_name }} <br>
-        Your first name: {{ g.user.profireader_first_name }} <br>
-        Your last name: {{ g.user.profireader_last_name }} <br>
-        Gender: {{ g.user.profireader_gender }} <br>
-        Your web-page: {{ g.user.profireader_link }} <br>
-        Phone:  {{ g.user.profireader_phone.national }} <br>
-        Your location: {{ g.user.location }} <br>
-        About: {{ g.user.about_me }} <br>
+        Your first name: {{ g.user.profireader_first_name or ''}} <br>
+        Your last name: {{ g.user.profireader_last_name or ''}} <br>
+        Gender: {{ g.user.profireader_gender or ''}} <br>
+        Your web-page: {{ g.user.profireader_link or ''}} <br>
+        Phone:  {{ g.user.profireader_phone.national or ''}} <br>
+        Your location: {{ g.user.location or ''}} <br>
+        About: {{ g.user.about_me or ''}} <br>
 {#        <p>Member since {{ '{{' }} user.registered_tm {{ '}}' }}.</p>#}
         <p>Member since {{ moment(g.user.registered_tm).format('L') }}.</p>
     </div>

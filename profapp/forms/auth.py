@@ -32,7 +32,8 @@ class RegistrationForm(Form):
 
     def validate_displayname(self, field):
         if User.query.filter_by(profireader_name=field.data).first():
-            raise ValidationError('Username already in use.')
+            pass
+            #raise ValidationError('Username already in use.')
 
 
 class ChangePasswordForm(Form):
