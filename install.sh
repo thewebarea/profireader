@@ -162,8 +162,10 @@ function menu_venv {
 function menu_modules {
     req=$(rr 'file with modules' requirements.txt)
     destdir=$(rr 'venv directory' .venv)
-    conf_comm "source $destdir/bin/activate
-pip3 install -r $req" nosudo port
+    conf_comm "
+cd `pwd`
+source $destdir/bin/activate
+pip install -r $req" nosudo port
     }
 
 function menu_port {
