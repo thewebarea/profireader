@@ -55,7 +55,6 @@ class ArticleVersion(Base):
         return self
 
 
-
     def create(self):
         pass
 
