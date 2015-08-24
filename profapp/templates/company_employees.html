@@ -19,116 +19,46 @@
 
                 <a href="{{ url_for('company.subscribe', company_id=comp.id)}}">Subscribe to this company</a>
 
-            {% elif curr_user %}
-
-                <span></span>
-
-            {% endif %}
-
-            {% for c_user in curr_user %}
-
-
-                {% if curr_user[c_user]['status'] != 'active' %}
-
-
-                    <a href="{{ url_for('company.subscribe', company_id=comp.id)}}">Subscribe to this company</a>
-
                 {% endif %}
 
-            {% endfor %}
-    {% endfor %}
+
+        {% endfor %}
     </span>
       <form class="add_rights" action="{{ url_for('company.employees', comp_id=comp.id) }}" onsubmit="return AjaxPost()" id="rights" method="post">
-    {% for key in company_user_rights %}
+          {% for key in company_user_rights %}
             <dt><img src="{{ company_user_rights[key]['user'].gravatar() }}">{{ company_user_rights[key]['name'] }}<br>
             Phone number : {{ company_user_rights[key]['user'].phone_number }}<br>
             Email : {{ company_user_rights[key]['user'].show_email }}
             </dt>
-             {% for company in company_user_rights[key]['companies'] %}
+              {% for company in company_user_rights[key]['companies'] %}
                 <dt> ALL COMPANIES :
-                {% for c in company %}
+                    {% for c in company %}
                 <a href="{{ url_for('company.profile', company_id=c.id)}}">{{ c.name }}</a>
-                {% endfor %}</dt><br>
-                 {% if curr_user %}
-                     <dt> Rights in this company: </dt>
-                        {% for c_user in curr_user %}
-                                {% if 'manage_access_company' in curr_user[c_user]['rights'] %}
-
-                                    {% for right in company_user_rights[key]['rights'] %}
-                                        <input type="checkbox" id="right" name="right" value="{{ right }}" checked="checked">{{ right }}<br>
-                                    {% endfor %}
-                                    {% for not_allow in company_user_rights[key]['not_allowed'] %}
-                                    <input type="checkbox" id="right" name="right" value="{{ not_allow }}">{{ not_allow }}<br>
-                                    {% endfor %}
-
-                                    <input type="submit" id="apply" value="Apply rights">
-                                {% elif not 'manage_access_company' in curr_user[c_user]['rights'] %}
-                                    {% for right in company_user_rights[key]['rights'] %}
-                                        <input type="checkbox" id="right" name="right" value="{{ right }}" disabled="disabled" checked="checked">{{ right }}<br>
-                                    {% endfor %}
-                                {% endif %}
-                        {% endfor %}
-                 {% endif %}
-             {% endfor %}
-        </form>
-    {% endfor %}<br>
-      <script type="text/javascript">
-
- function AjaxPost() {
-  $.post('', {
-             'right': $("#right").val(),
-      'name': $("#name").val(),
-              'id': $("#id").val(),
-             'req': $("#req").val()
-
- }, function (resp) {
-             console.log(resp);
-           },
-   'json');
-   return true;
- };
-</script>
-
-    {% if curr_user %}
-
-        {% for c_user in curr_user %}
-
-            {% for r in curr_user[c_user]['rights'] %}
-
-
-                {% if r == 'manage_access_company' %}
-
-                    {% for key in company_user_rights %}
-
-                        {% if company_user_rights[key]['status'] != 'active' %}
-
-                            User {{ company_user_rights[key]['name'] }} send query to your company
-
+                    {% endfor %}</dt><br>
+                  {% if curr_user %}
+                      {% for c_user in curr_user %}
+                          {% if curr_user[c_user]['rights']['manage_access_company']==true or comp.author_user_id==g.user_dict['id'] %}
+                              {% if company_user_rights[key]['status'] != 'active' %}
+                            User {{ company_user_rights[key]['name'] }} send query to your company<br>
                             <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
-
                                 <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
-
                                 <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
-
                                 <input type="hidden" id="req1" name="req" value="True">
-
                                 <input type="submit" id="apply" value="Add {{ company_user_rights[key]['name'] }} to your company">
-
+                            </form>
+                            <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
+                                <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+                                <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
+                                <input type="hidden" id="req1" name="req" value='False'>
+                                <input type="submit" id="reject" value="Don't add {{ company_user_rights[key]['name'] }} to your company">
                             </form>
 
+                        {% endif %}
 
 
-                            <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
+                         {% endif %}
 
-                                <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
-
-                                <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
-
-                                <input type="hidden" id="req1" name="req" value='False'>
-
-                                <input type="submit" id="reject" value="Don't add {{ company_user_rights[key]['name'] }} to your company">
-
-                            </form>{% endif %}{% endfor %}{% endif %}{% endfor %}{% endfor %}
+                     {% endfor %}
 
     {% else %}<span></span>
 
@@ -140,17 +70,63 @@
              'comp_id': $("#comp_id").val(),
       'user_id': $("#user_id").val(),
              'req': $("#req1").val()
-
  }, function (resp) {
              console.log(resp);
            },
    'json');
    return true;
  };
-
     </script>
 
     <br>
+                 {% if curr_user %}
+                        {% for c_user in curr_user %}
+                            {% if curr_user[c_user]['status']=='active' and company_user_rights[key]['status']=='active' %}
+                            <dt> Rights in this company: </dt>
+                                {% if curr_user[c_user]['rights']['manage_access_company']==true %}
+
+                                    <input type="hidden" id="user_id" value="{{ company_user_rights[key]['user'].id }}">
+                                    {% for right in company_user_rights[key]['rights'] %}
+
+                                        {% if company_user_rights[key]['rights'][right]==true %}
+                                        <input type="checkbox" id="right" name="right" value="{{ right }}" checked="checked">{{ right }}<br>
+                                        {% else %}
+                                            <input type="checkbox" id="right" name="right" value="{{ right }}">{{ right }}<br>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                {% else %}
+                                    {% for right in company_user_rights[key]['rights'] %}
+                                        {% if company_user_rights[key]['rights'][right]==true %}
+                                        <input type="checkbox" id="right" name="right" value="{{ right }}" disabled="disabled" checked="checked">{{ right }}<br>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                 {% endif %}
+             {% endfor %}
+
+
+    {% endfor %}
+      <input type="submit" id="apply" value="Apply rights">
+    </form>
+    <br>
+      <script type="text/javascript">
+ function AjaxPost() {
+  $.post('', {
+             'right': $("#right").val(),
+      'name': $("#name").val(),
+              'id': $("#user_id").val(),
+             'req': $("#req").val()
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return false;
+ };
+</script>
+
 {% endblock content %}
 
 {% block footer %}

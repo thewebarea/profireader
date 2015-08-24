@@ -28,7 +28,7 @@ class Company(Base):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    user_company_rs = relationship('UserCompany', backref='company')
+    user_company_rs = relationship('UserCompany', backref='company', lazy='dynamic')
 #TODO
     # employee = relationship
 
@@ -56,7 +56,7 @@ class Company(Base):
 
     @staticmethod
     def employee_rights(company_id, user_id):
-        ret = db(UserCompany, company_id=company_id, user_id=user_id).one()
+        ret = db(UserCompany, company_id=company_id, user_id=user_id).one().right
         return ret
 
     @staticmethod
@@ -203,10 +203,10 @@ class Right(Base):
 
         emplo = {}
         for x in Company.employee(comp_id):
-
             emplo[x.user_id] = x.user_id
             emplo[x.user_id] = {'name': x.user.user_name, 'user': x.user, 'rights': [],
                                 'companies': [x.user.companies], 'status': x.status}
             emplo[x.user_id]['rights'] = {y: False for y in COMPANY_OWNER}
-            emplo[x.user_id]['rights'] = {y.company_right_id: True for y in x.right}
+            for r in Company.employee_rights(comp_id, x.user_id):
+                emplo[x.user_id]['rights'][r.company_right_id] = True
         return emplo

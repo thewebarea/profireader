@@ -17,7 +17,7 @@ ROLE = {
     GUEST: 'guest',
     READER: 'reader'
 }
-COMPANY_OWNER = ['owner', 'edit', 'publish', 'un_publish', 'upload_files', 'delete_files', 'add_employee',
+COMPANY_OWNER = ['edit', 'publish', 'un_publish', 'upload_files', 'delete_files', 'add_employee',
                  'suspend_employee', 'send_publications', 'manage_access_company', 'manage_access_portal',
                  'article_priority', 'manage_readers', 'manage_companies_partners', 'manage_comments']
 
