@@ -49,40 +49,44 @@ def profile(company_id):
                            image=url_for('filemanager.get', id=comp.logo_file)
                            )
 
-@company_bp.route('/employees/<string:comp_id>/', methods=['GET', 'POST'])
+@company_bp.route('/employees/<string:comp_id>/')
 def employees(comp_id):
 
     company = Company()
-    r = Right()
-    company_user_rights = r.show_rights(comp_id)
-    curr_user = {g.user_dict['id']: company_user_rights[user] for user in company_user_rights
-                 if user == g.user_dict['id']}
+    company_user_rights = Right().show_rights(comp_id)
+    curr_user = {g.user_dict['id']: company_user_rights[user] for user
+                 in company_user_rights if user == g.user_dict['id']}
     current_company = company.query_company(company_id=comp_id)
 
     return render_template('company_employees.html',
                            comp=current_company,
                            company_user_rights=company_user_rights,
-                           curr_user=curr_user,
-                           all_rights=COMPANY_OWNER
+                           curr_user=curr_user
                            )
+
+@company_bp.route('/update_rights', methods=['POST'])
+def update_rights():
+
+    data = request.form
+    Right.update_rights(user_id=data['user_id'], comp_id=data['comp_id'], rights=data.getlist('right'))
+
+    return redirect(url_for('company.employees', comp_id=data['comp_id']))
 
 @company_bp.route('/edit/<string:company_id>/')
 def edit(company_id):
 
-    company = Company()
-    comp_query = company.query_company(company_id=company_id)
-    user_query = company.query_employee(comp_id=company_id)
+    comp = Company().query_company(company_id=company_id)
+    user = Company().query_employee(comp_id=company_id)
 
     return render_template('company_edit.html',
-                           comp=comp_query,
-                           user_query=user_query
+                           comp=comp,
+                           user_query=user
                            )
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 def confirm_edit(company_id):
 
-    company = Company()
-    company.update_comp(company_id=company_id, data=request.form, file=request.files['logo_file'])
+    Company().update_comp(company_id=company_id, data=request.form, file=request.files['logo_file'])
     return redirect(url_for('company.profile', company_id=company_id))
 
 @company_bp.route('/subscribe/<string:company_id>/')
@@ -113,3 +117,21 @@ def confirm_subscriber():
     comp_role.apply_request(comp_id=data['comp_id'], user_id=data['user_id'], bool=data['req'])
 
     return redirect(url_for('company.profile', company_id=data['comp_id']))
+
+@company_bp.route('/suspend_employee/', methods=['POST'])
+def suspend_employee():
+
+    data = request.form
+    UserCompanyRight.suspend_employee(user_id=data['user_id'], comp_id=data['comp_id'])
+
+    return redirect(url_for('company.employees', comp_id=data['comp_id']))
+
+@company_bp.route('/suspended_employees/<string:comp_id>')
+def suspended_employees(comp_id):
+
+    comp = Company().query_company(company_id=comp_id)
+    suspended_employee = Right.suspended_employees(comp_id)
+    return render_template('company_suspended.html',
+                           suspended_employees=suspended_employee,
+                           comp=comp
+                           )
