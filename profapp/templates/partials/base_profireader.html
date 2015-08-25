@@ -11,7 +11,6 @@
 
     module.controller('UserLoginController', ['$scope', '$modal',  function($scope, $modal) {
         $scope.user = {{ g.user_dict|tojson|safe }};
-
         $scope.open_filemanager = function() {
 var modalInstance = $modal.open({
             templateUrl: 'filemanager.html',
@@ -46,7 +45,7 @@ var modalInstance = $modal.open({
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">Profireader</a>
+      <a class="navbar-brand" href="{{ url_for('general.index') }}">Profireader</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
@@ -54,9 +53,9 @@ var modalInstance = $modal.open({
       <ul class="nav navbar-nav navbar-right">
         <li ng-cloak ng-show="{{ '{{' }}!user.id{{ '}}' }}">
             <span>
-           <a href="{{ url_for('auth.login') }}">log in</a>
-           <a href="{{ url_for('auth.signup') }}">signup</a>
-                </span>
+              <a href="{{ url_for('auth.login') }}">log in</a>
+              <a href="{{ url_for('auth.signup') }}">signup</a>
+            </span>
         </li>
         <li class="dropdown" ng-cloak ng-show="user.id">
             <ul>
@@ -67,7 +66,7 @@ var modalInstance = $modal.open({
                         <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a href="{{ flask_endpoint_to_angular('user.profile', user_email='user.email') }}">Your Profile</a></li>
+                        <li><a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">Your Profile</a></li>
                         <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
                         <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
                         <li><a href="{{ url_for('company.show') }}">company</a></li>

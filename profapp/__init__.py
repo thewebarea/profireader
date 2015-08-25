@@ -42,7 +42,7 @@ def load_user():
         user_dict['logged_via'] = logged_via
 
         for attr in SOC_NET_FIELDS:
-            if attr == 'link':
+            if attr == 'link' or attr == 'phone':
                 user_dict[attr] = \
                     str(user.attribute_getter(logged_via,  attr))
             else:
@@ -58,6 +58,7 @@ def load_user():
     g.user_init = user_init
     g.user = user
     g.user_dict = user_dict
+    g.delete = {'x': None}
     pass
 
 

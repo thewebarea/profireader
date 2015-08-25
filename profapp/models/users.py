@@ -25,7 +25,7 @@ class User(Base, UserMixin):
 
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    personal_folder_file_id  = Column(String(36), ForeignKey('file.id'))
+    personal_folder_file_id = Column(String(36), ForeignKey('file.id'))
     profireader_email = Column(TABLE_TYPES['email'], unique=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])
@@ -133,7 +133,8 @@ class User(Base, UserMixin):
                  MICROSOFT_ALL=SOC_NET_NONE['microsoft'],
                  YAHOO_ALL=SOC_NET_NONE['yahoo'],
 
-                 about_me='',
+                 location=None,
+                 about_me=None,
                  #password=None,
                  confirmed=False,
 
@@ -154,6 +155,7 @@ class User(Base, UserMixin):
         self.profireader_phone = PROFIREADER_ALL['phone']
 
         self.about_me = about_me
+        self.location = location
         #self.password = password
         self.confirmed = confirmed
 
@@ -246,6 +248,9 @@ class User(Base, UserMixin):
             if not getattr(self, field):
                 completeness = False
                 break
+        #self.completeness = completeness
+        #db_session.add(self)
+        #db_session.commit()
         return completeness
 
     def logged_in_via(self):
