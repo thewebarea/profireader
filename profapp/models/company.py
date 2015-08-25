@@ -78,7 +78,7 @@ class Company(Base):
             comp_dict[x] = y
         company = Company(**comp_dict)
         db_session.add(company)
-        db_session.commit()
+        db_session.flush()
 
         user_rbac = UserCompany(user_id=company.author_user_id,
                                 company_id=company.id,
@@ -88,7 +88,7 @@ class Company(Base):
                                                                     author=g.user_dict['name'],
                                                                     author_user_id=g.user_dict['id'])})
         db_session.add(user_rbac)
-        db_session.commit()
+        db_session.flush()
         r = Right()
         r.update_rights(company.author_user_id, user_rbac.company_id, COMPANY_OWNER)
 
@@ -100,7 +100,7 @@ class Company(Base):
             comp.update({x: y})
         if file.filename:
             comp.update({'logo_file': File.upload(file=file, company_id=company_id,
-                                                  parent_id=comp.corporate_folder_file_id,
+                                                  parent_id=comp.one().corporate_folder_file_id,
                                                   author=g.user_dict['name'],
                                                   author_user_id=g.user_dict['id'])})
         db_session.commit()
@@ -124,7 +124,7 @@ class Company(Base):
 class UserCompanyRight(Base):
     __tablename__ = 'user_company_right'
     id = Column(TABLE_TYPES['bigint'], primary_key=True)
-    user_company_id = Column(TABLE_TYPES['bigint'], ForeignKey('user_company.id', onupdate='cascade'))
+    user_company_id = Column(TABLE_TYPES['bigint'], ForeignKey('user_company.id'))
     company_right_id = Column(TABLE_TYPES['rights'], ForeignKey('company_right.id'))
 
     def __init__(self, user_company_id=None, company_right_id=None):
@@ -184,8 +184,9 @@ class Right(Base):
         user = db(User, id=user_id).one()
         user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
         for right in rights:
-            ucr.append(UserCompanyRight(company_right_id=right))
+            ucr.append(UserCompanyRight(company_right_id=right, user_company_id=user_right.id))
         if user_right.right:
+            db(UserCompanyRight, user_company_id=user_right.id).delete()
             user_right.right = ucr
         else:
             user_right.company = db(Company, id=comp_id).one()
