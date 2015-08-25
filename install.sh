@@ -186,46 +186,32 @@ function menu_db_user_pass {
     
     }
 
+function menu_db_rename {
+    profidb=$(get_profidb)
+    runsql "ALTER DATABASE $profidb RENAME TO bak_$profidb""_$date" 'db_create'
+    }
+
 function menu_db_create {
     profidb=$(get_profidb)
     psqldb=$(rr 'Enter postgresql database name' $profidb)
     
     profiuser=`cat secret_data.py | grep 'DB_USER' | sed -e 's/^\s*DB_USER\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
-    runsql "CREATE DATABASE $psqldb WITH ENCODING 'UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8'  OWNER = $profiuser TEMPLATE=template0" db_struct
+    runsql "CREATE DATABASE $psqldb WITH ENCODING 'UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8'  OWNER = $profiuser TEMPLATE=template0" db_load
     }
 
-function menu_db_struct {
-    runsql_dump 'Enter sql structure filename' database_structure.sql db_initial
+function menu_db_load {
+    runsql_dump 'Enter sql structure filename' database.sql db_save
     }
 
-function menu_db_initial {
-    runsql_dump 'Enter sql initial data filename' database_initial_data.sql 'db_backup'
-    }
-
-function menu_db_backup {
-    profidb=$(get_profidb)
-    runsql "ALTER DATABASE $profidb RENAME TO bak_$profidb""_$date" 'db_save_struct'
-    }
-
-function menu_db_save_struct {
+function menu_db_save {
     profidb=$(get_profidb)
     conf_comm "
-mv database_structure.sql database_structure.sql.bak
-su postgres -c 'pg_dump -s $profidb' > database_structure.sql
-git diff database_structure.sql" sudo db_save_initial
+mv database.sql database.sql.bak
+su postgres -c 'pg_dump -s $profidb' > database.sql
+tables=\$(su postgres -c \"echo 'SELECT RelName FROM pg_Description JOIN pg_Class ON pg_Description.ObjOID = pg_Class.OID WHERE ObjSubID = 0 AND Description LIKE '\\\"'\\\"%persistent%\\\"'\\\" | psql -t $profidb\" | sed '/^\\s*\$/d' | sed -e 's/^/-t /g' | tr \"\\n\" \" \" )
+su postgres -c \"pg_dump --inserts -a \$tables $profidb\" >> database.sql
+git diff database.sql" sudo 'exit'
     }
-
-function menu_db_save_initial {
-    profidb=$(get_profidb)
-    tables=$(sed -e 's/^/-t /g' ./initial_tables.txt | tr "\\n" " ")
-    conf_comm "
-mv database_initial_data.sql database_initial_data.sql.bak
-su postgres -c 'pg_dump --inserts -a $tables $profidb' > database_initial_data.sql
-git diff database_initial_data.sql" sudo 'exit'
-    }
-
-
-
 
 
 next='_'
@@ -249,12 +235,10 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "modules" "install required python modules (via pip)" \
 "port" "redirect port at localhost 80->8080" \
 "db_user_pass" "create postgres user/password" \
+"db_rename" "rename database (create backup)" \
 "db_create" "create empty database" \
-"db_struct" "import database structure from file" \
-"db_initial" "import database initial data" \
-"db_backup" "rename database (create backup)" \
-"db_save_struct" "save database structure to file" \
-"db_save_initial" "save database required for project start" \
+"db_load" "load database from file" \
+"db_save" "save database to file" \
 "exit" "Exit" 2> /tmp/selected_menu_
 reset
 date=`date +"%y_%m_%d___%H_%M"`
