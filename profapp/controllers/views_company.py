@@ -75,13 +75,12 @@ def update_rights():
 @company_bp.route('/edit/<string:company_id>/')
 def edit(company_id):
 
-    company = Company()
-    comp_query = company.query_company(company_id=company_id)
-    user_query = company.query_employee(comp_id=company_id)
+    comp = Company().query_company(company_id=company_id)
+    user = Company().query_employee(comp_id=company_id)
 
     return render_template('company_edit.html',
-                           comp=comp_query,
-                           user_query=user_query
+                           comp=comp,
+                           user_query=user
                            )
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
@@ -118,3 +117,21 @@ def confirm_subscriber():
     comp_role.apply_request(comp_id=data['comp_id'], user_id=data['user_id'], bool=data['req'])
 
     return redirect(url_for('company.profile', company_id=data['comp_id']))
+
+@company_bp.route('/suspend_employee/', methods=['POST'])
+def suspend_employee():
+
+    data = request.form
+    UserCompanyRight.suspend_employee(user_id=data['user_id'], comp_id=data['comp_id'])
+
+    return redirect(url_for('company.employees', comp_id=data['comp_id']))
+
+@company_bp.route('/suspended_employees/<string:comp_id>')
+def suspended_employees(comp_id):
+
+    comp = Company().query_company(company_id=comp_id)
+    suspended_employee = Right.suspended_employees(comp_id)
+    return render_template('company_suspended.html',
+                           suspended_employees=suspended_employee,
+                           comp=comp
+                           )

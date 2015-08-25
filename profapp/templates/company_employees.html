@@ -62,30 +62,35 @@
                         {% endfor %}
                  {% endif %}
               {% endfor %}</form>
+    {% for c_user in curr_user %}
+        {% if curr_user[c_user]['rights']['suspend_employee']==true and company_user_rights[key]['status']=='active' and c_user != key%}
+        <form class="suspend_employee" action="{{ url_for('company.suspend_employee') }}" onsubmit="return AjaxPost()" method="post">
+        <input type="hidden" id='comp_id' name="comp_id" value="{{ comp.id }}">
+        <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
+        <input type="submit" value="Suspend {{ company_user_rights[key]['name'] }} from your company">
+        </form>
+        {% endif %}
     {% endfor %}
 
-
-
-{#    <br><br>#}
-{#      <script type="text/javascript">#}
-{# function AjaxPost() {#}
-{#  $.post('', {#}
-{#             'right': $("#right").val(),#}
-{#              'comp_id': $("#comp_id").val(),#}
-{#              'user_id': $("#user_id").val()#}
-{# }, function (resp) {#}
-{#             console.log(resp);#}
-{#           },#}
-{#   'json');#}
-{#   return true;#}
-{# };#}
-{#</script>#}
+    {% endfor %}
+      <script type="text/javascript">
+ function AjaxPost() {
+  $.post('', {
+             'comp_id': $("#comp_id").val(),
+              'user_id': $("#user_id").val()
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return true;
+ };
+</script>
 
 {% for key in company_user_rights %}
     {% if curr_user %}
         {% for c_user in curr_user %}
             {% if curr_user[c_user]['rights']['manage_access_company']==true or comp.author_user_id==g.user_dict['id'] %}
-                {% if company_user_rights[key]['status'] != 'active' %}
+                {% if company_user_rights[key]['status'] == 'nonactive' %}
                     User {{ company_user_rights[key]['name'] }} send query to your company<br>
                     <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
                         <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
@@ -119,6 +124,8 @@
    return true;
  };
     </script>
+    <br>
+    <a href="{{ url_for('company.suspended_employees', comp_id=comp.id) }}">SUSPENDED EMPLOYEES</a>
 
 {% endblock content %}
 

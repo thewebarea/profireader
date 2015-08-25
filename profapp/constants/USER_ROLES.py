@@ -64,3 +64,6 @@ class RIGHTS:
 
     def MANAGE_COMMENTS(self):
         return 'manage_comments'
+
+    def SUBSCRIBE_TO_PORTALS(self):
+        return 'subscribe_to_portals'

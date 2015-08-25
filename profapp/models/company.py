@@ -147,15 +147,20 @@ class UserCompanyRight(Base):
     @staticmethod
     def apply_request(comp_id, user_id, bool):
 
-        r = Right()
         if bool == 'True':
             stat = STATUS().ACTIVE()
-            r.update_rights(user_id, comp_id, Config.BASE_RIGHT_IN_COMPANY)
+            Right().update_rights(user_id, comp_id, Config.BASE_RIGHT_IN_COMPANY)
         else:
             stat = STATUS().REJECT()
         db(UserCompany, company_id=comp_id, user_id=user_id,
            status=STATUS().NONACTIVE()).update({'status': stat})
         db_session.commit()
+
+    @staticmethod
+    def suspend_employee(comp_id, user_id):
+        db(UserCompany, company_id=comp_id, user_id=user_id).update({'status': STATUS.SUSPEND()})
+        db_session.commit()
+
 
 class UserCompany(Base):
 
@@ -164,12 +169,14 @@ class UserCompany(Base):
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
     status = Column(TABLE_TYPES['id_profireader'])
+    upd_time = Column(TABLE_TYPES['timestamp'])
     right = relationship(UserCompanyRight, backref='user_company')
 
-    def __init__(self, user_id=None, company_id=None, status=None, right=[]):
+    def __init__(self, user_id=None, company_id=None, status=None, right=[], upd_time=None):
         self.user_id = user_id
         self.company_id = company_id
         self.status = status
+        self.upd_time = upd_time
         self.right = right
 
 class Right(Base):
@@ -208,3 +215,13 @@ class Right(Base):
             for r in Company.employee_rights(comp_id, x.user_id):
                 emplo[x.user_id]['rights'][r.company_right_id] = True
         return emplo
+
+    @staticmethod
+    def suspended_employees(comp_id):
+        suspended_employees = {}
+        for x in Company.employee(comp_id):
+            if x.status == STATUS.SUSPEND():
+                suspended_employees[x.user_id] = x.user_id
+                suspended_employees[x.user_id] = {'name': x.user.user_name, 'user': x.user,
+                                                  'companies': [x.user.companies]}
+        return suspended_employees

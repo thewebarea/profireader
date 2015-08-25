@@ -23,3 +23,7 @@ class STATUS:
     @staticmethod
     def REJECT():
         return 'reject'
+
+    @staticmethod
+    def SUSPEND():
+        return 'suspend'
