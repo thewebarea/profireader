@@ -250,6 +250,19 @@ CREATE TABLE company (
 ALTER TABLE public.company OWNER TO pfuser;
 
 --
+-- Name: company_portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE company_portal (
+    id character varying(36) NOT NULL,
+    company_id character varying(36) NOT NULL,
+    portal_id character varying(36) NOT NULL
+);
+
+
+ALTER TABLE public.company_portal OWNER TO postgres;
+
+--
 -- Name: company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -308,12 +321,25 @@ CREATE TABLE "group" (
 ALTER TABLE public."group" OWNER TO pfuser;
 
 --
+-- Name: portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE portal (
+    id character varying(36) NOT NULL,
+    name character varying(100) NOT NULL,
+    portal_plan_id character varying(36) NOT NULL
+);
+
+
+ALTER TABLE public.portal OWNER TO postgres;
+
+--
 -- Name: portal_plan; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 CREATE TABLE portal_plan (
     id character varying(36) NOT NULL,
-    name character varying(50) NOT NULL
+    name character varying(100) NOT NULL
 );
 
 
@@ -394,7 +420,8 @@ CREATE TABLE "user" (
     yahoo_phone character varying(20),
     personal_folder_file_id character varying(36),
     profireader_avatar_url character varying(200) DEFAULT '/static/no_avatar.png'::character varying NOT NULL,
-    group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL
+    group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL,
+    banned boolean DEFAULT false NOT NULL
 );
 
 
@@ -511,6 +538,14 @@ ALTER TABLE ONLY company
 
 
 --
+-- Name: company_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY company_portal
+    ADD CONSTRAINT company_portal_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: company_right_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -532,6 +567,14 @@ ALTER TABLE ONLY file_content
 
 ALTER TABLE ONLY file
     ADD CONSTRAINT file_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_pkey PRIMARY KEY (id);
 
 
 --
@@ -694,10 +737,31 @@ CREATE TRIGGER id BEFORE INSERT ON article_version FOR EACH ROW EXECUTE PROCEDUR
 
 
 --
+-- Name: id; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER id BEFORE INSERT ON portal FOR EACH ROW EXECUTE PROCEDURE row_id();
+
+
+--
+-- Name: id; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER id BEFORE INSERT ON company_portal FOR EACH ROW EXECUTE PROCEDURE row_id();
+
+
+--
 -- Name: md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
 CREATE TRIGGER md_tm BEFORE INSERT OR UPDATE ON user_company FOR EACH ROW EXECUTE PROCEDURE row_md();
+
+
+--
+-- Name: uid; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER uid BEFORE INSERT ON portal_plan FOR EACH ROW EXECUTE PROCEDURE row_id();
 
 
 --
@@ -730,6 +794,22 @@ ALTER TABLE ONLY company
 
 ALTER TABLE ONLY company
     ADD CONSTRAINT company_logo_file_fkey FOREIGN KEY (logo_file) REFERENCES file(id);
+
+
+--
+-- Name: company_portal_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY company_portal
+    ADD CONSTRAINT company_portal_company_id_fkey FOREIGN KEY (company_id) REFERENCES company(id);
+
+
+--
+-- Name: company_portal_portal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY company_portal
+    ADD CONSTRAINT company_portal_portal_id_fkey FOREIGN KEY (portal_id) REFERENCES portal(id);
 
 
 --
@@ -786,6 +866,14 @@ ALTER TABLE ONLY article_version
 
 ALTER TABLE ONLY "user"
     ADD CONSTRAINT fk_user_personal_folder FOREIGN KEY (personal_folder_file_id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: portal_portal_plan_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_portal_plan_id_fkey FOREIGN KEY (portal_plan_id) REFERENCES portal_plan(id);
 
 
 --
