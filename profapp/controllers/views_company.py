@@ -39,9 +39,8 @@ def confirm_add():
 @company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
 def profile(company_id):
 
-    company = Company()
-    comp = company.query_company(company_id=company_id)
-    user_rights = company.query_employee(comp_id=company_id)
+    comp = Company().query_company(company_id=company_id)
+    user_rights = Company().query_employee(comp_id=company_id)
 
     return render_template('company_profile.html',
                            comp=comp,
