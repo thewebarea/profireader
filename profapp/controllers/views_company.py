@@ -39,9 +39,8 @@ def confirm_add():
 @company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
 def profile(company_id):
 
-    company = Company()
-    comp = company.query_company(company_id=company_id)
-    user_rights = company.query_employee(comp_id=company_id)
+    comp = Company().query_company(company_id=company_id)
+    user_rights = Company().query_employee(comp_id=company_id)
 
     return render_template('company_profile.html',
                            comp=comp,
@@ -56,6 +55,7 @@ def employees(comp_id):
     company_user_rights = Right().show_rights(comp_id)
     curr_user = {g.user_dict['id']: company_user_rights[user] for user
                  in company_user_rights if user == g.user_dict['id']}
+
     current_company = company.query_company(company_id=comp_id)
 
     return render_template('company_employees.html',
