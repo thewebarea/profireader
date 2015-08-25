@@ -58,8 +58,6 @@ def load_user():
     g.user_init = user_init
     g.user = user
     g.user_dict = user_dict
-    g.delete = {'x': None}
-    pass
 
 
 #def load_user():
@@ -92,20 +90,29 @@ login_manager.login_view = 'auth.login'
 
 class AnonymousUser(AnonymousUserMixin):
     def gravatar(self, size=100, default='identicon', rating='g'):
-        if request.is_secure:
-            url = 'https://secure.gravatar.com/avatar'
-        else:
-            url = 'http://www.gravatar.com/avatar'
-        hash = hashlib.md5(
-            'guest@profireader.com'.encode('utf-8')).hexdigest()
-        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
-            url=url, hash=hash, size=size, default=default, rating=rating)
+        #if request.is_secure:
+        #    url = 'https://secure.gravatar.com/avatar'
+        #else:
+        #    url = 'http://www.gravatar.com/avatar'
+        #hash = hashlib.md5(
+        #    'guest@profireader.com'.encode('utf-8')).hexdigest()
+        #return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+        #    url=url, hash=hash, size=size, default=default, rating=rating)
+        return '/static/no_avatar.png'
+
+    def has_rights(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+    def is_banned(self):
+        return False
 
     def __repr__(self):
         return "<User(id = %r)>" % self.id
 
 login_manager.anonymous_user = AnonymousUser
-
 
 
 def create_app(config='config.ProductionDevelopmentConfig'):

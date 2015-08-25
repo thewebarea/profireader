@@ -69,6 +69,10 @@ def login_signup_general(*soc_network_names):
                     user.confirmed = True
                     db_session.commit()
 
+                if user.is_banned():
+                    flash('Sorry, you are banned')
+                    return redirect(url_for('general.index'))
+
                 login_user(user)
                 flash('You have successfully logged in.')
 
@@ -164,6 +168,9 @@ def login():
         user = db_session.query(User).\
             filter(User.profireader_email == form.email.data).first()
 
+        if user.is_banned():
+            flash('Sorry, you are banned')
+            return redirect(url_for('general.index'))
         if user and user.verify_password(form.password.data):
             login_user(user)
             return redirect(request.args.get('next') or
@@ -227,6 +234,9 @@ def password_reset_request():
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(profireader_email=form.email.data).first()
+        if user.is_banned():
+            flash('Sorry, you are banned')
+            return redirect(url_for('general.index'))
         if user:
             token = user.generate_reset_token()
             send_email(user.profireader_email, 'Reset Your Password',
@@ -249,6 +259,9 @@ def password_reset(token):
     form = PasswordResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(profireader_email=form.email.data).first()
+        if user.is_banned():
+            flash('Sorry, you are banned')
+            return redirect(url_for('general.index'))
         if user is None:
             return redirect(url_for('general.index'))
         if user.reset_password(token, form.password.data):

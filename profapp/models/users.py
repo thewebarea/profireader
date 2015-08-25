@@ -42,12 +42,18 @@ class User(Base, UserMixin):
 
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False)
+    _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
     registered_tm = Column(TABLE_TYPES['timestamp'],
                            default=datetime.datetime.utcnow)
     last_seen = Column(TABLE_TYPES['timestamp'],
                        default=datetime.datetime.utcnow)
-    avatar_hash = Column(TABLE_TYPES['avatar_hash'])
+    profireader_avatar_url = Column(TABLE_TYPES['avatar_url'], nullable=False,
+                                    default='/static/no_avatar.png')
+    profireader_small_avatar_url = \
+        Column(TABLE_TYPES['avatar_url'],
+               nullable=False, default='/static/no_avatar_small.png')
+    #avatar_hash = Column(TABLE_TYPES['avatar_hash'])
 
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
@@ -137,6 +143,7 @@ class User(Base, UserMixin):
                  about_me=None,
                  password=None,
                  confirmed=False,
+                 banned=False,
 
                  email_conf_key=None,
                  email_conf_tm=None,
@@ -158,7 +165,7 @@ class User(Base, UserMixin):
         self.location = location
         self.password = password
         self.confirmed = confirmed
-
+        self.banned = banned
         self.registered_tm = datetime.datetime.utcnow()   # here problems are possible
 
         self.email_conf_key = email_conf_key
@@ -222,6 +229,29 @@ class User(Base, UserMixin):
         self.yahoo_link = YAHOO_ALL['link']
         self.yahoo_phone = YAHOO_ALL['phone']
 
+    @property
+    def banned(self):
+        return self._banned
+
+    @banned.setter
+    def banned(self, ban):
+        self._banned = ban
+
+    def is_banned(self):
+        return self.banned
+
+    def ban(self):
+        self.banned = True
+        db_session.add(self)
+        db_session.commit()
+        return self
+
+    def unban(self):
+        self.banned = False
+        db_session.add(self)
+        db_session.commit()
+        return self
+
     def ping(self):
         self.last_seen = datetime.datetime.utcnow()
         db_session.add(self)
@@ -237,7 +267,7 @@ class User(Base, UserMixin):
         if self.profireader_email:
             email = self.profireader_email
 
-        hash = self.avatar_hash or hashlib.md5(
+        hash = hashlib.md5(
             email.encode('utf-8')).hexdigest()
         return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
             url=url, hash=hash, size=size, default=default, rating=rating)

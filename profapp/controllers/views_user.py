@@ -5,7 +5,7 @@ from ..models.users import User
 from flask.ext.login import current_user, login_required
 #from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
 from ..forms.user import EditProfileForm
-from flask import g
+from flask import g, jsonify
 
 
 #@user_bp.route('/profile/<user_id>', methods=['GET', 'POST'])
