@@ -1,11 +1,12 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
-from ..models.articles import Article
+from ..models.articles import Article, ArticleVersion
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
 from ..constants.USER_ROLES import COMPANY_OWNER
 from ..models.files import File
+from .request_wrapers import json
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show():
@@ -116,10 +117,3 @@ def confirm_subscriber():
     return redirect(url_for('company.profile', company_id=data['comp_id']))
 
 
-@company_bp.route('/clone_article/', methods=['POST'])
-def clone_article():
-    data = request.form
-    company = Company(data['company_id'])
-    article = Article(data['article_id'])
-    article.clone
-    pass

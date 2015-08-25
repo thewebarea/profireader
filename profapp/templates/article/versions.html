@@ -1,19 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "index_lazy_layout.html" %}
 
-<h2>Article history</h2>
+{% block title %}Article history{% endblock title %}
+
+{% block portal_content %}
+
+    <script>
+    module.controller('article_my_versions', ['$scope', '$modal',  function($scope, $modal) {
+
+
+    }]);
+</script>
 
 {% for version in article_versions %}
-    {{ version['name'] }}<br/>
-    &nbsp;&nbsp;&nbsp;<a href="{{ url_for('article.update', article_version_id=version['id']) }}">Edit this version</a><br/>
-    <form action="{{ url_for('company.clone_article') }}">&nbsp;&nbsp;&nbsp;send this version to company&nbsp;<input name="send_to_company_id"/>&nbsp;<button>send</button></form>
-    <br/>
-{% endfor %}
 
-</body>
-</html>
+    &nbsp;&nbsp;&nbsp;<{{ url_for('article.update', article_version_id=version.id) }}n.id) }}">Edit this version</a><br/>
+    <form ang-ajax-form-validate ng-ajax-form {{ url_for('article.clone_for_company') }}any') }}">
+    <input type="hidden" name="article_version_id" value="{{ version.id }}" />
+        {{ version.compan        {% raw %}% raw %}
+        <span ng-hide="version.company.id">
+        &nbsp;&nbsp;&nbsp;send this version to company&nbsp;<input name="company_id"/>&nbsp;<button class="btn" type="submit">{{ submitting ? 'sending...' : 'send' }}</button>
+            <        {% endraw %}ndraw %}
+        <br/> {% endfor %}ndfor %}
+{% endblock portal_content %}
+

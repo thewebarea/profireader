@@ -32,6 +32,12 @@ INSERT INTO company_right VALUES ('manage_comments');
 INSERT INTO company_right VALUES ('owner');
 INSERT INTO company_right VALUES ('comment');
 
+INSERT INTO "group" VALUES ('anonymous');
+INSERT INTO "group" VALUES ('unconfirmed');
+INSERT INTO "group" VALUES ('member');
+INSERT INTO "group" VALUES ('god');
+INSERT INTO "group" VALUES ('banned');
+
 
 --
 -- PostgreSQL database dump complete

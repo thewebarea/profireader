@@ -10,7 +10,7 @@
 {% endblock metas %}
 
 {% block styles %}
-    {{ super() }}
+{#    {{ super() }}#}
 {#    <link rel="stylesheet" type="text/css" href="/static/filemanager/angular-filemanager.css">#}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'image_editor/dist/cropper.css') }}">
     {#<link href="{{ url_for('static', filename = 'image_editor/assets/css/bootstrap.min.css') }}" rel="stylesheet">#}
@@ -20,6 +20,7 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     #}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 {%- endblock styles %}
 
 {%- block head %}
@@ -33,9 +34,14 @@
 {#    <script src="{{ url_for('static', filename = 'image_editor/dist/cropper.js') }}"></script>#}
     {#<script src="{{ url_for('static', filename = 'image_editor/demo/js/main.js') }}"></script>#}
 {#    <script src="/static/filemanager/angular-filemanager.min.js"></script><!-- Comment if you need to use raw source code -->#}
+
 {#    <script src="/static/filemanager/cached-templates.js"></script><!-- Comment if you need to use raw source code -->#}
     <script src="{{bootstrap_find_resource('jquery.js', cdn='jquery')}}"></script>
-    <script src="{{bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap')}}"></script>
+{#    <script src="{{bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap')}}"></script>#}
+
+    <script src="/static/js/underscore-min.js"></script>
+    <script src="/static/js/profireader_angular.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 {%- endblock head %}
 
 {% block body_attribs %} ng-app="Profireader"{% endblock body_attribs %}
@@ -64,3 +70,5 @@
 
 {% block scripts %}
 {%- endblock scripts %}
+
+

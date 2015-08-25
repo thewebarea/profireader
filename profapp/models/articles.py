@@ -1,7 +1,6 @@
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship, backref
 
-from db_init import Base
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.STATUS import STATUS
 from db_init import db_session
@@ -9,23 +8,23 @@ from db_init import db_session
 from ..controllers.errors import BadDataProvided
 
 from flask import g
+from .pr_base import PRBase
+from db_init import Base
+
 
 def _Q(cls):
     return db_session.query(cls)
 
+
 def _A():
     return db_session.query(Article)
+
 
 def _V():
     return db_session.query(ArticleVersion)
 
 
-
-
-
-
-class ArticleVersion(Base):
-
+class ArticleVersion(Base, PRBase):
     __tablename__ = 'article_version'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
 
@@ -34,39 +33,40 @@ class ArticleVersion(Base):
     created_from_version_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_version.id'))
     article_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article.id'))
 
-    name =  Column(TABLE_TYPES['name'], nullable=False)
-    short =  Column(TABLE_TYPES['text'], nullable=False)
-    long =  Column(TABLE_TYPES['text'], nullable=False)
+    name = Column(TABLE_TYPES['name'], nullable=False)
+    short = Column(TABLE_TYPES['text'], nullable=False)
+    long = Column(TABLE_TYPES['text'], nullable=False)
 
     article = relationship('Article')
+    company = relationship('Company')
 
     def __init__(self, created_from_version_id, author_user_id=None, company_id=None, name='', short='', long=''):
-
         self.author_user_id = author_user_id if author_user_id is not None else g.user_dict['id']
 
         self.name = name
         self.short = short
         self.long = long
-        self.article = Article() if created_from_version_id is None else _A().filter(Article.id == Article.get_one_version(created_from_version_id).article_id).one()
+        self.article = Article() if created_from_version_id is None else _A().filter(
+            Article.id == Article.get_one_version(created_from_version_id).article_id).one()
 
-    def save(self):
-        db_session.add(self)
-        db_session.commit()
+
+    def clone_for_company(self, company_id):
+        self.detach()
+        self.company_id = company_id
+        self.created_from_version_id = self.id
         return self
 
 
-    def create(self):
-        pass
-
-class Article(Base):
+class Article(Base, PRBase):
     __tablename__ = 'article'
-    versions = relationship('ArticleVersion', primaryjoin="Article.id==ArticleVersion.article_id", order_by='desc(ArticleVersion.id)')
+    versions = relationship('ArticleVersion', primaryjoin="Article.id==ArticleVersion.article_id",
+                            order_by='desc(ArticleVersion.id)')
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
 
     @staticmethod
-    def list(user_id=None, company_id = None, before_id = None):
+    def list(user_id=None, company_id=None, before_id=None):
 
-        if (user_id is None and  company_id is None):
+        if user_id is None and company_id is None:
             raise BadDataProvided
 
         ret = _A()
@@ -79,14 +79,8 @@ class Article(Base):
         return ret.all()
 
     @staticmethod
-    def get_versions(article_id, author_user_id = None):
+    def get_versions(article_id, author_user_id=None):
         ret = _V().filter_by(article_id=article_id)
         return (ret if author_user_id is None else ret.filter_by(author_user_id=author_user_id)).all()
-
-    @staticmethod
-    def get_one_version(article_version_id=None):
-        return _V().filter(ArticleVersion.id == article_version_id).one()
-
-
 
 
