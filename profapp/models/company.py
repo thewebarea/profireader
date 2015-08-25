@@ -113,6 +113,7 @@ class Company(Base):
         if employee.status == status.ACTIVE():
             return True
 
+
 class UserCompanyRight(Base):
     __tablename__ = 'user_company_right'
     id = Column(TABLE_TYPES['bigint'], primary_key=True)

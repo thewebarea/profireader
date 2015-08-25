@@ -26,7 +26,7 @@ class User(Base, UserMixin):
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     personal_folder_file_id = Column(String(36), ForeignKey('file.id'))
-    profireader_email = Column(TABLE_TYPES['email'], unique=True)
+    profireader_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])
     profireader_name = Column(TABLE_TYPES['name'])
@@ -63,7 +63,7 @@ class User(Base, UserMixin):
 
     # GOOGLE
     google_id = Column(TABLE_TYPES['id_soc_net'])
-    google_email = Column(TABLE_TYPES['email'], unique=True)
+    google_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     google_first_name = Column(TABLE_TYPES['name'])
     google_last_name = Column(TABLE_TYPES['name'])
     google_name = Column(TABLE_TYPES['name'])
@@ -73,7 +73,7 @@ class User(Base, UserMixin):
 
     # FACEBOOK
     facebook_id = Column(TABLE_TYPES['id_soc_net'])
-    facebook_email = Column(TABLE_TYPES['email'], unique=True)
+    facebook_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     facebook_first_name = Column(TABLE_TYPES['name'])
     facebook_last_name = Column(TABLE_TYPES['name'])
     facebook_name = Column(TABLE_TYPES['name'])
@@ -83,7 +83,7 @@ class User(Base, UserMixin):
 
     # LINKEDIN
     linkedin_id = Column(TABLE_TYPES['id_soc_net'])
-    linkedin_email = Column(TABLE_TYPES['email'], unique=True)
+    linkedin_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     linkedin_first_name = Column(TABLE_TYPES['name'])
     linkedin_last_name = Column(TABLE_TYPES['name'])
     linkedin_name = Column(TABLE_TYPES['name'])
@@ -93,7 +93,7 @@ class User(Base, UserMixin):
 
     # TWITTER
     twitter_id = Column(TABLE_TYPES['id_soc_net'])
-    twitter_email = Column(TABLE_TYPES['email'], unique=True)
+    twitter_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     twitter_first_name = Column(TABLE_TYPES['name'])
     twitter_last_name = Column(TABLE_TYPES['name'])
     twitter_name = Column(TABLE_TYPES['name'])
@@ -103,7 +103,7 @@ class User(Base, UserMixin):
 
     # MICROSOFT
     microsoft_id = Column(TABLE_TYPES['id_soc_net'])
-    microsoft_email = Column(TABLE_TYPES['email'], unique=True)
+    microsoft_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     microsoft_first_name = Column(TABLE_TYPES['name'])
     microsoft_last_name = Column(TABLE_TYPES['name'])
     microsoft_name = Column(TABLE_TYPES['name'])
@@ -113,7 +113,7 @@ class User(Base, UserMixin):
 
     # YAHOO
     yahoo_id = Column(TABLE_TYPES['id_soc_net'])
-    yahoo_email = Column(TABLE_TYPES['email'], unique=True)
+    yahoo_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     yahoo_first_name = Column(TABLE_TYPES['name'])
     yahoo_last_name = Column(TABLE_TYPES['name'])
     yahoo_name = Column(TABLE_TYPES['name'])
@@ -135,7 +135,7 @@ class User(Base, UserMixin):
 
                  location=None,
                  about_me=None,
-                 #password=None,
+                 password=None,
                  confirmed=False,
 
                  email_conf_key=None,
@@ -156,7 +156,7 @@ class User(Base, UserMixin):
 
         self.about_me = about_me
         self.location = location
-        #self.password = password
+        self.password = password
         self.confirmed = confirmed
 
         self.registered_tm = datetime.datetime.utcnow()   # here problems are possible
@@ -309,10 +309,12 @@ class User(Base, UserMixin):
     # https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#full-integration-example
     @password.setter
     def password(self, password):
-        self.password_hash = \
-            generate_password_hash(password,
-                                   method='pbkdf2:sha256',
-                                   salt_length=32)  # salt_length=8
+        self.password_hash = None
+        if password:
+            self.password_hash = \
+                generate_password_hash(password,
+                                       method='pbkdf2:sha256',
+                                       salt_length=32)  # salt_length=8
 
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -372,3 +374,10 @@ class User(Base, UserMixin):
             return False
         self.profireader_email = new_email
         return True
+
+    def can(self, permissions):
+        return self.role is not None and \
+            (self.role.permissions & permissions) == permissions
+
+    def is_administrator(self):
+        return self.can(Permission.ADMINISTER)

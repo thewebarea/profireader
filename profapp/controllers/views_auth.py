@@ -69,7 +69,6 @@ def login_signup_general(*soc_network_names):
                     user.confirmed = True
                     db_session.commit()
 
-
                 login_user(user)
                 flash('You have successfully logged in.')
 
@@ -156,7 +155,8 @@ def login():
     # (Andriy) I suppose it is not necessary
     if g.user_init and g.user_init.is_authenticated():
         flash('You are already logged in. If you want to login with another'
-              'account logout first, please')
+              'account logout first please')
+        redirect(url_for('general.index'))
 
     form = LoginForm()
 
