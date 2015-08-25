@@ -3,7 +3,6 @@
 --
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -205,7 +204,7 @@ CREATE TABLE article (
 );
 
 
-ALTER TABLE article OWNER TO pfuser;
+ALTER TABLE public.article OWNER TO pfuser;
 
 --
 -- Name: article_version; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -223,7 +222,7 @@ CREATE TABLE article_version (
 );
 
 
-ALTER TABLE article_version OWNER TO pfuser;
+ALTER TABLE public.article_version OWNER TO pfuser;
 
 --
 -- Name: company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -243,11 +242,25 @@ CREATE TABLE company (
     email character varying(100),
     short_description character varying(666),
     journalist_folder_file_id character varying(36),
-    corporate_folder_file_id character varying(36)
+    corporate_folder_file_id character varying(36),
+    portal_domain character varying
 );
 
 
-ALTER TABLE company OWNER TO pfuser;
+ALTER TABLE public.company OWNER TO pfuser;
+
+--
+-- Name: company_portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE company_portal (
+    id character varying(36) NOT NULL,
+    company_id character varying(36) NOT NULL,
+    portal_id character varying(36) NOT NULL
+);
+
+
+ALTER TABLE public.company_portal OWNER TO postgres;
 
 --
 -- Name: company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -258,7 +271,7 @@ CREATE TABLE company_right (
 );
 
 
-ALTER TABLE company_right OWNER TO pfuser;
+ALTER TABLE public.company_right OWNER TO pfuser;
 
 --
 -- Name: file; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -282,7 +295,7 @@ CREATE TABLE file (
 );
 
 
-ALTER TABLE file OWNER TO pfuser;
+ALTER TABLE public.file OWNER TO pfuser;
 
 --
 -- Name: file_content; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -294,18 +307,43 @@ CREATE TABLE file_content (
 );
 
 
-ALTER TABLE file_content OWNER TO pfuser;
+ALTER TABLE public.file_content OWNER TO pfuser;
 
 --
--- Name: tst; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: group; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
-CREATE TABLE tst (
-    uid uuid NOT NULL
+CREATE TABLE "group" (
+    id character varying(30) NOT NULL
 );
 
 
-ALTER TABLE tst OWNER TO postgres;
+ALTER TABLE public."group" OWNER TO pfuser;
+
+--
+-- Name: portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE portal (
+    id character varying(36) NOT NULL,
+    name character varying(100) NOT NULL,
+    portal_plan_id character varying(36) NOT NULL
+);
+
+
+ALTER TABLE public.portal OWNER TO postgres;
+
+--
+-- Name: portal_plan; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE portal_plan (
+    id character varying(36) NOT NULL,
+    name character varying(100) NOT NULL
+);
+
+
+ALTER TABLE public.portal_plan OWNER TO pfuser;
 
 --
 -- Name: user; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -381,11 +419,13 @@ CREATE TABLE "user" (
     yahoo_link text,
     yahoo_phone character varying(20),
     personal_folder_file_id character varying(36),
-    profireader_avatar_url character varying(200) DEFAULT '/static/no_avatar.png'::character varying NOT NULL
+    profireader_avatar_url character varying(200) DEFAULT '/static/no_avatar.png'::character varying NOT NULL,
+    group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL,
+    banned boolean DEFAULT false NOT NULL
 );
 
 
-ALTER TABLE "user" OWNER TO pfuser;
+ALTER TABLE public."user" OWNER TO pfuser;
 
 --
 -- Name: COLUMN "user".profireader_avatar_file_id; Type: COMMENT; Schema: public; Owner: pfuser
@@ -402,11 +442,12 @@ CREATE TABLE user_company (
     id character varying(36) NOT NULL,
     user_id character varying(36) NOT NULL,
     company_id character varying(36) NOT NULL,
-    status character varying(36) NOT NULL
+    status character varying(36) NOT NULL,
+    md_tm timestamp without time zone
 );
 
 
-ALTER TABLE user_company OWNER TO pfuser;
+ALTER TABLE public.user_company OWNER TO pfuser;
 
 --
 -- Name: user_company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -419,7 +460,7 @@ CREATE TABLE user_company_right (
 );
 
 
-ALTER TABLE user_company_right OWNER TO pfuser;
+ALTER TABLE public.user_company_right OWNER TO pfuser;
 
 --
 -- Name: user_company_right_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
@@ -433,7 +474,7 @@ CREATE SEQUENCE user_company_right_id_seq
     CACHE 1;
 
 
-ALTER TABLE user_company_right_id_seq OWNER TO pfuser;
+ALTER TABLE public.user_company_right_id_seq OWNER TO pfuser;
 
 --
 -- Name: user_company_right_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pfuser
@@ -441,6 +482,21 @@ ALTER TABLE user_company_right_id_seq OWNER TO pfuser;
 
 ALTER SEQUENCE user_company_right_id_seq OWNED BY user_company_right.id;
 
+
+--
+-- Name: user_portal_reader; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE user_portal_reader (
+    id character varying(36) NOT NULL,
+    user_id character varying(36) NOT NULL,
+    company_id character varying(36) NOT NULL,
+    status character varying(36) NOT NULL,
+    portal_plan_id character varying(36) NOT NULL
+);
+
+
+ALTER TABLE public.user_portal_reader OWNER TO pfuser;
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: pfuser
@@ -482,6 +538,14 @@ ALTER TABLE ONLY company
 
 
 --
+-- Name: company_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY company_portal
+    ADD CONSTRAINT company_portal_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: company_right_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -506,11 +570,19 @@ ALTER TABLE ONLY file
 
 
 --
--- Name: tst_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
 --
 
-ALTER TABLE ONLY tst
-    ADD CONSTRAINT tst_pkey PRIMARY KEY (uid);
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: portal_plan_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY portal_plan
+    ADD CONSTRAINT portal_plan_pkey PRIMARY KEY (id);
 
 
 --
@@ -543,6 +615,14 @@ ALTER TABLE ONLY "user"
 
 ALTER TABLE ONLY "user"
     ADD CONSTRAINT user_google_email_key UNIQUE (google_email);
+
+
+--
+-- Name: user_group_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY "group"
+    ADD CONSTRAINT user_group_pkey PRIMARY KEY (id);
 
 
 --
@@ -657,6 +737,34 @@ CREATE TRIGGER id BEFORE INSERT ON article_version FOR EACH ROW EXECUTE PROCEDUR
 
 
 --
+-- Name: id; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER id BEFORE INSERT ON portal FOR EACH ROW EXECUTE PROCEDURE row_id();
+
+
+--
+-- Name: id; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER id BEFORE INSERT ON company_portal FOR EACH ROW EXECUTE PROCEDURE row_id();
+
+
+--
+-- Name: md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER md_tm BEFORE INSERT OR UPDATE ON user_company FOR EACH ROW EXECUTE PROCEDURE row_md();
+
+
+--
+-- Name: uid; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER uid BEFORE INSERT ON portal_plan FOR EACH ROW EXECUTE PROCEDURE row_id();
+
+
+--
 -- Name: article_author_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
@@ -686,6 +794,22 @@ ALTER TABLE ONLY company
 
 ALTER TABLE ONLY company
     ADD CONSTRAINT company_logo_file_fkey FOREIGN KEY (logo_file) REFERENCES file(id);
+
+
+--
+-- Name: company_portal_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY company_portal
+    ADD CONSTRAINT company_portal_company_id_fkey FOREIGN KEY (company_id) REFERENCES company(id);
+
+
+--
+-- Name: company_portal_portal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY company_portal
+    ADD CONSTRAINT company_portal_portal_id_fkey FOREIGN KEY (portal_id) REFERENCES portal(id);
 
 
 --
@@ -737,19 +861,19 @@ ALTER TABLE ONLY article_version
 
 
 --
--- Name: fk_user_company_right_company_right_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY user_company_right
-    ADD CONSTRAINT fk_user_company_right_company_right_id FOREIGN KEY (company_right_id) REFERENCES company_right(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
 -- Name: fk_user_personal_folder; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY "user"
     ADD CONSTRAINT fk_user_personal_folder FOREIGN KEY (personal_folder_file_id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: portal_portal_plan_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_portal_plan_id_fkey FOREIGN KEY (portal_plan_id) REFERENCES portal_plan(id);
 
 
 --
@@ -761,11 +885,19 @@ ALTER TABLE ONLY user_company
 
 
 --
+-- Name: user_company_right_company_right_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY user_company_right
+    ADD CONSTRAINT user_company_right_company_right_id_fkey FOREIGN KEY (company_right_id) REFERENCES company_right(id) ON UPDATE CASCADE;
+
+
+--
 -- Name: user_company_right_user_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY user_company_right
-    ADD CONSTRAINT user_company_right_user_company_id_fkey FOREIGN KEY (user_company_id) REFERENCES user_company(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT user_company_right_user_company_id_fkey FOREIGN KEY (user_company_id) REFERENCES user_company(id) ON UPDATE CASCADE;
 
 
 --
@@ -774,6 +906,22 @@ ALTER TABLE ONLY user_company_right
 
 ALTER TABLE ONLY user_company
     ADD CONSTRAINT user_company_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id);
+
+
+--
+-- Name: user_group_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY "user"
+    ADD CONSTRAINT user_group_id FOREIGN KEY (group_id) REFERENCES "group"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: user_portal_reader_plan_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY user_portal_reader
+    ADD CONSTRAINT user_portal_reader_plan_id FOREIGN KEY (portal_plan_id) REFERENCES portal_plan(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --

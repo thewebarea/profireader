@@ -16,6 +16,7 @@
     <dt><img src="{{ suspended_employees[emplo]['user'].gravatar() }}">{{ suspended_employees[emplo]['name'] }}<br>
         Phone number : {{ suspended_employees[emplo]['user'].phone_number }}<br>
         Email : {{ suspended_employees[emplo]['user'].show_email }}
+        Suspended : {{ suspended_employees[emplo]['date'] }}
     </dt>
     {% for company in suspended_employees[emplo]['companies'] %}
         <dt> ALL COMPANIES :
