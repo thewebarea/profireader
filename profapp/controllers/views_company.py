@@ -3,8 +3,8 @@ from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
-from ..constants.USER_ROLES import COMPANY_OWNER
-from ..models.files import File
+from .has_right import has_right
+from ..constants.USER_ROLES import RIGHTS
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show():
@@ -77,6 +77,7 @@ def edit(company_id):
 
     comp = Company().query_company(company_id=company_id)
     user = Company().query_employee(comp_id=company_id)
+    has_right(Right.permissions(g.user_dict['id'], company_id, rights=[RIGHTS.EDIT()]))
 
     return render_template('company_edit.html',
                            comp=comp,
