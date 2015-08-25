@@ -30,6 +30,7 @@
               <dt><img src="{{ company_user_rights[key]['user'].gravatar() }}">{{ company_user_rights[key]['name'] }}<br>
                 Phone number : {{ company_user_rights[key]['user'].phone_number }}<br>
                 Email : {{ company_user_rights[key]['user'].show_email }}
+                Subscribed : {{ company_user_rights[key]['date'] }}
             </dt>
               {% for company in company_user_rights[key]['companies'] %}
                   <dt> ALL COMPANIES :

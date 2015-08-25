@@ -1,5 +1,6 @@
 from functools import wraps
-from flask import jsonify, request
+from flask import jsonify, request, g, abort
+from ..models.company import Right
 
 def json(func):
     @wraps(func)
@@ -28,3 +29,14 @@ def replace_brackets(func):
                         kwargs[key] = kwargs[key].replace(ch, "")
         return func(*args, **kwargs)
     return wrapper
+
+def check_rights(rights):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+
+            if not set(rights) < set(Right.permissions(user_id=g.user_dict['id'], comp_id=kwargs['company_id'])):
+                return abort(403)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
