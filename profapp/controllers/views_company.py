@@ -55,6 +55,7 @@ def employees(comp_id):
     company_user_rights = Right().show_rights(comp_id)
     curr_user = {g.user_dict['id']: company_user_rights[user] for user
                  in company_user_rights if user == g.user_dict['id']}
+
     current_company = company.query_company(company_id=comp_id)
 
     return render_template('company_employees.html',
