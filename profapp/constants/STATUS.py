@@ -1,19 +1,29 @@
 class STATUS:
 
-    def NONACTIVE(self):
+    @staticmethod
+    def NONACTIVE():
         return 'nonactive'
 
-    def ACTIVE(self):
+    @staticmethod
+    def ACTIVE():
         return 'active'
 
-    def BLOCKED(self):
+    @staticmethod
+    def BLOCKED():
         return 'blocked'
 
-    def DELETED(self):
+    @staticmethod
+    def DELETED():
         return 'deleted'
 
-    def BANED(self):
+    @staticmethod
+    def BANED():
         return 'baned'
 
-    def REJECT(self):
+    @staticmethod
+    def REJECT():
         return 'reject'
+
+    @staticmethod
+    def SUSPEND():
+        return 'suspend'
