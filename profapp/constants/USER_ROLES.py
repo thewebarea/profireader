@@ -23,47 +23,62 @@ COMPANY_OWNER = ['edit', 'publish', 'un_publish', 'upload_files', 'delete_files'
 
 class RIGHTS:
 
-    def EDIT(self):
+    @staticmethod
+    def EDIT():
         return 'edit'
 
-    def PUBLISH(self):
+    @staticmethod
+    def PUBLISH():
         return 'publish'
 
-    def UNPUBLISH(self):
+    @staticmethod
+    def UNPUBLISH():
         return 'un_publish'
 
-    def UPLOAD_FILES(self):
+    @staticmethod
+    def UPLOAD_FILES():
         return 'upload_files'
 
-    def DELETE_FILES(self):
+    @staticmethod
+    def DELETE_FILES():
         return 'delete_files'
 
-    def ADD_EMPLOYEE(self):
+    @staticmethod
+    def ADD_EMPLOYEE():
         return 'add_employee'
 
-    def SUSPEND_EMPLOYEE(self):
+    @staticmethod
+    def SUSPEND_EMPLOYEE():
         return 'suspend_employee'
 
-    def SEND_PUBLICATIONS(self):
+    @staticmethod
+    def SEND_PUBLICATIONS():
         return 'send_publications'
 
-    def MANAGE_ACCESS_COMPANY(self):
+    @staticmethod
+    def MANAGE_ACCESS_COMPANY():
         return 'manage_access_company'
 
-    def MANAGE_ACCESS_PORTAL(self):
+    @staticmethod
+    def MANAGE_ACCESS_PORTAL():
         return 'manage_access_portal'
 
-    def ARTICLE_PRIORITY(self):
+    @staticmethod
+    def ARTICLE_PRIORITY():
         return 'article_priority'
 
-    def MANAGE_READERS(self):
+    @staticmethod
+    def MANAGE_READERS():
         return 'manage_readers'
 
-    def MANAGE_COMPANIES_PARTNERS(self):
+    @staticmethod
+    def MANAGE_COMPANIES_PARTNERS():
         return 'manage_companies_partners'
 
-    def MANAGE_COMMENTS(self):
+    @staticmethod
+    def MANAGE_COMMENTS():
         return 'manage_comments'
 
-    def SUBSCRIBE_TO_PORTALS(self):
+    @staticmethod
+    def SUBSCRIBE_TO_PORTALS():
         return 'subscribe_to_portals'
