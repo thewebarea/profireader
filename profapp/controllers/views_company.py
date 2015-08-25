@@ -77,7 +77,7 @@ def edit(company_id):
 
     comp = Company().query_company(company_id=company_id)
     user = Company().query_employee(comp_id=company_id)
-    has_right(Right.permissions(g.user_dict['id'], company_id, rights='as'))
+    has_right(Right.permissions(g.user_dict['id'], company_id, rights=[RIGHTS.EDIT()]))
 
     return render_template('company_edit.html',
                            comp=comp,
