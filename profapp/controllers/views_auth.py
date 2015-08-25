@@ -17,6 +17,7 @@ from authomatic.adapters import WerkzeugAdapter
 from flask import redirect, make_response
 from flask.ext.login import login_user
 from ..constants.SOCIAL_NETWORKS import SOC_NET_NONE
+from ..constants.UNCATEGORIZED import AVATAR_SIZE, AVATAR_SMALL_SIZE
 
 #def _session_saver():
 #    session.modified = True
@@ -52,7 +53,6 @@ def login_signup_general(*soc_network_names):
                     if not user:
                         ind = True
                         user = User()
-
                     for elem in SOC_NET_FIELDS:
                         setattr(user, db_fields[elem],
                                 getattr(result_user, elem))
@@ -64,6 +64,10 @@ def login_signup_general(*soc_network_names):
                             for elem in SOC_NET_FIELDS_SHORT:
                                 setattr(user, db_fields_profireader[elem],
                                         getattr(result_user, elem))
+                        user.profireader_avatar_url = \
+                            user.gravatar(size=AVATAR_SIZE)
+                        user.profireader_small_avatar_url = \
+                            user.gravatar(size=AVATAR_SMALL_SIZE)
 
                     db_session.add(user)
                     user.confirmed = True
@@ -121,9 +125,14 @@ def signup():
         profireader_all['email'] = form.email.data
         profireader_all['name'] = form.displayname.data
         user = User(
-            PROFIREADER_ALL=profireader_all
+            PROFIREADER_ALL=profireader_all,
+            password=form.password.data  # # pass is automatically hashed
         )
-        user.password = form.password.data  # pass is automatically hashed
+        user.profireader_avatar_url = \
+            user.gravatar(size=AVATAR_SIZE)
+        user.profireader_small_avatar_url = \
+            user.gravatar(size=AVATAR_SMALL_SIZE)
+        # # user.password = form.password.data  # pass is automatically hashed
 
         db_session.add(user)
         db_session.commit()

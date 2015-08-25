@@ -13,11 +13,12 @@ json_result = {"result": {"success": True, "error": None}}
 
 @filemanager_bp.route('/')
 def filemanager():
-    library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
+    # library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
+    library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.profireader_small_avatar_url}}
     for company in g.user.companies:
         library[company.journalist_folder_file_id]={'name': "%s materisals" % (company.name, ), 'icon': ''}
         library[company.corporate_folder_file_id]={'name': "%s corporate files" % (company.name, ), 'icon': ''}
-    return render_template('filemanager.html', library = library)
+    return render_template('filemanager.html', library=library)
 
 @filemanager_bp.route('/list/', methods=['POST'])
 @json

@@ -11,7 +11,9 @@
 {% block portal_content %}
 <h1>Your Profile</h1>
 
-<img class="img-rounded profile-thumbnail" src="{{ g.user.gravatar(size=256) }}"><br>
+{#<img class="img-rounded profile-thumbnail" src="{{ g.user.gravatar(size=256) }}"><br>#}
+width:18px;border:0
+    <img class="img-rounded profile-thumbnail" src="{{ current_user.profireader_avatar_url }}" style="width:256px;border:0"><br>
 [upload picture]
 <br/>
 <br/>

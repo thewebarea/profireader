@@ -89,7 +89,7 @@ login_manager.login_view = 'auth.login'
 
 
 class AnonymousUser(AnonymousUserMixin):
-    def gravatar(self, size=100, default='identicon', rating='g'):
+    #def gravatar(self, size=100, default='identicon', rating='g'):
         #if request.is_secure:
         #    url = 'https://secure.gravatar.com/avatar'
         #else:
@@ -98,7 +98,7 @@ class AnonymousUser(AnonymousUserMixin):
         #    'guest@profireader.com'.encode('utf-8')).hexdigest()
         #return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
         #    url=url, hash=hash, size=size, default=default, rating=rating)
-        return '/static/no_avatar.png'
+        #return '/static/no_avatar.png'
 
     def has_rights(self, permissions):
         return False
