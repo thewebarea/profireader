@@ -72,7 +72,9 @@ class Config(object):
     WTF_CSRF_ENABLED = True
     WTF_CSRF_SECRET_KEY = secret_data.WTF_CSRF_SECRET_KEY
 
+
     host = secret_data.DB_HOST
+
     username = secret_data.DB_USER
     password = secret_data.DB_PASSWORD
     database = secret_data.DB_NAME
