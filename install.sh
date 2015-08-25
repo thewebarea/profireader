@@ -217,9 +217,10 @@ git diff database_structure.sql" sudo db_save_initial
 
 function menu_db_save_initial {
     profidb=$(get_profidb)
+    tables=$(sed -e 's/^/-t /g' ./initial_tables.txt | tr "\\n" " ")
     conf_comm "
 mv database_initial_data.sql database_initial_data.sql.bak
-su postgres -c 'pg_dump --inserts -a -t company_right $profidb' > database_initial_data.sql
+su postgres -c 'pg_dump --inserts -a $tables $profidb' > database_initial_data.sql
 git diff database_initial_data.sql" sudo 'exit'
     }
 
