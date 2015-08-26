@@ -250,7 +250,7 @@ CREATE TABLE company (
 ALTER TABLE public.company OWNER TO pfuser;
 
 --
--- Name: company_portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: company_portal; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 CREATE TABLE company_portal (
@@ -260,7 +260,7 @@ CREATE TABLE company_portal (
 );
 
 
-ALTER TABLE public.company_portal OWNER TO postgres;
+ALTER TABLE public.company_portal OWNER TO pfuser;
 
 --
 -- Name: company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -272,6 +272,13 @@ CREATE TABLE company_right (
 
 
 ALTER TABLE public.company_right OWNER TO pfuser;
+
+--
+-- Name: TABLE company_right; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE company_right IS 'persistent';
+
 
 --
 -- Name: file; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -321,17 +328,25 @@ CREATE TABLE "group" (
 ALTER TABLE public."group" OWNER TO pfuser;
 
 --
--- Name: portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: TABLE "group"; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE "group" IS 'persistent';
+
+
+--
+-- Name: portal; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 CREATE TABLE portal (
     id character varying(36) NOT NULL,
     name character varying(100) NOT NULL,
-    portal_plan_id character varying(36) NOT NULL
+    portal_plan_id character varying(36) NOT NULL,
+    company_owner_id character varying(36)
 );
 
 
-ALTER TABLE public.portal OWNER TO postgres;
+ALTER TABLE public.portal OWNER TO pfuser;
 
 --
 -- Name: portal_plan; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -419,9 +434,9 @@ CREATE TABLE "user" (
     yahoo_link text,
     yahoo_phone character varying(20),
     personal_folder_file_id character varying(36),
-    profireader_avatar_url character varying(200) DEFAULT '/static/no_avatar.png'::character varying NOT NULL,
+    profireader_avatar_url text DEFAULT '/static/no_avatar.png'::text NOT NULL,
     group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL,
-    banned boolean DEFAULT false NOT NULL
+    _banned boolean DEFAULT false NOT NULL
 );
 
 
@@ -538,7 +553,7 @@ ALTER TABLE ONLY company
 
 
 --
--- Name: company_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: company_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 ALTER TABLE ONLY company_portal
@@ -570,7 +585,7 @@ ALTER TABLE ONLY file
 
 
 --
--- Name: portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: portal_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 ALTER TABLE ONLY portal
@@ -737,14 +752,14 @@ CREATE TRIGGER id BEFORE INSERT ON article_version FOR EACH ROW EXECUTE PROCEDUR
 
 
 --
--- Name: id; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: id; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
 CREATE TRIGGER id BEFORE INSERT ON portal FOR EACH ROW EXECUTE PROCEDURE row_id();
 
 
 --
--- Name: id; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: id; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
 CREATE TRIGGER id BEFORE INSERT ON company_portal FOR EACH ROW EXECUTE PROCEDURE row_id();
@@ -797,7 +812,7 @@ ALTER TABLE ONLY company
 
 
 --
--- Name: company_portal_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: company_portal_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY company_portal
@@ -805,7 +820,7 @@ ALTER TABLE ONLY company_portal
 
 
 --
--- Name: company_portal_portal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: company_portal_portal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY company_portal
@@ -869,7 +884,7 @@ ALTER TABLE ONLY "user"
 
 
 --
--- Name: portal_portal_plan_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: portal_portal_plan_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY portal
@@ -941,6 +956,56 @@ REVOKE ALL ON SCHEMA public FROM postgres;
 GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO pfuser;
 GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+SET search_path = public, pg_catalog;
+
+--
+-- Data for Name: company_right; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO company_right VALUES ('edit');
+INSERT INTO company_right VALUES ('publish');
+INSERT INTO company_right VALUES ('un_publish');
+INSERT INTO company_right VALUES ('upload_files');
+INSERT INTO company_right VALUES ('delete_files');
+INSERT INTO company_right VALUES ('add_employee');
+INSERT INTO company_right VALUES ('suspend_employee');
+INSERT INTO company_right VALUES ('send_publications');
+INSERT INTO company_right VALUES ('manage_access_company');
+INSERT INTO company_right VALUES ('manage_access_portal');
+INSERT INTO company_right VALUES ('article_priority');
+INSERT INTO company_right VALUES ('manage_readers');
+INSERT INTO company_right VALUES ('manage_companies_partners');
+INSERT INTO company_right VALUES ('manage_comments');
+INSERT INTO company_right VALUES ('owner');
+INSERT INTO company_right VALUES ('comment');
+INSERT INTO company_right VALUES ('subscribe_to_portals');
+
+
+--
+-- Data for Name: group; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO "group" VALUES ('anonymous');
+INSERT INTO "group" VALUES ('unconfirmed');
+INSERT INTO "group" VALUES ('member');
+INSERT INTO "group" VALUES ('god');
+INSERT INTO "group" VALUES ('banned');
 
 
 --

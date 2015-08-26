@@ -15,7 +15,7 @@ def show_mine():
 
 @article_bp.route('/create/', methods=['GET'])
 def show_form_create():
-    return render_template('article/edit_form.html', article_version = {'name': '', 'short':  '', 'long': ''})
+    return render_template('article/edit.html', edit_version = {'name': '', 'short':  '', 'long': ''})
 
 @article_bp.route('/create/', methods=['POST'])
 def create():
@@ -23,7 +23,7 @@ def create():
 
 @article_bp.route('/update/<string:article_version_id>/', methods=['GET'])
 def show_form_update(article_version_id):
-    return render_template('article/edit_form.html', article_version = ArticleVersion.get(article_version_id))
+    return render_template('article/edit.html', article_version = ArticleVersion.get(article_version_id))
 
 @article_bp.route('/update/<string:article_version_id>/', methods=['POST'])
 def update(article_version_id):
@@ -31,12 +31,15 @@ def update(article_version_id):
 
 @article_bp.route('/my/versions/<string:article_id>/', methods=['GET'])
 def my_versions(article_id):
-    return render_template('article/versions.html', article_versions=Article.get_versions(article_id, author_user_id=g.user.id))
+    allversions = Article.get_last_company_versions_for_user(article_id, g.user.id)
+    return render_template('article/versions.html',
+                           edit_version = [v.__dict__ for v in allversions if v.company_id is None][0],
+                           company_versions={v.id:v.__dict__ for v in allversions if v.company_id is not None})
 
 
-@article_bp.route('/clone_for_company/', methods=['POST'])
+@article_bp.route('/send_to_company/', methods=['POST'])
 @json
-def clone_for_company():
+def send_to_company():
     data = request.json
 
     ArticleVersion.get(data['article_version_id']).clone_for_company(data['company_id']).save()

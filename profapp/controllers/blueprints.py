@@ -8,6 +8,7 @@ filemanager_bp = Blueprint('filemanager', __name__)
 static_bp = Blueprint('static', __name__, static_url_path='')
 image_editor_bp = Blueprint('image_editor', __name__)
 company_bp = Blueprint('company', __name__)
+portal_bp = Blueprint('portal', __name__)
 exception_bp = Blueprint('exception', __name__)
 
 
@@ -35,6 +36,9 @@ def register(app):
 
     from . import views_company
     app.register_blueprint(company_bp, url_prefix='/company')
+
+    from . import views_portal
+    app.register_blueprint(portal_bp, url_prefix='/portal')
 
     from . import errors
     app.register_blueprint(exception_bp, url_prefix='/exception')

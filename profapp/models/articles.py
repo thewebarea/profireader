@@ -1,9 +1,11 @@
-from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean, func, desc
+from sqlalchemy.orm import relationship, backref, aliased
+
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.STATUS import STATUS
 from db_init import db_session
+
 
 from ..controllers.errors import BadDataProvided
 
@@ -47,7 +49,7 @@ class ArticleVersion(Base, PRBase):
         self.short = short
         self.long = long
         self.article = Article() if created_from_version_id is None else _A().filter(
-            Article.id == Article.get_one_version(created_from_version_id).article_id).one()
+            Article.id == ArticleVersion.get(created_from_version_id).article_id).one()
 
 
     def clone_for_company(self, company_id):
@@ -71,6 +73,15 @@ class Article(Base, PRBase):
 
         ret = _A()
 
+
+# SELECT DISTINCT ON (article_version.company_id) article_version.*, per_group.count FROM article_version LEFT JOIN (SELECT company_id, count(id) as count FROM article_version
+# GROUP BY article_version.company_id) as per_company  ON
+# (per_company.company_id = article_version.company_id OR (per_group.company_id IS NULL AND article_version.company_id IS NULL))
+# ORDER BY company_id, id
+
+
+
+
         if user_id is not None:
             ret = ret.filter(Article.versions.any(author_user_id=user_id))
         if company_id is not None:
@@ -79,8 +90,11 @@ class Article(Base, PRBase):
         return ret.all()
 
     @staticmethod
-    def get_versions(article_id, author_user_id=None):
-        ret = _V().filter_by(article_id=article_id)
-        return (ret if author_user_id is None else ret.filter_by(author_user_id=author_user_id)).all()
+    def get_last_company_versions_for_user(article_id, author_user_id):
+        # grouped_by_company = aliased(ArticleVersion)
+        grouped_by_company_subquery = db_session.query(ArticleVersion.company_id).filter_by(article_id=article_id, author_user_id=author_user_id).group_by(ArticleVersion.company_id).subquery()
+        ret = db_session.query(ArticleVersion).distinct('article_version.company_id').filter_by(article_id=article_id, author_user_id=author_user_id).order_by(ArticleVersion.company_id, desc(ArticleVersion.id)).outerjoin(grouped_by_company_subquery, grouped_by_company_subquery.c.company_id == ArticleVersion.company_id)
+        ret = ret.all()
+        return ret
 
 

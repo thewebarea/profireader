@@ -15,6 +15,8 @@ import hashlib
 from flask.ext.login import AnonymousUserMixin
 from .constants.SOCIAL_NETWORKS import INFO_ITEMS_NONE, SOC_NET_FIELDS
 from .constants.USER_REGISTERED import REGISTERED_WITH
+from flask import globals
+import re
 
 
 def setup_authomatic(app):
@@ -78,6 +80,24 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
+def raw_url_for(endpoint):
+    appctx = globals._app_ctx_stack.top
+    reqctx = globals._request_ctx_stack.top
+    if reqctx is not None:
+        url_adapter = reqctx.url_adapter
+    else:
+        url_adapter = appctx.url_adapter
+
+    rules = url_adapter.map._rules_by_endpoint.get(endpoint, ())
+
+    if len(rules) < 1:
+        return ''
+
+    ret = re.compile('<[^:]*:').sub('<', url_adapter.map._rules_by_endpoint.get(endpoint, ())[0].rule)
+
+    return "function (dict) { var ret = '" + ret + "'; " \
+                           " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
+
 
 mail = Mail()
 moment = Moment()
@@ -134,6 +154,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     # read this: http://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
+    app.jinja_env.globals.update(raw_url_for=raw_url_for)
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
     # Flask will automatically remove database sessions at the end of the

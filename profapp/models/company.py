@@ -81,7 +81,6 @@ class Company(Base):
         company = Company(**comp_dict)
         db_session.add(company)
         db_session.flush()
-
         user_rbac = UserCompany(user_id=company.author_user_id,
                                 company_id=company.id,
                                 status=STATUS().ACTIVE())
