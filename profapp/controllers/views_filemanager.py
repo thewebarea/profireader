@@ -36,8 +36,13 @@ def createdir(parent_id=None):
 @filemanager_bp.route('/upload/', methods=['POST'])
 @json
 def upload():
-    parent_id = (None if (request.form['parent_id'] == '') else (request.form['parent_id']))
-    return File.upload(file=request.files['file-0'], parent_id=parent_id)
+    parent_id = None if (request.form['parent_id'] == '') \
+        else (request.form['parent_id'])
+    got_file = request.files['file-0']
+
+    file = File(parent_id=parent_id, name=got_file.filename,
+                mime=got_file.content_type)
+    return file.upload(content=got_file.stream.read(-1)).id
 
 # # # #
 #

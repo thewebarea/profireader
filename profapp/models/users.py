@@ -1,8 +1,7 @@
 from flask import request, current_app
-from sqlalchemy.orm import relationship, backref
+#from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
-from os import urandom
 from db_init import Base, db_session
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -10,7 +9,6 @@ from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
     REGISTERED_WITH
 from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
-from flask.ext.login import UserMixin
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -18,6 +16,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
+from .files import File
 
 
 class User(Base, UserMixin):
@@ -347,7 +346,8 @@ class User(Base, UserMixin):
                                        salt_length=32)  # salt_length=8
 
     def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return self.password_hash and \
+            check_password_hash(self.password_hash, password)
 
     def generate_confirmation_token(self, expiration=3600):
         #with app.app_context
@@ -405,9 +405,24 @@ class User(Base, UserMixin):
         self.profireader_email = new_email
         return True
 
-    def can(self, permissions):
-        return self.role is not None and \
-            (self.role.permissions & permissions) == permissions
+    def avatar_update(self, passed_file):
+        file = File(
+            author=self.profireader_name,
+            author_user_id=self.id,
+            name=passed_file.filename,
+            mime=passed_file.content_type)
+        self.profireader_avatar_url = \
+            file.upload(content=passed_file.stream.read(-1)).get_url()
 
-    def is_administrator(self):
-        return self.can(Permission.ADMINISTER)
+        #self.profireader_small_avatar_url = \
+        #    file.upload(content=passed_file.stream.read(-1)).get_url()
+
+        #self.update()
+        return self
+
+    # def can(self, permissions):
+    #     return self.role is not None and \
+    #         (self.role.permissions & permissions) == permissions
+
+    #def is_administrator(self):
+    #    return self.can(Permission.ADMINISTER)
