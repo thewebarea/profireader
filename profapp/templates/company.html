@@ -9,15 +9,11 @@
 {% endblock portal_base %}
 
 
-
-
 {% block content %}
 
-
 <form>
-{% for comp in companies %}
-    <a href="{{ url_for('company.profile', company_id=comp.id)}}">{{ comp.name }}</a>
-
+    {% for comp in companies %}
+        <a href="{{ url_for('company.profile', company_id=comp.id)}}">{{ comp.name }}</a>
     {% endfor %}
 </form>
 
