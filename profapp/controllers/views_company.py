@@ -1,10 +1,16 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
+from ..models.articles import Article, ArticleVersion
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
+
+from ..constants.USER_ROLES import COMPANY_OWNER, RIGHTS
+from ..models.files import File
+from .request_wrapers import json
 from .has_right import has_right
-from ..constants.USER_ROLES import RIGHTS
+
+
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show():
@@ -118,6 +124,7 @@ def confirm_subscriber():
     comp_role.apply_request(comp_id=data['comp_id'], user_id=data['user_id'], bool=data['req'])
 
     return redirect(url_for('company.profile', company_id=data['comp_id']))
+
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
 def suspend_employee():
