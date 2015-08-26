@@ -1,16 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+{% extends "index_lazy_layout.html" %}
 
-<h2>Article history</h2>
+{% block title %}Article history{% endblock title %}
 
-{% for version in article_versions %}
-    {{ version['name'] }} <a href="{{ url_for('article.update', article_version_id=version['id']) }}">Edit this version</a><br/>
-{% endfor %}
+{% block portal_content %}
 
-</body>
-</html>
+
+    {% include "article/form.html" %}
+    send this version to company&nbsp;<input name="company_id"/>
+
+    <script>
+        module.controller('article_my_versions', ['$scope', '$modal', function ($scope, $modal) {
+            $scope.versions = {{ article_versions|safe }};
+            $scope.url_update = {{ raw_url_for('article.update')|safe }};
+            $scope.url_send = {{ raw_url_for('article.send_to_company')|safe }};
+        }]);
+    </script>
+    {% raw %}
+    <span ng-controller="article_my_versions">
+    <span ng-repeat="version in versions">
+    &nbsp;&nbsp;&nbsp;<a href="{{ url_update({article_version_id: version.id}) }}">Edit this version</a><br/>
+    <form ang-ajax-form-validate ng-ajax-form action="{{ url_send() }}">
+        <input type="hidden" name="article_version_id" value="{{ version.id }}"/>
+
+        <button class="btn" type="submit">{{ submitting ? 'sending...' : 'send' }}</button>
+        <br/>
+    </form>
+    </span>
+    </span>
+    {% endraw %}
+{% endblock portal_content %}
+

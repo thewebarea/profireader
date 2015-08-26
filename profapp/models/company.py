@@ -2,14 +2,17 @@ from sqlalchemy import Column, String, ForeignKey, update
 from sqlalchemy.orm import relationship
 from db_init import Base, db_session
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from flask import g
+from flask import g, abort
 from config import Config
 from ..constants.STATUS import STATUS
-from ..constants.USER_ROLES import COMPANY_OWNER
+from ..constants.USER_ROLES import COMPANY_OWNER, RIGHTS
 from utils.db_utils import db
 from .users import User
 from ..controllers.errors import StatusNonActivate
 from .files import File
+import datetime
+from ..controllers.has_right import has_right
+
 
 class Company(Base):
     __tablename__ = 'company'
@@ -27,8 +30,7 @@ class Company(Base):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    user_company_rs = relationship('UserCompany', backref='company')
-    # company_folder = relationship('File')
+    user_company_rs = relationship('UserCompany', backref='company', lazy='dynamic')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
                  address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
@@ -46,11 +48,20 @@ class Company(Base):
         self.user_company_rs = user_company_rs
 
     @staticmethod
+    def employee(company_id):
+        ret = db(UserCompany, company_id=company_id).all()
+        return ret
+
+    @staticmethod
+    def employee_rights(company_id, user_id):
+        ret = db(UserCompany, company_id=company_id, user_id=user_id).one().right
+        return ret
+
+    @staticmethod
     def query_all_companies(user_id):
 
-        status = STATUS()
         companies = []
-        query_companies = db(UserCompany, user_id=user_id, status=status.ACTIVE()).all()
+        query_companies = db(UserCompany, user_id=user_id, status=STATUS().ACTIVE()).all()
         for x in query_companies:
             companies = companies+db(Company, id=x.company_id).all()
         return set(companies)
@@ -61,17 +72,22 @@ class Company(Base):
         company = db(Company, id=company_id).one()
         return company
 
+<<<<<<< HEAD
     def create_company(self, data, passed_file):
+=======
+    def create_company(self, data, file):
+
+        has_right(True)
+>>>>>>> origin/master
         comp_dict = {'author_user_id': g.user_dict['id']}
-        status = STATUS()
         for x, y in zip(data.keys(), data.values()):
             comp_dict[x] = y
         company = Company(**comp_dict)
         db_session.add(company)
-        db_session.commit()
-
+        db_session.flush()
         user_rbac = UserCompany(user_id=company.author_user_id,
                                 company_id=company.id,
+<<<<<<< HEAD
                                 status=status.ACTIVE())
 
         file = File(company_id=company.id,
@@ -86,17 +102,26 @@ class Company(Base):
             {'logo_file': file.upload(content=passed_file.stream.read(-1)).id}
         )
 
+=======
+                                status=STATUS().ACTIVE())
+        db(Company, id=company.id).update({'logo_file': File.upload(file=file, company_id=company.id,
+                                                                    parent_id=company.corporate_folder_file_id,
+                                                                    author=g.user_dict['name'],
+                                                                    author_user_id=g.user_dict['id'])})
+>>>>>>> origin/master
         db_session.add(user_rbac)
-        db_session.commit()
+        db_session.flush()
         r = Right()
-        r.add_rights(company.author_user_id, company.id, COMPANY_OWNER)
+        r.update_rights(company.author_user_id, user_rbac.company_id, COMPANY_OWNER)
 
     @staticmethod
     def update_comp(company_id, data, passed_file):
 
+        has_right(Right.permissions(g.user_dict['id'], company_id, rights=[RIGHTS.EDIT()]))
         comp = db(Company, id=company_id)
         for x, y in zip(data.keys(), data.values()):
             comp.update({x: y})
+<<<<<<< HEAD
         if passed_file.filename:
             file = File(company_id=company_id,
                         parent_id=comp.one().corporate_folder_file_id,
@@ -108,6 +133,13 @@ class Company(Base):
                 {'logo_file':
                     file.upload(content=passed_file.stream.read(-1)).id}
             )
+=======
+        if file.filename:
+            comp.update({'logo_file': File.upload(file=file, company_id=company_id,
+                                                  parent_id=comp.one().corporate_folder_file_id,
+                                                  author=g.user_dict['name'],
+                                                  author_user_id=g.user_dict['id'])})
+>>>>>>> origin/master
         db_session.commit()
 
     @staticmethod
@@ -120,18 +152,17 @@ class Company(Base):
 
     def query_owner_or_member(self, company_id):
 
-        status = STATUS()
         employee = self.query_employee(company_id)
         if not employee:
             return False
-        if employee.status == status.ACTIVE():
+        if employee.status == STATUS().ACTIVE():
             return True
 
 
 class UserCompanyRight(Base):
     __tablename__ = 'user_company_right'
     id = Column(TABLE_TYPES['bigint'], primary_key=True)
-    user_company_id = Column(TABLE_TYPES['bigint'], ForeignKey('user_company.id', onupdate='cascade'))
+    user_company_id = Column(TABLE_TYPES['bigint'], ForeignKey('user_company.id'))
     company_right_id = Column(TABLE_TYPES['rights'], ForeignKey('company_right.id'))
 
     def __init__(self, user_company_id=None, company_right_id=None):
@@ -141,10 +172,10 @@ class UserCompanyRight(Base):
     @staticmethod
     def subscribe_to_company(company_id):
 
-        status = STATUS()
+        has_right(True)
         if not db(UserCompany, user_id=g.user_dict['id'], company_id=company_id).first():
             user_rbac = UserCompany(user_id=g.user_dict['id'], company_id=company_id,
-                                    status=status.NONACTIVE())
+                                    status=STATUS().NONACTIVE())
             user_rbac.user = db(User, id=g.user_dict['id']).one()
             db_session.add(user_rbac)
             db_session.commit()
@@ -155,16 +186,22 @@ class UserCompanyRight(Base):
     @staticmethod
     def apply_request(comp_id, user_id, bool):
 
-        status = STATUS()
-        r = Right()
+        has_right(Right.permissions(g.user_dict['id'], comp_id, rights=[RIGHTS.ADD_EMPLOYEE()]))
         if bool == 'True':
-            stat = status.ACTIVE()
-            r.add_rights(user_id, comp_id, Config.BASE_RIGHT_IN_COMPANY)
+            stat = STATUS().ACTIVE()
+            Right().update_rights(user_id, comp_id, Config.BASE_RIGHT_IN_COMPANY)
         else:
-            stat = status.REJECT()
+            stat = STATUS().REJECT()
         db(UserCompany, company_id=comp_id, user_id=user_id,
-           status=status.NONACTIVE()).update({'status': stat})
+           status=STATUS().NONACTIVE()).update({'status': stat})
         db_session.commit()
+
+    @staticmethod
+    def suspend_employee(comp_id, user_id):
+        has_right(Right.permissions(g.user_dict['id'], comp_id, rights=[RIGHTS.SUSPEND_EMPLOYEE()]))
+        db(UserCompany, company_id=comp_id, user_id=user_id).update({'status': STATUS.SUSPEND()})
+        db_session.commit()
+
 
 class UserCompany(Base):
 
@@ -173,9 +210,10 @@ class UserCompany(Base):
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
     status = Column(TABLE_TYPES['id_profireader'])
+    md_tm = Column(TABLE_TYPES['timestamp'])
     right = relationship(UserCompanyRight, backref='user_company')
 
-    def __init__(self, user_id=None, company_id=None, status=None, right=[]):
+    def __init__(self, user_id=None, company_id=None, status=None, right=[],):
         self.user_id = user_id
         self.company_id = company_id
         self.status = status
@@ -187,35 +225,56 @@ class Right(Base):
     id = Column(TABLE_TYPES['rights'], primary_key=True)
 
     @staticmethod
-    def add_rights(user_id, comp_id, rights):
+    def update_rights(user_id, comp_id, rights):
 
+        has_right(Right.permissions(g.user_dict['id'], comp_id, rights=[RIGHTS.MANAGE_ACCESS_COMPANY()]))
         ucr = []
         user = db(User, id=user_id).one()
-        for right in rights:
-            ucr.append(UserCompanyRight(company_right_id=right))
         user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
-        user_right.user = user
-        user_right.company = db(Company, id=comp_id).one()
-        user.companies.append(user_right.company)
-        user_right.right = ucr
+        for right in rights:
+            ucr.append(UserCompanyRight(company_right_id=right, user_company_id=user_right.id))
+        if user_right.right:
+            db(UserCompanyRight, user_company_id=user_right.id).delete()
+            user_right.right = ucr
+        else:
+            user_right.company = db(Company, id=comp_id).one()
+            user.companies.append(user_right.company)
+            user_right.user = user
+            user_right.right = ucr
+
         db_session.commit()
-
-    @staticmethod
-    def remove_rights(user_id, comp_id, rights):
-
-        user_right = db(UserCompany, user_id=user_id, company_id=comp_id).one()
-        for right in rights:
-            user_right.right.remove(UserCompanyRight(company_right_id=right))
-            db_session.commit()
 
     @staticmethod
     def show_rights(comp_id):
 
-        rights = {}
-        for x in db(UserCompany, company_id=comp_id).all():
-            if x.user_id not in rights:
-                rights[x.user_id] = {'name': x.user.user_name, 'user': x.user, 'rights': [], 'companies': [],
-                                     'status': x.status}
-            rights[x.user_id]['rights'] = [y.company_right_id for y in x.right]
-            rights[x.user_id]['companies'] = [x.user.companies]
-        return rights
+        emplo = {}
+        for x in Company.employee(comp_id):
+            emplo[x.user_id] = x.user_id
+            emplo[x.user_id] = {'name': x.user.user_name, 'user': x.user, 'rights': [],
+                                'companies': [x.user.companies], 'status': x.status,
+                                'date': x.md_tm}
+            emplo[x.user_id]['rights'] = {y: False for y in COMPANY_OWNER}
+            for r in Company.employee_rights(comp_id, x.user_id):
+                emplo[x.user_id]['rights'][r.company_right_id] = True
+        return emplo
+
+    @staticmethod
+    def suspended_employees(comp_id):
+
+        has_right(True)
+        suspended_employees = {}
+        for x in Company.employee(comp_id):
+            if x.status == STATUS.SUSPEND():
+                suspended_employees[x.user_id] = x.user_id
+                suspended_employees[x.user_id] = {'name': x.user.user_name, 'user': x.user,
+                                                  'companies': [x.user.companies], 'date': x.md_tm}
+        return suspended_employees
+
+    @staticmethod
+    def permissions(user_id, comp_id, rights):
+        ucr = []
+        for right in Company.employee_rights(comp_id, user_id):
+            ucr.append(right.company_right_id)
+        if not set(rights) < set(ucr):
+                return False
+        return True

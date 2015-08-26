@@ -1,4 +1,3 @@
-# User role
 OWNER = 0
 ADMIN = 1
 EDITOR = 2
@@ -18,34 +17,68 @@ ROLE = {
     GUEST: 'guest',
     READER: 'reader'
 }
-COMPANY_OWNER = ['comment', 'publish', 'unpublish', 'write_articles', 'moderate_comments', 'manage_content',
-                 'manage_members', 'manage_access', 'transfer_ownership']
+COMPANY_OWNER = ['edit', 'publish', 'un_publish', 'upload_files', 'delete_files', 'add_employee',
+                 'suspend_employee', 'send_publications', 'manage_access_company', 'manage_access_portal',
+                 'article_priority', 'manage_readers', 'manage_companies_partners', 'manage_comments']
 
 class RIGHTS:
 
-    def COMMENT(self):
-        return 'comment'
+    @staticmethod
+    def EDIT():
+        return 'edit'
 
-    def PUBLISH(self):
+    @staticmethod
+    def PUBLISH():
         return 'publish'
 
-    def UNPUBLISH(self):
-        return 'unpublish'
+    @staticmethod
+    def UNPUBLISH():
+        return 'un_publish'
 
-    def WRITE_ARTICLES(self):
-        return 'write_articles'
+    @staticmethod
+    def UPLOAD_FILES():
+        return 'upload_files'
 
-    def MODERATE_COMMENTS(self):
-        return 'moderate_comments'
+    @staticmethod
+    def DELETE_FILES():
+        return 'delete_files'
 
-    def MANAGE_CONTENT(self):
-        return 'manage_content'
+    @staticmethod
+    def ADD_EMPLOYEE():
+        return 'add_employee'
 
-    def MANAGE_MEMBERS(self):
-        return 'manage_members'
+    @staticmethod
+    def SUSPEND_EMPLOYEE():
+        return 'suspend_employee'
 
-    def MANAGE_ACCESS(self):
-        return 'manage_access'
+    @staticmethod
+    def SEND_PUBLICATIONS():
+        return 'send_publications'
 
-    def TRANSFER_OWNERSHIP(self):
-        return 'transfer_ownership'
+    @staticmethod
+    def MANAGE_ACCESS_COMPANY():
+        return 'manage_access_company'
+
+    @staticmethod
+    def MANAGE_ACCESS_PORTAL():
+        return 'manage_access_portal'
+
+    @staticmethod
+    def ARTICLE_PRIORITY():
+        return 'article_priority'
+
+    @staticmethod
+    def MANAGE_READERS():
+        return 'manage_readers'
+
+    @staticmethod
+    def MANAGE_COMPANIES_PARTNERS():
+        return 'manage_companies_partners'
+
+    @staticmethod
+    def MANAGE_COMMENTS():
+        return 'manage_comments'
+
+    @staticmethod
+    def SUBSCRIBE_TO_PORTALS():
+        return 'subscribe_to_portals'

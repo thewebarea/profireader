@@ -1,0 +1,38 @@
+{% extends "index_layout.html" %}
+{% block title %}Profireader{% endblock title %}
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
+{% block content %}
+    {% block company_base %}
+{% include 'company_base.html' %}
+{% endblock company_base %}
+{% for emplo in suspended_employees %}
+
+    <dt><img src="{{ suspended_employees[emplo]['user'].gravatar() }}">{{ suspended_employees[emplo]['name'] }}<br>
+        Phone number : {{ suspended_employees[emplo]['user'].phone_number }}<br>
+        Email : {{ suspended_employees[emplo]['user'].show_email }}
+        Suspended : {{ suspended_employees[emplo]['date'] }}
+    </dt>
+    {% for company in suspended_employees[emplo]['companies'] %}
+        <dt> ALL COMPANIES :
+            {% for c in company %}
+                <a href="{{ url_for('company.profile', company_id=c.id) }}">{{ c.name }}</a>
+            {% endfor %}</dt><br>
+    {% endfor %}
+
+
+
+
+
+
+{% endfor %}
+{% endblock content %}
+
+{% block footer %}
+    {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock footer %}

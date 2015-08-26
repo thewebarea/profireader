@@ -1,0 +1,22 @@
+{% extends "index_layout.html" %}
+
+{% block content %}
+    <div class="container">
+        {% for message in get_flashed_messages() %}
+        <div class="alert alert-warning">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+        </div>
+        {% endfor %}
+
+        {% block portal_content %}
+            Portal Content
+        {% endblock portal_content %}
+        <br/>
+    {% block portal_footer %}
+    {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock portal_footer %}
+    </div>
+{% endblock content %}
+
+

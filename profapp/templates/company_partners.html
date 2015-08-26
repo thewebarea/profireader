@@ -1,0 +1,44 @@
+{% extends "index_layout.html" %}
+{% block title %}Profireader{% endblock title %}
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
+{% block content %}
+    {% block company_base %}
+{% include 'company_base.html' %}
+{% endblock company_base %}
+
+    <form class="subscribe" action="{{ url_for('portal.apply_company') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
+        <h3><p>Subscribe to portal</p></h3>
+        <p>Enter portal id<input type="text" id="portal_id" placeholder="ID" name="portal_id"></p>
+        <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+        <input type="submit" value="submit">
+    </form>
+
+      <script type="text/javascript">
+ function AjaxPost() {
+  $.post('', {
+             'portal_id': $("#portal_id").val(),
+              'comp_id': $("#comp_id").val()
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return true;
+ };
+</script>
+
+    <h4>Companies Partners : </h4>
+    {% for comp in companies_partners %}
+    {{ comp.name }}
+    {% endfor %}
+
+{% endblock content %}
+
+{% block footer %}
+    {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock footer %}

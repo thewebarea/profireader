@@ -3,7 +3,6 @@
 --
 
 SET statement_timeout = 0;
-SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -31,6 +30,24 @@ INSERT INTO company_right VALUES ('manage_companies_partners');
 INSERT INTO company_right VALUES ('manage_comments');
 INSERT INTO company_right VALUES ('owner');
 INSERT INTO company_right VALUES ('comment');
+INSERT INTO company_right VALUES ('subscribe_to_portals');
+
+
+--
+-- Data for Name: group; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO "group" VALUES ('anonymous');
+INSERT INTO "group" VALUES ('unconfirmed');
+INSERT INTO "group" VALUES ('member');
+INSERT INTO "group" VALUES ('god');
+INSERT INTO "group" VALUES ('banned');
+
+INSERT INTO "group" VALUES ('anonymous');
+INSERT INTO "group" VALUES ('unconfirmed');
+INSERT INTO "group" VALUES ('member');
+INSERT INTO "group" VALUES ('god');
+INSERT INTO "group" VALUES ('banned');
 
 
 --

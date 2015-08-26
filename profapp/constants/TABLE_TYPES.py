@@ -21,7 +21,7 @@ TABLE_TYPES = {
 
     'boolean': BOOLEAN,
     'status': String(36),
-    'rights': String(30),
+    'rights': String(40),
     'bigint': BigInteger,
 
     # http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.phone_number
