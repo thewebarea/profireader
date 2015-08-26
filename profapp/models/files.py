@@ -80,8 +80,8 @@ class File(Base):
             return x.id
 
     def upload(self, content):
-        FileContent(file_content=self, content=content)
-        db_session.add(self)
+        file_cont = FileContent(file_content=self, content=content)
+        db_session.add(self, file_cont)
         db_session.commit()
         return self
 

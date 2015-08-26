@@ -61,7 +61,8 @@ var modalInstance = $modal.open({
             <ul>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown">
-                        <img src="{{ current_user.profireader_small_avatar_url }}" style="width:18px;border:0">
+{#                        <img src="{{ current_user.profireader_small_avatar_url }}" style="width:18px;border:0">#}
+                        <img src="{{ current_user.profireader_small_avatar_url }}" style="width:18px;height:18px;border:0">
                         {{ '{{' }} user.name {{ '}}' }}
                         <b class="caret"></b>
                     </a>

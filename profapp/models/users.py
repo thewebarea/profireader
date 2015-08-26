@@ -406,18 +406,24 @@ class User(Base, UserMixin):
         return True
 
     def avatar_update(self, passed_file):
+        content = passed_file.stream.read(-1)
+
         file = File(
             author=self.profireader_name,
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)
         self.profireader_avatar_url = \
-            file.upload(content=passed_file.stream.read(-1)).get_url()
+            file.upload(content=content).get_url()
 
-        #self.profireader_small_avatar_url = \
-        #    file.upload(content=passed_file.stream.read(-1)).get_url()
+        file = File(
+            author=self.profireader_name,
+            author_user_id=self.id,
+            name=passed_file.filename,
+            mime=passed_file.content_type)
+        self.profireader_small_avatar_url = \
+            file.upload(content=content).get_url()
 
-        #self.update()
         return self
 
     # def can(self, permissions):
