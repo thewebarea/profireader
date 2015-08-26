@@ -72,13 +72,9 @@ class Company(Base):
         company = db(Company, id=company_id).one()
         return company
 
-<<<<<<< HEAD
-    def create_company(self, data, passed_file):
-=======
-    def create_company(self, data, file):
 
+    def create_company(self, data, passed_file):
         has_right(True)
->>>>>>> origin/master
         comp_dict = {'author_user_id': g.user_dict['id']}
         for x, y in zip(data.keys(), data.values()):
             comp_dict[x] = y
@@ -86,9 +82,7 @@ class Company(Base):
         db_session.add(company)
         db_session.flush()
         user_rbac = UserCompany(user_id=company.author_user_id,
-                                company_id=company.id,
-<<<<<<< HEAD
-                                status=status.ACTIVE())
+                                company_id=company.id, status=status.ACTIVE())
 
         file = File(company_id=company.id,
                     parent_id=company.corporate_folder_file_id,
@@ -102,13 +96,6 @@ class Company(Base):
             {'logo_file': file.upload(content=passed_file.stream.read(-1)).id}
         )
 
-=======
-                                status=STATUS().ACTIVE())
-        db(Company, id=company.id).update({'logo_file': File.upload(file=file, company_id=company.id,
-                                                                    parent_id=company.corporate_folder_file_id,
-                                                                    author=g.user_dict['name'],
-                                                                    author_user_id=g.user_dict['id'])})
->>>>>>> origin/master
         db_session.add(user_rbac)
         db_session.flush()
         r = Right()
@@ -121,7 +108,7 @@ class Company(Base):
         comp = db(Company, id=company_id)
         for x, y in zip(data.keys(), data.values()):
             comp.update({x: y})
-<<<<<<< HEAD
+
         if passed_file.filename:
             file = File(company_id=company_id,
                         parent_id=comp.one().corporate_folder_file_id,
@@ -133,13 +120,7 @@ class Company(Base):
                 {'logo_file':
                     file.upload(content=passed_file.stream.read(-1)).id}
             )
-=======
-        if file.filename:
-            comp.update({'logo_file': File.upload(file=file, company_id=company_id,
-                                                  parent_id=comp.one().corporate_folder_file_id,
-                                                  author=g.user_dict['name'],
-                                                  author_user_id=g.user_dict['id'])})
->>>>>>> origin/master
+
         db_session.commit()
 
     @staticmethod
@@ -218,6 +199,7 @@ class UserCompany(Base):
         self.company_id = company_id
         self.status = status
         self.right = right
+
 
 class Right(Base):
     __tablename__ = 'company_right'
