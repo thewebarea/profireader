@@ -1,11 +1,12 @@
 from .blueprints import user_bp
-from flask import url_for, render_template, abort, request, flash, redirect
+from flask import url_for, render_template, abort, request, flash, redirect, \
+    request
 from db_init import db_session
 from ..models.users import User
 from flask.ext.login import current_user, login_required
 #from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
 from ..forms.user import EditProfileForm
-from flask import g
+from flask import g, jsonify
 
 
 #@user_bp.route('/profile/<user_id>', methods=['GET', 'POST'])
@@ -43,16 +44,26 @@ def edit_profile(user_id):
     if request.method == 'GET':
         return render_template('user_edit_profile.html')
 
-    user.profireader_name = request.form['name']
-    user.profireader_first_name = request.form['first_name']
-    user.profireader_last_name = request.form['last_name']
-    user.profireader_gender = request.form['gender']
-    user.profireader_link = request.form['link']
-    user.profireader_phone = request.form['phone']
-    user.location = request.form['location']
-    user.about_me = request.form['about_me']
-    db_session.add(user)
-    db_session.commit()
-    flash('You have successfully updated you profile.')
+    if request.form['submit'] == 'Upload Image':
+        image = request.files['avatar']
+        user.avatar_update(image)
+        db_session.add(user)
+        db_session.commit()
+    else:
+        user.profireader_name = request.form['name']
+        user.profireader_first_name = request.form['first_name']
+        user.profireader_last_name = request.form['last_name']
+        user.profireader_gender = request.form['gender']
+        user.profireader_link = request.form['link']
+        user.profireader_phone = request.form['phone']
+        user.location = request.form['location']
+        user.about_me = request.form['about_me']
+
+        x = request.form
+        y = request.form.id
+
+        db_session.add(user)
+        db_session.commit()
+        flash('You have successfully updated you profile.')
 
     return redirect(url_for('user.profile', user_id=user_id))
