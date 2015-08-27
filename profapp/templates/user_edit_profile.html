@@ -17,6 +17,9 @@
     <span ng-hide="mySwitch">[upload picture]</span>
     <span ng-show="mySwitch">[hide]</span>
 </a>
+<a>
+    <span ng-hide="mySwitch">[use gravatar]</span>
+</a>
 <form id="avatar" ng-show="mySwitch" ng-init="mySwitch=false" action="{{ request.path }}" method="post" enctype="multipart/form-data">
     Select image to upload:
     <input type="file" name="avatar" id="fileToUpload">
