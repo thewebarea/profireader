@@ -30,7 +30,7 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    user_company_rs = relationship('UserCompany', backref='company', lazy='dynamic')
+    # user_company_rs = relationship('UserCompany', backref='company')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
                  address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
@@ -45,10 +45,10 @@ class Company(Base, PRBase):
         self.phone2 = phone2
         self.email = email
         self.short_description = short_description
-        self.user_company_rs = user_company_rs
+        # self.user_company_rs = user_company_rs
 
     @staticmethod
-    def employee(company_id):
+    def employee(company_id, right = ''):
         ret = db(UserCompany, company_id=company_id).all()
         return ret
 
@@ -70,8 +70,13 @@ class Company(Base, PRBase):
     def search_for_company(user_id, searchtext):
 
         companies = []
-        query_companies = db(Company).filter(Company.user_company_rs.any(user_id=user_id)).filter(Company.name.like("%"+searchtext+"%")).all()
-        return PRBase.searchResult(query_companies)
+        query_companies = db(Company).filter(Company.name.like("%"+searchtext+"%")).all()
+        ret = []
+        for x in query_companies:
+            ret.append(x.dict())
+
+        return ret
+        # return PRBase.searchResult(query_companies)
 
 
     @staticmethod
