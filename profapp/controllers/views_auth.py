@@ -37,6 +37,11 @@ def login_signup_general(*soc_network_names):
             if result.user:
                 result.user.update()
                 result_user = result.user
+                if result_user.email is None:
+                    flash("you didn't confirm email bound to your soc-network "
+                          "account. Please confirm email first or choose "
+                          "another way of authentication.")
+                    redirect(url_for('auth.login'))
 
                 db_fields = DB_FIELDS[soc_network_names[-1]]
                 #user = db_session.query(User).\
