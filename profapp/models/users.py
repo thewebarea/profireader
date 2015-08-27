@@ -36,7 +36,8 @@ class User(Base, UserMixin, PRBase):
     user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
-    companies = relationship('Company', backref='users')
+    companies = relationship('Company', backref='owner')
+
     # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])

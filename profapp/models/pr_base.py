@@ -47,10 +47,10 @@ class PRBase():
     def get(cls, id):
         return db_session().query(cls).get(id)
 
-    @staticmethod
-    def searchResult(collection, convert_item = lambda item: item.dict()):
-        ret = {}
-        for x in collection:
-            ret[x.id] = convert_item(x)
-
-        return ret
+    # @staticmethod
+    # def searchResult(collection, convert_item = lambda item: item.dict()):
+    #     ret = {}
+    #     for x in collection:
+    #         ret[x.id] = convert_item(x)
+    #
+    #     return ret
