@@ -40,7 +40,7 @@ def add():
 def confirm_add():
 
     company = Company()
-    company.create_company(data=request.form, file=request.files['logo_file'])
+    company.create_company(data=request.form, passed_file=request.files['logo_file'])
 
     return redirect(url_for('company.show'))
 
@@ -101,7 +101,7 @@ def edit(company_id):
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
-                          file=request.files['logo_file'])
+                          passed_file=request.files['logo_file'])
     return redirect(url_for('company.profile', company_id=company_id))
 
 @company_bp.route('/subscribe/<string:company_id>/')

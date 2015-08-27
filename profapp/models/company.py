@@ -90,7 +90,7 @@ class Company(Base, PRBase):
         db_session.add(company)
         db_session.flush()
         user_rbac = UserCompany(user_id=company.author_user_id,
-                                company_id=company.id, status=status.ACTIVE())
+                                company_id=company.id, status=STATUS.ACTIVE())
 
         file = File(company_id=company.id,
                     parent_id=company.corporate_folder_file_id,
