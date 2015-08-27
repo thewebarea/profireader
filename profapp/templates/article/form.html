@@ -1,5 +1,23 @@
 
-    <script>
+
+    <h3><p>{% if edit_version.id %}{% if company.id %} {{ gettext('update version of article for company `%(name)s`', name = company.name) }} {% else %} update your own article copy {% endif %}{% else %}create article{% endif %}</p></h3>
+
+    <form action="{% if edit_version.id %}{{ url_for('article.update', article_company_id = edit_version.id) }}{% else %}{{ url_for('article.create') }}{% endif %}"
+          onsubmit="return AjaxPost()" id="edit" method="post">
+
+        <p>Article title<br/><input type="text" id="title" placeholder="title" name="title"
+                                   value="{{ edit_version.title }}"></p>
+
+        <p>Short Description<br/><textarea id="short" placeholder="short"
+                                           name="short">{{ edit_version.short }}</textarea></p>
+
+        <p>Full text<br/><textarea id="full" placeholder="text" name="long">{{ edit_version.long }}</textarea></p>
+
+        <input type="submit" value="{% if edit_version.id %}save{% else %}create{% endif %}">
+    </form>
+
+
+<script>
         tinymce.init({
             image_advtab: true,
             width: 500,
@@ -28,20 +46,3 @@
             }
         });
     </script>
-    <form class="send coordinates" action="{% if edit_version.id %}{{ url_for('article.update', article_version_id = edit_version.id) }}{% else %}{{ url_for('article.create') }}{% endif %}"
-          onsubmit="return AjaxPost()" id="edit" method="post">
-
-        <h3><p>{% if edit_version.id %}update{% else %}create{% endif %} article</p></h3>
-
-        <p>Article name<br/><input type="text" id="name" placeholder="name" name="name"
-                                   value="{{ edit_version.name }}"></p>
-
-        <p>Short Description<br/><textarea id="short" placeholder="short"
-                                           name="short">{{ edit_version.short }}</textarea></p>
-
-        <p>Full text<br/><textarea id="full" placeholder="text" name="long">{{ edit_version.long }}</textarea></p>
-
-        <input type="submit" value="{% if edit_version.id %}save{% else %}create{% endif %}">
-    </form>
-
-

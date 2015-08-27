@@ -17,9 +17,9 @@ from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
+from .pr_base import PRBase
 
-
-class User(Base, UserMixin):
+class User(Base, UserMixin, PRBase):
     __tablename__ = 'user'
 
     # PROFIREADER REGISTRATION DATA

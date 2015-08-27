@@ -1,7 +1,7 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
-from ..models.articles import Article, ArticleVersion
+from ..models.articles import Article, ArticleCompany
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
 
@@ -11,6 +11,14 @@ from .request_wrapers import json
 from .has_right import has_right
 
 
+
+
+
+@company_bp.route('/search_to_submit_article/', methods=['POST'])
+@json
+def search_to_submit_article(json):
+    companies = Company().search_for_company(g.user_dict['id'], json['search'])
+    return companies
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show():

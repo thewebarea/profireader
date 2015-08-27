@@ -25,13 +25,16 @@ TABLE_TYPES = {
     'bigint': BigInteger,
 
     # http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.phone_number
-    'phone': PhoneNumberType(country_code='UA'),  # (country_code='UA')
+    # 'phone': PhoneNumberType(country_code='UA'),  # (country_code='UA')
+    'phone': String(50),  # (country_code='UA')
 
     # http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.url
     # read also https://github.com/gruns/furl
-    'link': URLType,  # user = User(website=u'www.example.com'),
+    # 'link': URLType,  # user = User(website=u'www.example.com'),
+    'link': String(100),  # user = User(website=u'www.example.com'),
     'email': String(100),
     'name': String(100),
+    'title': String(100),
     'text': UnicodeText(length=65535),
     'gender': String(6),
     #'avatar_hash': String(32),
