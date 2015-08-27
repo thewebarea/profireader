@@ -49,7 +49,7 @@
     <p>Phone: <input type="text" placeholder="your phone" name="phone" value="{{ g.user.profireader_phone or '' }}"></p>
     <p>Location: <input type="text" placeholder="your city" name="location" value="{{ g.user.location or '' }}"></p>
     <p>About me: <textarea name="about_me" cols="40" rows="8" placeholder="Give us some information about you please">{{ g.user.about_me or '' }}</textarea></p>
-    <input type="submit" value="Update Profile">
+    <input type="submit" value="Update Profile" name="submit">
 </form>
 
 

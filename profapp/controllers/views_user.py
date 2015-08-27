@@ -59,9 +59,6 @@ def edit_profile(user_id):
         user.location = request.form['location']
         user.about_me = request.form['about_me']
 
-        x = request.form
-        y = request.form.id
-
         db_session.add(user)
         db_session.commit()
         flash('You have successfully updated you profile.')
