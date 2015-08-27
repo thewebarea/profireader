@@ -12,9 +12,9 @@ from ..controllers.errors import StatusNonActivate
 from .files import File
 import datetime
 from ..controllers.has_right import has_right
+from .pr_base import PRBase
 
-
-class Company(Base):
+class Company(Base, PRBase):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
@@ -65,6 +65,14 @@ class Company(Base):
         for x in query_companies:
             companies = companies+db(Company, id=x.company_id).all()
         return set(companies)
+
+    @staticmethod
+    def search_for_company(user_id, searchtext):
+
+        companies = []
+        query_companies = db(Company).filter(Company.user_company_rs.any(user_id=user_id)).filter(Company.name.like("%"+searchtext+"%")).all()
+        return PRBase.searchResult(query_companies)
+
 
     @staticmethod
     def query_company(company_id):
@@ -123,7 +131,7 @@ class Company(Base):
         if employee.status == STATUS().ACTIVE():
             return True
 
-class UserCompanyRight(Base):
+class UserCompanyRight(Base, PRBase):
     __tablename__ = 'user_company_right'
     id = Column(TABLE_TYPES['bigint'], primary_key=True)
     user_company_id = Column(TABLE_TYPES['bigint'], ForeignKey('user_company.id'))
@@ -167,7 +175,7 @@ class UserCompanyRight(Base):
         db_session.commit()
 
 
-class UserCompany(Base):
+class UserCompany(Base, PRBase):
 
     __tablename__ = 'user_company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)

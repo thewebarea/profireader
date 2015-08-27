@@ -17,6 +17,7 @@ from .constants.SOCIAL_NETWORKS import INFO_ITEMS_NONE, SOC_NET_FIELDS
 from .constants.USER_REGISTERED import REGISTERED_WITH
 from flask import globals
 import re
+from flask.ext.babel import Babel, gettext
 
 
 def setup_authomatic(app):
@@ -132,6 +133,8 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     app = Flask(__name__)
     app.config.from_object(config)
 
+    babel = Babel(app)
+
     app.before_request(setup_authomatic(app))
     app.before_request(load_user)
 
@@ -163,6 +166,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
-        db_session.remove()
+        db_session.commit()
+        # db_session.remove()
 
     return app

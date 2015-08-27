@@ -3,10 +3,11 @@
 {% block title %}Profireader - Create article{% endblock title %}
 
 {% block portal_content %}
+
 <h2><a href="{{ url_for('article.show_form_create') }}">Create article</a></h2>
 
 {% for article in articles %}
-    <a href="{{ url_for('article.my_versions', article_id=article.id) }}">{{ article.versions[0]['name'] }}</a><br/>
+    <a href="{{ url_for('article.details', article_id=article.id) }}">{{ article.mine['title'] }}</a><br/>
 {% endfor %}
 {% endblock portal_content %}
 
