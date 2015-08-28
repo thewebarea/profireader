@@ -41,3 +41,14 @@ def check_rights(rights):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+def has_rights(**rulelam):
+    (rule_name, lambda_func) = rulelam.items()[0]
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            has = lambda_func(**kwargs)
+
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
