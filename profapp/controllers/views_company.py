@@ -13,7 +13,6 @@ from .has_right import has_right
 
 
 
-
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @json
 def search_to_submit_article(json):
@@ -39,8 +38,12 @@ def add():
 @company_bp.route('/confirm_add/', methods=['POST'])
 def confirm_add():
 
-    company = Company()
-    company.create_company(data=request.form, passed_file=request.files['logo_file'])
+    data = request.form
+    comp_dict = {'author_user_id': g.user_dict['id']}
+    for x, y in zip(data.keys(), data.values()):
+        comp_dict[x] = y
+    company = Company(**comp_dict)
+    company.create_company(passed_file=request.files['logo_file'])
 
     return redirect(url_for('company.show'))
 
@@ -49,11 +52,15 @@ def profile(company_id):
 
     comp = Company().query_company(company_id=company_id)
     user_rights = Company().query_employee(comp_id=company_id)
+    if comp.logo_file:
+        image = url_for('filemanager.get', id=comp.logo_file)
+    else:
+        image = ''
 
     return render_template('company_profile.html',
                            comp=comp,
                            user_rights=user_rights,
-                           image=url_for('filemanager.get', id=comp.logo_file)
+                           image=image
                            )
 
 @company_bp.route('/employees/<string:comp_id>/')
@@ -92,7 +99,11 @@ def edit(company_id):
                            user_query=user
                            )
 
+# def p(user_id, right_name):
+#     return {'can_user_in_company_'+right_name: lambda **kwargs: Right.permissions(user_id, kwargs['company_id'], right_name)}
+
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
+# @has_rights(**p(RIGHTS.ADD_EMPLOYEE(), g.user_dict['id']))
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
                           passed_file=request.files['logo_file'])

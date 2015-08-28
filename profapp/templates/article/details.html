@@ -36,9 +36,10 @@
             $scope.getCompanyToSubmit = function (val) {
                 return $ok('{{ url_for('company.search_to_submit_article') }}', {search: val}, function (resp) {
                     console.log(resp);
-                    return resp['data']['result'].map(function (item) {
-                        return item;
-                    });
+                    return resp;
+{#                    return resp.map(function (item) {#}
+{#                        return resp;#}
+{#                    });#}
                 }, function () {
                     console.log(arguments);
                 });
@@ -77,7 +78,7 @@
                 typeahead-on-select="onSelect($item, $model, $label)"
                 typeahead-template-url="customTemplate.html" typeahead-loading="loadingLocations"
                 ng-model="selectedCompany_name"
-                typeahead="company.id as company.name for company in getCompanyToSubmit($viewValue)" name="company_id"/>&nbsp;
+                typeahead="company as company.name for company in getCompanyToSubmit($viewValue)" name="company_id"/>&nbsp;
         <button ng-click="submitToCompany()" ng-disabled="!selectedCompany_id">{{ _('submit for publication') }}
         </button>
         <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
