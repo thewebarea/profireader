@@ -1,8 +1,7 @@
 from flask import request, current_app
-from sqlalchemy.orm import relationship, backref
+#from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
-from os import urandom
 from db_init import Base, db_session
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -10,7 +9,6 @@ from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
     REGISTERED_WITH
 from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
-from flask.ext.login import UserMixin
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -18,15 +16,16 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
+from .files import File
+from .pr_base import PRBase
 
-
-class User(Base, UserMixin):
+class User(Base, UserMixin, PRBase):
     __tablename__ = 'user'
 
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     personal_folder_file_id = Column(String(36), ForeignKey('file.id'))
-    profireader_email = Column(TABLE_TYPES['email'], unique=True)
+    profireader_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])
     profireader_name = Column(TABLE_TYPES['name'])
@@ -37,17 +36,24 @@ class User(Base, UserMixin):
     user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
-    companies = relationship('Company', backref='users')
+    companies = relationship('Company', backref='owner')
+
     # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False)
+    _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
     registered_tm = Column(TABLE_TYPES['timestamp'],
                            default=datetime.datetime.utcnow)
     last_seen = Column(TABLE_TYPES['timestamp'],
                        default=datetime.datetime.utcnow)
-    avatar_hash = Column(TABLE_TYPES['avatar_hash'])
+    profireader_avatar_url = Column(TABLE_TYPES['avatar_url'], nullable=False,
+                                    default='/static/no_avatar.png')
+    profireader_small_avatar_url = \
+        Column(TABLE_TYPES['avatar_url'],
+               nullable=False, default='/static/no_avatar_small.png')
+    #avatar_hash = Column(TABLE_TYPES['avatar_hash'])
 
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
@@ -63,7 +69,7 @@ class User(Base, UserMixin):
 
     # GOOGLE
     google_id = Column(TABLE_TYPES['id_soc_net'])
-    google_email = Column(TABLE_TYPES['email'], unique=True)
+    google_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     google_first_name = Column(TABLE_TYPES['name'])
     google_last_name = Column(TABLE_TYPES['name'])
     google_name = Column(TABLE_TYPES['name'])
@@ -73,7 +79,7 @@ class User(Base, UserMixin):
 
     # FACEBOOK
     facebook_id = Column(TABLE_TYPES['id_soc_net'])
-    facebook_email = Column(TABLE_TYPES['email'], unique=True)
+    facebook_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     facebook_first_name = Column(TABLE_TYPES['name'])
     facebook_last_name = Column(TABLE_TYPES['name'])
     facebook_name = Column(TABLE_TYPES['name'])
@@ -83,7 +89,7 @@ class User(Base, UserMixin):
 
     # LINKEDIN
     linkedin_id = Column(TABLE_TYPES['id_soc_net'])
-    linkedin_email = Column(TABLE_TYPES['email'], unique=True)
+    linkedin_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     linkedin_first_name = Column(TABLE_TYPES['name'])
     linkedin_last_name = Column(TABLE_TYPES['name'])
     linkedin_name = Column(TABLE_TYPES['name'])
@@ -93,7 +99,7 @@ class User(Base, UserMixin):
 
     # TWITTER
     twitter_id = Column(TABLE_TYPES['id_soc_net'])
-    twitter_email = Column(TABLE_TYPES['email'], unique=True)
+    twitter_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     twitter_first_name = Column(TABLE_TYPES['name'])
     twitter_last_name = Column(TABLE_TYPES['name'])
     twitter_name = Column(TABLE_TYPES['name'])
@@ -103,7 +109,7 @@ class User(Base, UserMixin):
 
     # MICROSOFT
     microsoft_id = Column(TABLE_TYPES['id_soc_net'])
-    microsoft_email = Column(TABLE_TYPES['email'], unique=True)
+    microsoft_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     microsoft_first_name = Column(TABLE_TYPES['name'])
     microsoft_last_name = Column(TABLE_TYPES['name'])
     microsoft_name = Column(TABLE_TYPES['name'])
@@ -113,7 +119,7 @@ class User(Base, UserMixin):
 
     # YAHOO
     yahoo_id = Column(TABLE_TYPES['id_soc_net'])
-    yahoo_email = Column(TABLE_TYPES['email'], unique=True)
+    yahoo_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     yahoo_first_name = Column(TABLE_TYPES['name'])
     yahoo_last_name = Column(TABLE_TYPES['name'])
     yahoo_name = Column(TABLE_TYPES['name'])
@@ -135,8 +141,9 @@ class User(Base, UserMixin):
 
                  location=None,
                  about_me=None,
-                 #password=None,
+                 password=None,
                  confirmed=False,
+                 banned=False,
 
                  email_conf_key=None,
                  email_conf_tm=None,
@@ -156,9 +163,9 @@ class User(Base, UserMixin):
 
         self.about_me = about_me
         self.location = location
-        #self.password = password
+        self.password = password
         self.confirmed = confirmed
-
+        self.banned = banned
         self.registered_tm = datetime.datetime.utcnow()   # here problems are possible
 
         self.email_conf_key = email_conf_key
@@ -222,6 +229,29 @@ class User(Base, UserMixin):
         self.yahoo_link = YAHOO_ALL['link']
         self.yahoo_phone = YAHOO_ALL['phone']
 
+    @property
+    def banned(self):
+        return self._banned
+
+    @banned.setter
+    def banned(self, ban):
+        self._banned = ban
+
+    def is_banned(self):
+        return self.banned
+
+    def ban(self):
+        self.banned = True
+        db_session.add(self)
+        db_session.commit()
+        return self
+
+    def unban(self):
+        self.banned = False
+        db_session.add(self)
+        db_session.commit()
+        return self
+
     def ping(self):
         self.last_seen = datetime.datetime.utcnow()
         db_session.add(self)
@@ -237,7 +267,7 @@ class User(Base, UserMixin):
         if self.profireader_email:
             email = self.profireader_email
 
-        hash = self.avatar_hash or hashlib.md5(
+        hash = hashlib.md5(
             email.encode('utf-8')).hexdigest()
         return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
             url=url, hash=hash, size=size, default=default, rating=rating)
@@ -309,13 +339,16 @@ class User(Base, UserMixin):
     # https://pythonhosted.org/passlib/lib/passlib.context-tutorial.html#full-integration-example
     @password.setter
     def password(self, password):
-        self.password_hash = \
-            generate_password_hash(password,
-                                   method='pbkdf2:sha256',
-                                   salt_length=32)  # salt_length=8
+        self.password_hash = None
+        if password:
+            self.password_hash = \
+                generate_password_hash(password,
+                                       method='pbkdf2:sha256',
+                                       salt_length=32)  # salt_length=8
 
     def verify_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return self.password_hash and \
+            check_password_hash(self.password_hash, password)
 
     def generate_confirmation_token(self, expiration=3600):
         #with app.app_context
@@ -372,3 +405,31 @@ class User(Base, UserMixin):
             return False
         self.profireader_email = new_email
         return True
+
+    def avatar_update(self, passed_file):
+        content = passed_file.stream.read(-1)
+
+        file = File(
+            author=self.profireader_name,
+            author_user_id=self.id,
+            name=passed_file.filename,
+            mime=passed_file.content_type)
+        self.profireader_avatar_url = \
+            file.upload(content=content).get_url()
+
+        file = File(
+            author=self.profireader_name,
+            author_user_id=self.id,
+            name=passed_file.filename,
+            mime=passed_file.content_type)
+        self.profireader_small_avatar_url = \
+            file.upload(content=content).get_url()
+
+        return self
+
+    # def can(self, permissions):
+    #     return self.role is not None and \
+    #         (self.role.permissions & permissions) == permissions
+
+    #def is_administrator(self):
+    #    return self.can(Permission.ADMINISTER)

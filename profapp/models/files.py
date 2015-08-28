@@ -4,6 +4,8 @@ import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from utils.db_utils import db
 from sqlalchemy.orm import relationship
+from flask import url_for
+
 
 class File(Base):
     __tablename__ = 'file'
@@ -24,7 +26,11 @@ class File(Base):
 
     UniqueConstraint('name', 'parent_id', name='inique_name_in_folder')
 
-    def __init__(self, parent_id=None, name=None, mime='text/plain', size=None, user_id=None, cr_tm=None, md_tm=None, ac_tm=None, company_id=None, author_user_id=None, copyright='', author=''):
+    def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
+                 user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
+                 company_id=None, author_user_id=None, copyright='',
+                 author=''):
+
         self.parent_id = parent_id
         self.name = name
         self.mime = mime
@@ -65,36 +71,34 @@ class File(Base):
 
     @staticmethod
     def create_company_dir(company=None, name=None):
-        f = File(parent_id=None, author_user_id=company.author_user_id, name=name, size=0,
-                 company_id=company.id, mime='directory')
+        f = File(parent_id=None, author_user_id=company.author_user_id,
+                 name=name, size=0, company_id=company.id, mime='directory')
         db_session.add(f)
         company.company_folder.append(f)
         db_session.commit()
         for x in company.company_folder:
             return x.id
 
-    @staticmethod
-    def upload(parent_id=None, file=None, company_id=None, author_user_id=None, copyright='', author=''):
-        f = File(parent_id=parent_id, author_user_id=author_user_id, name=file.filename, size=0,
-                 company_id=company_id, copyright=copyright, author=author, mime=file.content_type)
-        db_session.add(f)
+    def upload(self, content):
+        file_cont = FileContent(file_content=self, content=content)
+        db_session.add(self, file_cont)
         db_session.commit()
-        FileContent(file_content=f, content=file.stream.read(-1))
-        db_session.commit()
-        return f.id
+        return self
+
+    def get_url(self):
+        return url_for('filemanager.get', id=self.id)
 
 
 class FileContent(Base):
-
     __tablename__ = 'file_content'
-    id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), primary_key=True)
+    id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
+                primary_key=True)
     content = Column(Binary, nullable=False)
     file_content = relationship('File', backref='file_information')
 
-    def __init__(self, file_content=None, content=None, id=None):
-        self.content = content
-        self.id = id
+    def __init__(self, file_content=None, content=None):
         self.file_content = file_content
+        self.content = content
 
         # file.save(os.path.join(root, filename# ))
         # for tmp_file in os.listdir(root# ):

@@ -1,10 +1,24 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
+from ..models.articles import Article, ArticleCompany
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
+
+from ..constants.USER_ROLES import COMPANY_OWNER, RIGHTS
+from ..models.files import File
+from .request_wrapers import json
 from .has_right import has_right
-from ..constants.USER_ROLES import RIGHTS
+
+
+
+
+
+@company_bp.route('/search_to_submit_article/', methods=['POST'])
+@json
+def search_to_submit_article(json):
+    companies = Company().search_for_company(g.user_dict['id'], json['search'])
+    return companies
 
 @company_bp.route('/', methods=['GET', 'POST'])
 def show():
@@ -26,15 +40,9 @@ def add():
 def confirm_add():
 
     company = Company()
-    company.create_company(data=request.form, file=request.files['logo_file'])
+    company.create_company(data=request.form, passed_file=request.files['logo_file'])
 
     return redirect(url_for('company.show'))
-
-    # query = company.query_company(id=id)
-    # non_active_subscribers = company.query_non_active(id=id)
-    # user_name = [x.user_name for x in non_active_subscribers]
-    # user_query = company.query_subscriber_all_status(comp_id=id)
-    # user_active = company.query_subscriber_active_status(comp_id=id)
 
 @company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
 def profile(company_id):
@@ -86,8 +94,8 @@ def edit(company_id):
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 def confirm_edit(company_id):
-
-    Company().update_comp(company_id=company_id, data=request.form, file=request.files['logo_file'])
+    Company().update_comp(company_id=company_id, data=request.form,
+                          passed_file=request.files['logo_file'])
     return redirect(url_for('company.profile', company_id=company_id))
 
 @company_bp.route('/subscribe/<string:company_id>/')
@@ -118,6 +126,7 @@ def confirm_subscriber():
     comp_role.apply_request(comp_id=data['comp_id'], user_id=data['user_id'], bool=data['req'])
 
     return redirect(url_for('company.profile', company_id=data['comp_id']))
+
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
 def suspend_employee():

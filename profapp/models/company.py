@@ -12,9 +12,9 @@ from ..controllers.errors import StatusNonActivate
 from .files import File
 import datetime
 from ..controllers.has_right import has_right
+from .pr_base import PRBase
 
-
-class Company(Base):
+class Company(Base, PRBase):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
@@ -30,7 +30,7 @@ class Company(Base):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    user_company_rs = relationship('UserCompany', backref='company', lazy='dynamic')
+    # user_company_rs = relationship('UserCompany', backref='company')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
                  address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
@@ -45,10 +45,10 @@ class Company(Base):
         self.phone2 = phone2
         self.email = email
         self.short_description = short_description
-        self.user_company_rs = user_company_rs
+        # self.user_company_rs = user_company_rs
 
     @staticmethod
-    def employee(company_id):
+    def employee(company_id, right = ''):
         ret = db(UserCompany, company_id=company_id).all()
         return ret
 
@@ -67,13 +67,24 @@ class Company(Base):
         return set(companies)
 
     @staticmethod
+    def search_for_company(user_id, searchtext):
+
+        companies = []
+        query_companies = db(Company).filter(Company.name.like("%"+searchtext+"%")).all()
+        ret = []
+        for x in query_companies:
+            ret.append(x.dict())
+
+        return ret
+        # return PRBase.searchResult(query_companies)
+
+    @staticmethod
     def query_company(company_id):
 
         company = db(Company, id=company_id).one()
         return company
 
-    def create_company(self, data, file):
-
+    def create_company(self, data, passed_file):
         has_right(True)
         comp_dict = {'author_user_id': g.user_dict['id']}
         for x, y in zip(data.keys(), data.values()):
@@ -82,29 +93,45 @@ class Company(Base):
         db_session.add(company)
         db_session.flush()
         user_rbac = UserCompany(user_id=company.author_user_id,
-                                company_id=company.id,
-                                status=STATUS().ACTIVE())
-        db(Company, id=company.id).update({'logo_file': File.upload(file=file, company_id=company.id,
-                                                                    parent_id=company.corporate_folder_file_id,
-                                                                    author=g.user_dict['name'],
-                                                                    author_user_id=g.user_dict['id'])})
+                                company_id=company.id, status=STATUS.ACTIVE())
+
+        file = File(company_id=company.id,
+                    parent_id=company.corporate_folder_file_id,
+                    author=g.user_dict['name'],
+                    author_user_id=g.user_dict['id'],
+                    name=passed_file.filename,
+                    mime=passed_file.content_type)
+
+        db(Company, id=company.id).\
+            update(
+            {'logo_file': file.upload(content=passed_file.stream.read(-1)).id}
+        )
+
         db_session.add(user_rbac)
         db_session.flush()
         r = Right()
         r.update_rights(company.author_user_id, user_rbac.company_id, COMPANY_OWNER)
 
     @staticmethod
-    def update_comp(company_id, data, file):
+    def update_comp(company_id, data, passed_file):
 
         has_right(Right.permissions(g.user_dict['id'], company_id, rights=[RIGHTS.EDIT()]))
         comp = db(Company, id=company_id)
         for x, y in zip(data.keys(), data.values()):
             comp.update({x: y})
-        if file.filename:
-            comp.update({'logo_file': File.upload(file=file, company_id=company_id,
-                                                  parent_id=comp.one().corporate_folder_file_id,
-                                                  author=g.user_dict['name'],
-                                                  author_user_id=g.user_dict['id'])})
+
+        if passed_file.filename:
+            file = File(company_id=company_id,
+                        parent_id=comp.one().corporate_folder_file_id,
+                        author=g.user_dict['name'],
+                        author_user_id=g.user_dict['id'],
+                        name=passed_file.filename,
+                        mime=passed_file.content_type)
+            comp.update(
+                {'logo_file':
+                    file.upload(content=passed_file.stream.read(-1)).id}
+            )
+
         db_session.commit()
 
     @staticmethod
@@ -123,7 +150,7 @@ class Company(Base):
         if employee.status == STATUS().ACTIVE():
             return True
 
-class UserCompanyRight(Base):
+class UserCompanyRight(Base, PRBase):
     __tablename__ = 'user_company_right'
     id = Column(TABLE_TYPES['bigint'], primary_key=True)
     user_company_id = Column(TABLE_TYPES['bigint'], ForeignKey('user_company.id'))
@@ -167,7 +194,7 @@ class UserCompanyRight(Base):
         db_session.commit()
 
 
-class UserCompany(Base):
+class UserCompany(Base, PRBase):
 
     __tablename__ = 'user_company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -177,11 +204,12 @@ class UserCompany(Base):
     md_tm = Column(TABLE_TYPES['timestamp'])
     right = relationship(UserCompanyRight, backref='user_company')
 
-    def __init__(self, user_id=None, company_id=None, status=None, right=[],):
+    def __init__(self, user_id=None, company_id=None, status=None, right=[]):
         self.user_id = user_id
         self.company_id = company_id
         self.status = status
         self.right = right
+
 
 class Right(Base):
     __tablename__ = 'company_right'

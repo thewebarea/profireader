@@ -6,7 +6,8 @@ def json(func):
     @wraps(func)
     def function_with_parent(*args, **kwargs):
         # try:
-            return jsonify({'ok': True, 'error_code': 'ERROR_NO_ERROR', 'result': func(*args, **kwargs)})
+            ret = func(request.json)
+            return jsonify({'result': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
         # except Exception:
         #     return jsonify({'ok': False, 'error_code': -1, 'result': "unknown error"})
     return function_with_parent

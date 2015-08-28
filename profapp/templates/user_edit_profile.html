@@ -11,14 +11,26 @@
 {% block portal_content %}
 <h1>Your Profile</h1>
 
-<img class="img-rounded profile-thumbnail" src="{{ g.user.gravatar(size=256) }}"><br>
-[upload picture]
+{#<img class="img-rounded profile-thumbnail" src="{{ g.user.gravatar(size=256) }}"><br>#}
+<img class="img-rounded profile-thumbnail" src="{{ current_user.profireader_avatar_url }}" style="width:256px;border:0"><br>
+<a ng-click="mySwitch = !mySwitch">
+    <span ng-hide="mySwitch">[upload picture]</span>
+    <span ng-show="mySwitch">[hide]</span>
+</a>
+<a>
+    <span ng-hide="mySwitch">[use gravatar]</span>
+</a>
+<form id="avatar" ng-show="mySwitch" ng-init="mySwitch=false" action="{{ request.path }}" method="post" enctype="multipart/form-data">
+    Select image to upload:
+    <input type="file" name="avatar" id="fileToUpload">
+    <input type="submit" value="Upload Image" name="submit">
+</form>
 <br/>
 <br/>
 <br/>
 
 
-<form action="{{ url_for('user.edit_profile', user_id=g.user.id) }}" method="post">
+<form action="{{ url_for('user.edit_profile', user_id=g.user.id) }}" onsubmit="return AjaxPost()" method="post">
     <p>Your display name: <input type="text" placeholder="name" name="name" value="{{ g.user.profireader_name }}"></p>
     <p>Your email: {{ g.user.profireader_email }}  <a href="{{ url_for('auth.change_email_request') }}"> [change]</a></p>
     <p>Your first name: <input type="text" placeholder="first name" name="first_name" value="{{ g.user.profireader_first_name or '' }}"></p>
@@ -40,7 +52,7 @@
     <p>Phone: <input type="text" placeholder="your phone" name="phone" value="{{ g.user.profireader_phone or '' }}"></p>
     <p>Location: <input type="text" placeholder="your city" name="location" value="{{ g.user.location or '' }}"></p>
     <p>About me: <textarea name="about_me" cols="40" rows="8" placeholder="Give us some information about you please">{{ g.user.about_me or '' }}</textarea></p>
-    <input type="submit" value="Update Profile">
+    <input type="submit" value="Update Profile" name="submit">
 </form>
 
 
@@ -66,7 +78,6 @@
     {{ moment.include_moment() }}
     <script type="text/javascript">
 
-
         tinymce.init({
             image_advtab: true ,
             width: 500,
@@ -74,7 +85,7 @@
         });
 
  function AjaxPost() {
-  $.post('{{ url_for('article.create') }}', {
+  $.post({{ request.path }}, {
              'name': $("#name").val(),
               'short': $("#short").val(),
               'full': $("#full").val()
@@ -85,5 +96,17 @@
    return true;
  };
 
+ function AjaxPost2() {
+  $.post('', {
+             'logo_file': $("#logo_file").val(),
+             'name': $("#name").val()
+ }, function (resp) {
+             console.log(resp);
+           },
+   'json');
+   return true;
+ };
+
 </script>
+
 {% endblock %}

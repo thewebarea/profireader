@@ -15,6 +15,9 @@ import hashlib
 from flask.ext.login import AnonymousUserMixin
 from .constants.SOCIAL_NETWORKS import INFO_ITEMS_NONE, SOC_NET_FIELDS
 from .constants.USER_REGISTERED import REGISTERED_WITH
+from flask import globals
+import re
+from flask.ext.babel import Babel, gettext
 
 
 def setup_authomatic(app):
@@ -58,8 +61,6 @@ def load_user():
     g.user_init = user_init
     g.user = user
     g.user_dict = user_dict
-    g.delete = {'x': None}
-    pass
 
 
 #def load_user():
@@ -78,6 +79,24 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
+def raw_url_for(endpoint):
+    appctx = globals._app_ctx_stack.top
+    reqctx = globals._request_ctx_stack.top
+    if reqctx is not None:
+        url_adapter = reqctx.url_adapter
+    else:
+        url_adapter = appctx.url_adapter
+
+    rules = url_adapter.map._rules_by_endpoint.get(endpoint, ())
+
+    if len(rules) < 1:
+        return ''
+
+    ret = re.compile('<[^:]*:').sub('<', url_adapter.map._rules_by_endpoint.get(endpoint, ())[0].rule)
+
+    return "function (dict) { var ret = '" + ret + "'; " \
+                           " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
+
 
 mail = Mail()
 moment = Moment()
@@ -91,15 +110,25 @@ login_manager.login_view = 'auth.login'
 
 
 class AnonymousUser(AnonymousUserMixin):
-    def gravatar(self, size=100, default='identicon', rating='g'):
-        if request.is_secure:
-            url = 'https://secure.gravatar.com/avatar'
-        else:
-            url = 'http://www.gravatar.com/avatar'
-        hash = hashlib.md5(
-            'guest@profireader.com'.encode('utf-8')).hexdigest()
-        return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
-            url=url, hash=hash, size=size, default=default, rating=rating)
+    #def gravatar(self, size=100, default='identicon', rating='g'):
+        #if request.is_secure:
+        #    url = 'https://secure.gravatar.com/avatar'
+        #else:
+        #    url = 'http://www.gravatar.com/avatar'
+        #hash = hashlib.md5(
+        #    'guest@profireader.com'.encode('utf-8')).hexdigest()
+        #return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+        #    url=url, hash=hash, size=size, default=default, rating=rating)
+        #return '/static/no_avatar.png'
+
+    def has_rights(self, permissions):
+        return False
+
+    def is_administrator(self):
+        return False
+
+    def is_banned(self):
+        return False
 
     def __repr__(self):
         return "<User(id = %r)>" % self.id
@@ -107,10 +136,11 @@ class AnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnonymousUser
 
 
-
 def create_app(config='config.ProductionDevelopmentConfig'):
     app = Flask(__name__)
     app.config.from_object(config)
+
+    babel = Babel(app)
 
     app.before_request(setup_authomatic(app))
     app.before_request(load_user)
@@ -134,6 +164,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     # read this: http://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
+    app.jinja_env.globals.update(raw_url_for=raw_url_for)
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
     # Flask will automatically remove database sessions at the end of the
@@ -142,6 +173,7 @@ def create_app(config='config.ProductionDevelopmentConfig'):
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
-        db_session.remove()
+        db_session.commit()
+        # db_session.remove()
 
     return app
