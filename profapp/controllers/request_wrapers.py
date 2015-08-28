@@ -31,13 +31,25 @@ def replace_brackets(func):
         return func(*args, **kwargs)
     return wrapper
 
-def check_rights(rights):
+# def check_rights(rights):
+#     def decorator(func):
+#         @wraps(func)
+#         def wrapper(*args, **kwargs):
+#
+#             if not set(rights) < set(Right.permissions(user_id=g.user_dict['id'], comp_id=kwargs['company_id'])):
+#                 return abort(403)
+#             return func(*args, **kwargs)
+#         return wrapper
+#     return decorator
+
+def check_rights(**rulelam):
+    # (rule_name, lambda_func) = rulelam.items()[0]
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-
-            if not set(rights) < set(Right.permissions(user_id=g.user_dict['id'], comp_id=kwargs['company_id'])):
-                return abort(403)
+            has = rulelam
+            for x in has:
+                has[x](**kwargs)
             return func(*args, **kwargs)
         return wrapper
     return decorator
