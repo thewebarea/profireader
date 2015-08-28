@@ -6,8 +6,16 @@ from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp
 from io import BytesIO
 from .request_wrapers import json
+from functools import wraps
 
 
+
+def parent_folder(func):
+    @wraps(func)
+    def function_parent_folder(json, *args, **kwargs):
+        ret = func(json, *args, **kwargs)
+        return ret
+    return function_parent_folder
 
 
 root = os.getcwd()+'/profapp/static/filemanager/tmp'
@@ -17,7 +25,7 @@ json_result = {"result": {"success": True, "error": None}}
 def filemanager():
     # library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
     library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.profireader_small_avatar_url}}
-    for company in g.user.companies:
+    for company in g.user.employer:
         library[company.journalist_folder_file_id]={'name': "%s materisals" % (company.name, ), 'icon': ''}
         library[company.corporate_folder_file_id]={'name': "%s corporate files" % (company.name, ), 'icon': ''}
     return render_template('filemanager.html', library=library)
@@ -25,19 +33,19 @@ def filemanager():
 @filemanager_bp.route('/list/', methods=['POST'])
 @json
 # @parent_folder
-def list(parent_id=None):
+def list(json, parent_id=None):
     return File.list(parent_id=parent_id)
 
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @json
 # @parent_folder
-def createdir(parent_id=None):
+def createdir(json, parent_id=None):
     return File.createdir(name=request.json['params']['name'],  parent_id=parent_id)
 
 @filemanager_bp.route('/upload/', methods=['POST'])
 @json
-def upload():
+def upload(json):
     parent_id = None if (request.form['parent_id'] == '') \
         else (request.form['parent_id'])
     got_file = request.files['file-0']

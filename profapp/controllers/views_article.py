@@ -46,9 +46,9 @@ def details(article_id):
     return render_template('article/details.html', article = article.dict())
 
 
-@article_bp.route('/send_to_company/', methods=['POST'])
+@article_bp.route('/send_to_company/<string:article_id>/', methods=['POST'])
 @json
-def send_to_company():
+def send_to_company(json, article_id):
     data = request.json
 
     ArticleCompany.get(data['article_version_id']).clone_for_company(data['company_id']).save()

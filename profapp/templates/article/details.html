@@ -14,15 +14,12 @@
             $scope.selectedCompany_id = name;
             $scope.selectedCompany_sending = false;
 
-            {#            $scope.submitToCompany = function () {#}
-            {#                $http.post('{{ url_for('company.submit_article') }}', {#}
-            {##}
-            {##}
-            {#                }).then().finally(function () {#}
-            {##}
-            {##}
-            {#                }#}
-            {#            );#}
+            $scope.submitToCompany = function (company_id) {
+                $scope.selectedCompany_sending = company_id;
+                $http.post($scope.url_send({article_id: $scope.article.id}), {company_id: company_id}).then().finally(function () {
+                    $scope.selectedCompany_sending = false;
+                });
+            };
 
             $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {
@@ -32,7 +29,8 @@
                 else {
                     $scope.selectedCompany_id = $item.id;
                 }
-            }
+            };
+
             $scope.getCompanyToSubmit = function (val) {
                 return $ok('{{ url_for('company.search_to_submit_article') }}', {search: val}, function (resp) {
                     console.log(resp);
