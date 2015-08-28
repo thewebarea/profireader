@@ -5,7 +5,7 @@ from profapp.models.users import User
 from profapp.models.company import Company
 from db_init import db_session
 from .blueprints import article_bp
-from .request_wrapers import json
+from .request_wrapers import json, object_to_dict
 #import os
 
 
@@ -43,17 +43,19 @@ def update(article_company_id):
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])
 def details(article_id):
     article = Article.get(article_id)
-    return render_template('article/details.html', article = article.dict())
+    d = object_to_dict(article, 'id', 'mine.id', 'submitted.id', 'submitted.cr_tm', 'submitted.editor', '*')
+    return render_template('article/details.html', article = object_to_dict(article, 'id', 'mine.id', 'submitted.id', 'submitted.cr_tm', 'submitted.editor', '*'))
 
 
-@article_bp.route('/send_to_company/', methods=['POST'])
+@article_bp.route('/search_for_company_to_submit/', methods=['POST'])
 @json
-def send_to_company():
-    data = request.json
+def search_for_company_to_submit(json):
+    companies = Company().search_for_company(g.user_dict['id'], json['search'])
+    return companies
 
-    ArticleCompany.get(data['article_version_id']).clone_for_company(data['company_id']).save()
-
-
-    # article.clone
-    return {'haha': 'hi'}
-    # pass
+@article_bp.route('/submit_to_company/<string:article_id>/', methods=['POST'])
+@json
+def submit_to_company(article_id, json = {}):
+    a = Article.get(article_id)
+    a.mine.clone_for_company(json['company_id'])
+    return [s.dict() for s in Article.get(article_id).submitted]

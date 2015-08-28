@@ -85,17 +85,18 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
             return $http.post(url, data).then(
                 function (resp) {
-
                     if (!resp || !resp['data'] || typeof resp['data'] !== 'object' || resp === null) {
                         return error('wrong response', -1);
                     }
 
-                    if (!resp['data']['ok']) {
-                        return error(resp['data']['result'], resp['data']['error_code']);
+                    resp  = resp ['data'];
+
+                    if (!resp['ok']) {
+                        return error(resp['result'], resp['error_code']);
                     }
 
                     if (ifok) {
-                        ifok(resp['data']['result']);
+                        return ifok(resp['result']);
                     }
 
                 },
@@ -287,3 +288,5 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
     }]);
 
 None = null;
+False = false;
+True = true;

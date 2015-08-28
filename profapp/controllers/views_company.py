@@ -11,15 +11,6 @@ from .request_wrapers import json
 from .has_right import has_right
 
 
-
-
-
-@company_bp.route('/search_to_submit_article/', methods=['POST'])
-@json
-def search_to_submit_article(json):
-    companies = Company().search_for_company(g.user_dict['id'], json['search'])
-    return companies
-
 @company_bp.route('/', methods=['GET', 'POST'])
 def show():
 
