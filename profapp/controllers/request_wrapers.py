@@ -4,21 +4,15 @@ from ..models.company import Right
 
 def json(func):
     @wraps(func)
-    def function_with_parent(*args, **kwargs):
+    def function_json(*args, **kwargs):
         # try:
-            ret = func(request.json)
+            if 'json' in kwargs:
+                del kwargs['json']
+            ret = func(request.json, *args, **kwargs)
             return jsonify({'result': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
-        # except Exception:
-        #     return jsonify({'ok': False, 'error_code': -1, 'result': "unknown error"})
-    return function_with_parent
-
-def parent_folder(func):
-    @wraps(func)
-    def function_with_parent(*args, **kwargs):
-        parent_id = (None if (request.json['params']['parent_id'] == '') else (request.json['params']['parent_id']))
-        kwargs['parent_id'] = parent_id
-        return func(*args, **kwargs)
-    return function_with_parent
+        # except Exception as e:
+        #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
+    return function_json
 
 def replace_brackets(func):
     @wraps(func)

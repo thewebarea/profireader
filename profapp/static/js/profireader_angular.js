@@ -287,3 +287,5 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
     }]);
 
 None = null;
+False = false;
+True = true;
