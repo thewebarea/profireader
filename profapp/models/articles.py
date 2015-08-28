@@ -5,6 +5,8 @@ from sqlalchemy.orm import relationship, backref, aliased
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.STATUS import STATUS
 from db_init import db_session
+from ..models.company import Company
+from ..models.users import User
 
 
 from ..controllers.errors import BadDataProvided
@@ -28,35 +30,36 @@ def _C():
 
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
-    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True, info={'visible': True})
 
-    editor_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
-    article_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article.id'))
+    editor_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False, info={'visible': True})
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), info={'visible': True})
+    article_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article.id'), info={'visible': True})
     # created_from_version_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_version.id'))
 
-    title = Column(TABLE_TYPES['title'], nullable=False)
-    short = Column(TABLE_TYPES['text'], nullable=False)
-    long = Column(TABLE_TYPES['text'], nullable=False)
+    title = Column(TABLE_TYPES['title'], nullable=False, info={'visible': True})
+    short = Column(TABLE_TYPES['text'], nullable=False, info={'visible': True})
+    long = Column(TABLE_TYPES['text'], nullable=False, info={'visible': True})
 
-    cr_tm = Column(TABLE_TYPES['timestamp'])
-    md_tm = Column(TABLE_TYPES['timestamp'])
+    cr_tm = Column(TABLE_TYPES['timestamp'], info={'visible': True})
+    md_tm = Column(TABLE_TYPES['timestamp'], info={'visible': True})
 
-    company = relationship('Company')
-    article = relationship('Article')
-
+    company = relationship(Company)
+    editor = relationship(User)
+    # article = relationship('Article')
 
     def clone_for_company(self, company_id):
-        return self.detach().attr({'company_id': company_id, 'created_from_version_id': self.id})
+        return self.detach().attr({'company_id': company_id}).save()
+
 
 class Article(Base, PRBase):
     __tablename__ = 'article'
 
-    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True, info={'visible': True})
+    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False, info={'visible': True})
 
-    submitted = relationship('ArticleCompany', primaryjoin="and_(Article.id==ArticleCompany.article_id, ArticleCompany.company_id!=None)")
-    mine = relationship('ArticleCompany', primaryjoin="and_(Article.id==ArticleCompany.article_id, ArticleCompany.company_id==None)", uselist=False)
+    submitted = relationship(ArticleCompany, primaryjoin="and_(Article.id==ArticleCompany.article_id, ArticleCompany.company_id!=None)", info={'visible': True})
+    mine = relationship(ArticleCompany, primaryjoin="and_(Article.id==ArticleCompany.article_id, ArticleCompany.company_id==None)", uselist=False, info={'visible': True})
 
     @staticmethod
     def save_new_article(user_id, **kwargs):

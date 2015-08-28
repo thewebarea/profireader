@@ -8,11 +8,14 @@
     <script>
         module.controller('article_my_versions', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
             $scope.article = {{ article|safe }};
+            console.log($scope.article);
             $scope.url_update = {{ raw_url_for('article.show_form_update')|safe }};
-            $scope.url_send = {{ raw_url_for('article.send_to_company')|safe }};
+            $scope.url_search_for_company = {{ raw_url_for('article.search_for_company_to_submit')|safe }};
+            $scope.url_submit = {{ raw_url_for('article.submit_to_company')|safe }};
             $scope.selectedCompany_name = '';
-            $scope.selectedCompany_id = name;
+            $scope.selectedCompany = null;
             $scope.selectedCompany_sending = false;
+
 
             $scope.submitToCompany = function (company_id) {
                 $scope.selectedCompany_sending = company_id;
@@ -21,30 +24,39 @@
                 });
             };
 
+
             $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {
                     $scope.selectedCompany_name = '';
-                    $scope.selectedCompany_id = null;
+                    $scope.selectedCompany = null;
                 }
                 else {
-                    $scope.selectedCompany_id = $item.id;
+                    $scope.selectedCompany = $item;
                 }
             };
 
             $scope.getCompanyToSubmit = function (val) {
-                return $ok('{{ url_for('company.search_to_submit_article') }}', {search: val}, function (resp) {
-                    console.log(resp);
-                    return resp;
-{#                    return resp.map(function (item) {#}
-{#                        return resp;#}
-{#                    });#}
-                }, function () {
-                    console.log(arguments);
+                return $ok($scope.url_search_for_company(), {search: val}, function (resp) {
+                    return resp.length ? resp : [{id: '', name: 'No results'}];
                 });
             };
 
+            $scope.submitToCompany = function () {
+                $ok($scope.url_submit({article_id: $scope.article['id']}), {company_id: $scope.selectedCompany.id}, function (resp) {
+                    $scope.selectedCompany = null;
+                    $scope.selectedCompany_name = null;
+                }).finally(function () {
+                    $scope.selectedCompany_sending = false;
+                });
+            }
+
             $scope._ = function (t, dict) {
-                return $translate(t, dict ? dict : $scope)
+                try {
+                    return $translate(t, dict ? dict : $scope)
+                }
+                catch (a) {
+                    return ''
+                }
             };
         }]);
     </script>
@@ -63,7 +75,7 @@
 
     {% raw %}
     <span ng-controller="article_my_versions">
-    <h2>{{ _('Article name is `%(article.mine.title)s`') }}</h2>
+    <h2>{{ _('Article title is `%(article.mine.title)s`') }}</h2>
     {{ mine.short }}
     <h4>{{ _('Created at %(article.mine.cr_tm)s') }}</h4>
     <h4>{{ _('Last modified at %(article.mine.md_tm)s') }} (<a
@@ -72,17 +84,21 @@
     {{ _('submit my article to company') }}
 
     <form style="display: inline">
-        <input
-                typeahead-on-select="onSelect($item, $model, $label)"
-                typeahead-template-url="customTemplate.html" typeahead-loading="loadingLocations"
-                ng-model="selectedCompany_name"
-                typeahead="company as company.name for company in getCompanyToSubmit($viewValue)" name="company_id"/>&nbsp;
-        <button ng-click="submitToCompany()" ng-disabled="!selectedCompany_id">{{ _('submit for publication') }}
+        <input typeahead-on-select="onSelect($item, $model, $label)"
+               typeahead-template-url="customTemplate.html" typeahead-loading="loadingLocations"
+               ng-model="selectedCompany_name"
+               typeahead="company as company.name for company in getCompanyToSubmit($viewValue)" name="company_id"/>&nbsp;
+        <button ng-click="submitToCompany()" ng-disabled="!selectedCompany">{{ _('submit for publication') }}
         </button>
         <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
     </form>
     <h2>{{ _('Submitted to following companies') }}</h2>
-    <span ng-repeat="a_submitted in article.submitted">!</span>
+    <span ng-repeat="a_submitted in article.submitted">
+        <h3>{{ _('Article title is `%(title)s`', a_submitted) }}</h3>
+    {{ a_submitted.short }}
+        <h5>{{ _('Created at %(cr_tm)s', a_submitted) }}</h5>
+        <h5>{{ _('Last modified at %(md_tm)s by user %(editor.profireader_name)s', a_submitted) }}</h5>
+    </span>
 
     </span>
     {% endraw %}

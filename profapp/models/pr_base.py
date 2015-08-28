@@ -1,7 +1,6 @@
-from db_init import db_session
+from db_init import db_session, Base
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
-from sqlalchemy.types import DateTime
 import datetime
 
 
@@ -22,26 +21,39 @@ class PRBase():
         self.id = None
         return self
 
-    def dict(self, found=None):
-        if found is None:
-            found = set()
-        mapper = class_mapper(self.__class__)
-        columns = [column.key for column in mapper.columns]
-        get_key_value = lambda c: (c, getattr(self, c).isoformat()) if isinstance(getattr(self, c),
-                                                                                  datetime.datetime) else (
-        c, getattr(self, c))
-        # get_key_value = lambda c: (c, getattr(self, c).__str__)
-        out = dict(map(get_key_value, columns))
-        for name, relation in mapper.relationships.items():
-            if relation not in found:
-                found.add(relation)
-                related_obj = getattr(self, name)
-                if related_obj is not None:
-                    if relation.uselist:
-                        out[name] = [child.dict(found) for child in related_obj]
-                    else:
-                        out[name] = related_obj.dict(found)
-        return out
+
+
+
+        #
+        # if found is None:
+        #     found = []
+        # if found_converted is None:
+        #     found_converted = []
+        # mapper = class_mapper(self.__class__)
+        # columns = [column.key for column in mapper.columns]
+        # get_key_value = lambda c: (c, getattr(self, c).isoformat()) if isinstance(getattr(self, c),
+        #                                                                           datetime.datetime) else (
+        # c, getattr(self, c))
+        # # get_key_value = lambda c: (c, getattr(self, c).__str__)
+        # out = dict(map(get_key_value, columns))
+        # for name, relation in mapper.relationships.items():
+        #     if relation.uselist:
+        #         if relation not in found:
+        #             found.append(relation)
+        #             found_converted.append(True)
+        #             found_index = len(found_converted)-1
+        #             related_obj = getattr(self, name)
+        #             converted = [child.dict(found, found_converted) for child in related_obj] if relation.uselist else related_obj.dict(found, found_converted)
+        #             found_converted[found_index] = converted
+        #             if related_obj is not None:
+        #                 out[name] = converted
+        #         else:
+        #             out[name] = found_converted[found.index(relation)]
+        #     else:
+        #         converted = related_obj.dict(found, found_converted)
+        #         if related_obj is not None:
+        #                 out[name] = converted
+        # return out
 
     @classmethod
     def get(cls, id):
@@ -54,3 +66,4 @@ class PRBase():
     #         ret[x.id] = convert_item(x)
     #
     #     return ret
+

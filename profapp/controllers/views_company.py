@@ -11,12 +11,6 @@ from flask.ext.login import login_required
 
 
 
-@company_bp.route('/search_to_submit_article/', methods=['POST'])
-@json
-def search_to_submit_article(json):
-    companies = Company().search_for_company(g.user_dict['id'], json['search'])
-    return companies
-
 @company_bp.route('/', methods=['GET', 'POST'])
 @check_rights(**Right.p(''))
 @login_required
