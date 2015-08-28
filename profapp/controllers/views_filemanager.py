@@ -5,7 +5,9 @@ from db_init import db_session
 from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp
 from io import BytesIO
-from .request_wrapers import json, parent_folder
+from .request_wrapers import json
+
+
 
 
 root = os.getcwd()+'/profapp/static/filemanager/tmp'
@@ -22,14 +24,14 @@ def filemanager():
 
 @filemanager_bp.route('/list/', methods=['POST'])
 @json
-@parent_folder
+# @parent_folder
 def list(parent_id=None):
     return File.list(parent_id=parent_id)
 
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @json
-@parent_folder
+# @parent_folder
 def createdir(parent_id=None):
     return File.createdir(name=request.json['params']['name'],  parent_id=parent_id)
 
