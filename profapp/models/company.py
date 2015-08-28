@@ -76,7 +76,6 @@ class Company(Base, PRBase):
         company = db(Company, id=company_id).one()
         return company
 
-
     def create_company(self, data, passed_file):
         has_right(True)
         comp_dict = {'author_user_id': g.user_dict['id']}
@@ -86,7 +85,7 @@ class Company(Base, PRBase):
         db_session.add(company)
         db_session.flush()
         user_rbac = UserCompany(user_id=company.author_user_id,
-                                company_id=company.id, status=status.ACTIVE())
+                                company_id=company.id, status=STATUS.ACTIVE())
 
         file = File(company_id=company.id,
                     parent_id=company.corporate_folder_file_id,
@@ -197,7 +196,7 @@ class UserCompany(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     right = relationship(UserCompanyRight, backref='user_company')
 
-    def __init__(self, user_id=None, company_id=None, status=None, right=[],):
+    def __init__(self, user_id=None, company_id=None, status=None, right=[]):
         self.user_id = user_id
         self.company_id = company_id
         self.status = status

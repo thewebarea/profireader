@@ -31,15 +31,9 @@ def add():
 def confirm_add():
 
     company = Company()
-    company.create_company(data=request.form, file=request.files['logo_file'])
+    company.create_company(data=request.form, passed_file=request.files['logo_file'])
 
     return redirect(url_for('company.show'))
-
-    # query = company.query_company(id=id)
-    # non_active_subscribers = company.query_non_active(id=id)
-    # user_name = [x.user_name for x in non_active_subscribers]
-    # user_query = company.query_subscriber_all_status(comp_id=id)
-    # user_active = company.query_subscriber_active_status(comp_id=id)
 
 @company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
 def profile(company_id):
@@ -92,7 +86,7 @@ def edit(company_id):
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
-                          file=request.files['logo_file'])
+                          passed_file=request.files['logo_file'])
     return redirect(url_for('company.profile', company_id=company_id))
 
 @company_bp.route('/subscribe/<string:company_id>/')
