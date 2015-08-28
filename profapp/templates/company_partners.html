@@ -16,7 +16,7 @@
         <h3><p>Subscribe to portal</p></h3>
         <p>Enter portal id<input type="text" id="portal_id" placeholder="ID" name="portal_id"></p>
         <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
-        <input type="submit" value="submit">
+        <input type="submit" value="Subscribe">
     </form>
 
       <script type="text/javascript">
@@ -31,12 +31,25 @@
    return true;
  };
 </script>
-
-    <h4>Companies Partners : </h4>
+{% if companies_partners %}
+    <h3>Companies Partners :
     {% for comp in companies_partners %}
-    {{ comp.name }}
-    {% endfor %}
+    {% if not comp.name %}
+        {{ comp }}
+        {% endif %}
+    <a href="{{ url_for('company.profile', company_id = comp.id) }}"> {{ comp.name }} </a>
+    {% endfor %}</h3>
+{% else %}
+   <h3> There is no portal in your company </h3>
+    {% endif %}
 
+    <h3>Your portals-partners:
+    {% for portals in portals_partners %}
+            {% if not portals.name %}
+        {{ portals }}
+        {% endif %}
+<a href="{{ url_for('company.profile', company_id = portals.company_owner_id) }}"> {{ portals.name }} </a>
+{% endfor %}</h3>
 {% endblock content %}
 
 {% block footer %}
