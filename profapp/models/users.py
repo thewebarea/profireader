@@ -12,12 +12,13 @@ from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-
+from utils.db_utils import db
 from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase
+from sqlalchemy.ext.associationproxy import association_proxy
 
 class User(Base, UserMixin, PRBase):
     __tablename__ = 'user'
@@ -32,12 +33,9 @@ class User(Base, UserMixin, PRBase):
     profireader_gender = Column(TABLE_TYPES['gender'])
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
-    profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
-    user_right_in_company = relationship('UserCompany', backref='user')
+    employer = relationship('Company', secondary='user_company', backref='employee')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
-    companies = relationship('Company', backref='owner')
-
     # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])
@@ -127,10 +125,13 @@ class User(Base, UserMixin, PRBase):
     yahoo_link = Column(TABLE_TYPES['link'])
     yahoo_phone = Column(TABLE_TYPES['phone'])
 
+# get all users in company : company.employee
+# get all users companies : user.employer
+
     def __init__(self,
                  companies=[],
-                 fk_user_right_in_company=None,
                  user_right_in_company=[],
+                 employer=None,
                  PROFIREADER_ALL=SOC_NET_NONE['profireader'],
                  GOOGLE_ALL=SOC_NET_NONE['google'],
                  FACEBOOK_ALL=SOC_NET_NONE['facebook'],
@@ -151,7 +152,7 @@ class User(Base, UserMixin, PRBase):
                  pass_reset_conf_tm=None,
                  ):
         self.companies = companies
-        self.fk_user_right_in_company = fk_user_right_in_company
+        self.employer = employer
         self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['email']
         self.profireader_first_name = PROFIREADER_ALL['first_name']
@@ -228,6 +229,11 @@ class User(Base, UserMixin, PRBase):
         self.yahoo_gender = YAHOO_ALL['gender']
         self.yahoo_link = YAHOO_ALL['link']
         self.yahoo_phone = YAHOO_ALL['phone']
+
+    @staticmethod
+    def user_query(user_id):
+        ret = db(User, id=user_id).one()
+        return ret
 
     @property
     def banned(self):
