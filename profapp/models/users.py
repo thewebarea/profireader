@@ -4,7 +4,6 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 from db_init import Base, db_session
 
-
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
