@@ -40,10 +40,10 @@
     <a href="{{ url_for('company.profile', company_id = comp.id) }}"> {{ comp.name }} </a>
     {% endfor %}</h3>
 {% else %}
-   <h3> There is no portal in your company </h3>
+   <h3> There is no portal in this company </h3>
     {% endif %}
 
-    <h3>Your portals-partners:
+    <h3>This company portals-partners:
     {% for portals in portals_partners %}
             {% if not portals.name %}
         {{ portals }}

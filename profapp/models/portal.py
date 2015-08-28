@@ -83,7 +83,7 @@ class CompanyPortal(Base):
     def show_my_portals(company_id):
         comp_port = db(CompanyPortal, company_id=company_id).all()
         if not comp_port:
-            return ['Your company does not subscribed to any portal']
+            return ['This company does not subscribed to any portal']
         comp = []
         for portal in comp_port:
             comp.append(Portal().query_portal(portal.portal_id))

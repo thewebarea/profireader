@@ -4,6 +4,7 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 from db_init import Base, db_session
 
+
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
 from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
@@ -12,12 +13,13 @@ from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-
+from utils.db_utils import db
 from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase
+from sqlalchemy.ext.associationproxy import association_proxy
 
 class User(Base, UserMixin, PRBase):
     __tablename__ = 'user'
@@ -36,8 +38,6 @@ class User(Base, UserMixin, PRBase):
     employer = relationship('Company', secondary='user_company', backref='employee')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
-    companies = relationship('Company', backref='owner')
-
     # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])
@@ -231,6 +231,11 @@ class User(Base, UserMixin, PRBase):
         self.yahoo_gender = YAHOO_ALL['gender']
         self.yahoo_link = YAHOO_ALL['link']
         self.yahoo_phone = YAHOO_ALL['phone']
+
+    @staticmethod
+    def user_query(user_id):
+        ret = db(User, id=user_id).one()
+        return ret
 
     @property
     def banned(self):
