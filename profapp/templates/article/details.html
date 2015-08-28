@@ -16,6 +16,15 @@
             $scope.selectedCompany = null;
             $scope.selectedCompany_sending = false;
 
+
+            $scope.submitToCompany = function (company_id) {
+                $scope.selectedCompany_sending = company_id;
+                $http.post($scope.url_send({article_id: $scope.article.id}), {company_id: company_id}).then().finally(function () {
+                    $scope.selectedCompany_sending = false;
+                });
+            };
+
+
             $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {
                     $scope.selectedCompany_name = '';
@@ -24,7 +33,8 @@
                 else {
                     $scope.selectedCompany = $item;
                 }
-            }
+            };
+
             $scope.getCompanyToSubmit = function (val) {
                 return $ok($scope.url_search_for_company(), {search: val}, function (resp) {
                     return resp.length ? resp : [{id: '', name: 'No results'}];

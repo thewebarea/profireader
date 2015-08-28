@@ -55,7 +55,7 @@ def search_for_company_to_submit(json):
 
 @article_bp.route('/submit_to_company/<string:article_id>/', methods=['POST'])
 @json
-def submit_to_company(article_id, json = {}):
+def submit_to_company(json, article_id):
     a = Article.get(article_id)
     a.mine.clone_for_company(json['company_id'])
     return [s.dict() for s in Article.get(article_id).submitted]
