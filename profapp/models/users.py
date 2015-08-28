@@ -33,7 +33,6 @@ class User(Base, UserMixin, PRBase):
     profireader_gender = Column(TABLE_TYPES['gender'])
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
-    profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
     employer = relationship('Company', secondary='user_company', backref='employee')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])

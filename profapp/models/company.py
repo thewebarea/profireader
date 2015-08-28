@@ -8,10 +8,7 @@ from ..constants.STATUS import STATUS
 from ..constants.USER_ROLES import COMPANY_OWNER, RIGHTS
 from utils.db_utils import db
 from .users import User
-from ..controllers.errors import StatusNonActivate
 from .files import File
-import datetime
-from ..controllers.has_right import has_right
 from .pr_base import PRBase
 
 class Company(Base, PRBase):
@@ -72,7 +69,6 @@ class Company(Base, PRBase):
 
     def create_company(self, passed_file=None):
 
-        has_right(True)
         self.save()
         user_rbac = UserCompany(user_id=self.author_user_id,
                                 company_id=self.id, status=STATUS.ACTIVE())
@@ -99,7 +95,6 @@ class Company(Base, PRBase):
     @staticmethod
     def update_comp(company_id, data, passed_file):
 
-        has_right(Right.permissions(g.user_dict['id'], company_id, rights=[RIGHTS.EDIT()]))
         comp = db(Company, id=company_id)
         upd = {x: y for x, y in zip(data.keys(), data.values())}
         comp.update(upd)
@@ -147,7 +142,6 @@ class UserCompanyRight(Base, PRBase):
     @staticmethod
     def apply_request(comp_id, user_id, bool):
 
-        has_right(Right.permissions(g.user_dict['id'], comp_id, rights=[RIGHTS.ADD_EMPLOYEE()]))
         if bool == 'True':
             stat = STATUS().ACTIVE()
             Right().update_rights(user_id, comp_id, Config.BASE_RIGHT_IN_COMPANY)
@@ -159,7 +153,6 @@ class UserCompanyRight(Base, PRBase):
 
     @staticmethod
     def suspend_employee(comp_id, user_id):
-        has_right(Right.permissions(g.user_dict['id'], comp_id, rights=[RIGHTS.SUSPEND_EMPLOYEE()]))
         db(UserCompany, company_id=comp_id, user_id=user_id).update({'status': STATUS.SUSPEND()})
         db_session.flush()
 
@@ -187,7 +180,6 @@ class UserCompany(Base, PRBase):
 
     def subscribe_to_company(self):
 
-        has_right(True)
         user = User.user_query(self.user_id)
         company = Company.query_company(self.company_id)
         user.employer.append(company)
@@ -200,9 +192,13 @@ class Right(Base):
     id = Column(TABLE_TYPES['rights'], primary_key=True)
 
     @staticmethod
+    def p(right_name):
+        return {'can_user_in_company_'+right_name: lambda **kwargs:
+                Right.permissions(g.user_dict['id'], kwargs['company_id'], right_name)}
+
+    @staticmethod
     def update_rights(user_id, comp_id, rights):
 
-        has_right(Right.permissions(g.user_dict['id'], comp_id, rights=[RIGHTS.MANAGE_ACCESS_COMPANY()]))
         ucr = []
         user_right = UserCompany.user_in_company(user_id, comp_id)
         for right in rights:
@@ -231,7 +227,6 @@ class Right(Base):
     @staticmethod
     def suspended_employees(comp_id):
 
-        has_right(True)
         suspended_employees = {}
         for x in Company.query_company(comp_id).employee:
             user_in_company = UserCompany.user_in_company(user_id=x.id, company_id=comp_id)
