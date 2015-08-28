@@ -1,16 +1,13 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, UserCompanyRight, Right
+from ..models.company import Company, UserCompanyRight, Right, UserCompany
 # from phonenumbers import NumberParseException
-from .errors import SubscribeToOwn
-from ..models.company import UserCompany
 from ..constants.USER_ROLES import RIGHTS
 from ..models.users import User
-from .request_wrapers import json
+from .request_wrapers import json, check_rights
 from .has_right import has_right
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
-
 
 
 
@@ -21,6 +18,7 @@ def search_to_submit_article(json):
     return companies
 
 @company_bp.route('/', methods=['GET', 'POST'])
+@check_rights(**Right.p(''))
 @login_required
 def show():
 
@@ -31,6 +29,7 @@ def show():
                            )
 
 @company_bp.route('/add/')
+@check_rights(**Right.p(''))
 @login_required
 def add():
 
@@ -38,6 +37,7 @@ def add():
                            user=g.user_dict)
 
 @company_bp.route('/confirm_add/', methods=['POST'])
+@check_rights(**Right.p(''))
 @login_required
 def confirm_add():
 
@@ -51,6 +51,7 @@ def confirm_add():
     return redirect(url_for('company.show'))
 
 @company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
+@check_rights(**Right.p(''))
 @login_required
 def profile(company_id):
 
@@ -68,6 +69,7 @@ def profile(company_id):
                            )
 
 @company_bp.route('/employees/<string:comp_id>/')
+@check_rights(**Right.p(''))
 @login_required
 def employees(comp_id):
 
@@ -85,6 +87,7 @@ def employees(comp_id):
                            )
 
 @company_bp.route('/update_rights', methods=['POST'])
+@check_rights(**Right.p(RIGHTS.MANAGE_ACCESS_COMPANY()))
 @login_required
 def update_rights():
 
@@ -94,6 +97,7 @@ def update_rights():
     return redirect(url_for('company.employees', comp_id=data['comp_id']))
 
 @company_bp.route('/edit/<string:company_id>/')
+@check_rights(**Right.p(RIGHTS.MANAGE_ACCESS_COMPANY()))
 @login_required
 def edit(company_id):
 
@@ -106,11 +110,10 @@ def edit(company_id):
                            user_query=user
                            )
 
-# def p(user_id, right_name):
-#     return {'can_user_in_company_'+right_name: lambda **kwargs: Right.permissions(user_id, kwargs['company_id'], right_name)}
+
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
-# @has_rights(**p(RIGHTS.ADD_EMPLOYEE(), g.user_dict['id']))
+@check_rights(**Right.p(RIGHTS.ADD_EMPLOYEE()))
 @login_required
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
@@ -118,6 +121,7 @@ def confirm_edit(company_id):
     return redirect(url_for('company.profile', company_id=company_id))
 
 @company_bp.route('/subscribe/<string:company_id>/')
+@check_rights(**Right.p(''))
 @login_required
 def subscribe(company_id):
 
@@ -128,6 +132,7 @@ def subscribe(company_id):
     return redirect(url_for('company.profile', company_id=company_id))
 
 @company_bp.route('/subscribe_search/', methods=['POST'])
+@check_rights(**Right.p(''))
 @login_required
 def subscribe_search_form():
 
@@ -139,6 +144,7 @@ def subscribe_search_form():
     return redirect(url_for('company.profile', company_id=data['company']))
 
 @company_bp.route('/add_subscriber/', methods=['POST'])
+@check_rights(**Right.p(RIGHTS.ADD_EMPLOYEE()))
 @login_required
 def confirm_subscriber():
 
@@ -150,6 +156,7 @@ def confirm_subscriber():
 
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
+@check_rights(**Right.p(RIGHTS.SUSPEND_EMPLOYEE()))
 @login_required
 def suspend_employee():
 
@@ -159,6 +166,7 @@ def suspend_employee():
     return redirect(url_for('company.employees', comp_id=data['comp_id']))
 
 @company_bp.route('/suspended_employees/<string:comp_id>')
+@check_rights(**Right.p(''))
 @login_required
 def suspended_employees(comp_id):
 
