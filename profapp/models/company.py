@@ -53,21 +53,10 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company(user_id, searchtext):
-<<<<<<< HEAD
         return [x.dict() for x in db(Company).filter(Company.name.like("%"+searchtext+"%")).all()]
-=======
 
-        query_companies = db(Company).filter(Company.name.like("%"+searchtext+"%")).all()
-        ret = []
-        for x in query_companies:
-            ret.append(x.dict())
-
-        return ret
-        # return PRBase.searchResult(query_companies)
->>>>>>> origin/master
 
     def user_comp_rs(self, user):
-
         user.employer.append(self)
         self.employee.append(user)
 
