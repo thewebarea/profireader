@@ -3,7 +3,8 @@ from sqlalchemy import Column, ForeignKey
 from db_init import Base, db_session
 from utils.db_utils import db
 from .company import Company
-from ..controllers.has_right import has_right
+#from ..models.company import has_right
+
 
 class Portal(Base):
 

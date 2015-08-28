@@ -11,8 +11,12 @@ from .users import User
 from ..controllers.errors import StatusNonActivate
 from .files import File
 import datetime
-from ..controllers.has_right import has_right
+#from ..controllers.has_right import has_right
 from .pr_base import PRBase
+from sqlalchemy import CheckConstraint
+from flask import abort
+from db_init import db_session
+
 
 class Company(Base, PRBase):
     __tablename__ = 'company'
@@ -22,7 +26,8 @@ class Company(Base, PRBase):
     journalist_folder_file_id = Column(String(36), ForeignKey('file.id'))
     corporate_folder_file_id = Column(String(36), ForeignKey('file.id'))
     portal_consist = Column(TABLE_TYPES['boolean'])
-    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    author_user_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('user.id'), nullable=False)
     country = Column(TABLE_TYPES['name'])
     region = Column(TABLE_TYPES['name'])
     address = Column(TABLE_TYPES['name'])
@@ -30,7 +35,7 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    # user_company_rs = relationship('UserCompany', backref='company')
+    users = relationship('UserCompany', backref='companies')
 
     def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
                  address=None, phone=None, phone2=None, email=None, short_description=None, user_company_rs=[]):
@@ -150,6 +155,7 @@ class Company(Base, PRBase):
         if employee.status == STATUS().ACTIVE():
             return True
 
+
 class UserCompanyRight(Base, PRBase):
     __tablename__ = 'user_company_right'
     id = Column(TABLE_TYPES['bigint'], primary_key=True)
@@ -195,20 +201,27 @@ class UserCompanyRight(Base, PRBase):
 
 
 class UserCompany(Base, PRBase):
-
     __tablename__ = 'user_company'
+
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    user_id = Column(TABLE_TYPES['id_profireader'],
+                     ForeignKey('user.id'),
+                     primary_key=True)
+    company_id = Column(TABLE_TYPES['id_profireader'],
+                        ForeignKey('company.id'),
+                        primary_key=True)
     status = Column(TABLE_TYPES['id_profireader'])
     md_tm = Column(TABLE_TYPES['timestamp'])
-    right = relationship(UserCompanyRight, backref='user_company')
+    rights = Column(TABLE_TYPES['bigint'],
+                    CheckConstraint('rights >= 0', name='unsigned_rights'))
 
-    def __init__(self, user_id=None, company_id=None, status=None, right=[]):
+    user = relationship('User', backref='company_assocs')
+
+    def __init__(self, user_id=None, company_id=None, status=None, rights=0):
         self.user_id = user_id
         self.company_id = company_id
         self.status = status
-        self.right = right
+        self.rights = rights
 
 
 class Right(Base):
@@ -269,4 +282,23 @@ class Right(Base):
             ucr.append(right.company_right_id)
         if not set(rights) < set(ucr):
                 return False
+        return True
+
+
+def has_right(user_object, company_object, needed_rights):
+    user = user_object
+    company = company_object
+    if type(user_object) is int:
+        user = db_session.query(User).filter_by(id=user_object).first()
+    if type(company_object) is int:
+        company = db_session.query(Company).\
+            filter_by(id=company_object).first()
+
+    available_rights = \
+        [company_user.rights for company_user in company.users
+         if company_user.user == user][0] or 0
+
+    if available_rights & needed_rights != needed_rights:
+        return abort(403)
+    else:
         return True

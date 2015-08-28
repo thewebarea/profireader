@@ -3,9 +3,9 @@ from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompanyRight, Right
 # from phonenumbers import NumberParseException
 from .errors import SubscribeToOwn
-from .has_right import has_right
-from ..constants.USER_ROLES import RIGHTS
+#from ..constants.USER_ROLES import RIGHTS
 from ..models.portal import CompanyPortal
+from ..models.company import has_right
 
 @portal_bp.route('/', methods=['POST'])
 def apply_company():

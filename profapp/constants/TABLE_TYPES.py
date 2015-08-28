@@ -1,4 +1,5 @@
 from sqlalchemy import Integer, String, TIMESTAMP, SMALLINT, BOOLEAN, Column, ForeignKey, UnicodeText, BigInteger, Binary
+from sqlalchemy.dialects.postgresql import BIGINT
 from sqlalchemy_utils.types.phone_number import PhoneNumberType
 from sqlalchemy_utils import URLType
 # read this about UUID:
@@ -22,7 +23,8 @@ TABLE_TYPES = {
     'boolean': BOOLEAN,
     'status': String(36),
     'rights': String(40),
-    'bigint': BigInteger,
+    #'bigint': BigInteger,
+    'bigint': BIGINT,
 
     # http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.phone_number
     # 'phone': PhoneNumberType(country_code='UA'),  # (country_code='UA')

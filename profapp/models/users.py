@@ -19,6 +19,7 @@ from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase
 
+
 class User(Base, UserMixin, PRBase):
     __tablename__ = 'user'
 
@@ -32,11 +33,10 @@ class User(Base, UserMixin, PRBase):
     profireader_gender = Column(TABLE_TYPES['gender'])
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
-    profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
-    user_right_in_company = relationship('UserCompany', backref='user')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
-    companies = relationship('Company', backref='owner')
+    #companies = relationship('Company', backref='owner')
+    #user_right_in_company = relationship('UserCompany', backref='user')
 
     # SECURITY DATA
 
