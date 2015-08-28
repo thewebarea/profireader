@@ -17,6 +17,7 @@ from authomatic.adapters import WerkzeugAdapter
 from flask import redirect, make_response
 from flask.ext.login import login_user
 from ..constants.SOCIAL_NETWORKS import SOC_NET_NONE
+from ..constants.UNCATEGORIZED import AVATAR_SIZE, AVATAR_SMALL_SIZE
 
 #def _session_saver():
 #    session.modified = True
@@ -52,7 +53,6 @@ def login_signup_general(*soc_network_names):
                     if not user:
                         ind = True
                         user = User()
-
                     for elem in SOC_NET_FIELDS:
                         setattr(user, db_fields[elem],
                                 getattr(result_user, elem))
@@ -64,11 +64,18 @@ def login_signup_general(*soc_network_names):
                             for elem in SOC_NET_FIELDS_SHORT:
                                 setattr(user, db_fields_profireader[elem],
                                         getattr(result_user, elem))
+                        user.profireader_avatar_url = \
+                            user.gravatar(size=AVATAR_SIZE)
+                        user.profireader_small_avatar_url = \
+                            user.gravatar(size=AVATAR_SMALL_SIZE)
 
                     db_session.add(user)
                     user.confirmed = True
                     db_session.commit()
 
+                if user.is_banned():
+                    flash('Sorry, you are banned')
+                    return redirect(url_for('general.index'))
 
                 login_user(user)
                 flash('You have successfully logged in.')
@@ -118,9 +125,14 @@ def signup():
         profireader_all['email'] = form.email.data
         profireader_all['name'] = form.displayname.data
         user = User(
-            PROFIREADER_ALL=profireader_all
+            PROFIREADER_ALL=profireader_all,
+            password=form.password.data  # # pass is automatically hashed
         )
-        user.password = form.password.data  # pass is automatically hashed
+        user.profireader_avatar_url = \
+            user.gravatar(size=AVATAR_SIZE)
+        user.profireader_small_avatar_url = \
+            user.gravatar(size=AVATAR_SMALL_SIZE)
+        # # user.password = form.password.data  # pass is automatically hashed
 
         db_session.add(user)
         db_session.commit()
@@ -156,7 +168,8 @@ def login():
     # (Andriy) I suppose it is not necessary
     if g.user_init and g.user_init.is_authenticated():
         flash('You are already logged in. If you want to login with another'
-              'account logout first, please')
+              'account logout first please')
+        redirect(url_for('general.index'))
 
     form = LoginForm()
 
@@ -164,6 +177,9 @@ def login():
         user = db_session.query(User).\
             filter(User.profireader_email == form.email.data).first()
 
+        if user.is_banned():
+            flash('Sorry, you are banned')
+            return redirect(url_for('general.index'))
         if user and user.verify_password(form.password.data):
             login_user(user)
             return redirect(request.args.get('next') or
@@ -227,6 +243,9 @@ def password_reset_request():
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(profireader_email=form.email.data).first()
+        if user.is_banned():
+            flash('Sorry, you are banned')
+            return redirect(url_for('general.index'))
         if user:
             token = user.generate_reset_token()
             send_email(user.profireader_email, 'Reset Your Password',
@@ -249,6 +268,9 @@ def password_reset(token):
     form = PasswordResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(profireader_email=form.email.data).first()
+        if user.is_banned():
+            flash('Sorry, you are banned')
+            return redirect(url_for('general.index'))
         if user is None:
             return redirect(url_for('general.index'))
         if user.reset_password(token, form.password.data):

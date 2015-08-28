@@ -110,6 +110,22 @@ END$$;
 ALTER FUNCTION public.has_user_in_company_role(u_id uuid, c_id uuid, inc character varying[], exc character varying[]) OWNER TO postgres;
 
 --
+-- Name: row_cr(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION row_cr() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$BEGIN
+
+NEW.cr_tm = clock_timestamp();
+RETURN NEW;
+
+END$$;
+
+
+ALTER FUNCTION public.row_cr() OWNER TO postgres;
+
+--
 -- Name: row_cr_md(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -200,29 +216,63 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE article (
-    id character varying(36) NOT NULL
+    id character varying(36) NOT NULL,
+    author_user_id character varying(36) NOT NULL
 );
 
 
 ALTER TABLE public.article OWNER TO pfuser;
 
 --
--- Name: article_version; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+-- Name: article_company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
-CREATE TABLE article_version (
+CREATE TABLE article_company (
     id character varying(36) NOT NULL,
-    author_user_id character varying(36) NOT NULL,
+    editor_user_id character varying(36) NOT NULL,
     company_id character varying(36),
-    name character varying(200) DEFAULT ''::character varying NOT NULL,
+    title character varying(200) DEFAULT ''::character varying NOT NULL,
     short text DEFAULT ''::text NOT NULL,
     long text DEFAULT ''::text NOT NULL,
-    created_from_version_id character varying(36),
-    article_id character varying(36) NOT NULL
+    article_id character varying(36) NOT NULL,
+    cr_tm timestamp without time zone NOT NULL,
+    md_tm timestamp without time zone NOT NULL
 );
 
 
-ALTER TABLE public.article_version OWNER TO pfuser;
+ALTER TABLE public.article_company OWNER TO pfuser;
+
+--
+-- Name: article_company_history_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
+--
+
+CREATE SEQUENCE article_company_history_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.article_company_history_id_seq OWNER TO pfuser;
+
+--
+-- Name: article_company_history; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE article_company_history (
+    id bigint DEFAULT nextval('article_company_history_id_seq'::regclass) NOT NULL,
+    editor_user_id character varying(36),
+    company_id character varying(36),
+    name character varying(200),
+    short text,
+    long text,
+    article_company_id character varying(36),
+    article_id character varying(36)
+);
+
+
+ALTER TABLE public.article_company_history OWNER TO pfuser;
 
 --
 -- Name: company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -256,7 +306,8 @@ ALTER TABLE public.company OWNER TO pfuser;
 CREATE TABLE company_portal (
     id character varying(36) NOT NULL,
     company_id character varying(36) NOT NULL,
-    portal_id character varying(36) NOT NULL
+    portal_id character varying(36) NOT NULL,
+    company_portal_plan_id character varying(36)
 );
 
 
@@ -380,7 +431,6 @@ CREATE TABLE "user" (
     confirmed boolean,
     registered_tm timestamp without time zone,
     last_seen timestamp without time zone,
-    avatar_hash character varying(32),
     email_conf_token character varying(128),
     email_conf_tm timestamp without time zone,
     pass_reset_token character varying(128),
@@ -436,7 +486,9 @@ CREATE TABLE "user" (
     personal_folder_file_id character varying(36),
     profireader_avatar_url text DEFAULT '/static/no_avatar.png'::text NOT NULL,
     group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL,
-    _banned boolean DEFAULT false NOT NULL
+    _banned boolean DEFAULT false NOT NULL,
+    profireader_small_avatar_url text DEFAULT '/static/no_avatar_small.png'::text NOT NULL,
+    avatar_hash character varying(32)
 );
 
 
@@ -458,7 +510,9 @@ CREATE TABLE user_company (
     user_id character varying(36) NOT NULL,
     company_id character varying(36) NOT NULL,
     status character varying(36) NOT NULL,
-    md_tm timestamp without time zone
+    md_tm timestamp without time zone,
+    rights bigint DEFAULT 0 NOT NULL,
+    CONSTRAINT positive_rights_values CHECK ((rights >= 0))
 );
 
 
@@ -532,7 +586,7 @@ ALTER TABLE ONLY article
 -- Name: article_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
-ALTER TABLE ONLY article_version
+ALTER TABLE ONLY article_company
     ADD CONSTRAINT article_pkey PRIMARY KEY (id);
 
 
@@ -582,6 +636,14 @@ ALTER TABLE ONLY file_content
 
 ALTER TABLE ONLY file
     ADD CONSTRAINT file_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: for_one_company_one_version; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY article_company
+    ADD CONSTRAINT for_one_company_one_version UNIQUE (company_id, article_id);
 
 
 --
@@ -696,6 +758,13 @@ CREATE TRIGGER cr_md_ac BEFORE INSERT ON file FOR EACH ROW EXECUTE PROCEDURE row
 
 
 --
+-- Name: cr_md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER cr_md_tm BEFORE INSERT ON article_company FOR EACH ROW EXECUTE PROCEDURE row_cr_md();
+
+
+--
 -- Name: create_company_folders; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
@@ -748,7 +817,7 @@ CREATE TRIGGER id BEFORE INSERT ON article FOR EACH ROW EXECUTE PROCEDURE row_id
 -- Name: id; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
-CREATE TRIGGER id BEFORE INSERT ON article_version FOR EACH ROW EXECUTE PROCEDURE row_id();
+CREATE TRIGGER id BEFORE INSERT ON article_company FOR EACH ROW EXECUTE PROCEDURE row_id();
 
 
 --
@@ -773,6 +842,13 @@ CREATE TRIGGER md_tm BEFORE INSERT OR UPDATE ON user_company FOR EACH ROW EXECUT
 
 
 --
+-- Name: md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER md_tm BEFORE UPDATE ON article_company FOR EACH ROW EXECUTE PROCEDURE row_md();
+
+
+--
 -- Name: uid; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
@@ -783,15 +859,15 @@ CREATE TRIGGER uid BEFORE INSERT ON portal_plan FOR EACH ROW EXECUTE PROCEDURE r
 -- Name: article_author_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
-ALTER TABLE ONLY article_version
-    ADD CONSTRAINT article_author_user_id_fkey FOREIGN KEY (author_user_id) REFERENCES "user"(id);
+ALTER TABLE ONLY article_company
+    ADD CONSTRAINT article_author_user_id_fkey FOREIGN KEY (editor_user_id) REFERENCES "user"(id);
 
 
 --
 -- Name: article_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
-ALTER TABLE ONLY article_version
+ALTER TABLE ONLY article_company
     ADD CONSTRAINT article_company_id_fkey FOREIGN KEY (company_id) REFERENCES company(id);
 
 
@@ -863,16 +939,8 @@ ALTER TABLE ONLY file
 -- Name: fk_article_article_bulk_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
-ALTER TABLE ONLY article_version
+ALTER TABLE ONLY article_company
     ADD CONSTRAINT fk_article_article_bulk_id FOREIGN KEY (article_id) REFERENCES article(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: fk_article_created_from_article_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY article_version
-    ADD CONSTRAINT fk_article_created_from_article_id FOREIGN KEY (created_from_version_id) REFERENCES article_version(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -980,7 +1048,6 @@ SET search_path = public, pg_catalog;
 
 INSERT INTO company_right VALUES ('edit');
 INSERT INTO company_right VALUES ('publish');
-INSERT INTO company_right VALUES ('un_publish');
 INSERT INTO company_right VALUES ('upload_files');
 INSERT INTO company_right VALUES ('delete_files');
 INSERT INTO company_right VALUES ('add_employee');
@@ -992,9 +1059,11 @@ INSERT INTO company_right VALUES ('article_priority');
 INSERT INTO company_right VALUES ('manage_readers');
 INSERT INTO company_right VALUES ('manage_companies_partners');
 INSERT INTO company_right VALUES ('manage_comments');
-INSERT INTO company_right VALUES ('owner');
 INSERT INTO company_right VALUES ('comment');
 INSERT INTO company_right VALUES ('subscribe_to_portals');
+INSERT INTO company_right VALUES ('company_owner');
+INSERT INTO company_right VALUES ('manage_articles');
+INSERT INTO company_right VALUES ('un_publish');
 
 
 --

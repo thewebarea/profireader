@@ -13,11 +13,12 @@ json_result = {"result": {"success": True, "error": None}}
 
 @filemanager_bp.route('/')
 def filemanager():
-    library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
+    # library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
+    library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.profireader_small_avatar_url}}
     for company in g.user.companies:
         library[company.journalist_folder_file_id]={'name': "%s materisals" % (company.name, ), 'icon': ''}
         library[company.corporate_folder_file_id]={'name': "%s corporate files" % (company.name, ), 'icon': ''}
-    return render_template('filemanager.html', library = library)
+    return render_template('filemanager.html', library=library)
 
 @filemanager_bp.route('/list/', methods=['POST'])
 @json
@@ -35,8 +36,13 @@ def createdir(parent_id=None):
 @filemanager_bp.route('/upload/', methods=['POST'])
 @json
 def upload():
-    parent_id = (None if (request.form['parent_id'] == '') else (request.form['parent_id']))
-    return File.upload(file=request.files['file-0'], parent_id=parent_id)
+    parent_id = None if (request.form['parent_id'] == '') \
+        else (request.form['parent_id'])
+    got_file = request.files['file-0']
+
+    file = File(parent_id=parent_id, name=got_file.filename,
+                mime=got_file.content_type)
+    return file.upload(content=got_file.stream.read(-1)).id
 
 # # # #
 #
