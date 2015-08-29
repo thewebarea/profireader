@@ -133,12 +133,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             link: function (scope, element, attrs) {
                 scope.$watch(attrs.highlighter, function (nv, ov) {
                     if (nv !== ov) {
-                        // apply class
-                        element.addClass('highlight');
-                        // auto remove after some delay
-                        $timeout(function () {
-                            element.removeClass('highlight');
-                        }, 500);
+                        highlight($(element));
                     }
                 });
             }
@@ -290,3 +285,21 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 None = null;
 False = false;
 True = true;
+
+
+//TODO: RP by OZ:   pls rewrite this two functions as jquery plugin
+
+function scrool($el, options) {
+    $.smoothScroll($.extend({
+        scrollElement:$el.parent(),
+        scrollTarget:$el
+        }, options?options:{}));
+}
+
+function highlight($el) {
+    $el.addClass('highlight');
+    setTimeout(function () {
+    $el.removeClass('highlight');
+    }, 500);
+}
+
