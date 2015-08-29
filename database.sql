@@ -236,7 +236,8 @@ CREATE TABLE article_company (
     long text DEFAULT ''::text NOT NULL,
     article_id character varying(36) NOT NULL,
     cr_tm timestamp without time zone NOT NULL,
-    md_tm timestamp without time zone NOT NULL
+    md_tm timestamp without time zone NOT NULL,
+    status character varying(36) DEFAULT 'submitted'::character varying
 );
 
 
@@ -424,7 +425,6 @@ CREATE TABLE "user" (
     profireader_gender character varying(6),
     profireader_link text,
     profireader_phone character varying(20),
-    profireader_avatar_file_id character varying(36),
     about_me character varying(666),
     location character varying(64),
     password_hash character varying(128),
@@ -493,13 +493,6 @@ CREATE TABLE "user" (
 
 
 ALTER TABLE public."user" OWNER TO pfuser;
-
---
--- Name: COLUMN "user".profireader_avatar_file_id; Type: COMMENT; Schema: public; Owner: pfuser
---
-
-COMMENT ON COLUMN "user".profireader_avatar_file_id IS 'remove me!!!';
-
 
 --
 -- Name: user_company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -1005,14 +998,6 @@ ALTER TABLE ONLY "user"
 
 ALTER TABLE ONLY user_portal_reader
     ADD CONSTRAINT user_portal_reader_plan_id FOREIGN KEY (portal_plan_id) REFERENCES portal_plan(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: user_profireader_avatar_file_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY "user"
-    ADD CONSTRAINT user_profireader_avatar_file_id_fkey FOREIGN KEY (profireader_avatar_file_id) REFERENCES file(id);
 
 
 --
