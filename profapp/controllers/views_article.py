@@ -43,8 +43,8 @@ def update(article_company_id):
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])
 def details(article_id):
     article = Article.get(article_id)
-    d = object_to_dict(article, 'id', 'mine.id', 'submitted.id', 'submitted.cr_tm', 'submitted.editor', '*')
-    return render_template('article/details.html', article = object_to_dict(article, 'id', 'mine.id', 'submitted.id', 'submitted.cr_tm', 'submitted.editor', '*'))
+
+    return render_template('article/details.html', article = article.to_dict('id, mine|submitted.*, submitted.editor.id|profireader_name'))
 
 
 @article_bp.route('/search_for_company_to_submit/', methods=['POST'])
