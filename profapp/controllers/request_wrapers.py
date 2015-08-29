@@ -6,7 +6,7 @@ import datetime
 from db_init import Base
 
 
-def json(func):
+def ok(func):
     @wraps(func)
     def function_json(*args, **kwargs):
         # try:

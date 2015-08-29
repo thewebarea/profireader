@@ -22,45 +22,20 @@ class PRBase():
         self.id = None
         return self
 
+    @classmethod
+    def get_client_side_dict(cls, obj_id):
+        return cls(obj_id).get_client_side_dict()
 
 
-
-        #
-        # if found is None:
-        #     found = []
-        # if found_converted is None:
-        #     found_converted = []
-        # mapper = class_mapper(self.__class__)
-        # columns = [column.key for column in mapper.columns]
-        # get_key_value = lambda c: (c, getattr(self, c).isoformat()) if isinstance(getattr(self, c),
-        #                                                                           datetime.datetime) else (
-        # c, getattr(self, c))
-        # # get_key_value = lambda c: (c, getattr(self, c).__str__)
-        # out = dict(map(get_key_value, columns))
-        # for name, relation in mapper.relationships.items():
-        #     if relation.uselist:
-        #         if relation not in found:
-        #             found.append(relation)
-        #             found_converted.append(True)
-        #             found_index = len(found_converted)-1
-        #             related_obj = getattr(self, name)
-        #             converted = [child.dict(found, found_converted) for child in related_obj] if relation.uselist else related_obj.dict(found, found_converted)
-        #             found_converted[found_index] = converted
-        #             if related_obj is not None:
-        #                 out[name] = converted
-        #         else:
-        #             out[name] = found_converted[found.index(relation)]
-        #     else:
-        #         converted = related_obj.dict(found, found_converted)
-        #         if related_obj is not None:
-        #                 out[name] = converted
-        # return out
+    def get_client_side_dict(self):
+        return self.to_dict('id')
 
     @classmethod
     def get(cls, id):
         return db_session().query(cls).get(id)
 
 
+#TODO: OZ by OZ:    **kwargs should accept lambdafunction for fields formattings
     def to_dict(self, *args, prefix=''):
         ret = {}
 
@@ -80,13 +55,10 @@ class PRBase():
                             req_relationships[column_name] = []
                         req_relationships[column_name].append('.'.join(columnsdevided))
 
-        # req_columns = list(set(req_columns))
-        # req_relationships = {relationname:convert_col_to_arrays(*nextlevelcols) for relationname,nextlevelcols in relationships}
-
         columns = class_mapper(self.__class__).columns
         realations = {a:b for (a,b) in  class_mapper(self.__class__).relationships.items()}
 
-        get_key_value = lambda o: o.isoformat() if isinstance(o, datetime.datetime) else o
+        get_key_value = lambda o: o.strftime('%c') if isinstance(o, datetime.datetime) else o
         for col in columns:
             if col.key in req_columns or '*' in req_columns:
                 ret[col.key] = get_key_value(getattr(self, col.key))

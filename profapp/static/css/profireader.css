@@ -1,0 +1,14 @@
+
+/*
+TODO: OK by OZ:   this class `highlights` changed element (see js function highligh, its just add and remove this class).
+We have something similar in bootstrap? Can correct this class to look nicer?
+*/
+
+.highlight {
+  color: coral;
+  -moz-transition: color 0.5s;
+  -webkit-transition: color 0.5s;
+  -o-transition: color 0.5s;
+  transition: color 0.5s;
+
+}

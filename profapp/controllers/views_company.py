@@ -4,7 +4,7 @@ from ..models.company import Company, UserCompanyRight, Right, UserCompany
 # from phonenumbers import NumberParseException
 from ..constants.USER_ROLES import RIGHTS
 from ..models.users import User
-from .request_wrapers import json, check_rights
+from .request_wrapers import ok, check_rights
 from .has_right import has_right
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
