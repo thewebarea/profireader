@@ -1,0 +1,14 @@
+{% extends "index_lazy_layout.html" %}
+
+{% block title %}Profireader - Company materials{% endblock title %}
+
+{% block portal_content %}
+
+{% for article in articles %}
+    <a href="{{ url_for('company.material_details', company_id=company.id , article_id=article.id) }}">{{ article.title }}</a>
+    {% for new_status in article.possible_new_statuses %}
+        <button>make article {{ new_status }}</button>
+    {% endfor %}
+
+{% endfor %}
+{% endblock portal_content %}

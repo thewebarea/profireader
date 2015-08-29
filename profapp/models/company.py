@@ -181,6 +181,7 @@ class Right(Base):
 
     @staticmethod
     def p(right_name):
+        return {'hmm': lambda **kwargs: True}
         return {'can_user_in_company_'+right_name: lambda **kwargs:
                 Right.permissions(g.user_dict['id'], kwargs['company_id'], right_name)}
 
