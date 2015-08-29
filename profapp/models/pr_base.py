@@ -22,20 +22,14 @@ class PRBase():
         self.id = None
         return self
 
-    @classmethod
-    def get_client_side_dict(cls, obj_id):
-        return cls(obj_id).get_client_side_dict()
-
-
-    def get_client_side_dict(self):
-        return self.to_dict('id')
+    def get_client_side_dict(self, fields='id'):
+        return self.to_dict(fields)
 
     @classmethod
     def get(cls, id):
         return db_session().query(cls).get(id)
 
-
-#TODO: OZ by OZ:    **kwargs should accept lambdafunction for fields formattings
+    # TODO: OZ by OZ:    **kwargs should accept lambdafunction for fields formattings
     def to_dict(self, *args, prefix=''):
         ret = {}
 
@@ -56,7 +50,7 @@ class PRBase():
                         req_relationships[column_name].append('.'.join(columnsdevided))
 
         columns = class_mapper(self.__class__).columns
-        realations = {a:b for (a,b) in  class_mapper(self.__class__).relationships.items()}
+        realations = {a: b for (a, b) in class_mapper(self.__class__).relationships.items()}
 
         get_key_value = lambda o: o.strftime('%c') if isinstance(o, datetime.datetime) else o
         for col in columns:
@@ -74,7 +68,7 @@ class PRBase():
                     "you requested not existing attribute(s) `%s%s`" % (prefix, '`, `'.join(columns_not_in_relations),))
             else:
                 raise ValueError("you requested for attribute(s) but relationships found `%s%s`" % (
-                prefix, '`, `'.join(set(realations.keys()).intersection(req_columns.keys())),))
+                    prefix, '`, `'.join(set(realations.keys()).intersection(req_columns.keys())),))
 
         for relationname, relation in realations.items():
             if relationname in req_relationships or '*' in req_relationships:
@@ -85,10 +79,10 @@ class PRBase():
                     nextlevelargs = req_relationships['*']
                 related_obj = getattr(self, relationname)
                 if relation.uselist:
-                    ret[relationname] = [child.to_dict(*nextlevelargs, prefix = prefix + relationname + '.') for child in
+                    ret[relationname] = [child.to_dict(*nextlevelargs, prefix=prefix + relationname + '.') for child in
                                          related_obj]
                 else:
-                    ret[relationname] = related_obj.to_dict(*nextlevelargs, prefix = prefix + relationname + '.')
+                    ret[relationname] = related_obj.to_dict(*nextlevelargs, prefix=prefix + relationname + '.')
 
         if '*' in req_relationships:
             del req_relationships['*']
@@ -100,15 +94,14 @@ class PRBase():
                     "you requested not existing relation(s) `%s%s`" % (prefix, '`, `'.join(relations_not_in_columns),))
             else:
                 raise ValueError("you requested for relation(s) but column(s) found `%s%s`" % (
-                prefix, '`, `'.join(set(columns).intersection(req_relationships)),))
+                    prefix, '`, `'.join(set(columns).intersection(req_relationships)),))
 
         return ret
 
-    # @staticmethod
-    # def searchResult(collection, convert_item = lambda item: item.dict()):
-    #     ret = {}
-    #     for x in collection:
-    #         ret[x.id] = convert_item(x)
-    #
-    #     return ret
-
+        # @staticmethod
+        # def searchResult(collection, convert_item = lambda item: item.dict()):
+        #     ret = {}
+        #     for x in collection:
+        #         ret[x.id] = convert_item(x)
+        #
+        #     return ret

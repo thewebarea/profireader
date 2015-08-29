@@ -64,8 +64,9 @@ class Article(Base, PRBase):
                         primaryjoin="and_(Article.id==ArticleCompany.article_id, ArticleCompany.company_id==None)",
                         uselist=False)
 
-    def get_client_side_dict(self):
-        return self.to_dict('id, mine|submitted.id|title|short|cr_tm|md_tm|company_id|status, submitted.editor.id|profireader_name, submitted.company.name')
+    def get_client_side_dict(self,
+                             fields='id, mine|submitted.id|title|short|cr_tm|md_tm|company_id|status, submitted.editor.id|profireader_name, submitted.company.name'):
+        return self.to_dict(fields)
 
     @staticmethod
     def save_new_article(user_id, **kwargs):
@@ -76,8 +77,9 @@ class Article(Base, PRBase):
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
         return [x.to_dict('id,name') for x in db(Company)
-#TODO: AA by OZ:    .filter(user_id has to be employee in company and must have rights to submit article to this company)
-            .filter(~db(ArticleCompany).filter_by(company_id=Company.id, article_id=article_id).exists()) # article is NOT published yet in company
+            # TODO: AA by OZ:    .filter(user_id has to be employee in company and must have rights to submit article to this company)
+            .filter(~db(ArticleCompany).filter_by(company_id=Company.id,
+                                                  article_id=article_id).exists())  # article is NOT published yet in company
             .filter(Company.name.like("%" + searchtext + "%")).all()]
 
     @staticmethod
