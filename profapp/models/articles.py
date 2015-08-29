@@ -9,6 +9,7 @@ from utils.db_utils import db
 
 from .pr_base import PRBase
 from db_init import Base
+from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 
 
 def _Q(cls):
@@ -80,12 +81,25 @@ class Article(Base, PRBase):
             # TODO: AA by OZ:    .filter(user_id has to be employee in company and must have rights to submit article to this company)
             .filter(~db(ArticleCompany).filter_by(company_id=Company.id,
                                                   article_id=article_id).exists())  # article is NOT published yet in company
-            .filter(Company.name.like("%" + searchtext + "%")).all()]
+            .filter(Company.name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
         return ArticleCompany.get(article_company_id).attr(kwargs).save()
 
     @staticmethod
-    def user_articles(user_id=None, before_id=None):
+    def get_articles_for_user(user_id):
         return _A().filter_by(author_user_id=user_id).all()
+
+    # @staticmethod
+    # def user_articles(user_id=None, before_id=None):
+    #     return _A().filter_by(author_user_id=user_id).all()
+
+    @staticmethod
+    def get_articles_submitted_to_company(company_id):
+        articles = _C().filter_by(company_id=company_id).all()
+        for article in articles:
+            article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article.status)
+        return articles
+
+

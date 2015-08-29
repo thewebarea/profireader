@@ -19,7 +19,7 @@ def _C():
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
-    return render_template('article/list.html', articles=_A().filter_by(author_user_id=g.user_dict['id']).all())
+    return render_template('article/list.html', articles=Article.get_articles_for_user(g.user.id))
 
 
 @article_bp.route('/create/', methods=['GET'])
