@@ -4,12 +4,14 @@ from ..models.company import Right
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
 from db_init import Base
+from time import sleep
 
 
 def ok(func):
     @wraps(func)
     def function_json(*args, **kwargs):
         # try:
+        sleep(0.3)
         if 'json' in kwargs:
             del kwargs['json']
         ret = func(request.json, *args, **kwargs)
