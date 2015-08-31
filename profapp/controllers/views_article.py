@@ -19,58 +19,71 @@ def _C():
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
-    return render_template('article/list.html', articles=Article.get_articles_for_user(g.user.id))
+    return render_template('article/list.html',
+                           articles=Article.
+                           get_articles_for_user(g.user.id))
 
 
 @article_bp.route('/create/', methods=['GET'])
 def show_form_create():
-    return render_template('article/create.html', edit_version={'title': '', 'short': '', 'long': ''})
+    return render_template('article/create.html',
+                           edit_version={'title': '',
+                                         'short': '', 'long': ''})
 
 
 @article_bp.route('/create/', methods=['POST'])
 def create():
     return redirect(url_for('article.details',
-                            article_id=Article.save_new_article(g.user.id, **request.form.to_dict(True)).id))
+                            article_id=Article.save_new_article(
+                                g.user.id,
+                                **request.form.to_dict(True)).id))
 
 
-@article_bp.route('/update/<string:article_company_id>/', methods=['GET'])
+@article_bp.route('/update/<string:article_company_id>/',
+                  methods=['GET'])
 def show_form_update(article_company_id):
-    return render_template('article/update.html', article_company_id=article_company_id)
+    return render_template('article/update.html',
+                           article_company_id=article_company_id)
 
-@article_bp.route('/update/<string:article_company_id>/', methods=['POST'])
+@article_bp.route('/update/<string:article_company_id>/',
+                  methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
-    ret = ArticleCompany.get(article_company_id).get_client_side_dict()
-    return ret
+    return  ArticleCompany.get(article_company_id).get_client_side_dict()
 
 
-@article_bp.route('/save/<string:article_company_id>/', methods=['POST'])
+@article_bp.route('/save/<string:article_company_id>/',
+                  methods=['POST'])
 def save(article_company_id):
     return redirect(url_for('article.details',
-                            article_id=Article.save_edited_version(g.user.id, article_company_id,
-                                                                   **request.form.to_dict(True)).article_id))
+                            article_id=Article.save_edited_version(
+                                g.user.id, article_company_id,
+                                **request.form.to_dict(True)).
+                            article_id))
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])
 def details(article_id):
-    return render_template('article/details.html', article_id = article_id)
+    return render_template('article/details.html', article_id=article_id)
 
 @article_bp.route('/details/<string:article_id>/', methods=['POST'])
 @ok
 def details_load(json, article_id):
     return Article.get(article_id).get_client_side_dict()
 
-
 @article_bp.route('/search_for_company_to_submit/', methods=['POST'])
 @ok
 def search_for_company_to_submit(json):
-    companies = Article().search_for_company_to_submit(g.user_dict['id'], json['article_id'], json['search'])
+    companies = Article().search_for_company_to_submit(
+        g.user_dict['id'], json['article_id'], json['search'])
     return companies
 
 
-@article_bp.route('/submit_to_company/<string:article_id>/', methods=['POST'])
+@article_bp.route('/submit_to_company/<string:article_id>/',
+                  methods=['POST'])
 @ok
 def submit_to_company(json, article_id):
     a = Article.get(article_id)
     a.mine.clone_for_company(json['company_id'])
-    return {'article': a.get(article_id).get_client_side_dict(), 'company_id': json['company_id']}
+    return {'article': a.get(article_id).get_client_side_dict(),
+            'company_id': json['company_id']}
