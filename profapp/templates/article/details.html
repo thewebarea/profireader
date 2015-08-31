@@ -8,7 +8,6 @@
     <script>
         module.controller('article_my_versions', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
             $scope.article = {{ article|safe }};
-            console.log($scope.article);
             $scope.url_update = {{ raw_url_for('article.show_form_update')|safe }};
             $scope.url_search_for_company = {{ raw_url_for('article.search_for_company_to_submit')|safe }};
             $scope.url_submit = {{ raw_url_for('article.submit_to_company')|safe }};
@@ -84,7 +83,7 @@
             color: #f00;
         }
     </style>
-    <div ng-controller="article_my_versions">
+    <div  ng-controller="article_my_versions">
         <h2>{{ _('Article title is `%(article.mine.title)s`') }}</h2>
         {{ article.mine.short }}
         <h4>{{ _('Created at %(article.mine.cr_tm)s') }}</h4>

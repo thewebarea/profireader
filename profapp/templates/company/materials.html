@@ -5,10 +5,14 @@
 {% block portal_content %}
 
 {% for article in articles %}
-    <a href="{{ url_for('company.material_details', company_id=company.id , article_id=article.id) }}">{{ article.title }}</a>
-    {% for new_status in article.possible_new_statuses %}
-        <button>make article {{ new_status }}</button>
-    {% endfor %}
+    <a href="{{ url_for('company.material_details', company_id=company.id , article_id=article.id) }}">{{ article.title }}</a><br/>
+    change material status to <select>
+        {% for new_status in article.possible_new_statuses %}
+          <option value="{{ new_status }}">{{ new_status }}</option>
+        {% endfor %}
+    </select><br/>
+    introduce user to work on this material <input/> <button>send</button><br/>
+    publish this material at portal <input/> in devision <select><option>selecet portal first</option></select>
 
 {% endfor %}
 {% endblock portal_content %}
