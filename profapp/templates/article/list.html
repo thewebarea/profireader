@@ -7,6 +7,6 @@
 <h2><a href="{{ url_for('article.show_form_create') }}">Create article</a></h2>
 
 {% for article in articles %}
-    <a href="{{ url_for('article.details', article_id=article.id) }}">{{ article.mine['title'] }}</a><br/>
+    <a href="{{ url_for('article.details_load', article_id=article.id) }}">{{ article.mine['title'] }}</a><br/>
 {% endfor %}
 {% endblock portal_content %}

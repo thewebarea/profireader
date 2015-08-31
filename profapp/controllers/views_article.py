@@ -52,7 +52,7 @@ def save(article_company_id):
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])
-def details_form(article_id):
+def details(article_id):
     return render_template('article/details.html', article_id = article_id)
 
 @article_bp.route('/details/<string:article_id>/', methods=['POST'])
