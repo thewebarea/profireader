@@ -8,12 +8,16 @@ from ..controllers.has_right import has_right
 class Portal(Base):
 
     __tablename__ = 'portal'
-    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False,
+                primary_key=True)
     name = Column(TABLE_TYPES['name'])
-    company_owner_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
-    portal_plan_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_plan.id'))
+    company_owner_id = Column(TABLE_TYPES['id_profireader'],
+                              ForeignKey('company.id'))
+    portal_plan_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('portal_plan.id'))
 
-    def __init__(self, name=None, portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
+    def __init__(self, name=None,
+                 portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
                  company_owner_id=None):
         self.name = name
         self.portal_plan_id = portal_plan_id
@@ -35,7 +39,8 @@ class Portal(Base):
 class PortalPlan(Base):
 
     __tablename__ = 'portal_plan'
-    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False,
+                primary_key=True)
     name = Column(TABLE_TYPES['name'], nullable=False)
 
     def __init__(self, name=None):
@@ -44,12 +49,16 @@ class PortalPlan(Base):
 class CompanyPortal(Base):
 
     __tablename__ = 'company_portal'
-    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
-    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False,
+                primary_key=True)
+    company_id = Column(TABLE_TYPES['id_profireader'],
+                        ForeignKey('company.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'],
+                       ForeignKey('portal.id'))
     company_portal_plan_id = Column(TABLE_TYPES['id_profireader'])
 
-    def __init__(self, company_id=None, portal_id=None, company_portal_plan_id=None):
+    def __init__(self, company_id=None, portal_id=None,
+                 company_portal_plan_id=None):
         self.company_id = company_id
         self.portal_id = portal_id
         self.company_portal_plan_id = company_portal_plan_id
@@ -66,9 +75,12 @@ class CompanyPortal(Base):
 
     @staticmethod
     def apply_company_to_portal(company_id, portal_id):
-        db_session.add(CompanyPortal(company_id=company_id, portal_id=portal_id,
-                                     company_portal_plan_id=Portal().query_portal(portal_id).portal_plan_id))
-        db_session.commit()
+        db_session.add(CompanyPortal(company_id=company_id,
+                                     portal_id=portal_id,
+                                     company_portal_plan_id=Portal().
+                                     query_portal(portal_id).
+                                     portal_plan_id))
+        db_session.flush()
 
     @staticmethod
     def show_companies_on_my_portal(company_id):
@@ -88,3 +100,46 @@ class CompanyPortal(Base):
         for portal in comp_port:
             comp.append(Portal().query_portal(portal.portal_id))
         return comp
+
+class PortalDivision(Base):
+
+    __tablename__ = 'portal_division'
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    cr_tm = Column(TABLE_TYPES['timestamp'])
+    md_tm = Column(TABLE_TYPES['timestamp'])
+    portal_id = Column(TABLE_TYPES['id_profireader'],
+                       ForeignKey('portal.id'))
+    portal_division_type_id = Column(
+        TABLE_TYPES['id_profireader'],
+        ForeignKey('portal_division_type.id'))
+    name = Column(TABLE_TYPES['short_name'], default='')
+
+    def __init__(self, portal_id=None, portal_division_type_id=None,
+                 name=None):
+        self.portal_id = portal_id
+        self.portal_division_type_id = portal_division_type_id
+        self.name = name
+
+class PortalDivisionType(Base):
+
+    __tablename__ = 'portal_division_type'
+    id = Column(TABLE_TYPES['short_name'], primary_key=True)
+
+class UserPortalReader(Base):
+
+    __tablename__ = 'user_portal_reader'
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    user_id = Column(TABLE_TYPES['id_profireader'],
+                     ForeignKey('user.id'))
+    company_id = Column(TABLE_TYPES['id_profireader'],
+                        ForeignKey('company.id'))
+    status = Column(TABLE_TYPES['id_profireader'])
+    portal_plan_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('portal_plan.id'))
+
+    def __init__(self, user_id=None, company_id=None, status=None,
+                 portal_plan_id=None):
+        self.user_id = user_id
+        self.company_id = company_id
+        self.status = status
+        self.portal_plan_id = portal_plan_id
