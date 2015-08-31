@@ -121,14 +121,6 @@ class Company(Base, PRBase):
             return employee
         return False
 
-    def query_owner_or_member(self, company_id):
-
-        employee = self.query_employee(company_id)
-        if not employee:
-            return False
-        if employee.status == STATUS().ACTIVE():
-            return True
-
 class UserCompanyRight(Base, PRBase):
     __tablename__ = 'user_company_right'
     id = Column(TABLE_TYPES['bigint'], primary_key=True)
