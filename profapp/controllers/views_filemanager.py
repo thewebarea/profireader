@@ -5,37 +5,52 @@ from db_init import db_session
 from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp
 from io import BytesIO
-from .request_wrapers import json, parent_folder
+from .request_wrapers import ok
+from functools import wraps
 
 
-root = os.getcwd()+'/profapp/static/filemanager/tmp'
+def parent_folder(func):
+    @wraps(func)
+    def function_parent_folder(json, *args, **kwargs):
+        ret = func(json, *args, **kwargs)
+        return ret
+
+    return function_parent_folder
+
+
+root = os.getcwd() + '/profapp/static/filemanager/tmp'
 json_result = {"result": {"success": True, "error": None}}
+
 
 @filemanager_bp.route('/')
 def filemanager():
     # library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
-    library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.profireader_small_avatar_url}}
-    for company in g.user.companies:
-        library[company.journalist_folder_file_id]={'name': "%s materisals" % (company.name, ), 'icon': ''}
-        library[company.corporate_folder_file_id]={'name': "%s corporate files" % (company.name, ), 'icon': ''}
+    library = {
+        g.user.personal_folder_file_id: {'name': 'My personal files',
+                                         'icon': current_user.profireader_small_avatar_url}}
+    for company in g.user.employer:
+        library[company.journalist_folder_file_id] = {'name': "%s materisals" % (company.name,), 'icon': ''}
+        library[company.corporate_folder_file_id] = {'name': "%s corporate files" % (company.name,), 'icon': ''}
     return render_template('filemanager.html', library=library)
 
+
 @filemanager_bp.route('/list/', methods=['POST'])
-@json
-@parent_folder
-def list(parent_id=None):
+@ok
+# @parent_folder
+def list(json, parent_id=None):
     return File.list(parent_id=parent_id)
 
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
-@json
-@parent_folder
-def createdir(parent_id=None):
-    return File.createdir(name=request.json['params']['name'],  parent_id=parent_id)
+@ok
+# @parent_folder
+def createdir(json, parent_id=None):
+    return File.createdir(name=request.json['params']['name'], parent_id=parent_id)
+
 
 @filemanager_bp.route('/upload/', methods=['POST'])
-@json
-def upload():
+@ok
+def upload(json):
     parent_id = None if (request.form['parent_id'] == '') \
         else (request.form['parent_id'])
     got_file = request.files['file-0']
@@ -43,6 +58,7 @@ def upload():
     file = File(parent_id=parent_id, name=got_file.filename,
                 mime=got_file.content_type)
     return file.upload(content=got_file.stream.read(-1)).id
+
 
 # # # #
 #
@@ -82,16 +98,16 @@ def upload():
 #
 #     return result
 
-@filemanager_bp.route('/get/<string:id>')
-def get(id):
-    image_query = file_query(id, File)
-    image_query_content = db_session.query(FileContent).filter_by(id=id).first()
+@filemanager_bp.route('/get/<string:file_id>')
+def get(file_id):
+    image_query = file_query(file_id, File)
+    image_query_content = db_session.query(FileContent).filter_by(id=file_id).first()
     response = make_response()
     response.headers['Content-Type'] = image_query.mime
     response.headers['Content-Disposition'] = 'filename=%s' % image_query.name
     return send_file(BytesIO(image_query_content.content), mimetype=image_query.mime, as_attachment=False)
 
-def file_query(id, table):
 
-    query = db_session.query(table).filter_by(id=id).first()
+def file_query(file_id, table):
+    query = db_session.query(table).filter_by(id=file_id).first()
     return query

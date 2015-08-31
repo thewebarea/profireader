@@ -1,6 +1,7 @@
 
 
-    <h3><p>{% if edit_version.id %}{% if company.id %} {{ gettext('update version of article for company `%(name)s`', name = company.name) }} {% else %} update your own article copy {% endif %}{% else %}create article{% endif %}</p></h3>
+    <h3><p>{% if edit_version.id %}{% if company.id %} {{ gettext('update version of article for company `%(name)s`', name = company.name) }}
+    {% else %} update your own article copy {% endif %}{% else %}create article{% endif %}</p></h3>
 
     <form action="{% if edit_version.id %}{{ url_for('article.update', article_company_id = edit_version.id) }}{% else %}{{ url_for('article.create') }}{% endif %}"
           onsubmit="return AjaxPost()" id="edit" method="post">
