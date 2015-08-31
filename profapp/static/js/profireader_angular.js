@@ -60,7 +60,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 for (var i in indexes) {
                     if (typeof d[indexes[i]] !== undefined) {
                         d = d[indexes[i]];
-                        }
+                    }
                     else {
                         return g1;
                     }
@@ -74,7 +74,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
     .factory('$ok', ['$http', function ($http) {
         return function (url, data, ifok, iferror) {
-            function error (result, error_code) {
+            function error(result, error_code) {
                 if (iferror) {
                     iferror(result, error_code)
                 }
@@ -89,7 +89,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                         return error('wrong response', -1);
                     }
 
-                    resp  = resp ['data'];
+                    resp = resp ['data'];
 
                     if (!resp['ok']) {
                         return error(resp['result'], resp['error_code']);
@@ -102,8 +102,8 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 },
                 function () {
                     return error('wrong response', -1);
-                    }
-                );
+                }
+            );
         }
     }])
     .directive('dateTimestampFormat', function () {
@@ -139,42 +139,22 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             }
         };
     }])
-    .directive('ngAjaxForm', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+    .directive('ngAjaxAction', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',
             scope: true,
             link: function (scope, iElement, iAttrs, ctrl) {
                 console.log(scope, iElement, iAttrs, ctrl);
-                scope.areAllEmpty = function () {
-                    var are = true;
-                    $.each(arguments, function (ind, object) {
-                        if (are) {
-                            var ret = true;
-                            if ($.isArray(object)) {
-                                ret = object.length ? false : true;
-                            }
-                            else if ($.isPlainObject(object) && $.isEmptyObject(object)) {
-                                ret = true;
-                            }
-                            else {
-                                ret = ((object === undefined || object === false || object === null || object === 0) ? true : false);
-                            }
-                            are = ret;
-                        }
-                    });
-                    return are;
-                };
+                scope.areAllEmpty = areAllEmpty;
 
                 scope.checking = {};
                 scope.checked = {};
-                scope.data = {};
 
                 scope.errors = {};
                 scope.warnings = {};
                 scope.dirty = true;
 
                 scope.submitting = false;
-                scope.url = $(iElement).attr('action');
 
                 $(iElement).on('submit',
                     function () {
@@ -183,7 +163,9 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                             $('input[type=submit]', $(iElement)).prop('disabled', true);
                             $('button[type=submit]', $(iElement)).prop('disabled', true);
 
-                            $ok(scope.url, scope['data']).finally(function () {
+                            console.log(iAttrs['o']);
+
+                            $ok($(iElement).attr('ngAjaxAction'), scope['data']).finally(function () {
                                 scope.submitting = false;
                                 $('input[type=submit]', $(iElement)).prop('disabled', false);
                                 $('button[type=submit]', $(iElement)).prop('disabled', false);
@@ -195,13 +177,12 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     });
 
 
-                $.each($('[name]', $(iElement)), function (ind, el) {
-                    $newel = $(el).clone();
-                    scope.data[$(el).attr('name')] = $(el).val();
-                    $newel.attr('ng-model', 'data.' + $newel.attr('name'));
-                    $(el).replaceWith($compile($newel)(scope))
-                });
-
+                //$.each($('[name]', $(iElement)), function (ind, el) {
+                //$newel = $(el).clone();
+                //scope.data[$(el).attr('name')] = $(el).val();
+                //$newel.attr('ng-model', 'data.' + $newel.attr('name'));
+                //$(el).replaceWith($compile($newel)(scope))
+                //});
 
 
                 scope.getSignificantClass = function (index, one, onw, onn) {
@@ -233,8 +214,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 };
 
 
-
-
                 scope.refresh = function () {
                     console.log('refresh');
                     scope.changed = getObjectsDifference(scope.checked, scope['data']);
@@ -248,7 +227,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                         if (!scope.areAllEmpty(scope.changed)) {
                             scope.checking = scope['data'];
 
-                            $http.post(scope.url, scope.checking)
+                            $http.post($(iElement).attr('njAjaxAction'), scope.checking)
                                 .then(function (fromserver) {
                                     var resp = fromserver['data'];
                                     if (scope.areAllEmpty(getObjectsDifference(scope.checking, scope['data']))) {
@@ -282,6 +261,27 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
         };
     }]);
 
+
+areAllEmpty = function () {
+    var are = true;
+    $.each(arguments, function (ind, object) {
+        if (are) {
+            var ret = true;
+            if ($.isArray(object)) {
+                ret = object.length ? false : true;
+            }
+            else if ($.isPlainObject(object) && $.isEmptyObject(object)) {
+                ret = true;
+            }
+            else {
+                ret = ((object === undefined || object === false || object === null || object === 0) ? true : false);
+            }
+            are = ret;
+        }
+    });
+    return are;
+}
+
 None = null;
 False = false;
 True = true;
@@ -291,15 +291,15 @@ True = true;
 
 function scrool($el, options) {
     $.smoothScroll($.extend({
-        scrollElement:$el.parent(),
-        scrollTarget:$el
-        }, options?options:{}));
+        scrollElement: $el.parent(),
+        scrollTarget: $el
+    }, options ? options : {}));
 }
 
 function highlight($el) {
     $el.addClass('highlight');
     setTimeout(function () {
-    $el.removeClass('highlight');
+        $el.removeClass('highlight');
     }, 500);
 }
 
