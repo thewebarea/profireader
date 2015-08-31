@@ -49,8 +49,7 @@ def show_form_update(article_company_id):
                   methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
-    ret = ArticleCompany.get(article_company_id).get_client_side_dict()
-    return ret
+    return  ArticleCompany.get(article_company_id).get_client_side_dict()
 
 
 @article_bp.route('/save/<string:article_company_id>/',
@@ -67,6 +66,10 @@ def save(article_company_id):
 def details(article_id):
     return render_template('article/details.html', article_id=article_id)
 
+@article_bp.route('/details/<string:article_id>/', methods=['POST'])
+@ok
+def details_load(json, article_id):
+    return Article.get(article_id).get_client_side_dict()
 
 @article_bp.route('/search_for_company_to_submit/', methods=['POST'])
 @ok
