@@ -16,3 +16,6 @@ class ARTICLE_STATUS_IN_COMPANY:
 
         elif from_status == cls.declined:
             return [cls.accepted]
+
+        else:
+            return [cls.accepted, cls.declined]
