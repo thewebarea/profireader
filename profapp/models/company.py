@@ -48,9 +48,22 @@ class Company(Base, PRBase):
     @staticmethod
     def query_company(company_id):
         ret = db(Company, id=company_id).one()
+
         return ret
 
+    @staticmethod
+    def search_for_company(user_id, searchtext):
+
+        query_companies = db(Company).filter(Company.name.like("%"+searchtext+"%")).all()
+        ret = []
+        for x in query_companies:
+            ret.append(x.dict())
+
+        return ret
+        # return PRBase.searchResult(query_companies)
+
     def user_comp_rs(self, user):
+
         user.employer.append(self)
         self.employee.append(user)
 
@@ -107,6 +120,14 @@ class Company(Base, PRBase):
         if employee:
             return employee
         return False
+
+    def query_owner_or_member(self, company_id):
+
+        employee = self.query_employee(company_id)
+        if not employee:
+            return False
+        if employee.status == STATUS().ACTIVE():
+            return True
 
 class UserCompanyRight(Base, PRBase):
     __tablename__ = 'user_company_right'
@@ -173,8 +194,8 @@ class Right(Base):
     @staticmethod
     def p(right_name):
         return {'hmm': lambda **kwargs: True}
-        return {'can_user_in_company_'+right_name: lambda **kwargs:
-                Right.permissions(g.user_dict['id'], kwargs['company_id'], right_name)}
+        # return {'can_user_in_company_'+right_name: lambda **kwargs:
+        #         Right.permissions(g.user_dict['id'], kwargs['company_id'], right_name)}
 
     @staticmethod
     def update_rights(user_id, comp_id, rights):

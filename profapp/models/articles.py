@@ -1,12 +1,18 @@
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean, func, desc
 from sqlalchemy.orm import relationship, backref, aliased
 
+
 from ..constants.TABLE_TYPES import TABLE_TYPES
+from ..constants.STATUS import STATUS
 from db_init import db_session
 from ..models.company import Company
 from ..models.users import User
 from utils.db_utils import db
 
+
+from ..controllers.errors import BadDataProvided
+
+from flask import g
 from .pr_base import PRBase
 from db_init import Base
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
@@ -43,13 +49,11 @@ class ArticleCompany(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    company = relationship(Company)
-    editor = relationship(User)
-    # article = relationship('Article')
+    company = relationship('Company')
+    article = relationship('Article')
 
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id}).save()
-
 
 class Article(Base, PRBase):
     __tablename__ = 'article'
