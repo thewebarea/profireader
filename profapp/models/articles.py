@@ -42,7 +42,6 @@ class ArticleCompany(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     company = relationship(Company)
     editor = relationship(User)
-    possible_new_statuses = Column(TABLE_TYPES['short_name'])
 
     def get_client_side_dict(self, fields='id|title|short|'
                                           'long|cr_tm|md_tm|company_id|'
@@ -85,11 +84,7 @@ class Article(Base, PRBase):
         article = Article(mine=ArticleCompany(editor_user_id=user_id,
                                               company_id=None,
                                               **kwargs),
-                                              author_user_id=user_id,
-                                              possible_new_statuses=
-                                              ARTICLE_STATUS_IN_COMPANY.
-                                              can_user_change_status_to(
-                                              'submitted'))
+                                              author_user_id=user_id)
         return article.save()
 
     @staticmethod
@@ -118,11 +113,16 @@ class Article(Base, PRBase):
     #     return _A().filter_by(author_user_id=user_id).all()
 
     @staticmethod
+    def get_one_article(article_id):
+        article = _C().filter_by(id=article_id).one()
+        return article
+
+    @staticmethod
     def get_articles_submitted_to_company(company_id):
         articles = _C().filter_by(company_id=company_id).all()
-    # for article in articles:
-    #     article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.\
-    #         can_user_change_status_to(article.status)
+     # for article in articles:
+     #     article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.\
+     #         can_user_change_status_to(article.status)
         return articles
 
 class ArticleCompanyHistory(Base, PRBase):

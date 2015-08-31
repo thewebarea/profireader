@@ -7,6 +7,7 @@
     <script>
         module.controller('materials_articles', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
             $scope.articles = {{ articles|safe }};
+            $scope.company = {{ comp|safe }}
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
 
         }]);
@@ -14,9 +15,8 @@
     {% raw %}
 <div ng-controller="materials_articles">
 
-
     <span ng-repeat="article in articles">
-    <a href="{{ url_article_details({company_id: comp.id, article_id: article.id}) }}">{{ article.title }}</a><br/>
+    <a href="{{ url_article_details({company_id: company.id, article_id: article.id}) }}">{{ article.title }}</a><br/>
     change material status to <select>
         <span ng-repeat="new_status in articles.possible_new_statuses">
           <option value="{{ new_status }}">{{ new_status }}</option>

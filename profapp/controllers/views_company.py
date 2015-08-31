@@ -10,7 +10,7 @@ from .has_right import has_right
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
-
+from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 
 @company_bp.route('/', methods=['GET', 'POST'])
 @check_rights(**Right.p(''))
@@ -41,13 +41,19 @@ def materials(company_id):
 @check_rights(**Right.p(''))
 @login_required
 def material_details(company_id, article_id):
+
+    article = Article.get_one_article(article_id).\
+        to_dict('id, title,short, cr_tm, md_tm, '
+                'company_id, status, long,'
+                'editor_user_id, company.name')
+    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
+        article['status'])
     return render_template('company/material_details.html',
                            comp=Company.get(company_id).
                            get_client_side_dict(),
-                           articles=Article.
-                           get_articles_submitted_to_company(
-                               company_id))
-
+                           article=article,
+                           status=status
+                           )
 
 @company_bp.route('/add/')
 @check_rights(**Right.p(''))
@@ -61,6 +67,7 @@ def add():
 @check_rights(**Right.p(''))
 @login_required
 def confirm_add():
+
     data = request.form
     comp_dict = {'author_user_id': g.user_dict['id']}
     for x, y in zip(data.keys(), data.values()):
