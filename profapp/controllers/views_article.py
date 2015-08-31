@@ -35,13 +35,17 @@ def create():
 
 @article_bp.route('/update/<string:article_company_id>/', methods=['GET'])
 def show_form_update(article_company_id):
-    article_for_company = ArticleCompany.get(article_company_id)
-    company = article_for_company.company.__dict__ if article_for_company.company else {}
-    return render_template('article/update.html', edit_version=article_for_company.__dict__, company=company)
-
+    return render_template('article/update.html', article_company_id=article_company_id)
 
 @article_bp.route('/update/<string:article_company_id>/', methods=['POST'])
-def update(article_company_id):
+@ok
+def load_form_update(json, article_company_id):
+    ret = ArticleCompany.get(article_company_id).get_client_side_dict()
+    return ret
+
+
+@article_bp.route('/save/<string:article_company_id>/', methods=['POST'])
+def save(article_company_id):
     return redirect(url_for('article.details',
                             article_id=Article.save_edited_version(g.user.id, article_company_id,
                                                                    **request.form.to_dict(True)).article_id))
