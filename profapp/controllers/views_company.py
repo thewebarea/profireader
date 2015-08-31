@@ -9,7 +9,7 @@ from .request_wrapers import ok, check_rights
 from .has_right import has_right
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
-from ..models.articles import Article, ArticleCompany
+from ..models.articles import Article
 
 
 @company_bp.route('/', methods=['GET', 'POST'])
@@ -30,11 +30,10 @@ def materials(company_id):
     return render_template('company/materials.html',
                            company=Company.get(company_id).
                            get_client_side_dict(),
-                           articles=[art.
-                           to_dict('id, '
-                                   'title, '
-                                   'possible_new_statuses') for art in Article.
-                           get_articles_submitted_to_company(
+                           articles=[art.to_dict(
+                               'id, title, possible_new_statuses')
+                               for art in Article.
+                               get_articles_submitted_to_company(
                                company_id)])
 
 @company_bp.route('/materials/<string:company_id>/<string:article_id>/',
