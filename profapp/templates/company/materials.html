@@ -3,16 +3,28 @@
 {% block title %}Profireader - Company materials{% endblock title %}
 
 {% block portal_content %}
+    <script>
+        module.controller('materials_articles', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
+            $scope.articles = {{ articles|safe }};
+            $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
 
-{% for article in articles %}
-    <a href="{{ url_for('company.material_details', company_id=company.id , article_id=article.id) }}">{{ article.title }}</a><br/>
+        }]);
+</script>
+    {% raw %}
+<div ng-controller="materials_articles">
+
+
+    <span ng-repeat="article in articles">
+        kljlkjlk
+    <a href="{{ url_article_details({company_id: company.id, article_id: article.id}) }}">{{ article.title }}</a><br/>
     change material status to <select>
-        {% for new_status in article.possible_new_statuses %}
+        <span ng-repeat="new_status in articles.possible_new_statuses">
           <option value="{{ new_status }}">{{ new_status }}</option>
-        {% endfor %}
+        </span>
     </select><br/>
     introduce user to work on this material <input/> <button>send</button><br/>
-    publish this material at portal <input/> in devision <select><option>selecet portal first</option></select>
-
-{% endfor %}
+    publish this material at portal <input/> in devision <select><option>select portal first</option></select>
+        </span>
+</div>
+{% endraw %}
 {% endblock portal_content %}

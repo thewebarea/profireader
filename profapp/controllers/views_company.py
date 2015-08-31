@@ -1,6 +1,7 @@
 from .blueprints import company_bp
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, UserCompanyRight, Right, UserCompany
+from ..models.company import Company, UserCompanyRight, Right, \
+    UserCompany
 # from phonenumbers import NumberParseException
 from ..constants.USER_ROLES import RIGHTS
 from ..models.users import User
@@ -25,17 +26,28 @@ def show():
 @check_rights(**Right.p(''))
 @login_required
 def materials(company_id):
-    return render_template('company/materials.html',
-                           company=Company.get(company_id).get_client_side_dict(),
-                           articles=Article.get_articles_submitted_to_company(company_id))
 
-@company_bp.route('/materials/<string:company_id>/<string:article_id>/', methods=['GET'])
+    return render_template('company/materials.html',
+                           company=Company.get(company_id).
+                           get_client_side_dict(),
+                           articles=[art.
+                           to_dict('id, '
+                                   'title, '
+                                   'possible_new_statuses') for art in Article.
+                           get_articles_submitted_to_company(
+                               company_id)])
+
+@company_bp.route('/materials/<string:company_id>/<string:article_id>/',
+                  methods=['GET'])
 @check_rights(**Right.p(''))
 @login_required
 def material_details(company_id, article_id):
     return render_template('company/material_details.html',
-                           company=Company.get(company_id).get_client_side_dict(),
-                           articles=Article.get_articles_submitted_to_company(company_id))
+                           company=Company.get(company_id).
+                           get_client_side_dict(),
+                           articles=Article.
+                           get_articles_submitted_to_company(
+                               company_id))
 
 
 @company_bp.route('/add/')
@@ -60,7 +72,7 @@ def confirm_add():
     return redirect(url_for('company.show'))
 
 
-@company_bp.route('/profile/<string:company_id>/', methods=['GET', 'POST'])
+@company_bp.route('/profile/<string:company_id>/')
 @check_rights(**Right.p(''))
 @login_required
 def profile(company_id):
@@ -101,9 +113,12 @@ def employees(comp_id):
 @login_required
 def update_rights():
     data = request.form
-    Right.update_rights(user_id=data['user_id'], comp_id=data['comp_id'], rights=data.getlist('right'))
+    Right.update_rights(user_id=data['user_id'],
+                        comp_id=data['comp_id'],
+                        rights=data.getlist('right'))
 
-    return redirect(url_for('company.employees', comp_id=data['comp_id']))
+    return redirect(url_for('company.employees',
+                            comp_id=data['comp_id']))
 
 
 @company_bp.route('/edit/<string:company_id>/')
@@ -112,7 +127,8 @@ def update_rights():
 def edit(company_id):
     comp = Company().query_company(company_id=company_id)
     user = Company().query_employee(comp_id=company_id)
-    has_right(Right.permissions(g.user_dict['id'], company_id, rights=[RIGHTS.EDIT()]))
+    has_right(Right.permissions(g.user_dict['id'], company_id,
+                                rights=[RIGHTS.EDIT()]))
 
     return render_template('company_edit.html',
                            comp=comp,
@@ -133,7 +149,8 @@ def confirm_edit(company_id):
 @check_rights(**Right.p(''))
 @login_required
 def subscribe(company_id):
-    comp_role = UserCompany(user_id=g.user_dict['id'], company_id=company_id,
+    comp_role = UserCompany(user_id=g.user_dict['id'],
+                            company_id=company_id,
                             status=STATUS().NONACTIVE())
     comp_role.subscribe_to_company()
 
@@ -145,11 +162,13 @@ def subscribe(company_id):
 @login_required
 def subscribe_search_form():
     data = request.form
-    comp_role = UserCompany(user_id=g.user_dict['id'], company_id=data['company'],
+    comp_role = UserCompany(user_id=g.user_dict['id'],
+                            company_id=data['company'],
                             status=STATUS().NONACTIVE())
     comp_role.subscribe_to_company()
 
-    return redirect(url_for('company.profile', company_id=data['company']))
+    return redirect(url_for('company.profile',
+                            company_id=data['company']))
 
 
 @company_bp.route('/add_subscriber/', methods=['POST'])
@@ -158,9 +177,11 @@ def subscribe_search_form():
 def confirm_subscriber():
     comp_role = UserCompanyRight()
     data = request.form
-    comp_role.apply_request(comp_id=data['comp_id'], user_id=data['user_id'], bool=data['req'])
+    comp_role.apply_request(comp_id=data['comp_id'],
+                            user_id=data['user_id'], bool=data['req'])
 
-    return redirect(url_for('company.profile', company_id=data['comp_id']))
+    return redirect(url_for('company.profile',
+                            company_id=data['comp_id']))
 
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
@@ -168,9 +189,11 @@ def confirm_subscriber():
 @login_required
 def suspend_employee():
     data = request.form
-    UserCompanyRight.suspend_employee(user_id=data['user_id'], comp_id=data['comp_id'])
+    UserCompanyRight.suspend_employee(user_id=data['user_id'],
+                                      comp_id=data['comp_id'])
 
-    return redirect(url_for('company.employees', comp_id=data['comp_id']))
+    return redirect(url_for('company.employees',
+                            comp_id=data['comp_id']))
 
 
 @company_bp.route('/suspended_employees/<string:comp_id>')

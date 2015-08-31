@@ -105,7 +105,8 @@ class Article(Base, PRBase):
     def get_articles_submitted_to_company(company_id):
         articles = _C().filter_by(company_id=company_id).all()
         for article in articles:
-            article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article.status)
+            article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.\
+                can_user_change_status_to(article.status)
         return articles
 
 class ArticleCompanyHistory(Base, PRBase):
