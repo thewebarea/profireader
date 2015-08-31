@@ -63,13 +63,9 @@ def save(article_company_id):
                             article_id))
 
 
-@article_bp.route('/details/<string:article_id>/',
-                  methods=['GET', 'POST'])
+@article_bp.route('/details/<string:article_id>/', methods=['GET'])
 def details(article_id):
-
-    return render_template('article/details.html',
-                           article=Article.get(article_id).
-                           get_client_side_dict())
+    return render_template('article/details.html', article_id=article_id)
 
 
 @article_bp.route('/search_for_company_to_submit/', methods=['POST'])
