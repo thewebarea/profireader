@@ -45,6 +45,11 @@ class Company(Base, PRBase):
         # get all users in company : company.employee
         # get all users companies : user.employer
 
+    def get_client_side_dict(self, fields='id|title|short|'
+                                          'long|cr_tm|md_tm|company_id|'
+                                          'status, company.name'):
+        return self.to_dict(fields)
+
     @staticmethod
     def query_company(company_id):
         ret = db(Company, id=company_id).one()

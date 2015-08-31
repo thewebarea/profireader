@@ -23,7 +23,7 @@ def partners(company_id):
         show_companies_on_my_portal(company_id)
     portals_partners = CompanyPortal().show_my_portals(company_id)
 
-    return render_template('company_partners.html',
+    return render_template('company/company_partners.html',
                            comp=comp,
                            companies_partners=companies_partners,
                            portals_partners=portals_partners

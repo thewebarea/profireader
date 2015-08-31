@@ -9,7 +9,7 @@
 {% endblock portal_base %}
 {% block content %}
     {% block company_base %}
-{% include 'company_base.html' %}
+{% include 'company/company_base.html' %}
 {% endblock company_base %}
 
     <form class="subscribe" action="{{ url_for('portal.apply_company') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">

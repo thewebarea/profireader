@@ -18,7 +18,7 @@ from ..models.articles import Article
 def show():
     companies = User.user_query(g.user_dict['id']).employer
 
-    return render_template('company.html',
+    return render_template('company/company.html',
                            companies=companies
                            )
 
@@ -28,7 +28,7 @@ def show():
 def materials(company_id):
 
     return render_template('company/materials.html',
-                           company=Company.get(company_id).
+                           comp=Company.get(company_id).
                            get_client_side_dict(),
                            articles=[art.to_dict(
                                'id, title, possible_new_statuses')
@@ -42,7 +42,7 @@ def materials(company_id):
 @login_required
 def material_details(company_id, article_id):
     return render_template('company/material_details.html',
-                           company=Company.get(company_id).
+                           comp=Company.get(company_id).
                            get_client_side_dict(),
                            articles=Article.
                            get_articles_submitted_to_company(
@@ -53,7 +53,7 @@ def material_details(company_id, article_id):
 @check_rights(**Right.p(''))
 @login_required
 def add():
-    return render_template('company_add.html',
+    return render_template('company/company_add.html',
                            user=g.user_dict)
 
 
@@ -82,7 +82,7 @@ def profile(company_id):
     else:
         image = ''
 
-    return render_template('company_profile.html',
+    return render_template('company/company_profile.html',
                            comp=comp,
                            user_rights=user_rights,
                            image=image
@@ -100,7 +100,7 @@ def employees(comp_id):
 
     current_company = company.query_company(company_id=comp_id)
 
-    return render_template('company_employees.html',
+    return render_template('company/company_employees.html',
                            comp=current_company,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user
@@ -129,7 +129,7 @@ def edit(company_id):
     has_right(Right.permissions(g.user_dict['id'], company_id,
                                 rights=[RIGHTS.EDIT()]))
 
-    return render_template('company_edit.html',
+    return render_template('company/company_edit.html',
                            comp=comp,
                            user_query=user
                            )
@@ -201,6 +201,6 @@ def suspend_employee():
 def suspended_employees(comp_id):
     comp = Company().query_company(company_id=comp_id)
     suspended_employee = Right.suspended_employees(comp_id)
-    return render_template('company_suspended.html',
+    return render_template('company/company_suspended.html',
                            suspended_employees=suspended_employee,
                            comp=comp)
