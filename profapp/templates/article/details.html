@@ -7,6 +7,7 @@
 
     <script>
         module.controller('article_my_versions', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
+            {{ translate_() }}
             $scope.article = {{ article|safe }};
             $scope.url_update = {{ raw_url_for('article.show_form_update')|safe }};
             $scope.url_search_for_company = {{ raw_url_for('article.search_for_company_to_submit')|safe }};
@@ -61,14 +62,6 @@
                 });
             }
 
-            $scope._ = function (t, dict) {
-                try {
-                    return $translate(t, dict ? dict : $scope)
-                }
-                catch (a) {
-                    return ''
-                }
-            };
         }]);
     </script>
     {% raw %}

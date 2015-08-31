@@ -82,7 +82,7 @@ class PRBase():
                     ret[relationname] = [child.to_dict(*nextlevelargs, prefix=prefix + relationname + '.') for child in
                                          related_obj]
                 else:
-                    ret[relationname] = related_obj.to_dict(*nextlevelargs, prefix=prefix + relationname + '.')
+                    ret[relationname] = None if related_obj is None else related_obj.to_dict(*nextlevelargs, prefix=prefix + relationname + '.')
 
         if '*' in req_relationships:
             del req_relationships['*']

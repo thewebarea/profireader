@@ -49,9 +49,12 @@ class ArticleCompany(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    company = relationship('Company')
-    article = relationship('Article')
+    company = relationship(Company)
+    editor = relationship(User)
 
+    def get_client_side_dict(self, fields='id|title|short|long|cr_tm|md_tm|company_id|status, company.name'):
+        return self.to_dict(fields)
+    
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id}).save()
 
