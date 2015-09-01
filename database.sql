@@ -810,6 +810,14 @@ ALTER TABLE ONLY "user"
 
 
 --
+-- Name: user_portal_reader_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY user_portal_reader
+    ADD CONSTRAINT user_portal_reader_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: user_profireader_email_key; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -1151,11 +1159,27 @@ ALTER TABLE ONLY "user"
 
 
 --
+-- Name: user_portal_reader_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY user_portal_reader
+    ADD CONSTRAINT user_portal_reader_company_id_fkey FOREIGN KEY (company_id) REFERENCES company(id);
+
+
+--
 -- Name: user_portal_reader_plan_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY user_portal_reader
     ADD CONSTRAINT user_portal_reader_plan_id FOREIGN KEY (portal_plan_id) REFERENCES portal_plan(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: user_portal_reader_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY user_portal_reader
+    ADD CONSTRAINT user_portal_reader_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id);
 
 
 --
