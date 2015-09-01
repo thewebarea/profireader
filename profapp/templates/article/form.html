@@ -1,7 +1,7 @@
 <script>
     module.controller('article_edit', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
         {{ init_data()|safe }}
-        $scope.save_article = {{ raw_url_for('article.show_form_update')|safe }};
+        $scope.save_article = {{ raw_url_for('article.confirm_create')|safe }};
         $scope.details_article = {{ raw_url_for('article.details')|safe }};
     }]);
 </script>
@@ -12,12 +12,14 @@
     <div ng-if="!loading">
 
         <h2 ng-show="!data.id && company">{{ _('Create new article') }}</h2>
+        <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company) }}</h2>
+        <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
 
         <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
             }}</h2>
 
         <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
-        <form ng-on-success="{{ details_article({'article_id': data.article_id}) }}" ng-ajax-action="{{ save_article({'article_company_id': data.id}) }}">
+        <form ng-on-success="{{ details_article({'article_id': data.id}) }}" ng-ajax-action="{{ save_article({}) }}">
             <input type="hidden" ng-model="data.id">
             {{ _('Article title') }}<br/>
             <input type="text" ng-model="data.title"><br/><br/>

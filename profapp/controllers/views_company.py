@@ -11,6 +11,9 @@ from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
+from ..models.portal import CompanyPortal
+from ..models.articles import ArticleCompany
+from utils.db_utils import db
 
 @company_bp.route('/', methods=['GET', 'POST'])
 @check_rights(**Right.p(''))
@@ -31,7 +34,7 @@ def materials(company_id):
                            comp=Company.get(company_id).
                            get_client_side_dict(),
                            articles=[art.to_dict(
-                               'id, title, possible_new_statuses')
+                               'id, title')
                                for art in Article.
                                get_articles_submitted_to_company(
                                company_id)])
@@ -52,8 +55,27 @@ def material_details(company_id, article_id):
                            comp=Company.get(company_id).
                            get_client_side_dict(),
                            article=article,
-                           status=status
+                           status=status,
+                           portals=[port.to_dict('id, name') for port in
+                                    CompanyPortal.show_portals(
+                                        company_id) if port]
                            )
+
+@company_bp.route('/update_article/', methods=['POST'])
+@login_required
+def update_article():
+
+    data = request.form
+    print(data)
+    print(request.json)
+    article = db(ArticleCompany, company_id=data['company_id'],
+                 article_id=data['article_id'])
+    article.update_article(**data['status'])
+    return redirect(url_for('company.material_details',
+                            company_id=article.company_id,
+                            article_id=article.article_id
+                            ))
+
 
 @company_bp.route('/add/')
 @check_rights(**Right.p(''))
@@ -84,10 +106,8 @@ def confirm_add():
 def profile(company_id):
     comp = Company().query_company(company_id=company_id)
     user_rights = Company().query_employee(comp_id=company_id)
-    if comp.logo_file:
-        image = url_for('filemanager.get', id=comp.logo_file)
-    else:
-        image = ''
+    image = url_for('filemanager.get', id=comp.logo_file) if \
+        comp.logo_file else ''
 
     return render_template('company/company_profile.html',
                            comp=comp,

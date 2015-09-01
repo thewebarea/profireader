@@ -44,12 +44,19 @@ class ArticleCompany(Base, PRBase):
     editor = relationship(User)
 
     def get_client_side_dict(self, fields='id|title|short|'
-                                          'long|cr_tm|md_tm|company_id|article_id|'
+                                          'long|cr_tm|md_tm|company_id|'
+                                          'article_id|'
                                           'status, company.name'):
         return self.to_dict(fields)
     
     def clone_for_company(self, company_id):
-        return self.detach().attr({'company_id': company_id}).save()
+        return self.detach().attr({'company_id': company_id,
+                                   'status': 'submitted'}).save()
+
+    def update_article(self, **kwargs):
+        self.update(**kwargs)
+        self.save()
+        return self
 
 class Article(Base, PRBase):
     __tablename__ = 'article'
@@ -85,7 +92,8 @@ class Article(Base, PRBase):
                                               company_id=None,
                                               **kwargs),
                                               author_user_id=user_id)
-        return article.save()
+        article.save()
+        return article
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
@@ -120,10 +128,12 @@ class Article(Base, PRBase):
     @staticmethod
     def get_articles_submitted_to_company(company_id):
         articles = _C().filter_by(company_id=company_id).all()
+        return articles if articles else []
+
      # for article in articles:
      #     article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.\
      #         can_user_change_status_to(article.status)
-        return articles
+
 
 class ArticleCompanyHistory(Base, PRBase):
     __tablename__ = 'article_company_history'
