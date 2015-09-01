@@ -49,7 +49,7 @@ def show_form_update(article_company_id):
                   methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
-    return  ArticleCompany.get(article_company_id).get_client_side_dict()
+    return ArticleCompany.get(article_company_id).get_client_side_dict()
 
 
 @article_bp.route('/save/<string:article_company_id>/',
