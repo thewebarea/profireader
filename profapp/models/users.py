@@ -152,7 +152,8 @@ class User(Base, UserMixin, PRBase):
                  pass_reset_conf_tm=None,
                  ):
         self.companies = companies
-        self.employer = employer
+# TODO AA by OK
+        # self.employer = employer
         self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['email']
         self.profireader_first_name = PROFIREADER_ALL['first_name']
