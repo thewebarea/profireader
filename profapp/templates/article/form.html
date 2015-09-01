@@ -1,8 +1,44 @@
 <script>
+
+    function fileSelected(selectedfiles) {
+        var args = top.tinymce.activeEditor.windowManager.getParams();
+        var win = (args.window);
+        var input = (args.input);
+        $.each(selectedfiles, function (ind, val) {
+            win.document.getElementById(input).value = val['url'];
+        });
+        top.tinymce.activeEditor.windowManager.close();
+    }
+
     module.controller('article_edit', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
         {{ init_data()|safe }}
         $scope.save_article = {{ raw_url_for('article.show_form_update')|safe }};
         $scope.details_article = {{ raw_url_for('article.details')|safe }};
+        $scope.tinymceOptions = {
+            onChange: function (e) {
+                // put logic here for keypress and cut/paste changes
+            },
+            inline: false,
+            plugins: 'advlist autolink link image lists charmap print preview',
+            skin: 'lightgray',
+            theme: 'modern',
+            file_browser_callback: function (field_name, url, type, win) {
+                console.log(field_name, url, type, win);
+                var cmsURL = '/filemanager/?calledby=tinymce_file_browse_' + type;
+                tinymce.activeEditor.windowManager.open({
+                    file: cmsURL,
+                    title: 'Select an Image',
+                    width: 600,  // Your dimensions may differ - toy around with them!
+                    height: 600,
+                    resizable: "yes",
+                    {#                    inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!#}
+                    close_previous: "yes"
+                }, {
+                    window: win,
+                    input: field_name
+                });
+            }
+        };
     }]);
 </script>
 
@@ -17,7 +53,9 @@
             }}</h2>
 
         <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
-        <form ng-on-success="{{ details_article({'article_id': data.article_id}) }}" ng-ajax-action="{{ save_article({'article_company_id': data.id}) }}">
+
+        <form ng-on-success="{{ details_article({'article_id': data.article_id}) }}"
+              ng-ajax-action="{{ save_article({'article_company_id': data.id}) }}">
             <input type="hidden" ng-model="data.id">
             {{ _('Article title') }}<br/>
             <input type="text" ng-model="data.title"><br/><br/>
@@ -26,7 +64,7 @@
             <textarea placeholder="short" ng-model="data.short"></textarea><br/><br/>
 
             {{ _('Full text') }}<br/>
-            <textarea ui-tinymce placeholder="text" ng-model="data.long"></textarea><br/><br/>
+            <textarea ui-tinymce="tinymceOptions" placeholder="text" ng-model="data.long"></textarea><br/><br/>
             <input type="submit" value="{{ data.id ? 'save' : 'create' }}">
         </form>
     </div>
