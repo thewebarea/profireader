@@ -3,9 +3,10 @@ from sqlalchemy import Column, ForeignKey
 from db_init import Base, db_session
 from utils.db_utils import db
 from .company import Company
+from .pr_base import PRBase
 from ..controllers.has_right import has_right
 
-class Portal(Base):
+class Portal(Base, PRBase):
 
     __tablename__ = 'portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
@@ -36,7 +37,7 @@ class Portal(Base):
         ret = db(Portal, id=portal_id).one()
         return ret
 
-class PortalPlan(Base):
+class PortalPlan(Base, PRBase):
 
     __tablename__ = 'portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
@@ -92,14 +93,14 @@ class CompanyPortal(Base):
             return False
 
     @staticmethod
-    def show_my_portals(company_id):
+    def show_portals(company_id):
         comp_port = db(CompanyPortal, company_id=company_id).all()
         if not comp_port:
             return ['This company does not subscribed to any portal']
-        comp = []
+        port = []
         for portal in comp_port:
-            comp.append(Portal().query_portal(portal.portal_id))
-        return comp
+            port.append(Portal().query_portal(portal.portal_id))
+        return port
 
 class PortalDivision(Base):
 

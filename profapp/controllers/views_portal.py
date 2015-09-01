@@ -21,7 +21,7 @@ def partners(company_id):
     comp = Company().query_company(company_id=company_id)
     companies_partners = CompanyPortal().\
         show_companies_on_my_portal(company_id)
-    portals_partners = CompanyPortal().show_my_portals(company_id)
+    portals_partners = CompanyPortal().show_portals(company_id)
 
     return render_template('company/company_partners.html',
                            comp=comp,

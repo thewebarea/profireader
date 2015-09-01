@@ -11,6 +11,7 @@ from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
+from ..models.portal import CompanyPortal
 
 @company_bp.route('/', methods=['GET', 'POST'])
 @check_rights(**Right.p(''))
@@ -31,7 +32,7 @@ def materials(company_id):
                            comp=Company.get(company_id).
                            get_client_side_dict(),
                            articles=[art.to_dict(
-                               'id, title, possible_new_statuses')
+                               'id, title')
                                for art in Article.
                                get_articles_submitted_to_company(
                                company_id)])
@@ -48,11 +49,17 @@ def material_details(company_id, article_id):
                 'editor_user_id, company.name')
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
         article['status'])
+    print([port.to_dict('id, name') for port in
+                                    CompanyPortal.show_portals(
+                                    company_id)])
     return render_template('company/material_details.html',
                            comp=Company.get(company_id).
                            get_client_side_dict(),
                            article=article,
-                           status=status
+                           status=status,
+                           portals=[port.to_dict('id, name') for port in
+                                    CompanyPortal.show_portals(
+                                    company_id)]
                            )
 
 @company_bp.route('/add/')

@@ -3,6 +3,9 @@
 {% block title %}Profireader - Company materials{% endblock title %}
 
 {% block portal_content %}
+    {% block company_base %}
+{% include 'company/company_base.html' %}
+{% endblock company_base %}
     <script>
         module.controller('materials_articles', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
             $scope.article = {{ article|safe }};
@@ -20,10 +23,6 @@
     </select><br/>
     introduce user to work on this material <input/> <button>send</button><br/>
     publish this material at portal <input/> in devision <select><option>select portal first</option></select>
-
-
-
-
     </div>
 
 
