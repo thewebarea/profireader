@@ -92,8 +92,7 @@ class Article(Base, PRBase):
                                               company_id=None,
                                               **kwargs),
                                               author_user_id=user_id)
-        db_session.add(article)
-        db_session.commit()
+        article.save()
         return article
 
     @staticmethod

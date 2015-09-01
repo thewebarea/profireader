@@ -12,6 +12,8 @@
     <div ng-if="!loading">
 
         <h2 ng-show="!data.id && company">{{ _('Create new article') }}</h2>
+        <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company) }}</h2>
+        <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
 
         <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
             }}</h2>

@@ -139,9 +139,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             }
         };
     }])
-    .directive('ngAjaxAction', ['$http', '$compile', '$ok', '$timeout', function ($http, $compile, $ok, $timeout) {
-//TODO: RP by OZ can you bind model to tag with this directivre? I want move ajax_action from code below to model binded by ng-bind
-//<form ng-model="ajax_action" ng-ajax-action="url">
+    .directive('ngAjaxForm', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',
             scope: false,
@@ -177,11 +175,8 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                             $('input[type=submit]', $(iElement)).prop('disabled', true);
                             $('button[type=submit]', $(iElement)).prop('disabled', true);
                             $ok(s.url, scope['data'], function (resp) {
-                                scope.data = resp;
                                 if (s.on_success_url) {
-                                    $timeout(function () {
-                                        document.location.href = s.on_success_url;
-                                    }, 1);
+                                    document.location.href = s.on_success_url;
                                 }
                             }).finally(function () {
                                 $('input[type=submit]', $(iElement)).prop('disabled', false);
