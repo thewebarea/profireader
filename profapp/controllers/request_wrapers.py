@@ -15,7 +15,7 @@ def ok(func):
         if 'json' in kwargs:
             del kwargs['json']
         ret = func(request.json, *args, **kwargs)
-        return jsonify({'result': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
+        return jsonify({'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
         # except Exception as e:
         #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
 

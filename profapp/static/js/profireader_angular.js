@@ -92,11 +92,11 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     resp = resp ['data'];
 
                     if (!resp['ok']) {
-                        return error(resp['result'], resp['error_code']);
+                        return error(resp['data'], resp['error_code']);
                     }
 
                     if (ifok) {
-                        return ifok(resp['result']);
+                        return ifok(resp['data']);
                     }
 
                 },
