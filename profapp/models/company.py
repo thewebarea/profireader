@@ -16,10 +16,13 @@ class Company(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
     logo_file = Column(String(36), ForeignKey('file.id'))
-    journalist_folder_file_id = Column(String(36), ForeignKey('file.id'))
-    corporate_folder_file_id = Column(String(36), ForeignKey('file.id'))
+    journalist_folder_file_id = Column(String(36),
+                                       ForeignKey('file.id'))
+    corporate_folder_file_id = Column(String(36),
+                                      ForeignKey('file.id'))
     portal_consist = Column(TABLE_TYPES['boolean'])
-    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    author_user_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('user.id'), nullable=False)
     country = Column(TABLE_TYPES['name'])
     region = Column(TABLE_TYPES['name'])
     address = Column(TABLE_TYPES['name'])
@@ -28,8 +31,10 @@ class Company(Base, PRBase):
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
 
-    def __init__(self, name=None, portal_consist=False, author_user_id=None, logo_file=None, country=None, region=None,
-                 address=None, phone=None, phone2=None, email=None, short_description=None):
+    def __init__(self, name=None, portal_consist=False,
+                 author_user_id=None, logo_file=None,
+                 country=None, region=None, address=None, phone=None,
+                 phone2=None, email=None, short_description=None):
         self.name = name
         self.portal_consist = portal_consist
         self.author_user_id = author_user_id
@@ -122,9 +127,7 @@ class Company(Base, PRBase):
 
         employee = db(UserCompany, company_id=comp_id,
                       user_id=g.user_dict['id']).first()
-        if employee:
-            return employee
-        return False
+        return employee if employee else False
 
     def query_owner_or_member(self, company_id):
 
@@ -207,8 +210,6 @@ class Right(Base):
     @staticmethod
     def p(right_name):
         return {'hmm': lambda **kwargs: True}
-# return {'can_user_in_company_'+right_name: lambda **kwargs:
-#         Right.permissions(g.user_dict['id'], kwargs['company_id'], right_name)}
 
     @staticmethod
     def update_rights(user_id, comp_id, rights):
@@ -246,8 +247,9 @@ class Right(Base):
 
         suspended_employees = {}
         for x in Company.query_company(comp_id).employee:
-            user_in_company = UserCompany.user_in_company(user_id=x.id,
-                                                          company_id=comp_id)
+            user_in_company = UserCompany.user_in_company(
+                user_id=x.id,
+                company_id=comp_id)
             if user_in_company.status == STATUS.SUSPEND():
                 suspended_employees[x.id] = x.id
                 suspended_employees[x.id] = {'name': x.user_name,
@@ -263,6 +265,4 @@ class Right(Base):
         for right in UserCompany.user_in_company(
                 user_id=user_id, company_id=comp_id).right:
             ucr.append(right.company_right_id)
-        if not set(rights) < set(ucr):
-                return False
-        return True
+        return True if set(rights) < set(ucr) else False

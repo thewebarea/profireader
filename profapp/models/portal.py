@@ -67,12 +67,8 @@ class CompanyPortal(Base):
     @staticmethod
     def all_companies_on_portal(portal_id):
         comp_port = db(CompanyPortal, portal_id=portal_id).all()
-        if not comp_port:
-            return ['Your portal does not have any companies partners']
-        comp = []
-        for company in comp_port:
-            comp.append(db(Company, id=company.company_id).one())
-        return comp
+        return [db(Company, id=company.company_id).one() for company in
+                comp_port] if comp_port else False
 
     @staticmethod
     def apply_company_to_portal(company_id, portal_id):
@@ -87,20 +83,14 @@ class CompanyPortal(Base):
     def show_companies_on_my_portal(company_id):
 
         portal = Portal().own_portal(company_id)
-        if portal:
-            return CompanyPortal().all_companies_on_portal(portal.id)
-        else:
-            return False
+        return CompanyPortal().all_companies_on_portal(portal.id) if \
+            portal else []
 
     @staticmethod
     def show_portals(company_id):
         comp_port = db(CompanyPortal, company_id=company_id).all()
-        if not comp_port:
-            return ['This company does not subscribed to any portal']
-        port = []
-        for portal in comp_port:
-            port.append(Portal().query_portal(portal.portal_id))
-        return port
+        return [Portal().query_portal(portal.portal_id) for portal in
+                comp_port] if comp_port else []
 
 class PortalDivision(Base):
 

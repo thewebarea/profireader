@@ -1,134 +1,35 @@
 <script>
     module.controller('article_edit', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
-        {{ translate_()|safe }}
-        {#        $scope.edit_version = {{ edit_version|safe }};#}
-        {#            $scope.save_article = {{ raw_url_for('article.show_form_update')|safe }};#}
-
-
+        {{ init_data()|safe }}
+        $scope.save_article = {{ raw_url_for('article.confirm_create')|safe }};
+        $scope.details_article = {{ raw_url_for('article.details')|safe }};
     }]);
 </script>
-{#action="{% if edit_version.id %}{{ url_for('article.update', article_company_id = edit_version.id) }}{% else %}{{ url_for('article.create') }}{% endif %}"#}
-{#              onsubmit="return AjaxPost()"#}
+
 {% raw %}
 <div ng-controller="article_edit">
     <div ng-if="loading">Loading...</div>
     <div ng-if="!loading">
+
         <h2 ng-show="!data.id && company">{{ _('Create new article') }}</h2>
-        <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company) }}</h2>
+
+        <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
+            }}</h2>
+
         <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
+        <form ng-on-success="{{ details_article({'article_id': data.id}) }}" ng-ajax-action="{{ save_article({}) }}">
+            <input type="hidden" ng-model="data.id">
+            {{ _('Article title') }}<br/>
+            <input type="text" ng-model="data.title"><br/><br/>
 
-        <form  id="edit" method="post">
-            <p>Article title<br/><input type="text" id="title" placeholder="title" name="title" #}
-                                        value="{{ edit_version.title }}"></p>#}
+            {{ _('Short Description') }}<br/>
+            <textarea placeholder="short" ng-model="data.short"></textarea><br/><br/>
 
-            <p>Short Description<br/><textarea id="short" placeholder="short" #}
-                                               name="short">{{ edit_version.short }}</textarea></p>#}
-
-            <p>Full text<br/><textarea id="full" placeholder="text" name="long">{{ edit_version.long }}</textarea></p>#}
-
-
-            <input type="submit" value="{% if edit_version.id %}save{% else %}create{% endif %}">#}
+            {{ _('Full text') }}<br/>
+            <textarea placeholder="text" ng-model="data.long"></textarea><br/><br/>
+            <input type="submit" value="{{ data.id ? 'save' : 'create' }}">
         </form>
-
-
     </div>
-    {##}
-    {# <h2>#}
-    {# {{#}
-    {# edit_version.id?#}
-    {# _('update version of article for company `%(article.mine.title)s`', company):#}
-    {# _('update your own article copy `%(article.mine.title)s`', company)#}
-    {# }}#}
-    {# </h2>#}
-    {##}
-    {##}
-    {#
-    <form action="{% if edit_version.id %}{{ url_for('article.update', article_company_id = edit_version.id) }}{% else %}{{ url_for('article.create') }}{% endif %}"
-          #}
-          {# onsubmit="return AjaxPost()" id="edit" method="post">#}
-        {##}
-        {# <p>Article title<br/><input type="text" id="title" placeholder="title" name="title" #}
-                                       {# value="{{ edit_version.title }}"></p>#}
-        {##}
-        {# <p>Short Description<br/><textarea id="short" placeholder="short" #}
-                                              {# name="short">{{ edit_version.short }}</textarea></p>#}
-        {##}
-        {# <p>Full text<br/><textarea id="full" placeholder="text" name="long">{{ edit_version.long }}</textarea></p>#}
-        {##}
-        {# <input type="submit" value="{% if edit_version.id %}save{% else %}create{% endif %}">#}
-        {#
-    </form>
-    #}
-    {#
-</div>#}
-{##}
-{##}
-{#
-<script>#
-}
-{#    tinymce.init({#
-}
-{#        image_advtab: true,#
-}
-{#        width: 500,#
-}
-{#        selector: "#full",#
-}
-{#        plugins: [#
-}
-{#            "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",#
-}
-{#            "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",#
-}
-{#            "table contextmenu directionality emoticons template textcolor paste fullpage textcolor"#
-}
-{#        ],#
-}
-{#        toolbar1: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",#
-}
-{#        toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media code | inserttime preview | forecolor backcolor",#
-}
-{#        file_browser_callback: function (field_name, url, type, win) {#
-}
-    {#            var cmsURL = '/filemanager/';#
-    }
-    {#            tinymce.activeEditor.windowManager.open({#
-    }
-    {#                file: cmsURL,#
-    }
-    {#                title: 'Select an File',#
-    }
-    {#                width: 1000,  // Your dimensions may differ - toy around with them!#}
-    {#                height: 700,#
-    }
-    {#                resizable: "yes",#
-    }
-    {#                inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!#}
-    {#                close_previous: "yes"#
-    }
-    {#
-    }
-,
-    {#
-    }
-    {#                window: win,#
-    }
-    {#                input: field_name#
-    }
-    {#
-    }
-)
-    ;#
-}
-{#
-}
-#
-}
-{#
-}
-)
-;
-#
-}
-{#</script>#}
+</div>
+
 {% endraw %}
