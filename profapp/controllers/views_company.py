@@ -75,14 +75,10 @@ def load_material_details(json, company_id, article_id):
 @ok
 def update_article(json):
 
-    data = request.json
-    article = db(ArticleCompany, company_id=data['company_id'],
-                 article_id=data['article_id'])
-    article.update_article(**data['status'])
-    return redirect(url_for('company.material_details',
-                            company_id=article.company_id,
-                            article_id=article.article_id
-                            ))
+    ArticleCompany.update_article(
+        company_id=json['comp']['id'], article_id=json['article']['id'],
+        **{'status': json['article']['status']})
+    return json
 
 
 @company_bp.route('/add/')

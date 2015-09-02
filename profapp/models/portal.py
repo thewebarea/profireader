@@ -18,15 +18,18 @@ class Portal(Base, PRBase):
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
     portal_division = relationship('PortalDivision')
+    article = relationship('ArticlePortal', backref='portal',
+                           uselist=False)
     company = relationship('Company', backref='portal')
 
     def __init__(self, name=None,
                  portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
-                 company_owner_id=None, company=None):
+                 company_owner_id=None, company=None, article=None):
         self.name = name
         self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
         self.company = company
+        self.article = article
 
     @staticmethod
     def own_portal(company_id):

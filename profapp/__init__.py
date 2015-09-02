@@ -81,8 +81,9 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
 
 # TODO: OZ by OZ:   remove this function and move it to angilar (good idea to auto inject this functions to all controllers scopes)
 def init_data():
-    return "$scope.loading = true; $ok('', {}, function (data) {$scope.loading = false; $scope.data = data});  $scope._ = function (t, dict) { try { return $translate(t, dict ? dict : $scope) } catch (a) { return null }};"
+    return "$scope.loading = true; $ok('', {}, function (data) {$scope.loading = false; $scope.data = data; $scope.original_data = $.extend(true, {} , data)});  $scope._ = function (t, dict) { try { return $translate(t, dict ? dict : $scope) } catch (a) { return null }};"
 
+#TODO: OZ by OZ: add kwargs just like in url_for
 def raw_url_for(endpoint):
     appctx = globals._app_ctx_stack.top
     reqctx = globals._request_ctx_stack.top

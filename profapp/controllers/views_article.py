@@ -55,12 +55,10 @@ def load_form_update(json, article_company_id):
 
 @article_bp.route('/save/<string:article_company_id>/',
                   methods=['POST'])
-def save(article_company_id):
-    return redirect(url_for('article.details',
-                            article_id=Article.save_edited_version(
-                                g.user.id, article_company_id,
-                                **request.form.to_dict(True)).
-                            article_id))
+@ok
+def save(json, article_company_id):
+    return Article.save_edited_version(g.user.id, article_company_id,
+                                       **json).get_client_side_dict()
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])

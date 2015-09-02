@@ -10,11 +10,13 @@
         module.controller('materials_articles', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
             {{ init_data()|safe }}
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
-            $scope.url_update_status = {{ raw_url_for('company.update_article')|safe }};
+            $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
+            $scope.getData = function () {return $scope.data;};
+            $scope.afterSave = function (resp) {window.location.href = $scope.url_article_details({company_id: resp.comp.id, article_id: resp.article.id})};
         }]);
     </script>
     {% raw %}
-    <div ng-controller="materials_articles">
+    <div on-init="initOld" ng-controller="materials_articles">
     <h3>{{data.article.title}}</h3>
     <h4>Created at {{data.article.cr_tm}}</h4>
         <h4>Last modified at {{data.article.md_tm}}</h4>
@@ -23,13 +25,11 @@
         <br>
         <h4>Text</h4>
         <h5><input type="text" disabled="disabled" value="{{ data.article.long }}"></h5>
-        Current status is {{ data.article.status }}<br>
-        <form ng-on-success="{{ url_article_details({'company_id': data.comp.id, 'article_id': data.article.id}) }}" ng-ajax-action="{{ url_update_status({}) }}">
-            <input type="hidden" ng-model="data.article.company_id">
-            <input type="hidden" ng-model="data.article.article_id">
+        Current status is {{ original_data.article.status }}<br>
+        <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
             Change material status to
-            <select>
-            <option ng-repeat="stat in data.status" name="status" value="{{ stat }}">{{stat}}</option>
+            <select ng-model="data.article.status">
+            <option ng-repeat="stat in data.status">{{stat}}</option>
             </select>
             <input type="submit" value="Submit status">
         </form>
@@ -47,7 +47,7 @@
             </span>
             <input type="submit" value="Send article">
         </form>
-        <form ng-on-success="{{ url_article_details({'company_id': data.comp.id, 'article_id': data.article.id}) }}" ng-ajax-action="{{ url_update_status({}) }}">
+        <form ng-on-success="{{ url_article_details({'company_id': data.comp.id, 'article_id': data.article.id}) }}" ng-action="{{ url_update_status({}) }}">
     Publish this material at portal
             <span ng-repeat="port in data.portals">
                 <input type="hidden" ng-model="port.id">
