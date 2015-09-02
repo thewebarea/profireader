@@ -7,7 +7,7 @@ from ..models.users import User
 from utils.db_utils import db
 from .pr_base import PRBase
 from db_init import Base
-from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
+from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 
 def _Q(cls):
     return db_session.query(cls)
@@ -20,6 +20,30 @@ def _A():
 def _C():
     return db_session.query(ArticleCompany)
 
+class ArticlePortal(Base, PRBase):
+    __tablename__ = 'article_portal'
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True,
+                nullable=False)
+    cr_tm = Column(TABLE_TYPES['timestamp'])
+    article_company_id = Column(TABLE_TYPES['id_profireader'],
+                                ForeignKey('article_company.id'))
+    title = Column(TABLE_TYPES['name'], default='')
+    short = Column(TABLE_TYPES['text'], default='')
+    long = Column(TABLE_TYPES['text'], default='')
+    md_tm = Column(TABLE_TYPES['timestamp'])
+    status = Column(TABLE_TYPES['id_profireader'],
+                    default=ARTICLE_STATUS_IN_PORTAL.not_published)
+    portal_id = Column(TABLE_TYPES['id_profireader'],
+                       ForeignKey('portal.id'))
+
+    def __init__(self, article_company_id=None, title=None, short=None,
+                 long=None, status=None, portal_id=None):
+        self.article_company_id = article_company_id
+        self.title = title
+        self.short = short
+        self.long = long
+        self.status = status
+        self.portal_id = portal_id
 
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
@@ -42,6 +66,14 @@ class ArticleCompany(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     company = relationship(Company)
     editor = relationship(User)
+    portal_article = relationship('ArticlePortal',
+                                  primaryjoin="and_(ArticleCompany.id=="
+                                              "ArticlePortal."
+                                              "article_company_id, "
+                                              "ArticlePortal."
+                                              "portal_id==None)",
+                                  uselist=False,
+                                  backref='company_article')
 
     def get_client_side_dict(self, fields='id|title|short|'
                                           'long|cr_tm|md_tm|company_id|'
@@ -51,12 +83,31 @@ class ArticleCompany(Base, PRBase):
     
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
-                                   'status': 'submitted'}).save()
+                                   'status': ARTICLE_STATUS_IN_COMPANY.
+                                  submitted, 'portal_article':
+                                   ArticlePortal(title=self.title,
+                                                 short=self.short,
+                                                 long=self.long)
+                                   }).save()
 
-    def update_article(self, **kwargs):
-        self.update(**kwargs)
-        self.save()
-        return self
+        # self.portal_devision_id = portal_devision_id
+        # self.article_company_id = article_company_id
+        # self.title = title
+        # self.short = short
+        # self.long = long
+        # self.status = status
+    # def clone_for_portal(self, portal_id):
+
+    # def update_article(self, **kwargs):
+    #     for key, value in kwargs.items():
+    #         self.key = value
+    #     self.save()
+    #     return self
+
+    @staticmethod
+    def update_article(company_id, article_id, **kwargs):
+        db(ArticleCompany, company_id=company_id, id=article_id).update(
+            kwargs)
 
 class Article(Base, PRBase):
     __tablename__ = 'article'
@@ -76,7 +127,8 @@ class Article(Base, PRBase):
                         primaryjoin="and_(Article.id==ArticleCompany."
                                     "article_id, ArticleCompany."
                                     "company_id==None)",
-                        uselist=False)
+                        uselist=False,
+                        backref='article')
 
     def get_client_side_dict(self,
                              fields='id, mine|submitted.id|title|short|'
@@ -110,7 +162,7 @@ class Article(Base, PRBase):
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
         return ArticleCompany.get(article_company_id).attr(
-            kwargs).save()
+            kwargs).save().article
 
     @staticmethod
     def get_articles_for_user(user_id):
@@ -147,7 +199,7 @@ class ArticleCompanyHistory(Base, PRBase):
     article_id = Column(TABLE_TYPES['id_profireader'])
 
     def __init__(self, editor_user_id=None, company_id=None, name=None,
-                 short=None, long=None,article_company_id=None,
+                 short=None, long=None, article_company_id=None,
                  article_id=None):
         self.editor_user_id = editor_user_id
         self.company_id = company_id
@@ -156,38 +208,3 @@ class ArticleCompanyHistory(Base, PRBase):
         self.long = long
         self.article_company_id = article_company_id
         self.article_id = article_id
-
-class ArticlePortal(Base, PRBase):
-    __tablename__ = 'article_portal'
-    id = Column(TABLE_TYPES['id_profireader'], primary_key=True,
-                nullable=False)
-    cr_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
-    portal_devision_id = Column(TABLE_TYPES['id_profireader'],
-                                ForeignKey('portal_division.id'))
-    article_company_id = Column(TABLE_TYPES['id_profireader'],
-                                ForeignKey('article_company.id'))
-    title = Column(TABLE_TYPES['name'], default='')
-    short = Column(TABLE_TYPES['text'], default='')
-    long = Column(TABLE_TYPES['text'], default='')
-    md_tm = Column(TABLE_TYPES['timestamp'])
-    status = Column(TABLE_TYPES['id_profireader'], default='published')
-
-    def __init__(self, portal_devision_id=None, article_company_id=None,
-                 title=None, short=None, long=None, status=None):
-        self.portal_devision_id = portal_devision_id
-        self.article_company_id = article_company_id
-        self.title = title
-        self.short = short
-        self.long = long
-        self.status = status
-
-
-
-
-
-
-
-
-
-
-

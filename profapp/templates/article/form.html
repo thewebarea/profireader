@@ -22,8 +22,7 @@
 
 
         $scope.afterSave = function (resp) {
-            console.log(resp);
-            window.location.href = $scope.details_article({article_id: resp['article_id']})
+            window.location.href = $scope.details_article({article_id: resp['id']})
         }
 
         $scope.getData = function () {
@@ -64,7 +63,7 @@
     <div ng-if="loading">Loading...</div>
     <div ng-if="!loading">
 
-        <h2 ng-show="!data.id && company">{{ _('Create new article') }}</h2>
+        <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
         <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
             }}</h2>
