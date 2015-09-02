@@ -6,5 +6,5 @@ from ..models.portal import CompanyPortal
 
 @front_bp.route('/', methods=['GET'])
 def index():
-    return '!!!'
+    return render_template('front/index.html', articles = {})
 

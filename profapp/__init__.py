@@ -3,6 +3,8 @@ from authomatic.providers import oauth2
 from authomatic import Authomatic
 from profapp.models.users import User
 from profapp.controllers.blueprints import register as register_blueprints
+from profapp.controllers.blueprints import register_front as register_blueprints_front
+
 from flask import url_for
 from profapp.controllers.errors import csrf
 from flask.ext.bootstrap import Bootstrap
@@ -18,6 +20,7 @@ from .constants.USER_REGISTERED import REGISTERED_WITH
 from flask import globals
 import re
 from flask.ext.babel import Babel, gettext
+import jinja2
 
 
 def setup_authomatic(app):
@@ -145,12 +148,22 @@ def create_app(config='config.ProductionDevelopmentConfig', front = False):
     app = Flask(__name__)
     app.config.from_object(config)
 
+
+
     babel = Babel(app)
 
     app.before_request(setup_authomatic(app))
     app.before_request(load_user)
 
-    register_blueprints(app)
+    if front:
+        register_blueprints_front(app)
+        my_loader = jinja2.ChoiceLoader([
+            app.jinja_loader,
+            jinja2.FileSystemLoader('templates_front'),
+            ])
+        app.jinja_loader = my_loader
+    else:
+        register_blueprints(app)
 
     bootstrap.init_app(app)
     mail.init_app(app)
