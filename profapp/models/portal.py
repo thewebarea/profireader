@@ -1,5 +1,6 @@
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relationship
 from db_init import Base, db_session
 from utils.db_utils import db
 from .company import Company
@@ -16,13 +17,19 @@ class Portal(Base, PRBase):
                               ForeignKey('company.id'))
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
+    portal_division = relationship('PortalDivision')
+    article = relationship('ArticlePortal', backref='portal',
+                           uselist=False)
+    company = relationship('Company', backref='portal')
 
     def __init__(self, name=None,
                  portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
-                 company_owner_id=None):
+                 company_owner_id=None, company=None, article=None):
         self.name = name
         self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
+        self.company = company
+        self.article = article
 
     @staticmethod
     def own_portal(company_id):
@@ -92,24 +99,24 @@ class CompanyPortal(Base):
         return [Portal().query_portal(portal.portal_id) for portal in
                 comp_port] if comp_port else []
 
-class PortalDivision(Base):
+class PortalDivision(Base, PRBase):
 
     __tablename__ = 'portal_division'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
-    portal_id = Column(TABLE_TYPES['id_profireader'],
-                       ForeignKey('portal.id'))
     portal_division_type_id = Column(
         TABLE_TYPES['id_profireader'],
         ForeignKey('portal_division_type.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'],
+                       ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
-    def __init__(self, portal_id=None, portal_division_type_id=None,
-                 name=None):
-        self.portal_id = portal_id
+    def __init__(self, portal_division_type_id=None,
+                 name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id
         self.name = name
+        self.portal_id = portal_id
 
 class PortalDivisionType(Base):
 
