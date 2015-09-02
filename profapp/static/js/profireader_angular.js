@@ -60,7 +60,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 for (var i in indexes) {
                     if (typeof d[indexes[i]] !== undefined) {
                         d = d[indexes[i]];
-                        }
+                    }
                     else {
                         return g1;
                     }
@@ -74,7 +74,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
     .factory('$ok', ['$http', function ($http) {
         return function (url, data, ifok, iferror) {
-            function error (result, error_code) {
+            function error(result, error_code) {
                 if (iferror) {
                     iferror(result, error_code)
                 }
@@ -85,24 +85,25 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
             return $http.post(url, data).then(
                 function (resp) {
-
                     if (!resp || !resp['data'] || typeof resp['data'] !== 'object' || resp === null) {
                         return error('wrong response', -1);
                     }
 
-                    if (!resp['data']['ok']) {
-                        return error(resp['data']['result'], resp['data']['error_code']);
+                    resp = resp ['data'];
+
+                    if (!resp['ok']) {
+                        return error(resp['data'], resp['error_code']);
                     }
 
                     if (ifok) {
-                        ifok(resp['data']['result']);
+                        return ifok(resp['data']);
                     }
 
                 },
                 function () {
                     return error('wrong response', -1);
-                    }
-                );
+                }
+            );
         }
     }])
     .directive('dateTimestampFormat', function () {
@@ -132,160 +133,196 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             link: function (scope, element, attrs) {
                 scope.$watch(attrs.highlighter, function (nv, ov) {
                     if (nv !== ov) {
-                        // apply class
-                        element.addClass('highlight');
-                        // auto remove after some delay
-                        $timeout(function () {
-                            element.removeClass('highlight');
-                        }, 500);
+                        highlight($(element));
                     }
                 });
             }
         };
     }])
-    .directive('ngAjaxForm', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+    .directive('ngOk', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+        console.log('aaa1');
         return {
             restrict: 'A',
-            scope: true,
+            scope: {
+                ngOnsubmit: '&',
+                ngOnsuccess: '&',
+                ngOnfail: '&',
+                ngAction: '='
+            },
             link: function (scope, iElement, iAttrs, ctrl) {
-                console.log(scope, iElement, iAttrs, ctrl);
-                scope.areAllEmpty = function () {
-                    var are = true;
-                    $.each(arguments, function (ind, object) {
-                        if (are) {
-                            var ret = true;
-                            if ($.isArray(object)) {
-                                ret = object.length ? false : true;
-                            }
-                            else if ($.isPlainObject(object) && $.isEmptyObject(object)) {
-                                ret = true;
-                            }
-                            else {
-                                ret = ((object === undefined || object === false || object === null || object === 0) ? true : false);
-                            }
-                            are = ret;
-                        }
-                    });
-                    return are;
-                };
+                //console.log(scope, iElement, iAttrs, ctrl);
+                //if (iAttrs['ngValidationResult']) {
+                //    scope[iAttrs['ngValidationResult']] = {};
+                //    var s = scope[iAttrs['ngValidationResult']];
+                //
+                //    s.checking = {};
+                //    s.checked = {};
+                //
+                //    s.errors = {};
+                //    s.warnings = {};
+                //    s.dirty = true;
+                //
+                //    s.submitting = false;
+                //    s.url = null;
+                //    s.on_success_url = null;
+                //}
 
-                scope.checking = {};
-                scope.checked = {};
-                scope.data = {};
+                //iAttrs.$observe('ngAjaxAction', function(value) {
+                //    s.url = value;
+                //    });
 
-                scope.errors = {};
-                scope.warnings = {};
-                scope.dirty = true;
+                //iAttrs.$observe('ngOnSuccess', function(value) {
+                //    s.on_success_url = value;
+                //    });
 
-                scope.submitting = false;
-                scope.url = $(iElement).attr('action');
+                if (scope['ngOnsubmit']) {
+                    $(iElement).on('submit',
+                        function () {
+                            scope.$apply(function () {
+                                $('input[type=submit]', $(iElement)).prop('disabled', true);
+                                $('button[type=submit]', $(iElement)).prop('disabled', true);
 
-                $(iElement).on('submit',
-                    function () {
-                        scope.$apply(function () {
-                            scope.submitting = true;
-                            $('input[type=submit]', $(iElement)).prop('disabled', true);
-                            $('button[type=submit]', $(iElement)).prop('disabled', true);
-
-                            $ok(scope.url, scope['data']).finally(function () {
-                                scope.submitting = false;
-                                $('input[type=submit]', $(iElement)).prop('disabled', false);
-                                $('button[type=submit]', $(iElement)).prop('disabled', false);
+                                var dataToSend = scope['ngOnsubmit']()();
+                                if (dataToSend) {
+                                    $ok(scope['ngAction'], dataToSend, function (resp) {
+                                        console.log(resp);
+                                        if (scope.ngOnsuccess) {
+                                            scope.ngOnsuccess()(resp)
+                                        }
+                                    }).finally(function () {
+                                        $('input[type=submit]', $(iElement)).prop('disabled', false);
+                                        $('button[type=submit]', $(iElement)).prop('disabled', false);
+                                    });
+                                }
                             });
-
-
+                            return false;
                         });
-                        return false;
-                    });
-
-
-                $.each($('[name]', $(iElement)), function (ind, el) {
-                    $newel = $(el).clone();
-                    scope.data[$(el).attr('name')] = $(el).val();
-                    $newel.attr('ng-model', 'data.' + $newel.attr('name'));
-                    $(el).replaceWith($compile($newel)(scope))
-                });
-
-
-
-                scope.getSignificantClass = function (index, one, onw, onn) {
-
-                    if (scope.errors && !scope.areAllEmpty(scope.errors[index])) {
-                        return one;
-                    }
-                    if (scope.warnings && !scope.areAllEmpty(scope.warnings[index])) {
-                        return onw;
-                    }
-                    if (scope.notices && !scope.areAllEmpty(scope.notices[index])) {
-                        return onn;
-                    }
-                    return '';
-                };
-
-                scope.getSignificantMessage = function (index) {
-
-                    if (scope.errors && !scope.areAllEmpty(scope.errors[index])) {
-                        return scope.errors[index][0];
-                    }
-                    if (scope.warnings && !scope.areAllEmpty(scope.warnings[index])) {
-                        return scope.warnings[index][0];
-                    }
-                    if (scope.notices && !scope.areAllEmpty(scope.notices[index])) {
-                        return scope.notices[index][0]
-                    }
-                    return '';
-                };
-
-
-
-
-                scope.refresh = function () {
-                    console.log('refresh');
-                    scope.changed = getObjectsDifference(scope.checked, scope['data']);
-                    scope.check();
-                };
-
-                scope.check = _.debounce(function (d) {
-                    if (scope.areAllEmpty(scope.checking)) {
-                        console.log('scope.changed', scope.changed);
-                        scope.changed = getObjectsDifference(scope.checked, scope['data']);
-                        if (!scope.areAllEmpty(scope.changed)) {
-                            scope.checking = scope['data'];
-
-                            $http.post(scope.url, scope.checking)
-                                .then(function (fromserver) {
-                                    var resp = fromserver['data'];
-                                    if (scope.areAllEmpty(getObjectsDifference(scope.checking, scope['data']))) {
-                                        scope.errors = $.extend(true, {}, resp['errors']);
-                                        scope.warnings = $.extend(true, {}, resp['warnings']);
-                                        scope.checked = $.extend(true, {}, scope.checking);
-                                        scope.changed = {};
-                                        scope.checking = {};
-                                    }
-                                    else {
-                                        scope.checking = {};
-                                        scope.refresh();
-                                    }
-                                }, function () {
-                                    scope.checking = {};
-                                    scope.refresh();
-                                });
-                        }
-                    }
-                    else {
-                        scope.refresh();
-                    }
-                }, 500);
-                console.log(iAttrs);
-                if (iAttrs['ngAjaxFormValidate'] !== undefined) {
-                    scope.$watch('data', scope.refresh, true);
-                    scope.refresh();
                 }
-                //            scope.getTemp(iAttrs.ngCity);
+
+
+                //$.each($('[name]', $(iElement)), function (ind, el) {
+                //$newel = $(el).clone();
+                //scope.data[$(el).attr('name')] = $(el).val();
+                //$newel.attr('ng-model', 'data.' + $newel.attr('name'));
+                //$(el).replaceWith($compile($newel)(scope))
+                //});
+
+
+                //s.getSignificantClass = function (index, one, onw, onn) {
+                //
+                //    if (s.errors && !areAllEmpty(s.errors[index])) {
+                //        return one;
+                //    }
+                //    if (s.warnings && !areAllEmpty(s.warnings[index])) {
+                //        return onw;
+                //    }
+                //    if (s.notices && !areAllEmpty(s.notices[index])) {
+                //        return onn;
+                //    }
+                //    return '';
+                //};
+                //
+                //s.getSignificantMessage = function (index) {
+                //
+                //    if (s.errors && !areAllEmpty(s.errors[index])) {
+                //        return s.errors[index][0];
+                //    }
+                //    if (s.warnings && !areAllEmpty(s.warnings[index])) {
+                //        return s.warnings[index][0];
+                //    }
+                //    if (s.notices && !areAllEmpty(s.notices[index])) {
+                //        return s.notices[index][0]
+                //    }
+                //    return '';
+                //};
+                //
+                //
+                //s.refresh = function () {
+                //    s.changed = getObjectsDifference(s.checked, s['data']);
+                //    s.check();
+                //};
+                //
+                //s.check = _.debounce(function (d) {
+                //    if (areAllEmpty(s.checking)) {
+                //        console.log('s.changed', s.changed);
+                //        s.changed = getObjectsDifference(s.checked, scope['data']);
+                //        if (!areAllEmpty(s.changed)) {
+                //            s.checking = scope['data'];
+                //
+                //            $http.post($(iElement).attr('njAjaxAction'), s.checking)
+                //                .then(function (fromserver) {
+                //                    var resp = fromserver['data'];
+                //                    if (areAllEmpty(getObjectsDifference(s.checking, scope['data']))) {
+                //                        s.errors = $.extend(true, {}, resp['errors']);
+                //                        s.warnings = $.extend(true, {}, resp['warnings']);
+                //                        s.checked = $.extend(true, {}, s.checking);
+                //                        s.changed = {};
+                //                        s.checking = {};
+                //                    }
+                //                    else {
+                //                        s.checking = {};
+                //                        s.refresh();
+                //                    }
+                //                }, function () {
+                //                    s.checking = {};
+                //                    s.refresh();
+                //                });
+                //        }
+                //    }
+                //    else {
+                //        s.refresh();
+                //    }
+                //}, 500);
+                //console.log(iAttrs);
+                //if (iAttrs['ngAjaxFormValidate'] !== undefined) {
+                //    s.$watch('data', s.refresh, true);
+                //    s.refresh();
+                //}
+                //            s.getTemp(iAttrs.ngCity);
             }
-        };
+        }
+
     }]);
+
+
+areAllEmpty = function () {
+    var are = true;
+    $.each(arguments, function (ind, object) {
+        if (are) {
+            var ret = true;
+            if ($.isArray(object)) {
+                ret = object.length ? false : true;
+            }
+            else if ($.isPlainObject(object) && $.isEmptyObject(object)) {
+                ret = true;
+            }
+            else {
+                ret = ((object === undefined || object === false || object === null || object === 0) ? true : false);
+            }
+            are = ret;
+        }
+    });
+    return are;
+}
 
 None = null;
 False = false;
 True = true;
+
+
+//TODO: RP by OZ:   pls rewrite this two functions as jquery plugin
+
+function scrool($el, options) {
+    $.smoothScroll($.extend({
+        scrollElement: $el.parent(),
+        scrollTarget: $el
+    }, options ? options : {}));
+}
+
+function highlight($el) {
+    $el.addClass('highlight');
+    setTimeout(function () {
+        $el.removeClass('highlight');
+    }, 500);
+}
+

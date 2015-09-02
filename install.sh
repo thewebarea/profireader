@@ -182,8 +182,8 @@ function menu_db_user_pass {
     
     profipass=`cat secret_data.py | grep 'DB_PASSWORD' | sed -e 's/^\s*DB_PASSWORD\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
     psqlpass=$(rr 'Enter postgresql password' $profipass)
-    runsql "CREATE USER $psqluser with password '$psqlpass'" db_create
-    
+    runsql "CREATE USER $psqluser;
+ALTER USER $psqluser WITH PASSWORD '$psqlpass';" db_create
     }
 
 function menu_db_rename {

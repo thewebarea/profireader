@@ -192,6 +192,26 @@ END$$;
 ALTER FUNCTION public.row_id() OWNER TO postgres;
 
 --
+-- Name: row_id_cr_md(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION row_id_cr_md() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$    
+BEGIN
+   NEW.id = create_uuid();
+
+   NEW.cr_tm = clock_timestamp();
+   NEW.md_tm = NEW.cr_tm;
+
+   return NEW;
+
+END$$;
+
+
+ALTER FUNCTION public.row_id_cr_md() OWNER TO postgres;
+
+--
 -- Name: row_md(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -236,7 +256,8 @@ CREATE TABLE article_company (
     long text DEFAULT ''::text NOT NULL,
     article_id character varying(36) NOT NULL,
     cr_tm timestamp without time zone NOT NULL,
-    md_tm timestamp without time zone NOT NULL
+    md_tm timestamp without time zone NOT NULL,
+    status character varying(36) DEFAULT 'submitted'::character varying
 );
 
 
@@ -273,6 +294,25 @@ CREATE TABLE article_company_history (
 
 
 ALTER TABLE public.article_company_history OWNER TO pfuser;
+
+--
+-- Name: article_portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE article_portal (
+    id character varying NOT NULL,
+    cr_tm timestamp without time zone NOT NULL,
+    portal_devision_id character varying(36) NOT NULL,
+    article_company_id character varying(36) NOT NULL,
+    title character varying(200) DEFAULT ''::text NOT NULL,
+    short text DEFAULT ''::text NOT NULL,
+    long text DEFAULT ''::text NOT NULL,
+    md_tm timestamp without time zone NOT NULL,
+    status character varying(36) DEFAULT 'published'::character varying NOT NULL
+);
+
+
+ALTER TABLE public.article_portal OWNER TO postgres;
 
 --
 -- Name: company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -393,11 +433,38 @@ CREATE TABLE portal (
     id character varying(36) NOT NULL,
     name character varying(100) NOT NULL,
     portal_plan_id character varying(36) NOT NULL,
-    company_owner_id character varying(36)
+    company_owner_id character varying(36) NOT NULL
 );
 
 
 ALTER TABLE public.portal OWNER TO pfuser;
+
+--
+-- Name: portal_division; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE portal_division (
+    id character varying(36) NOT NULL,
+    cr_tm timestamp without time zone,
+    md_tm timestamp without time zone,
+    portal_id character varying(36),
+    portal_division_type_id character varying(36) NOT NULL,
+    name character varying(50) DEFAULT ''::character varying NOT NULL
+);
+
+
+ALTER TABLE public.portal_division OWNER TO pfuser;
+
+--
+-- Name: portal_division_type; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE portal_division_type (
+    id character varying(50) NOT NULL
+);
+
+
+ALTER TABLE public.portal_division_type OWNER TO pfuser;
 
 --
 -- Name: portal_plan; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -424,7 +491,6 @@ CREATE TABLE "user" (
     profireader_gender character varying(6),
     profireader_link text,
     profireader_phone character varying(20),
-    profireader_avatar_file_id character varying(36),
     about_me character varying(666),
     location character varying(64),
     password_hash character varying(128),
@@ -493,13 +559,6 @@ CREATE TABLE "user" (
 
 
 ALTER TABLE public."user" OWNER TO pfuser;
-
---
--- Name: COLUMN "user".profireader_avatar_file_id; Type: COMMENT; Schema: public; Owner: pfuser
---
-
-COMMENT ON COLUMN "user".profireader_avatar_file_id IS 'remove me!!!';
-
 
 --
 -- Name: user_company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -591,6 +650,14 @@ ALTER TABLE ONLY article_company
 
 
 --
+-- Name: article_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY article_portal
+    ADD CONSTRAINT article_portal_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: company_name_key; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -644,6 +711,22 @@ ALTER TABLE ONLY file
 
 ALTER TABLE ONLY article_company
     ADD CONSTRAINT for_one_company_one_version UNIQUE (company_id, article_id);
+
+
+--
+-- Name: portal_division_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY portal_division
+    ADD CONSTRAINT portal_division_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: portal_division_type_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY portal_division_type
+    ADD CONSTRAINT portal_division_type_pkey PRIMARY KEY (id);
 
 
 --
@@ -724,6 +807,14 @@ ALTER TABLE ONLY "user"
 
 ALTER TABLE ONLY "user"
     ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_portal_reader_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY user_portal_reader
+    ADD CONSTRAINT user_portal_reader_pkey PRIMARY KEY (id);
 
 
 --
@@ -835,6 +926,20 @@ CREATE TRIGGER id BEFORE INSERT ON company_portal FOR EACH ROW EXECUTE PROCEDURE
 
 
 --
+-- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER id_cr_md BEFORE INSERT ON portal_division FOR EACH ROW EXECUTE PROCEDURE row_id_cr_md();
+
+
+--
+-- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER id_cr_md BEFORE INSERT ON article_portal FOR EACH ROW EXECUTE PROCEDURE row_id_cr_md();
+
+
+--
 -- Name: md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
@@ -846,6 +951,20 @@ CREATE TRIGGER md_tm BEFORE INSERT OR UPDATE ON user_company FOR EACH ROW EXECUT
 --
 
 CREATE TRIGGER md_tm BEFORE UPDATE ON article_company FOR EACH ROW EXECUTE PROCEDURE row_md();
+
+
+--
+-- Name: md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER md_tm BEFORE UPDATE ON portal_division FOR EACH ROW EXECUTE PROCEDURE row_md();
+
+
+--
+-- Name: md_tm; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER md_tm BEFORE UPDATE ON article_portal FOR EACH ROW EXECUTE PROCEDURE row_md();
 
 
 --
@@ -869,6 +988,22 @@ ALTER TABLE ONLY article_company
 
 ALTER TABLE ONLY article_company
     ADD CONSTRAINT article_company_id_fkey FOREIGN KEY (company_id) REFERENCES company(id);
+
+
+--
+-- Name: article_portal_article_company_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY article_portal
+    ADD CONSTRAINT article_portal_article_company_id FOREIGN KEY (article_company_id) REFERENCES article_company(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: article_portal_portal_devision_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY article_portal
+    ADD CONSTRAINT article_portal_portal_devision_id FOREIGN KEY (portal_devision_id) REFERENCES portal_division(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -952,6 +1087,30 @@ ALTER TABLE ONLY "user"
 
 
 --
+-- Name: portal_company_owner_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_company_owner_id FOREIGN KEY (company_owner_id) REFERENCES company(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: portal_division_portal_division_type_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY portal_division
+    ADD CONSTRAINT portal_division_portal_division_type_id FOREIGN KEY (portal_division_type_id) REFERENCES portal_division_type(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: portal_division_portal_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY portal_division
+    ADD CONSTRAINT portal_division_portal_id FOREIGN KEY (portal_id) REFERENCES portal(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
 -- Name: portal_portal_plan_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
@@ -1000,6 +1159,14 @@ ALTER TABLE ONLY "user"
 
 
 --
+-- Name: user_portal_reader_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY user_portal_reader
+    ADD CONSTRAINT user_portal_reader_company_id_fkey FOREIGN KEY (company_id) REFERENCES company(id);
+
+
+--
 -- Name: user_portal_reader_plan_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
@@ -1008,11 +1175,11 @@ ALTER TABLE ONLY user_portal_reader
 
 
 --
--- Name: user_profireader_avatar_file_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+-- Name: user_portal_reader_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
-ALTER TABLE ONLY "user"
-    ADD CONSTRAINT user_profireader_avatar_file_id_fkey FOREIGN KEY (profireader_avatar_file_id) REFERENCES file(id);
+ALTER TABLE ONLY user_portal_reader
+    ADD CONSTRAINT user_portal_reader_user_id_fkey FOREIGN KEY (user_id) REFERENCES "user"(id);
 
 
 --

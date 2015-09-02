@@ -21,6 +21,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     #}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/profireader.css">
 {%- endblock styles %}
 
 {%- block head %}
@@ -29,19 +30,25 @@
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
     <link rel="icon" href="/static/favicon.gif" type="image/gif" />
 
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>
-    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.2.js"></script>
-    <script src="{{ url_for('static', filename = 'tinymce/tinymce.min.js') }}"></script>
-{#    <script src="{{ url_for('static', filename = 'image_editor/dist/cropper.js') }}"></script>#}
-    {#<script src="{{ url_for('static', filename = 'image_editor/demo/js/main.js') }}"></script>#}
-{#    <script src="/static/filemanager/angular-filemanager.min.js"></script><!-- Comment if you need to use raw source code -->#}
+{#    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>#}
+{#    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>#}
 
-{#    <script src="/static/filemanager/cached-templates.js"></script><!-- Comment if you need to use raw source code -->#}
+
     <script src="{{bootstrap_find_resource('jquery.js', cdn='jquery')}}"></script>
+    <script src="{{ url_for('static', filename = 'components/angular/angular.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'components/tinymce-dist/tinymce.jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'components/angular-ui-tinymce/src/tinymce.js') }}"></script>
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.2.js"></script>
+    {#    <script src="{{ url_for('static', filename = 'image_editor/dist/cropper.js') }}"></script>#}
+    {#<script src="{{ url_for('static', filename = 'image_editor/demo/js/main.js') }}"></script>#}
+    {#    <script src="/static/filemanager/angular-filemanager.min.js"></script><!-- Comment if you need to use raw source code -->#}
+
+    {#    <script src="/static/filemanager/cached-templates.js"></script><!-- Comment if you need to use raw source code -->#}
 {#    <script src="{{bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap')}}"></script>#}
 
     <script src="/static/js/underscore-min.js"></script>
     <script src="/static/js/profireader_angular.js"></script>
+    <script src="/static/js/jquery.smooth-scroll.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 {%- endblock head %}
 

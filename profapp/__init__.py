@@ -79,6 +79,10 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
+# TODO: OZ by OZ:   remove this function and move it to angilar (good idea to auto inject this functions to all controllers scopes)
+def init_data():
+    return "$scope.loading = true; $ok('', {}, function (data) {$scope.loading = false; $scope.data = data});  $scope._ = function (t, dict) { try { return $translate(t, dict ? dict : $scope) } catch (a) { return null }};"
+
 def raw_url_for(endpoint):
     appctx = globals._app_ctx_stack.top
     reqctx = globals._request_ctx_stack.top
@@ -165,6 +169,8 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     # read this: http://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
     app.jinja_env.globals.update(raw_url_for=raw_url_for)
+    app.jinja_env.globals.update(init_data=init_data)
+
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
     # Flask will automatically remove database sessions at the end of the
