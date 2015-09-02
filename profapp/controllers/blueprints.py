@@ -9,6 +9,7 @@ static_bp = Blueprint('static', __name__, static_url_path='')
 image_editor_bp = Blueprint('image_editor', __name__)
 company_bp = Blueprint('company', __name__)
 portal_bp = Blueprint('portal', __name__)
+front_bp = Blueprint('front', __name__)
 exception_bp = Blueprint('exception', __name__)
 
 
@@ -39,6 +40,9 @@ def register(app):
 
     from . import views_portal
     app.register_blueprint(portal_bp, url_prefix='/portal')
+
+    from . import views_front
+    app.register_blueprint(front_bp, url_prefix='/')
 
     from . import errors
     app.register_blueprint(exception_bp, url_prefix='/exception')
