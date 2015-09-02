@@ -31,13 +31,17 @@
    return true;
  };
 </script>
-{% if not companies_partners %}
-    <h3> There is no portal in this company </h3>
+    {% if not comp.portal %}
+        <h3>This company does not have portal</h3>
     {% else %}
-    <h3>Companies Partners :
-    {% for comp in companies_partners %}
-    <a href="{{ url_for('company.profile', company_id = comp.id) }}"> {{ comp.name }} </a>
-    {% endfor %}</h3>
+        {% if not companies_partners %}
+            <h3> There are no companies partners on {% for portal in comp.portal %}"{{ portal.name }}"{% endfor %} portal </h3>
+        {% else %}
+            <h3>Companies Partners :
+                {% for comp in companies_partners %}
+                    <a href="{{ url_for('company.profile', company_id = comp.id) }}"> "{{ comp.name }}" </a>
+                {% endfor %}</h3>
+        {% endif %}
     {% endif %}
 <h3>
     {% if not portals_partners %}
@@ -46,7 +50,7 @@
     This company portals-partners:
     {% for portals in portals_partners %}
 
-<a href="{{ url_for('company.profile', company_id = portals.company_owner_id) }}"> {{ portals.name }} </a>
+<a href="{{ url_for('company.profile', company_id = portals.company_owner_id) }}"> "{{ portals.name }}" </a>
 {% endfor %}{% endif %}</h3>
 {% endblock content %}
 
