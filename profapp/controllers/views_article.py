@@ -57,7 +57,8 @@ def load_form_update(json, article_company_id):
                   methods=['POST'])
 @ok
 def save(json, article_company_id):
-    return Article.save_edited_version(g.user.id, article_company_id, **json).get_client_side_dict()
+    return Article.save_edited_version(g.user.id, article_company_id,
+                                       **json).get_client_side_dict()
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])

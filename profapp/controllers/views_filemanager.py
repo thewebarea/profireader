@@ -24,19 +24,23 @@ json_result = {"result": {"success": True, "error": None}}
 
 @filemanager_bp.route('/')
 def filemanager():
-    # library = {g.user.personal_folder_file_id: {'name': 'My personal files', 'icon': current_user.gravatar(size=18)}}
+    # library = {g.user.personal_folder_file_id:
+    # {'name': 'My personal files',
+    # 'icon': current_user.gravatar(size=18)}}
     library = {
-        g.user.personal_folder_file_id: {'name': 'My personal files',
-                                         'icon': current_user.profireader_small_avatar_url}}
+        g.user.personal_folder_file_id: {
+            'name': 'My personal files',
+            'icon': current_user.profireader_small_avatar_url}}
     for company in g.user.employer:
         library[company.journalist_folder_file_id] = {'name': "%s materisals" % (company.name,), 'icon': ''}
         library[company.corporate_folder_file_id] = {'name': "%s corporate files" % (company.name,), 'icon': ''}
 
     options = {'mime_allow': '.*', 'mime_deny': '^directory$', 'max_choose': 0, 'on_choose': ''}
-    if request.args['calledby'] == 'tinymce_file_browse_image':
-        options['mime_allow'] = '^image/.*'
-        options['max_choose'] = 1
-        options['on_choose'] = 'parent.fileSelected'
+    if 'calledby' in request.args:
+        if request.args['calledby'] == 'tinymce_file_browse_image':
+            options['mime_allow'] = '^image/.*'
+            options['max_choose'] = 1
+            options['on_choose'] = 'parent.fileSelected'
 
     return render_template('filemanager.html', library=library, **options)
 
@@ -52,7 +56,8 @@ def list(json, parent_id=None):
 @ok
 # @parent_folder
 def createdir(json, parent_id=None):
-    return File.createdir(name=request.json['params']['name'], parent_id=parent_id)
+    return File.createdir(name=request.json['params']['name'],
+                          parent_id=parent_id)
 
 
 @filemanager_bp.route('/upload/', methods=['POST'])
@@ -78,8 +83,10 @@ def upload(json):
 #     for tmp_file in os.listdir(root# ):
 #         st = os.stat(root+'/'+filenam# e)
 #         file_db.name = filena# me
-#         file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename# ))
-#         file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename# ))
+#         file_db.md_tm = time.ctime(
+# os.path.getmtime(root+'/'+filename# ))
+#         file_db.ac_tm = time.ctime(
+# os.path.getctime(root+'/'+filename# ))
 #         file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime(# ))
 #         file_db.size = st[ST_SIZ# E]
 #         if os.path.isfile(root+'/'+tmp_file# ):
@@ -108,11 +115,14 @@ def upload(json):
 @filemanager_bp.route('/get/<string:file_id>')
 def get(file_id):
     image_query = file_query(file_id, File)
-    image_query_content = db_session.query(FileContent).filter_by(id=file_id).first()
+    image_query_content = db_session.query(FileContent).filter_by(
+        id=file_id).first()
     response = make_response()
     response.headers['Content-Type'] = image_query.mime
-    response.headers['Content-Disposition'] = 'filename=%s' % image_query.name
-    return send_file(BytesIO(image_query_content.content), mimetype=image_query.mime, as_attachment=False)
+    response.headers['Content-Disposition'] = 'filename=%s' % \
+                                              image_query.name
+    return send_file(BytesIO(image_query_content.content),
+                     mimetype=image_query.mime, as_attachment=False)
 
 
 def file_query(file_id, table):

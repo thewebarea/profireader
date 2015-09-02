@@ -45,36 +45,40 @@ def materials(company_id):
 @login_required
 def material_details(company_id, article_id):
 
+    return render_template('company/material_details.html',
+                           comp=Company.get(company_id).
+                           get_client_side_dict()
+                           )
+
+@company_bp.route('/materials/<string:company_id>/<string:article_id>/',
+                  methods=['POST'])
+@ok
+def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id).\
         to_dict('id, title,short, cr_tm, md_tm, '
                 'company_id, status, long,'
                 'editor_user_id, company.name')
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
         article['status'])
-    return render_template('company/material_details.html',
-                           comp=Company.get(company_id).
-                           get_client_side_dict(),
-                           article=article,
-                           status=status,
-                           portals=[port.to_dict('id, name') for port in
-                                    CompanyPortal.show_portals(
-                                        company_id) if port]
-                           )
+
+    return {'article': article, 'status': status, 'portals':
+            [port.to_dict('id, name, '
+                          'portal_division.name')
+             for port in
+             CompanyPortal.show_portals(company_id) if port],
+            'comp': Company.get(company_id).to_dict('id, employee.id|'
+                                                    'profireader_name')}
+
 
 @company_bp.route('/update_article/', methods=['POST'])
 @login_required
-def update_article():
+@ok
+def update_article(json):
 
-    data = request.form
-    print(data)
-    print(request.json)
-    article = db(ArticleCompany, company_id=data['company_id'],
-                 article_id=data['article_id'])
-    article.update_article(**data['status'])
-    return redirect(url_for('company.material_details',
-                            company_id=article.company_id,
-                            article_id=article.article_id
-                            ))
+    ArticleCompany.update_article(
+        company_id=json['comp']['id'], article_id=json['article']['id'],
+        **{'status': json['article']['status']})
+    return json
 
 
 @company_bp.route('/add/')
@@ -106,7 +110,7 @@ def confirm_add():
 def profile(company_id):
     comp = Company().query_company(company_id=company_id)
     user_rights = Company().query_employee(comp_id=company_id)
-    image = url_for('filemanager.get', id=comp.logo_file) if \
+    image = url_for('filemanager.get', file_id=comp.logo_file) if \
         comp.logo_file else ''
 
     return render_template('company/company_profile.html',
@@ -120,6 +124,7 @@ def profile(company_id):
 @check_rights(**Right.p(''))
 @login_required
 def employees(comp_id):
+
     company = Company()
     company_user_rights = Right().show_rights(comp_id)
     curr_user = {g.user_dict['id']: company_user_rights[user] for user
