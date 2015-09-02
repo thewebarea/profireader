@@ -41,8 +41,11 @@ def register(app):
     from . import views_portal
     app.register_blueprint(portal_bp, url_prefix='/portal')
 
+    from . import errors
+    app.register_blueprint(exception_bp, url_prefix='/exception')
+
+def register_front(app):
+
     from . import views_front
     app.register_blueprint(front_bp, url_prefix='/')
 
-    from . import errors
-    app.register_blueprint(exception_bp, url_prefix='/exception')

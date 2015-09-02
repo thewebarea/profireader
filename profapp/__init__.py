@@ -140,7 +140,7 @@ class AnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnonymousUser
 
 
-def create_app(config='config.ProductionDevelopmentConfig'):
+def create_app(config='config.ProductionDevelopmentConfig', front = False):
     app = Flask(__name__)
     app.config.from_object(config)
 
