@@ -1,9 +1,7 @@
 <!-- Navigation -->
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
-{#        <?php#}
-{#        include("social.php");#}
-{#        ?>#}
+    {% include 'front/social.html' %}
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
@@ -21,11 +19,11 @@
             <ul class="nav navbar-nav">
                 {% for division in portal.divisions %}
                 <li>
-                    <a href="#">{{ division.name }}</a>
+                    <a href="/{{ division.name }}/">{{ division.name }}</a>
                 </li>
                 {% endfor %}
                 <li>
-                    <a href="#">{{ _('About us') }}</a>
+                    <a href="?about">{{ _('About us') }}</a>
                 </li>
             </ul>
         </div>

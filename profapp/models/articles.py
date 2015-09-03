@@ -38,16 +38,24 @@ class ArticlePortal(Base, PRBase):
     short = Column(TABLE_TYPES['text'], default='')
     long = Column(TABLE_TYPES['text'], default='')
     md_tm = Column(TABLE_TYPES['timestamp'])
+    publishing_tm = Column(TABLE_TYPES['timestamp'])
+
     status = Column(TABLE_TYPES['id_profireader'],
                     default=ARTICLE_STATUS_IN_PORTAL.not_published)
+
     portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                 ForeignKey('portal_division.id'))
 
     division = relationship(PortalDivision)
 
+    company = relationship(Company, secondary = 'article_company',
+                           primaryjoin="ArticlePortal.article_company_id == ArticleCompany.id",
+                           secondaryjoin="ArticleCompany.company_id == Company.id", viewonly=True, uselist=False)
+
+
     def get_client_side_dict(self, fields='id|title|short|'
                                           'long|cr_tm|md_tm|'
-                                          'status'):
+                                          'status|publishing_tm, company.id|name'):
         return self.to_dict(fields)
 
     def __init__(self, article_company_id=None, title=None, short=None,
