@@ -49,3 +49,7 @@ def register_front(app):
     from . import views_front
     app.register_blueprint(front_bp, url_prefix='/')
 
+
+
+
+

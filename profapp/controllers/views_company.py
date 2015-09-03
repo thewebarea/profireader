@@ -63,7 +63,7 @@ def load_material_details(json, company_id, article_id):
 
     return {'article': article, 'status': status, 'portals':
             [port.to_dict('id, name, '
-                          'portal_division.name')
+                          'divisions.name')
              for port in
              CompanyPortal.show_portals(company_id) if port],
             'comp': Company.get(company_id).to_dict('id, employee.id|'

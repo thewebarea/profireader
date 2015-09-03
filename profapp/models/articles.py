@@ -3,11 +3,13 @@ from sqlalchemy.orm import relationship
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from db_init import db_session
 from ..models.company import Company
+from ..models.portal import PortalDivision
 from ..models.users import User
 from utils.db_utils import db
 from .pr_base import PRBase
 from db_init import Base
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
+
 
 def _Q(cls):
     return db_session.query(cls)
@@ -19,6 +21,11 @@ def _A():
 
 def _C():
     return db_session.query(ArticleCompany)
+
+
+def _P():
+    return db_session.query(ArticlePortal)
+
 
 class ArticlePortal(Base, PRBase):
     __tablename__ = 'article_portal'
@@ -33,17 +40,25 @@ class ArticlePortal(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'],
                     default=ARTICLE_STATUS_IN_PORTAL.not_published)
-    portal_id = Column(TABLE_TYPES['id_profireader'],
-                       ForeignKey('portal.id'))
+    portal_division_id = Column(TABLE_TYPES['id_profireader'],
+                                ForeignKey('portal_division.id'))
+
+    division = relationship(PortalDivision)
+
+    def get_client_side_dict(self, fields='id|title|short|'
+                                          'long|cr_tm|md_tm|'
+                                          'status'):
+        return self.to_dict(fields)
 
     def __init__(self, article_company_id=None, title=None, short=None,
-                 long=None, status=None, portal_id=None):
+                 long=None, status=None, portal_division_id=None):
         self.article_company_id = article_company_id
         self.title = title
         self.short = short
         self.long = long
         self.status = status
-        self.portal_id = portal_id
+        self.portal_division_id = portal_division_id
+
 
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
@@ -70,8 +85,7 @@ class ArticleCompany(Base, PRBase):
                                   primaryjoin="and_(ArticleCompany.id=="
                                               "ArticlePortal."
                                               "article_company_id, "
-                                              "ArticlePortal."
-                                              "portal_id==None)",
+                                              ")",
                                   uselist=False,
                                   backref='company_article')
 
@@ -80,14 +94,14 @@ class ArticleCompany(Base, PRBase):
                                           'article_id|'
                                           'status, company.name'):
         return self.to_dict(fields)
-    
+
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
                                    'status': ARTICLE_STATUS_IN_COMPANY.
                                   submitted, 'portal_article':
-                                   ArticlePortal(title=self.title,
-                                                 short=self.short,
-                                                 long=self.long)
+                                       ArticlePortal(title=self.title,
+                                                     short=self.short,
+                                                     long=self.long)
                                    }).save()
 
         # self.portal_devision_id = portal_devision_id
@@ -96,6 +110,7 @@ class ArticleCompany(Base, PRBase):
         # self.short = short
         # self.long = long
         # self.status = status
+
     # def clone_for_portal(self, portal_id):
 
     # def update_article(self, **kwargs):
@@ -108,6 +123,7 @@ class ArticleCompany(Base, PRBase):
     def update_article(company_id, article_id, **kwargs):
         db(ArticleCompany, company_id=company_id, id=article_id).update(
             kwargs)
+
 
 class Article(Base, PRBase):
     __tablename__ = 'article'
@@ -143,21 +159,22 @@ class Article(Base, PRBase):
         article = Article(mine=ArticleCompany(editor_user_id=user_id,
                                               company_id=None,
                                               **kwargs),
-                                              author_user_id=user_id)
+                          author_user_id=user_id)
         article.save()
         return article
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
-# TODO: AA by OZ:    .filter(user_id has to be employee in company and
-# TODO: must have rights to submit article to this company)
+        # TODO: AA by OZ:    .filter(user_id has to be employee in company and
+        # TODO: must have rights to submit article to this company)
         return [x.to_dict('id,name') for x in db(Company)
-                .filter(~db(ArticleCompany).filter_by(
-                        company_id=Company.id,
-                        article_id=article_id).exists())
-                .filter(Company.name.ilike(
-                        "%" + searchtext + "%")).all()]
-# article is NOT published yet in company
+            .filter(~db(ArticleCompany).filter_by(
+            company_id=Company.id,
+            article_id=article_id).exists())
+            .filter(Company.name.ilike(
+            "%" + searchtext + "%")).all()]
+
+    # article is NOT published yet in company
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
@@ -167,6 +184,11 @@ class Article(Base, PRBase):
     @staticmethod
     def get_articles_for_user(user_id):
         return _A().filter_by(author_user_id=user_id).all()
+
+    @staticmethod
+    def get_articles_for_portal(user_id, portal_division_id):
+        return _P().filter_by(portal_division_id=portal_division_id, status=ARTICLE_STATUS_IN_PORTAL.published).all()
+        # return _P().all()
 
     # @staticmethod
     # def user_articles(user_id=None, before_id=None):
@@ -182,9 +204,9 @@ class Article(Base, PRBase):
         articles = _C().filter_by(company_id=company_id).all()
         return articles if articles else []
 
-     # for article in articles:
-     #     article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.\
-     #         can_user_change_status_to(article.status)
+        # for article in articles:
+        #     article.possible_new_statuses = ARTICLE_STATUS_IN_COMPANY.\
+        #         can_user_change_status_to(article.status)
 
 
 class ArticleCompanyHistory(Base, PRBase):

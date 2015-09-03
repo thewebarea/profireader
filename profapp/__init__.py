@@ -106,6 +106,12 @@ def raw_url_for(endpoint):
                            " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
 
 
+def pre(value):
+    res = []
+    for k in dir(value):
+        res.append('%r %r\n' % (k, getattr(value, k)))
+    return '<pre>' + '\n'.join(res) + '</pre>'
+
 mail = Mail()
 moment = Moment()
 bootstrap = Bootstrap()
@@ -184,6 +190,8 @@ def create_app(config='config.ProductionDevelopmentConfig', front = False):
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
     app.jinja_env.globals.update(raw_url_for=raw_url_for)
     app.jinja_env.globals.update(init_data=init_data)
+    app.jinja_env.globals.update(pre=pre)
+
 
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
