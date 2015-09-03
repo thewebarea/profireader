@@ -2,6 +2,7 @@ from .blueprints import front_bp
 from flask import render_template, request, url_for, redirect, g
 from ..models.articles import Article
 from ..models.portal import CompanyPortal, PortalDivision, PortalDivisionType, Portal
+from db_init import db_session, Base
 
 
 
@@ -11,6 +12,17 @@ def index():
     division = PortalDivision.get(pid)
     portal = Portal.get(division.portal_id)
     articles = Article.get_articles_for_portal(user_id = g.user_dict['id'], portal_division_id = pid)
+    return render_template('front/index.html',
+                           articles = {a.id:a.get_client_side_dict() for a in articles},
+                           division = division.get_client_side_dict(),
+                           portal = portal.get_client_side_dict())
+
+
+@front_bp.route('<string:division_name>/', methods=['GET'])
+def division(division_name):
+    division = db_session().query(PortalDivision).filter_by(name = division_name).one()
+    portal = Portal.get(division.portal_id)
+    articles = Article.get_articles_for_portal(user_id = g.user_dict['id'], portal_division_id = division.id)
     return render_template('front/index.html',
                            articles = {a.id:a.get_client_side_dict() for a in articles},
                            division = division.get_client_side_dict(),
