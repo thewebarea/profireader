@@ -18,7 +18,12 @@ class Portal(Base, PRBase):
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
 
+    portal_layout_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('portal_layout.id'))
+
     divisions = relationship('PortalDivision')
+
+    layout = relationship('PortalLayout')
 
     company = relationship('Company', backref='portal')
 
@@ -31,7 +36,7 @@ class Portal(Base, PRBase):
         self.company = company
         self.article = article
 
-    def get_client_side_dict(self, fields='id|name, divisions.*'):
+    def get_client_side_dict(self, fields='id|name, divisions.*, layout.*'):
         return self.to_dict(fields)
 
     @staticmethod
@@ -53,6 +58,16 @@ class PortalPlan(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
     name = Column(TABLE_TYPES['name'], nullable=False)
+
+    def __init__(self, name=None):
+        self.name = name
+
+class PortalLayout(Base, PRBase):
+    __tablename__ = 'portal_layout'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False,
+                primary_key=True)
+    name = Column(TABLE_TYPES['name'], nullable=False)
+    path = Column(TABLE_TYPES['name'], nullable=False)
 
     def __init__(self, name=None):
         self.name = name
@@ -128,7 +143,7 @@ class PortalDivisionType(Base, PRBase):
     id = Column(TABLE_TYPES['short_name'], primary_key=True)
 
 
-class UserPortalReader(Base):
+class UserPortalReader(Base, PRBase):
     __tablename__ = 'user_portal_reader'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     user_id = Column(TABLE_TYPES['id_profireader'],
