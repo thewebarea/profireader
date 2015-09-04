@@ -100,7 +100,7 @@ class ProductionDevelopmentConfig(Config):
     password = os.getenv('PRODUCTION_SERVER_DB_PASSWORD', Config.password)
     db_name = os.getenv('PRODUCTION_SERVER_DB_NAME', Config.database)
 
-    #SERVER_NAME = os.getenv('PRODUCTION_SERVER_NAME', Config.SERVER_NAME)
+    SERVER_NAME = os.getenv('PRODUCTION_SERVER_NAME', Config.SERVER_NAME)
 
     # Define production database
     SQLALCHEMY_DATABASE_URI = \
