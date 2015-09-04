@@ -235,7 +235,7 @@ CREATE FUNCTION row_publishing_tm_if_null() RETURNS trigger
     LANGUAGE plpgsql
     AS $$BEGIN
 
-NEW.publishing_tm = (case when NEW.publishing_tm then clock_timestamp() else NEW.publishing_tm end);
+NEW.publishing_tm = (case when NEW.publishing_tm IS NULL then clock_timestamp() else NEW.publishing_tm end);
 RETURN NEW;
 
 END$$;
@@ -312,7 +312,7 @@ CREATE TABLE article_company_history (
 ALTER TABLE public.article_company_history OWNER TO pfuser;
 
 --
--- Name: article_portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: article_portal; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 CREATE TABLE article_portal (
@@ -325,11 +325,12 @@ CREATE TABLE article_portal (
     md_tm timestamp without time zone NOT NULL,
     status character varying(36) DEFAULT 'not_published'::character varying NOT NULL,
     portal_division_id character varying(36),
-    publishing_tm timestamp without time zone
+    publishing_tm timestamp without time zone DEFAULT clock_timestamp() NOT NULL,
+    portal_id character varying(36)
 );
 
 
-ALTER TABLE public.article_portal OWNER TO postgres;
+ALTER TABLE public.article_portal OWNER TO pfuser;
 
 --
 -- Name: company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -529,7 +530,8 @@ CREATE TABLE portal (
     id character varying(36) NOT NULL,
     name character varying(100) NOT NULL,
     portal_plan_id character varying(36) NOT NULL,
-    company_owner_id character varying(36) NOT NULL
+    company_owner_id character varying(36) NOT NULL,
+    portal_layout_id character varying(36) DEFAULT '55e99785-bda1-4001-922f-ab974923999a'::character varying NOT NULL
 );
 
 
@@ -563,6 +565,33 @@ CREATE TABLE portal_division_type (
 ALTER TABLE public.portal_division_type OWNER TO pfuser;
 
 --
+-- Name: TABLE portal_division_type; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE portal_division_type IS 'persistent';
+
+
+--
+-- Name: portal_layout; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE portal_layout (
+    id character varying(36) NOT NULL,
+    name character varying(50) NOT NULL,
+    path character varying DEFAULT 'bird/'::character varying
+);
+
+
+ALTER TABLE public.portal_layout OWNER TO pfuser;
+
+--
+-- Name: TABLE portal_layout; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE portal_layout IS 'persistent';
+
+
+--
 -- Name: portal_plan; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -573,6 +602,13 @@ CREATE TABLE portal_plan (
 
 
 ALTER TABLE public.portal_plan OWNER TO pfuser;
+
+--
+-- Name: TABLE portal_plan; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE portal_plan IS 'persistent';
+
 
 --
 -- Name: user; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -760,7 +796,7 @@ ALTER TABLE ONLY article_company
 
 
 --
--- Name: article_portal_id_key; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: article_portal_id_key; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 ALTER TABLE ONLY article_portal
@@ -768,7 +804,7 @@ ALTER TABLE ONLY article_portal
 
 
 --
--- Name: article_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: article_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 ALTER TABLE ONLY article_portal
@@ -869,6 +905,14 @@ ALTER TABLE ONLY portal_division
 
 ALTER TABLE ONLY portal_division_type
     ADD CONSTRAINT portal_division_type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: portal_layout_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY portal_layout
+    ADD CONSTRAINT portal_layout_pkey PRIMARY KEY (id);
 
 
 --
@@ -1068,6 +1112,13 @@ CREATE TRIGGER id BEFORE INSERT ON company_portal FOR EACH ROW EXECUTE PROCEDURE
 
 
 --
+-- Name: id; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER id BEFORE INSERT ON portal_layout FOR EACH ROW EXECUTE PROCEDURE row_id();
+
+
+--
 -- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
@@ -1075,7 +1126,7 @@ CREATE TRIGGER id_cr_md BEFORE INSERT ON portal_division FOR EACH ROW EXECUTE PR
 
 
 --
--- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
 CREATE TRIGGER id_cr_md BEFORE INSERT ON article_portal FOR EACH ROW EXECUTE PROCEDURE row_id_cr_md();
@@ -1103,17 +1154,10 @@ CREATE TRIGGER md_tm BEFORE UPDATE ON portal_division FOR EACH ROW EXECUTE PROCE
 
 
 --
--- Name: md_tm; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
 CREATE TRIGGER md_tm BEFORE UPDATE ON article_portal FOR EACH ROW EXECUTE PROCEDURE row_md();
-
-
---
--- Name: publishing_tm; Type: TRIGGER; Schema: public; Owner: pfuser
---
-
-CREATE TRIGGER publishing_tm BEFORE INSERT ON company_portal FOR EACH ROW EXECUTE PROCEDURE row_publishing_tm_if_null();
 
 
 --
@@ -1140,7 +1184,7 @@ ALTER TABLE ONLY article_company
 
 
 --
--- Name: article_portal_article_company_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: article_portal_article_company_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY article_portal
@@ -1148,11 +1192,19 @@ ALTER TABLE ONLY article_portal
 
 
 --
--- Name: article_portal_portal_division_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: article_portal_portal_division_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY article_portal
     ADD CONSTRAINT article_portal_portal_division_id_fkey FOREIGN KEY (portal_division_id) REFERENCES portal_division(id);
+
+
+--
+-- Name: article_portal_portal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY article_portal
+    ADD CONSTRAINT article_portal_portal_id_fkey FOREIGN KEY (portal_id) REFERENCES portal(id);
 
 
 --
@@ -1273,6 +1325,14 @@ ALTER TABLE ONLY portal_division
 
 ALTER TABLE ONLY portal_division
     ADD CONSTRAINT portal_division_portal_id_fkey FOREIGN KEY (portal_id) REFERENCES portal(id);
+
+
+--
+-- Name: portal_portal_layout_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_portal_layout_id FOREIGN KEY (portal_layout_id) REFERENCES portal_layout(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -1407,6 +1467,28 @@ INSERT INTO "group" VALUES ('unconfirmed');
 INSERT INTO "group" VALUES ('member');
 INSERT INTO "group" VALUES ('god');
 INSERT INTO "group" VALUES ('banned');
+
+
+--
+-- Data for Name: portal_division_type; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_division_type VALUES ('news');
+INSERT INTO portal_division_type VALUES ('events');
+
+
+--
+-- Data for Name: portal_layout; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_layout VALUES ('55e99785-bda1-4001-922f-ab974923999a', 'bird', 'bird/');
+
+
+--
+-- Data for Name: portal_plan; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_plan VALUES ('55dcb92a-6708-4001-acca-b94c96260506', 'free');
 
 
 --
