@@ -7,8 +7,8 @@ from .company import Company
 from .pr_base import PRBase
 from ..controllers.has_right import has_right
 
-
 class Portal(Base, PRBase):
+
     __tablename__ = 'portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -17,9 +17,9 @@ class Portal(Base, PRBase):
                               ForeignKey('company.id'))
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
-
-    divisions = relationship('PortalDivision')
-
+    divisions = relationship('PortalDivision', backref='portal')
+    article = relationship('ArticlePortal', backref='portal',
+                           uselist=False)
     company = relationship('Company', backref='portal')
 
     def __init__(self, name=None,
@@ -40,15 +40,15 @@ class Portal(Base, PRBase):
             ret = db(Portal, company_owner_id=company_id).one()
             return ret
         except:
-            pass
+            return []
 
     @staticmethod
     def query_portal(portal_id):
         ret = db(Portal, id=portal_id).one()
         return ret
 
-
 class PortalPlan(Base, PRBase):
+
     __tablename__ = 'portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -57,8 +57,8 @@ class PortalPlan(Base, PRBase):
     def __init__(self, name=None):
         self.name = name
 
+class CompanyPortal(Base):
 
-class CompanyPortal(Base, PRBase):
     __tablename__ = 'company_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -91,6 +91,7 @@ class CompanyPortal(Base, PRBase):
 
     @staticmethod
     def show_companies_on_my_portal(company_id):
+
         portal = Portal().own_portal(company_id)
         return CompanyPortal().all_companies_on_portal(portal.id) if \
             portal else []
@@ -101,8 +102,8 @@ class CompanyPortal(Base, PRBase):
         return [Portal().query_portal(portal.portal_id) for portal in
                 comp_port] if comp_port else []
 
-
 class PortalDivision(Base, PRBase):
+
     __tablename__ = 'portal_division'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     cr_tm = Column(TABLE_TYPES['timestamp'])
@@ -114,21 +115,19 @@ class PortalDivision(Base, PRBase):
                        ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
-    portal = relationship(Portal)
-
     def __init__(self, portal_division_type_id=None,
                  name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id
         self.name = name
         self.portal_id = portal_id
 
+class PortalDivisionType(Base):
 
-class PortalDivisionType(Base, PRBase):
     __tablename__ = 'portal_division_type'
     id = Column(TABLE_TYPES['short_name'], primary_key=True)
 
-
 class UserPortalReader(Base):
+
     __tablename__ = 'user_portal_reader'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     user_id = Column(TABLE_TYPES['id_profireader'],
