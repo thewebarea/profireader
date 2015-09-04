@@ -202,8 +202,10 @@ class Article(Base, PRBase):
         return _A().filter_by(author_user_id=user_id).all()
 
     @staticmethod
-    def get_articles_for_portal(user_id, portal_division_id):
-        return _P().order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')).filter_by(portal_division_id=portal_division_id, status=ARTICLE_STATUS_IN_PORTAL.published).all()
+    def get_articles_for_portal(user_id, portal_division_id, stext = '', page = 1, perpage = 3):
+        return _P().order_by('publishing_tm').\
+            filter(text(' "publishing_tm" < clock_timestamp() ')).\
+            filter_by(portal_division_id=portal_division_id, status=ARTICLE_STATUS_IN_PORTAL.published).all()
         # return _P().all()
 
 
