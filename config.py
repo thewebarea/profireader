@@ -1,6 +1,7 @@
 import os
 import secret_data
 
+
 def database_uri(host, username, password, db_name):
     return 'postgresql+psycopg2://{username}:{password}@{host}/{db_name}'. \
         format(**{'db_name': db_name,
@@ -122,6 +123,7 @@ class ProductionDevelopmentConfig(Config):
 
         # Statement for enabling the development environment
         DEBUG = True
+
 
 class TestingConfig(Config):
     # Statement for enabling the development environment

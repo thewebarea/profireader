@@ -12,12 +12,13 @@ from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-
+from utils.db_utils import db
 from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase
+from sqlalchemy.ext.associationproxy import association_proxy
 
 
 class User(Base, UserMixin, PRBase):
@@ -35,10 +36,6 @@ class User(Base, UserMixin, PRBase):
     profireader_phone = Column(TABLE_TYPES['phone'])
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
-    #companies = relationship('Company', backref='owner')
-    #user_right_in_company = relationship('UserCompany', backref='user')
-
-    # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False)
@@ -53,8 +50,6 @@ class User(Base, UserMixin, PRBase):
     profireader_small_avatar_url = \
         Column(TABLE_TYPES['avatar_url'],
                nullable=False, default='/static/no_avatar_small.png')
-    #avatar_hash = Column(TABLE_TYPES['avatar_hash'])
-
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
     email_conf_token = Column(TABLE_TYPES['token'])
@@ -63,6 +58,8 @@ class User(Base, UserMixin, PRBase):
     pass_reset_conf_tm = Column(TABLE_TYPES['timestamp'])
 
     # registered_via = Column(_T['REGISTERED_VIA'])
+
+    employers = relationship('Company', secondary='user_company')
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['profireader', 'google', 'facebook', 'linkedin', 'twitter', 'microsoft', 'yahoo']
@@ -127,10 +124,13 @@ class User(Base, UserMixin, PRBase):
     yahoo_link = Column(TABLE_TYPES['link'])
     yahoo_phone = Column(TABLE_TYPES['phone'])
 
+# get all users in company : company.employees
+# get all users companies : user.employers
+
     def __init__(self,
                  companies=[],
-                 fk_user_right_in_company=None,
                  user_right_in_company=[],
+                 employers=None,
                  PROFIREADER_ALL=SOC_NET_NONE['profireader'],
                  GOOGLE_ALL=SOC_NET_NONE['google'],
                  FACEBOOK_ALL=SOC_NET_NONE['facebook'],
@@ -150,8 +150,7 @@ class User(Base, UserMixin, PRBase):
                  pass_reset_key=None,
                  pass_reset_conf_tm=None,
                  ):
-        self.companies = companies
-        self.fk_user_right_in_company = fk_user_right_in_company
+        self.employers = employers
         self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['email']
         self.profireader_first_name = PROFIREADER_ALL['first_name']
@@ -228,6 +227,11 @@ class User(Base, UserMixin, PRBase):
         self.yahoo_gender = YAHOO_ALL['gender']
         self.yahoo_link = YAHOO_ALL['link']
         self.yahoo_phone = YAHOO_ALL['phone']
+
+    @staticmethod
+    def user_query(user_id):
+        ret = db(User, id=user_id).one()
+        return ret
 
     @property
     def banned(self):
@@ -410,7 +414,6 @@ class User(Base, UserMixin, PRBase):
         content = passed_file.stream.read(-1)
 
         file = File(
-            author=self.profireader_name,
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)
@@ -418,7 +421,6 @@ class User(Base, UserMixin, PRBase):
             file.upload(content=content).get_url()
 
         file = File(
-            author=self.profireader_name,
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)

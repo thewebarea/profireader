@@ -1,9 +1,10 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
+from sqlalchemy import Column, Integer, ForeignKey, String, Binary, \
+    Float, TIMESTAMP, UniqueConstraint
 from db_init import Base, db_session
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from utils.db_utils import db
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from flask import url_for
 
 
@@ -15,21 +16,27 @@ class File(Base):
     mime = Column(String(30), default='text/plain', nullable=False)
     description = Column(TABLE_TYPES['text'], default='', nullable=False)
     copyright = Column(TABLE_TYPES['text'], default='', nullable=False)
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
-    author_name = Column(TABLE_TYPES['name'], default='', nullable=False)
+    company_id = Column(TABLE_TYPES['id_profireader'],
+                        ForeignKey('company.id'),
+                        nullable=False)
     ac_count = Column(Integer, default=0, nullable=False)
     size = Column(Integer, default=0, nullable=False)
-    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    author_user_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('user.id'),
+                            nullable=False)
     cr_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     md_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     ac_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
 
-    UniqueConstraint('name', 'parent_id', name='inique_name_in_folder')
+    UniqueConstraint('name', 'parent_id', name='unique_name_in_folder')
+
+    owner = relationship('User',
+                         backref=backref('files', lazy='dynamic'),
+                         foreign_keys='File.author_user_id')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
-                 company_id=None, author_user_id=None, copyright='',
-                 author=''):
+                 company_id=None, author_user_id=None):
 
         self.parent_id = parent_id
         self.name = name
@@ -44,17 +51,21 @@ class File(Base):
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
-                                self.name, self.mime, self.id, self.parent_id)
+            self.name, self.mime, self.id, self.parent_id)
 
+    @staticmethod
     def is_directory(file_id):
         return db(File, id=file_id)[0].mime == 'directory'
 
+    @staticmethod
     def is_cropable(file):
         return File.is_graphics(file)
 
+    @staticmethod
     def is_graphics(file):
         return re.match('^image/.*', file.mime)
 
+    @staticmethod
     def list(parent_id=None):
         return list({'size': file.size, 'name': file.name, 'id': file.id,
                                 'cropable': True if File.is_cropable(file) else False,
@@ -63,8 +74,10 @@ class File(Base):
                                         for file in db(File, File.parent_id == parent_id))
 
     @staticmethod
-    def createdir(parent_id=None, name=None, author_user_id=None, company_id=None, copyright='', author=''):
-        f = File(parent_id=parent_id, author_user_id=author_user_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
+    def createdir(parent_id=None, name=None, author_user_id=None,
+                  company_id=None, copyright='', author=''):
+        f = File(parent_id=parent_id, author_user_id=author_user_id,
+                 name=name, size=0, company_id=company_id, mime='directory')
         db_session.add(f)
         db_session.commit()
         return f.id
@@ -94,7 +107,9 @@ class FileContent(Base):
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file_content = relationship('File', backref='file_information')
+    file_content = relationship('File',
+                                uselist=False,
+                                backref='file_all_content')
 
     def __init__(self, file_content=None, content=None):
         self.file_content = file_content

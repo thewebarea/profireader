@@ -1,25 +1,29 @@
 from .blueprints import portal_bp
-from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, UserCompanyRight, Right
-# from phonenumbers import NumberParseException
-from .errors import SubscribeToOwn
-#from ..constants.USER_ROLES import RIGHTS
+from flask import render_template, request, url_for, redirect
+from ..models.company import Company
+from flask.ext.login import login_required
 from ..models.portal import CompanyPortal
-from ..models.company import has_right
+from utils.db_utils import db
 
 @portal_bp.route('/', methods=['POST'])
+@login_required
 def apply_company():
 
     data = request.form
-    CompanyPortal.apply_company_to_portal(company_id=data['comp_id'], portal_id=data['portal_id'])
+    CompanyPortal.apply_company_to_portal(company_id=data['comp_id'],
+                                          portal_id=data['portal_id'])
     return redirect(url_for('portal.partners', company_id=data['comp_id']))
 
 @portal_bp.route('/partners/<string:company_id>/')
+@login_required
 def partners(company_id):
+    comp = db(Company, id=company_id).one()
+    companies_partners = CompanyPortal().\
+        show_companies_on_my_portal(company_id)
+    portals_partners = CompanyPortal().show_my_portals(company_id)
 
-    comp = Company().query_company(company_id=company_id)
-    companies_partners = CompanyPortal.show_companies_on_portal(company_id)
     return render_template('company_partners.html',
                            comp=comp,
-                           companies_partners=companies_partners
+                           companies_partners=companies_partners,
+                           portals_partners=portals_partners
                            )

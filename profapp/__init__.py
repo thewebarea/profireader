@@ -110,6 +110,7 @@ login_manager.login_view = 'auth.login'
 
 
 class AnonymousUser(AnonymousUserMixin):
+    id = 0
     #def gravatar(self, size=100, default='identicon', rating='g'):
         #if request.is_secure:
         #    url = 'https://secure.gravatar.com/avatar'
@@ -121,14 +122,25 @@ class AnonymousUser(AnonymousUserMixin):
         #    url=url, hash=hash, size=size, default=default, rating=rating)
         #return '/static/no_avatar.png'
 
-    def has_rights(self, permissions):
+    @staticmethod
+    def has_rights(permissions):
         return False
 
-    def is_administrator(self):
+    @staticmethod
+    def is_administrator():
         return False
 
-    def is_banned(self):
+    @staticmethod
+    def is_banned():
         return False
+
+    def get_id(self):
+        return self.id
+
+    @staticmethod
+    @property
+    def user_name():
+        return 'Guest'
 
     def __repr__(self):
         return "<User(id = %r)>" % self.id

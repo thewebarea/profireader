@@ -3,12 +3,26 @@ from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 from sqlalchemy.types import DateTime
 import datetime
+from flask.ext.login import current_user, login_required
 
 
-class PRBase():
+class PRBase:
+    @login_required
     def save(self):
+        # p = Parent()  # current_user
+        # a = Association(extra_data="some data")  # CompanyUser
+        # a.child = Child()
+        # p.children.append(a)
+        #
+        # # iterate through child objects via association, including association
+        # # attributes
+        # for assoc in p.children:
+        #     print assoc.extra_data
+        #     print assoc.child
+
         db_session.add(self)
-        db_session.flush()
+        # db_session.flush()
+        db_session.commit()
         return self
 
     def attr(self, dictionary):
