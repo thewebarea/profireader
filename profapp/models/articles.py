@@ -9,6 +9,8 @@ from utils.db_utils import db
 from .pr_base import PRBase
 from db_init import Base
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
+from config import Config
+import math
 
 def _Q(cls):
     return db_session.query(cls)
@@ -202,12 +204,32 @@ class Article(Base, PRBase):
         return _A().filter_by(author_user_id=user_id).all()
 
     @staticmethod
-    def get_articles_for_portal(user_id, portal_division_id, stext = '', page = 1, perpage = 3):
-        return _P().order_by('publishing_tm').\
-            filter(text(' "publishing_tm" < clock_timestamp() ')).\
-            filter_by(portal_division_id=portal_division_id, status=ARTICLE_STATUS_IN_PORTAL.published).all()
-        # return _P().all()
+    def get_pages_count(portal_division_id):
+        return math.ceil(_P().order_by('publishing_tm').filter(text(
+            ' "publishing_tm" < clock_timestamp() ')).filter_by(
+            portal_division_id=portal_division_id,
+            status=ARTICLE_STATUS_IN_PORTAL.published).count(
+        )/Config.ITEMS_PER_PAGE)
 
+    def get_articles_for_portal(page_size, user_id, portal_division_id,
+                                pages, page=0):
+        query = _P().order_by('publishing_tm').filter(text(
+            ' "publishing_tm" < clock_timestamp() ')).filter_by(
+            portal_division_id=portal_division_id,
+            status=ARTICLE_STATUS_IN_PORTAL.published)
+        if page_size:
+            query = query.limit(page_size)
+        if page:
+            query = query.offset(page*page_size) if int(page) in range(
+                0, int(pages)) else query.offset(pages*page_size)
+
+        return query
+
+    # def pagination(obj, page, items_per_page):
+    #
+    #     pages = len(obj)/items_per_page
+    #     items = page * items_per_page
+    #     return obj[(items-items_per_page):items]
 
     # @staticmethod
     # def user_articles(user_id=None, before_id=None):

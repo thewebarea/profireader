@@ -47,15 +47,18 @@ class Config(object):
     # operations using the other.
     THREADS_PER_PAGE = 2
 
-    # Ratio for image_editor, can be : 1.7777777777777777, 1.3333333333333333,
-    # 0.6666666666666666, 1
+# Ratio for image_editor, can be :
+# 1.7777777777777777, 1.3333333333333333, 0.6666666666666666, 1
     IMAGE_EDITOR_RATIO = 1.3333333333333333
     HEIGHT_IMAGE = 300   # px
     ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'JPEG2000',
                              'MSP', 'PCX', 'PNG', 'PPM', 'SPIDER',
                              'TIFF', 'WebP', 'XBM', 'XV Thumbnails']
 
-    #Base rights will added when user is confirmed in company
+# Pagination
+    ITEMS_PER_PAGE = 3
+
+# Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']
     # Define the application directory
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
