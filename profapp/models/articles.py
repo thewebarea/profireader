@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from db_init import db_session
 from ..models.company import Company
+from ..models.portal import PortalDivision
 from ..models.users import User
 from utils.db_utils import db
 from .pr_base import PRBase
@@ -20,6 +21,11 @@ def _A():
 def _C():
     return db_session.query(ArticleCompany)
 
+
+def _P():
+    return db_session.query(ArticlePortal)
+
+
 class ArticlePortal(Base, PRBase):
     __tablename__ = 'article_portal'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True,
@@ -31,12 +37,26 @@ class ArticlePortal(Base, PRBase):
     short = Column(TABLE_TYPES['text'], default='')
     long = Column(TABLE_TYPES['text'], default='')
     md_tm = Column(TABLE_TYPES['timestamp'])
+    publishing_tm = Column(TABLE_TYPES['timestamp'])
+
     status = Column(TABLE_TYPES['id_profireader'],
                     default=ARTICLE_STATUS_IN_PORTAL.not_published)
+    # portal_id = Column(TABLE_TYPES['id_profireader'],
+    #                    ForeignKey('portal.id'))
+
     portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                 ForeignKey('portal_division.id'))
-    portal_division = relationship('PortalDivision',
-                                   backref='article_portal')
+
+    division = relationship('PortalDivision', backref='article_portal')
+
+    company = relationship(Company, secondary = 'article_company',
+                           primaryjoin="ArticlePortal.article_company_id == ArticleCompany.id",
+                           secondaryjoin="ArticleCompany.company_id == Company.id", viewonly=True, uselist=False)
+
+    def get_client_side_dict(self, fields='id|title|short|'
+                                          'long|cr_tm|md_tm|'
+                                          'status|publishing_tm, company.id|name'):
+        return self.to_dict(fields)
 
     def __init__(self, article_company_id=None, title=None, short=None,
                  long=None, status=None, portal_division_id=None):
@@ -157,15 +177,14 @@ class Article(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
-# TODO: AA by OZ:    .filter(user_id has to be employee in company and
-# TODO: must have rights to submit article to this company)
+        # TODO: AA by OZ:    .filter(user_id has to be employee in company and
+        # TODO: must have rights to submit article to this company)
         return [x.to_dict('id,name') for x in db(Company)
-                .filter(~db(ArticleCompany).filter_by(
-                        company_id=Company.id,
-                        article_id=article_id).exists())
-                .filter(Company.name.ilike(
-                        "%" + searchtext + "%")).all()]
-# article is NOT published yet in company
+            .filter(~db(ArticleCompany).filter_by(
+            company_id=Company.id,
+            article_id=article_id).exists())
+            .filter(Company.name.ilike(
+            "%" + searchtext + "%")).all()]
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
@@ -175,6 +194,11 @@ class Article(Base, PRBase):
     @staticmethod
     def get_articles_for_user(user_id):
         return _A().filter_by(author_user_id=user_id).all()
+
+    @staticmethod
+    def get_articles_for_portal(user_id, portal_division_id):
+        return _P().filter_by(portal_division_id=portal_division_id, status=ARTICLE_STATUS_IN_PORTAL.published).all()
+        # return _P().all()
 
     # @staticmethod
     # def user_articles(user_id=None, before_id=None):

@@ -1,0 +1,15 @@
+<div class="social-block">
+    <a class="btn btn-social-icon btn-facebook">
+        <i class="fa fa-facebook"></i>
+    </a>
+    <a class="btn btn-social-icon btn-twitter">
+        <i class="fa fa-twitter"></i>
+    </a>
+    <a class="btn btn-social-icon btn-linkedin">
+        <i class="fa fa-linkedin"></i>
+    </a>
+    <a class="btn btn-social-icon btn-google">
+        <i class="fa fa-google"></i>
+    </a>
+
+</div>

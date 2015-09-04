@@ -36,10 +36,11 @@ def filemanager():
         library[company.corporate_folder_file_id] = {'name': "%s corporate files" % (company.name,), 'icon': ''}
 
     options = {'mime_allow': '.*', 'mime_deny': '^directory$', 'max_choose': 0, 'on_choose': ''}
-    if request.args['calledby'] == 'tinymce_file_browse_image':
-        options['mime_allow'] = '^image/.*'
-        options['max_choose'] = 1
-        options['on_choose'] = 'parent.fileSelected'
+    if 'calledby' in request.args:
+        if request.args['calledby'] == 'tinymce_file_browse_image':
+            options['mime_allow'] = '^image/.*'
+            options['max_choose'] = 1
+            options['on_choose'] = 'parent.fileSelected'
 
     return render_template('filemanager.html', library=library, **options)
 

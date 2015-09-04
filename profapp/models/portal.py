@@ -17,7 +17,9 @@ class Portal(Base, PRBase):
                               ForeignKey('company.id'))
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
-    portal_division = relationship('PortalDivision', backref='portal')
+    divisions = relationship('PortalDivision')
+    article = relationship('ArticlePortal', backref='portal',
+                           uselist=False)
     company = relationship('Company', backref='portal')
 
     def __init__(self, name=None,
@@ -28,6 +30,9 @@ class Portal(Base, PRBase):
         self.company_owner_id = company_owner_id
         self.company = company
         self.article = article
+
+    def get_client_side_dict(self, fields='id|name, divisions.*'):
+        return self.to_dict(fields)
 
     @staticmethod
     def own_portal(company_id):

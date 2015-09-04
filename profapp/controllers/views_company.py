@@ -58,8 +58,8 @@ def load_material_details(json, company_id, article_id):
         to_dict('id, title,short, cr_tm, md_tm, '
                 'company_id, status, long,'
                 'editor_user_id, company.name,'
-                'portal_article.portal_division.portal.id')
-    portals = [port.to_dict('id, name, portal_division.name|id')
+                'portal_article.division.portal.id')
+    portals = [port.to_dict('id, name, divisions.name|id')
                for port in CompanyPortal.show_portals(company_id)
                if port]
     if article['portal_article']['portal_division']:

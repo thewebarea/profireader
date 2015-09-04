@@ -42,14 +42,14 @@ def publications(company_id):
 def publications_load(json, company_id):
     portal = Portal.own_portal(company_id)
     if portal:
-        if not portal.portal_division[0]:
-            return {'portal_division': [{'name': '',
-                                        'article_portal': []}]}
+        if not portal.divisions[0]:
+            return {'divisions': [{'name': '',
+                                   'article_portal': []}]}
         portal = [port.to_dict('name|id|portal_id,article_portal.'
                            'status|md_tm|cr_tm|title|long|short|id,'
                            'article_portal.company_article.company.id|'
                            'name|short_description|email|phone') for
-              port in portal.portal_division if port.article_portal]
+                  port in portal.divisions if port.article_portal]
 
     return portal
 

@@ -11,7 +11,6 @@
             {{ init_data()|safe }}
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
-            $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
             $scope.getData = function () {return $scope.data;};
             $scope.afterSave = function (resp) {window.location.href = $scope.url_article_details({company_id: resp.comp.id, article_id: resp.article.id})};
         }]);
