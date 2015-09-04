@@ -33,17 +33,19 @@ class ArticlePortal(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'],
                     default=ARTICLE_STATUS_IN_PORTAL.not_published)
-    portal_id = Column(TABLE_TYPES['id_profireader'],
-                       ForeignKey('portal.id'))
+    portal_division_id = Column(TABLE_TYPES['id_profireader'],
+                                ForeignKey('portal_division.id'))
+    portal_division = relationship('PortalDivision',
+                                   backref='article_portal')
 
     def __init__(self, article_company_id=None, title=None, short=None,
-                 long=None, status=None, portal_id=None):
+                 long=None, status=None, portal_division_id=None):
         self.article_company_id = article_company_id
         self.title = title
         self.short = short
         self.long = long
         self.status = status
-        self.portal_id = portal_id
+        self.portal_division_id = portal_division_id
 
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
@@ -67,11 +69,9 @@ class ArticleCompany(Base, PRBase):
     company = relationship(Company)
     editor = relationship(User)
     portal_article = relationship('ArticlePortal',
-                                  primaryjoin="and_(ArticleCompany.id=="
+                                  primaryjoin="ArticleCompany.id=="
                                               "ArticlePortal."
-                                              "article_company_id, "
-                                              "ArticlePortal."
-                                              "portal_id==None)",
+                                              "article_company_id",
                                   uselist=False,
                                   backref='company_article')
 
@@ -84,11 +84,7 @@ class ArticleCompany(Base, PRBase):
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
                                    'status': ARTICLE_STATUS_IN_COMPANY.
-                                  submitted, 'portal_article':
-                                   ArticlePortal(title=self.title,
-                                                 short=self.short,
-                                                 long=self.long)
-                                   }).save()
+                                  submitted}).save()
 
         # self.portal_devision_id = portal_devision_id
         # self.article_company_id = article_company_id
@@ -96,7 +92,15 @@ class ArticleCompany(Base, PRBase):
         # self.short = short
         # self.long = long
         # self.status = status
-    # def clone_for_portal(self, portal_id):
+    def clone_for_portal(self, division):
+
+        self.portal_article = ArticlePortal(title=self.title,
+                                            short=self.short,
+                                            long=self.long,
+                                            portal_division_id=division,
+                                            article_company_id=self.id,
+                                            ).save()
+        return self
 
     # def update_article(self, **kwargs):
     #     for key, value in kwargs.items():
@@ -108,6 +112,10 @@ class ArticleCompany(Base, PRBase):
     def update_article(company_id, article_id, **kwargs):
         db(ArticleCompany, company_id=company_id, id=article_id).update(
             kwargs)
+
+    @staticmethod
+    def update_article_portal(article_portal_id, **kwargs):
+        db(ArticlePortal, company_id=article_portal_id).update(kwargs)
 
 class Article(Base, PRBase):
     __tablename__ = 'article'

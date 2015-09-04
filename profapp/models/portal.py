@@ -17,9 +17,7 @@ class Portal(Base, PRBase):
                               ForeignKey('company.id'))
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
-    portal_division = relationship('PortalDivision')
-    article = relationship('ArticlePortal', backref='portal',
-                           uselist=False)
+    portal_division = relationship('PortalDivision', backref='portal')
     company = relationship('Company', backref='portal')
 
     def __init__(self, name=None,
@@ -37,7 +35,7 @@ class Portal(Base, PRBase):
             ret = db(Portal, company_owner_id=company_id).one()
             return ret
         except:
-            pass
+            return []
 
     @staticmethod
     def query_portal(portal_id):

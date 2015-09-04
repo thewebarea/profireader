@@ -57,17 +57,22 @@ def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id).\
         to_dict('id, title,short, cr_tm, md_tm, '
                 'company_id, status, long,'
-                'editor_user_id, company.name')
+                'editor_user_id, company.name,'
+                'portal_article.portal_division.portal.id')
+    portals = [port.to_dict('id, name, portal_division.name|id')
+               for port in CompanyPortal.show_portals(company_id)
+               if port]
+    if article['portal_article']['portal_division']:
+        portals = [port for port in portals if port['id'] !=
+                   article['portal_article']['portal_division']['portal']['id']]
+
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
         article['status'])
 
     return {'article': article, 'status': status, 'portals':
-            [port.to_dict('id, name, '
-                          'portal_division.name')
-             for port in
-             CompanyPortal.show_portals(company_id) if port],
-            'comp': Company.get(company_id).to_dict('id, employee.id|'
-                                                    'profireader_name')}
+            portals, 'comp': Company.get(company_id).
+            to_dict('id, employee.id|profireader_name'),
+            'selected_portal': {}, 'selected_division': {}}
 
 
 @company_bp.route('/update_article/', methods=['POST'])
@@ -80,6 +85,14 @@ def update_article(json):
         **{'status': json['article']['status']})
     return json
 
+@company_bp.route('/submit_to_portal/', methods=['POST'])
+@login_required
+@ok
+def submit_to_portal(json):
+
+    article = ArticleCompany.get(json['article']['id'])
+    article.clone_for_portal(json['selected_division'])
+    return json
 
 @company_bp.route('/add/')
 @check_rights(**Right.p(''))

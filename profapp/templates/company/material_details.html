@@ -11,6 +11,7 @@
             {{ init_data()|safe }}
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
+            $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
             $scope.getData = function () {return $scope.data;};
             $scope.afterSave = function (resp) {window.location.href = $scope.url_article_details({company_id: resp.comp.id, article_id: resp.article.id})};
         }]);
@@ -47,28 +48,28 @@
             </span>
             <input type="submit" value="Send article">
         </form>
-        <form ng-on-success="{{ url_article_details({'company_id': data.comp.id, 'article_id': data.article.id}) }}" ng-action="{{ url_update_status({}) }}">
+        <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_submit_to_portal">
     Publish this material at portal
-            <span ng-repeat="port in data.portals">
-                <input type="hidden" ng-model="port.id">
-                <select>
-                    <option>
-                        {{ port.name }}
-                    </option>
+            <span ng-if="original_data.article.status=='accepted'">
+                <select ng-model="data.selected_division">
+                    <optgroup ng-repeat="port in data.portals" label="{{ port.name }}">
+                        <option ng-repeat="division in port.portal_division" value="{{ division.id }}"}>{{ division.name }}</option>
+                    </optgroup>
                 </select>
-                in devision
-                <select>
-                    <option ng-repeat="division in port.portal_division">
-                        {{ division.name }}
-                    </option>
-                </select>
+                <input type="submit" value="Publish">
             </span>
-            <input type="submit" value="Publish">
+            <span ng-if="original_data.article.status!='accepted'">
+                <select disabled>
+                    <optgroup label="Change article status to accepted first">
+                        <option>Change article status to accepted first</option>
+                    </optgroup>
+                </select>
+                <input type="submit" value="Publish" disabled>
+            </span>
+
+
         </form>
     </div>
-
-
-
 
 {% endraw %}
 
