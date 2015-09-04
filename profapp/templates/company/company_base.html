@@ -3,7 +3,7 @@
                        <a href="{{ url_for('company.materials', company_id = comp.id) }}">Materials</a>
                     </span>
                                     <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('company.show') }}">Publications</a>
+                       <a href="{{ url_for('portal.publications', company_id=comp.id) }}">Publications</a>
                     </span>
                                     <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
                        <a href="{{ url_for('company.show') }}">Readers</a>
