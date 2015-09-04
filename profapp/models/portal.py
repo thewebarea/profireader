@@ -17,7 +17,7 @@ class Portal(Base, PRBase):
                               ForeignKey('company.id'))
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
-    divisions = relationship('PortalDivision')
+    divisions = relationship('PortalDivision', backref='portal')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
     company = relationship('Company', backref='portal')

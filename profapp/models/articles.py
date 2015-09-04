@@ -41,31 +41,41 @@ class ArticlePortal(Base, PRBase):
 
     status = Column(TABLE_TYPES['id_profireader'],
                     default=ARTICLE_STATUS_IN_PORTAL.not_published)
-    # portal_id = Column(TABLE_TYPES['id_profireader'],
-    #                    ForeignKey('portal.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'],
+                       ForeignKey('portal.id'))
 
     portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                 ForeignKey('portal_division.id'))
 
     division = relationship('PortalDivision', backref='article_portal')
 
-    company = relationship(Company, secondary = 'article_company',
-                           primaryjoin="ArticlePortal.article_company_id == ArticleCompany.id",
-                           secondaryjoin="ArticleCompany.company_id == Company.id", viewonly=True, uselist=False)
-
-    def get_client_side_dict(self, fields='id|title|short|'
-                                          'long|cr_tm|md_tm|'
-                                          'status|publishing_tm, company.id|name'):
-        return self.to_dict(fields)
+    company = relationship(Company, secondary='article_company',
+                           primaryjoin="ArticlePortal.article_company_"
+                                       "id == ArticleCompany.id",
+                           secondaryjoin="ArticleCompany.company_id == "
+                                         "Company.id",
+                           viewonly=True, uselist=False)
 
     def __init__(self, article_company_id=None, title=None, short=None,
-                 long=None, status=None, portal_division_id=None):
+                 long=None, status=None, portal_division_id=None,
+                 portal_id=None):
         self.article_company_id = article_company_id
         self.title = title
         self.short = short
         self.long = long
         self.status = status
         self.portal_division_id = portal_division_id
+        self.portal_id = portal_id
+
+    def get_client_side_dict(self, fields='id|title|short|'
+                                          'long|cr_tm|md_tm|'
+                                          'status|publishing_tm, '
+                                          'company.id|name'):
+        return self.to_dict(fields)
+
+    @staticmethod
+    def update_article_portal(article_portal_id, **kwargs):
+        db(ArticlePortal, id=article_portal_id).update(kwargs)
 
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
@@ -132,10 +142,6 @@ class ArticleCompany(Base, PRBase):
     def update_article(company_id, article_id, **kwargs):
         db(ArticleCompany, company_id=company_id, id=article_id).update(
             kwargs)
-
-    @staticmethod
-    def update_article_portal(article_portal_id, **kwargs):
-        db(ArticlePortal, company_id=article_portal_id).update(kwargs)
 
 class Article(Base, PRBase):
     __tablename__ = 'article'

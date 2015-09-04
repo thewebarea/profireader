@@ -62,9 +62,11 @@ def load_material_details(json, company_id, article_id):
     portals = [port.to_dict('id, name, divisions.name|id')
                for port in CompanyPortal.show_portals(company_id)
                if port]
-    if article['portal_article']['portal_division']:
-        portals = [port for port in portals if port['id'] !=
-                   article['portal_article']['portal_division']['portal']['id']]
+    if article['portal_article']:
+        if article['portal_article']['division']:
+            portals = [port for port in portals if port['id'] !=
+                       article['portal_article']['division']
+                       ['portal']['id']]
 
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
         article['status'])

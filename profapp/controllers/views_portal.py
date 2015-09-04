@@ -4,6 +4,7 @@ from ..models.company import Company
 from flask.ext.login import login_required
 from ..models.portal import CompanyPortal, Portal
 from .request_wrapers import ok
+from ..models.articles import ArticlePortal
 
 @portal_bp.route('/', methods=['POST'])
 @login_required
@@ -51,10 +52,13 @@ def publications_load(json, company_id):
                            'name|short_description|email|phone') for
                   port in portal.divisions if port.article_portal]
 
-    return portal
+    return {'portal': portal, 'new_status': ''}
 
 @portal_bp.route('/update_article_portal/', methods=['POST'])
 @ok
 def update_article_portal(json):
-    print(json['article_portal']['id'])
+
+    update = json['new_status'].split('/')
+    ArticlePortal.update_article_portal(update[0], **{'status':
+                                                      update[1]})
     return json
