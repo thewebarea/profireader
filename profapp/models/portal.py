@@ -38,7 +38,8 @@ class Portal(Base, PRBase):
         self.company = company
         self.article = article
 
-    def get_client_side_dict(self, fields='id|name, divisions.*, layout.*'):
+    def get_client_side_dict(self, fields='id|name, divisions.*, '
+                                          'layout.*'):
         return self.to_dict(fields)
 
     @staticmethod
