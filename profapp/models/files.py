@@ -60,7 +60,8 @@ class File(Base):
                                 'cropable': True if File.is_cropable(file) else False,
                                 'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0]}
-                                        for file in db(File, parent_id = parent_id))
+                                        for file in db(File))
+                                        #for file in db(File, parent_id = parent_id))# we need all records from the table "file"
 
     @staticmethod
     def createdir(parent_id=None, name=None, author_user_id=None, company_id=None, copyright='', author=''):

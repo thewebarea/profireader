@@ -49,7 +49,7 @@ def filemanager():
 @ok
 # @parent_folder
 def list(json, parent_id=None):
-    return File.list(parent_id=parent_id)
+    return File.list(parent_id)
 
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
