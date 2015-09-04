@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, text
 from sqlalchemy.orm import relationship
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from db_init import db_session
@@ -203,8 +203,9 @@ class Article(Base, PRBase):
 
     @staticmethod
     def get_articles_for_portal(user_id, portal_division_id):
-        return _P().filter_by(portal_division_id=portal_division_id, status=ARTICLE_STATUS_IN_PORTAL.published).all()
+        return _P().order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')).filter_by(portal_division_id=portal_division_id, status=ARTICLE_STATUS_IN_PORTAL.published).all()
         # return _P().all()
+
 
     # @staticmethod
     # def user_articles(user_id=None, before_id=None):

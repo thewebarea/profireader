@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="{{ lang }}">
 <head>
-    {% include 'front/head.html' %}
+    {% include 'front/bird/head.html' %}
 </head>
 
 <body>
-{% include 'front/nav.html' %}
+{% include 'front/bird/nav.html' %}
 {% block content %}
 
     <div class="container">
@@ -39,7 +39,7 @@
                             <div class="item-publication-date">{{ articles[article_id]['publishing_tm']|safe }}</div>
                         </div>
 
-                        <img src="../../static/front/img/article/1.jpg"/>
+                        <img src="../../../static/front/img/article/1.jpg"/>
 
 
                         <!--                <a class="btn btn-primary" href="#">Read More <span-->
@@ -48,7 +48,7 @@
 
                 {% endfor %}
 
-                {#                {% include 'pager.html' %}#}
+                {% include 'front/bird/pager.html' %}
 
 
             </div>
@@ -128,7 +128,7 @@
 
 {% endblock content %}
 
-{% include 'front/footer.html' %}
+{% include 'front/bird/footer.html' %}
 
 
 </body>
