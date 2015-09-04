@@ -135,6 +135,9 @@ class PortalDivision(Base, PRBase):
                        ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
+    def get_client_side_dict(self, fields='id|name'):
+        return self.to_dict(fields)
+
     def __init__(self, portal_division_type_id=None,
                  name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id
