@@ -9,17 +9,13 @@
 {% endblock portal_base %}
 
 {% block content %}
-<<<<<<< HEAD:profapp/templates/company_profile.html
 {% block company_base %}
-{% include 'company_base.html' %}
-=======
-    {% block company_base %}
-{% include 'company/company_base.html' %}
->>>>>>> origin/master:profapp/templates/company/company_profile.html
+    {% include 'company_base.html' %}
+    {% include 'company/company_base.html' %}
 {% endblock company_base %}
 
     <h2><img  src="{{ image }}" height="100" width="100"> {{ comp.name }}
-    <span ng-cloak ng-show="{{ user_rights[0] }}">
+    <span ng-cloak ng-show="{{ user_rights }}">
         {% for right in user_rights %}
             {% if right=='manage_access_company' %}
                 <a href="{{ url_for('company.edit', company_id=comp.id) }}">Edit company</a>
