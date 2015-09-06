@@ -162,11 +162,14 @@ class AnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnonymousUser
 
 
-def create_app(config='config.ProductionDevelopmentConfig', front = False):
+def create_app(config='config.ProductionDevelopmentConfig',
+               front=False,
+               host='localhost'):
     app = Flask(__name__)
+
     app.config.from_object(config)
-
-
+    print(host)
+    app.config['SERVER_NAME'] = host
 
     babel = Babel(app)
 
