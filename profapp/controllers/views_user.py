@@ -5,6 +5,7 @@ from db_init import db_session
 from ..models.users import User
 from flask.ext.login import current_user, login_required
 from utils.db_utils import db
+from ..constants.UNCATEGORIZED import AVATAR_SIZE
 from ..forms.user import EditProfileForm
 
 @user_bp.route('/profile/<user_id>')
@@ -14,7 +15,7 @@ def profile(user_id):
         filter(User.id == user_id).first()
     if not user:
         abort(404)
-    return render_template('user_profile.html')
+    return render_template('user_profile.html', avatar_size=AVATAR_SIZE)
 
 
 @user_bp.route('/edit-profile/<user_id>', methods=['GET', 'POST'])

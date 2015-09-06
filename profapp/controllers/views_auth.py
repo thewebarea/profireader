@@ -62,8 +62,8 @@ def login_signup_general(*soc_network_names):
                         setattr(user, db_fields[elem],
                                 getattr(result_user, elem))
 
-                    if ind:  # ToDo: introduce field signup_via instead.
-                             # Todo: If signed_up not via profireader then...
+                    if ind:  # ToDo (AA): introduce field signup_via instead.
+                        # Todo (AA): If signed_up not via profireader then...
                         if soc_network_names[0] == 'profireader':
                             db_fields_profireader = DB_FIELDS['profireader']
                             for elem in SOC_NET_FIELDS_SHORT:
