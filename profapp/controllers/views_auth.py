@@ -38,8 +38,9 @@ def login_signup_general(*soc_network_names):
                 result.user.update()
                 result_user = result.user
                 if result_user.email is None:
-                    flash("you didn't confirm email bound to your soc-network "
-                          "account. Please confirm email first or choose "
+                    flash("you haven't confirm email bound to your "
+                          "soc-network account yet. "
+                          "Please confirm email first or choose "
                           "another way of authentication.")
                     redirect(url_for('auth.login'))
 
@@ -48,8 +49,8 @@ def login_signup_general(*soc_network_names):
                 #    filter(getattr(User, db_fields['id']) == result_user.id)\
                 #    .first()
                 user = db_session.query(User).\
-                    filter(getattr(User, db_fields['email']) == result_user.email)\
-                    .first()
+                    filter(getattr(User, db_fields['email'])
+                           == result_user.email).first()
                 if not user:
                     user = db_session.query(User).\
                         filter(User.profireader_email == result_user.email)\
