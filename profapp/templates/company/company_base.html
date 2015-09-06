@@ -1,23 +1,11 @@
 <span ng-controller="UserLoginController" class="topbar-menu-links">
-                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('company.materials', company_id = comp.id) }}">Materials</a>
-                    </span>
-                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('portal.publications', company_id=comp.id) }}">Publications</a>
-                    </span>
-                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('company.show') }}">Readers</a>
-                    </span>
-                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('portal.partners', company_id=comp.id) }}">Companies Partners</a>
-                    </span>
-                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('company.show') }}">Comments</a>
-                    </span>
-                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('company.employees', comp_id=comp.id) }}">Employees</a>
-                    </span>
-                                                    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
-                       <a href="{{ url_for('company.profile', company_id=comp.id) }}">Profile</a>
-                    </span>
-                </span>
+    <span ng-cloak ng-show="{{ '{{' }}user.id{{ '}}' }}">
+        <a href="{{ url_for('company.materials', company_id = comp.id) }}">Materials</a>
+        <a href="{{ url_for('portal.publications', company_id=comp.id) }}">Publications</a>
+        <a href="{{ url_for('company.show') }}">Readers</a>
+        <a href="{{ url_for('portal.partners', company_id=comp.id) }}">Companies Partners</a>
+        <a href="{{ url_for('company.show') }}">Comments</a>
+        <a href="{{ url_for('company.employees', comp_id=comp.id) }}">Employees</a>
+        <a href="{{ url_for('company.profile', company_id=comp.id) }}">Profile</a>
+    </span>
+</span>
