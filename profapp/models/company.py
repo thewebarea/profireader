@@ -174,9 +174,12 @@ class UserCompany(Base, PRBase):
     __tablename__ = 'user_company'
 
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
+    user_id = Column(TABLE_TYPES['id_profireader'],
+                     ForeignKey('user.id'),
+                     nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'))
+                        ForeignKey('company.id'),
+                        nullable=False)
     status = Column(TABLE_TYPES['id_profireader'])
     md_tm = Column(TABLE_TYPES['timestamp'])
     rights = Column(TABLE_TYPES['bigint'],
