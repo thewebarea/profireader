@@ -435,3 +435,8 @@ class User(Base, UserMixin, PRBase):
 
     #def is_administrator(self):
     #    return self.can(Permission.ADMINISTER)
+
+class Group(Base, PRBase):
+
+    __tablename__ = 'group'
+    id = Column(TABLE_TYPES['string_30'], primary_key=True)

@@ -3,6 +3,8 @@ from authomatic.providers import oauth2
 from authomatic import Authomatic
 from profapp.models.users import User
 from profapp.controllers.blueprints import register as register_blueprints
+from profapp.controllers.blueprints import register_front as register_blueprints_front
+
 from flask import url_for
 from profapp.controllers.errors import csrf
 from flask.ext.bootstrap import Bootstrap
@@ -18,6 +20,7 @@ from .constants.USER_REGISTERED import REGISTERED_WITH
 from flask import globals
 import re
 from flask.ext.babel import Babel, gettext
+import jinja2
 
 
 def setup_authomatic(app):
@@ -79,6 +82,11 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
+# TODO: OZ by OZ:   remove this function and move it to angilar (good idea to auto inject this functions to all controllers scopes)
+def init_data():
+    return "$scope.loading = true; $ok('', {}, function (data) {$scope.loading = false; $scope.data = data; $scope.original_data = $.extend(true, {} , data)});  $scope._ = function (t, dict) { try { return $translate(t, dict ? dict : $scope) } catch (a) { return null }};"
+
+#TODO: OZ by OZ: add kwargs just like in url_for
 def raw_url_for(endpoint):
     appctx = globals._app_ctx_stack.top
     reqctx = globals._request_ctx_stack.top
@@ -97,6 +105,12 @@ def raw_url_for(endpoint):
     return "function (dict) { var ret = '" + ret + "'; " \
                            " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
 
+
+def pre(value):
+    res = []
+    for k in dir(value):
+        res.append('%r %r\n' % (k, getattr(value, k)))
+    return '<pre>' + '\n'.join(res) + '</pre>'
 
 mail = Mail()
 moment = Moment()
@@ -148,16 +162,26 @@ class AnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnonymousUser
 
 
-def create_app(config='config.ProductionDevelopmentConfig'):
+def create_app(config='config.ProductionDevelopmentConfig', front = False):
     app = Flask(__name__)
     app.config.from_object(config)
+
+
 
     babel = Babel(app)
 
     app.before_request(setup_authomatic(app))
     app.before_request(load_user)
 
-    register_blueprints(app)
+    if front:
+        register_blueprints_front(app)
+        my_loader = jinja2.ChoiceLoader([
+            app.jinja_loader,
+            jinja2.FileSystemLoader('templates_front'),
+            ])
+        app.jinja_loader = my_loader
+    else:
+        register_blueprints(app)
 
     bootstrap.init_app(app)
     mail.init_app(app)
@@ -177,6 +201,10 @@ def create_app(config='config.ProductionDevelopmentConfig'):
     # read this: http://stackoverflow.com/questions/6036082/call-a-python-function-from-jinja2
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
     app.jinja_env.globals.update(raw_url_for=raw_url_for)
+    app.jinja_env.globals.update(init_data=init_data)
+    app.jinja_env.globals.update(pre=pre)
+
+
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
     # Flask will automatically remove database sessions at the end of the

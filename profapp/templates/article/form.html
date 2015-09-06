@@ -1,48 +1,91 @@
-
-
-    <h3><p>{% if edit_version.id %}{% if company.id %} {{ gettext('update version of article for company `%(name)s`', name = company.name) }} {% else %} update your own article copy {% endif %}{% else %}create article{% endif %}</p></h3>
-
-    <form action="{% if edit_version.id %}{{ url_for('article.update', article_company_id = edit_version.id) }}{% else %}{{ url_for('article.create') }}{% endif %}"
-          onsubmit="return AjaxPost()" id="edit" method="post">
-
-        <p>Article title<br/><input type="text" id="title" placeholder="title" name="title"
-                                   value="{{ edit_version.title }}"></p>
-
-        <p>Short Description<br/><textarea id="short" placeholder="short"
-                                           name="short">{{ edit_version.short }}</textarea></p>
-
-        <p>Full text<br/><textarea id="full" placeholder="text" name="long">{{ edit_version.long }}</textarea></p>
-
-        <input type="submit" value="{% if edit_version.id %}save{% else %}create{% endif %}">
-    </form>
-
-
 <script>
-        tinymce.init({
-            image_advtab: true,
-            width: 500,
-            selector: "#full",
-            plugins: [
-                "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak spellchecker",
-                "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
-                "table contextmenu directionality emoticons template textcolor paste fullpage textcolor"
-            ],
-            toolbar1: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
-            toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media code | inserttime preview | forecolor backcolor",
+
+    function fileSelected(selectedfiles) {
+        var args = top.tinymce.activeEditor.windowManager.getParams();
+        var win = (args.window);
+        var input = (args.input);
+        $.each(selectedfiles, function (ind, val) {
+            win.document.getElementById(input).value = val['url'];
+        });
+        top.tinymce.activeEditor.windowManager.close();
+    }
+
+    module.controller('article_edit', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
+        {{ init_data()|safe }}
+
+        $scope.details_article = {{ raw_url_for('article.details')|safe }};
+        {% if article_company_id %}
+            $scope.save_article = '{{ url_for('article.save', article_company_id = article_company_id)|safe }}';
+        {% else %}
+            $scope.save_article = '{{ url_for('article.confirm_create')|safe }}';
+        {% endif %}
+
+
+        $scope.afterSave = function (resp) {
+            window.location.href = $scope.details_article({article_id: resp['id']})
+        }
+
+        $scope.getData = function () {
+            return $scope.data;
+        };
+
+
+        $scope.tinymceOptions = {
+            onChange: function (e) {
+                // put logic here for keypress and cut/paste changes
+            },
+            inline: false,
+            plugins: 'advlist autolink link image lists charmap print preview',
+            skin: 'lightgray',
+            theme: 'modern',
             file_browser_callback: function (field_name, url, type, win) {
-                var cmsURL = '/filemanager/';
+                console.log(field_name, url, type, win);
+                var cmsURL = '/filemanager/?calledby=tinymce_file_browse_' + type;
                 tinymce.activeEditor.windowManager.open({
                     file: cmsURL,
-                    title: 'Select an File',
-                    width: 1000,  // Your dimensions may differ - toy around with them!
-                    height: 700,
+                    title: 'Select an Image',
+                    width: 600,  // Your dimensions may differ - toy around with them!
+                    height: 600,
                     resizable: "yes",
-                    inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+                    {#                    inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!#}
                     close_previous: "yes"
                 }, {
                     window: win,
                     input: field_name
                 });
             }
-        });
-    </script>
+        };
+    }]);
+</script>
+
+{% raw %}
+<div ng-controller="article_edit">
+    <div ng-if="loading">Loading...</div>
+    <div ng-if="!loading">
+
+        <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
+
+        <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
+            }}</h2>
+
+        <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
+
+        <form ng-ok
+              ng-onsuccess="afterSave"
+              ng-onsubmit="getData"
+              ng-action="save_article">
+            <input type="hidden" ng-model="data.id">
+            {{ _('Article title') }}<br/>
+            <input type="text" ng-model="data.title"><br/><br/>
+
+            {{ _('Short Description') }}<br/>
+            <textarea placeholder="short" ng-model="data.short"></textarea><br/><br/>
+
+            {{ _('Full text') }}<br/>
+            <textarea ui-tinymce="tinymceOptions" placeholder="text" ng-model="data.long"></textarea><br/><br/>
+            <input type="submit" value="{{ data.id ? 'save' : 'create' }}">
+        </form>
+    </div>
+</div>
+
+{% endraw %}
