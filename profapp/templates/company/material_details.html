@@ -8,41 +8,68 @@
 {% endblock company_base %}
     <script>
         module.controller('materials_articles', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
-            $scope.article = {{ article|safe }};
-            $scope.company = {{ comp|safe }};
+            {{ init_data()|safe }}
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
-            $scope.status = {{ status|safe }};
-            $scope.url_update_status = {{ raw_url_for('company.update_article')|safe }}
+            $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
+            $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
+            $scope.getData = function () {return $scope.data;};
+            $scope.afterSave = function (resp) {window.location.href = $scope.url_article_details({company_id: resp.comp.id, article_id: resp.article.id})};
         }]);
     </script>
     {% raw %}
-    <div ng-controller="materials_articles">
-    <h3>{{article.title}}</h3>
-    <h4>Created at {{article.cr_tm}}</h4>
-        <h4>Last modified at {{article.md_tm}}</h4>
+    <div on-init="initOld" ng-controller="materials_articles">
+    <h3>{{data.article.title}}</h3>
+    <h4>Created at {{data.article.cr_tm}}</h4>
+        <h4>Last modified at {{data.article.md_tm}}</h4>
         <h4>Short description</h4>
-        <h5><input type="text" disabled="disabled" value="{{ article.short }}"></h5>
+        <h5><input type="text" disabled="disabled" value="{{ data.article.short }}"></h5>
         <br>
         <h4>Text</h4>
-        <h5><input type="text" disabled="disabled" value="{{ article.long }}"></h5>
-        current status is {{ article.status }}<br>
-        <form ng-ajax-action="{{ url_update_status({}) }}" method="post">
-            <input type="hidden" name="company_id" value="article.company_id">
-            <input type="hidden" name="article_id" value="article.article_id">
-            change material status to
-            <select>
-            <option ng-repeat="stat in status" name="status" value="{{ stat }}">{{stat}}</option>
+        <h5><input type="text" disabled="disabled" value="{{ data.article.long }}"></h5>
+        Current status is {{ original_data.article.status }}<br>
+        <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
+            Change material status to
+            <select ng-model="data.article.status">
+            <option ng-repeat="stat in data.status">{{stat}}</option>
             </select>
             <input type="submit" value="Submit status">
         </form>
     <br/>
-    introduce user to work on this material <input/> <button>send</button><br/>
-    publish this material at portal <input/> in devision <select><option>select portal first</option></select>
+        <form>
+            Introduce user to work on this material
+            <input type="hidden" ng-model="data.comp.id">
+            <span ng-repeat="user in data.comp.employee">
+                <input type="hidden" ng-model="user.id">
+                <select>
+                    <option>
+                        {{ user.profireader_name }}
+                    </option>
+                </select>
+            </span>
+            <input type="submit" value="Send article">
+        </form>
+        <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_submit_to_portal">
+    Publish this material at portal
+            <span ng-if="original_data.article.status=='accepted'">
+                <select ng-model="data.selected_division">
+                    <optgroup ng-repeat="port in data.portals" label="{{ port.name }}">
+                        <option ng-repeat="division in port.divisions" value="{{ division.id }}"}>{{ division.name }}</option>
+                    </optgroup>
+                </select>
+                <input type="submit" value="Publish">
+            </span>
+            <span ng-if="original_data.article.status!='accepted'">
+                <select disabled>
+                    <optgroup label="Change article status to accepted first">
+                        <option>Change article status to accepted first</option>
+                    </optgroup>
+                </select>
+                <input type="submit" value="Publish" disabled>
+            </span>
 
+
+        </form>
     </div>
-
-
-
 
 {% endraw %}
 

@@ -227,6 +227,22 @@ END$$;
 
 ALTER FUNCTION public.row_md() OWNER TO postgres;
 
+--
+-- Name: row_publishing_tm_if_null(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION row_publishing_tm_if_null() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$BEGIN
+
+NEW.publishing_tm = (case when NEW.publishing_tm IS NULL then clock_timestamp() else NEW.publishing_tm end);
+RETURN NEW;
+
+END$$;
+
+
+ALTER FUNCTION public.row_publishing_tm_if_null() OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -296,23 +312,25 @@ CREATE TABLE article_company_history (
 ALTER TABLE public.article_company_history OWNER TO pfuser;
 
 --
--- Name: article_portal; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+-- Name: article_portal; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 CREATE TABLE article_portal (
     id character varying NOT NULL,
     cr_tm timestamp without time zone NOT NULL,
-    portal_devision_id character varying(36) NOT NULL,
     article_company_id character varying(36) NOT NULL,
     title character varying(200) DEFAULT ''::text NOT NULL,
     short text DEFAULT ''::text NOT NULL,
     long text DEFAULT ''::text NOT NULL,
     md_tm timestamp without time zone NOT NULL,
-    status character varying(36) DEFAULT 'published'::character varying NOT NULL
+    status character varying(36) DEFAULT 'not_published'::character varying NOT NULL,
+    portal_division_id character varying(36),
+    publishing_tm timestamp without time zone DEFAULT clock_timestamp() NOT NULL,
+    portal_id character varying(36)
 );
 
 
-ALTER TABLE public.article_portal OWNER TO postgres;
+ALTER TABLE public.article_portal OWNER TO pfuser;
 
 --
 -- Name: company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -372,6 +390,86 @@ COMMENT ON TABLE company_right IS 'persistent';
 
 
 --
+-- Name: department; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE department (
+    id integer NOT NULL,
+    name character varying
+);
+
+
+ALTER TABLE public.department OWNER TO pfuser;
+
+--
+-- Name: department_employee_link; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE department_employee_link (
+    department_id integer NOT NULL,
+    employee_id integer NOT NULL,
+    extra_data character varying(256)
+);
+
+
+ALTER TABLE public.department_employee_link OWNER TO pfuser;
+
+--
+-- Name: department_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
+--
+
+CREATE SEQUENCE department_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.department_id_seq OWNER TO pfuser;
+
+--
+-- Name: department_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pfuser
+--
+
+ALTER SEQUENCE department_id_seq OWNED BY department.id;
+
+
+--
+-- Name: employee; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE employee (
+    id integer NOT NULL,
+    name character varying,
+    hired_on timestamp without time zone
+);
+
+
+ALTER TABLE public.employee OWNER TO pfuser;
+
+--
+-- Name: employee_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
+--
+
+CREATE SEQUENCE employee_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.employee_id_seq OWNER TO pfuser;
+
+--
+-- Name: employee_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pfuser
+--
+
+ALTER SEQUENCE employee_id_seq OWNED BY employee.id;
+
+
+--
 -- Name: file; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -383,7 +481,6 @@ CREATE TABLE file (
     description character varying(666) DEFAULT ''::character varying NOT NULL,
     copyright character varying(666) DEFAULT ''::character varying NOT NULL,
     company_id character varying(36),
-    author_name character varying(100) DEFAULT ''::character varying NOT NULL,
     ac_count integer DEFAULT 0 NOT NULL,
     size integer DEFAULT 0 NOT NULL,
     author_user_id character varying(36),
@@ -433,7 +530,8 @@ CREATE TABLE portal (
     id character varying(36) NOT NULL,
     name character varying(100) NOT NULL,
     portal_plan_id character varying(36) NOT NULL,
-    company_owner_id character varying(36) NOT NULL
+    company_owner_id character varying(36) NOT NULL,
+    portal_layout_id character varying(36) DEFAULT '55e99785-bda1-4001-922f-ab974923999a'::character varying NOT NULL
 );
 
 
@@ -447,9 +545,9 @@ CREATE TABLE portal_division (
     id character varying(36) NOT NULL,
     cr_tm timestamp without time zone,
     md_tm timestamp without time zone,
-    portal_id character varying(36),
     portal_division_type_id character varying(36) NOT NULL,
-    name character varying(50) DEFAULT ''::character varying NOT NULL
+    name character varying(50) DEFAULT ''::character varying NOT NULL,
+    portal_id character varying(36)
 );
 
 
@@ -467,6 +565,33 @@ CREATE TABLE portal_division_type (
 ALTER TABLE public.portal_division_type OWNER TO pfuser;
 
 --
+-- Name: TABLE portal_division_type; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE portal_division_type IS 'persistent';
+
+
+--
+-- Name: portal_layout; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE portal_layout (
+    id character varying(36) NOT NULL,
+    name character varying(50) NOT NULL,
+    path character varying DEFAULT 'bird/'::character varying
+);
+
+
+ALTER TABLE public.portal_layout OWNER TO pfuser;
+
+--
+-- Name: TABLE portal_layout; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE portal_layout IS 'persistent';
+
+
+--
 -- Name: portal_plan; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
 --
 
@@ -477,6 +602,13 @@ CREATE TABLE portal_plan (
 
 
 ALTER TABLE public.portal_plan OWNER TO pfuser;
+
+--
+-- Name: TABLE portal_plan; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON TABLE portal_plan IS 'persistent';
+
 
 --
 -- Name: user; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -630,6 +762,20 @@ ALTER TABLE public.user_portal_reader OWNER TO pfuser;
 -- Name: id; Type: DEFAULT; Schema: public; Owner: pfuser
 --
 
+ALTER TABLE ONLY department ALTER COLUMN id SET DEFAULT nextval('department_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY employee ALTER COLUMN id SET DEFAULT nextval('employee_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: pfuser
+--
+
 ALTER TABLE ONLY user_company_right ALTER COLUMN id SET DEFAULT nextval('user_company_right_id_seq'::regclass);
 
 
@@ -650,7 +796,15 @@ ALTER TABLE ONLY article_company
 
 
 --
--- Name: article_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+-- Name: article_portal_id_key; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY article_portal
+    ADD CONSTRAINT article_portal_id_key UNIQUE (id);
+
+
+--
+-- Name: article_portal_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
 --
 
 ALTER TABLE ONLY article_portal
@@ -687,6 +841,30 @@ ALTER TABLE ONLY company_portal
 
 ALTER TABLE ONLY company_right
     ADD CONSTRAINT company_right_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: department_employee_link_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY department_employee_link
+    ADD CONSTRAINT department_employee_link_pkey PRIMARY KEY (department_id, employee_id);
+
+
+--
+-- Name: department_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY department
+    ADD CONSTRAINT department_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: employee_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY employee
+    ADD CONSTRAINT employee_pkey PRIMARY KEY (id);
 
 
 --
@@ -727,6 +905,14 @@ ALTER TABLE ONLY portal_division
 
 ALTER TABLE ONLY portal_division_type
     ADD CONSTRAINT portal_division_type_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: portal_layout_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY portal_layout
+    ADD CONSTRAINT portal_layout_pkey PRIMARY KEY (id);
 
 
 --
@@ -926,6 +1112,13 @@ CREATE TRIGGER id BEFORE INSERT ON company_portal FOR EACH ROW EXECUTE PROCEDURE
 
 
 --
+-- Name: id; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER id BEFORE INSERT ON portal_layout FOR EACH ROW EXECUTE PROCEDURE row_id();
+
+
+--
 -- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
@@ -933,7 +1126,7 @@ CREATE TRIGGER id_cr_md BEFORE INSERT ON portal_division FOR EACH ROW EXECUTE PR
 
 
 --
--- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: id_cr_md; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
 CREATE TRIGGER id_cr_md BEFORE INSERT ON article_portal FOR EACH ROW EXECUTE PROCEDURE row_id_cr_md();
@@ -961,7 +1154,7 @@ CREATE TRIGGER md_tm BEFORE UPDATE ON portal_division FOR EACH ROW EXECUTE PROCE
 
 
 --
--- Name: md_tm; Type: TRIGGER; Schema: public; Owner: postgres
+-- Name: md_tm; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
 CREATE TRIGGER md_tm BEFORE UPDATE ON article_portal FOR EACH ROW EXECUTE PROCEDURE row_md();
@@ -991,7 +1184,7 @@ ALTER TABLE ONLY article_company
 
 
 --
--- Name: article_portal_article_company_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: article_portal_article_company_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY article_portal
@@ -999,11 +1192,19 @@ ALTER TABLE ONLY article_portal
 
 
 --
--- Name: article_portal_portal_devision_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: article_portal_portal_division_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY article_portal
-    ADD CONSTRAINT article_portal_portal_devision_id FOREIGN KEY (portal_devision_id) REFERENCES portal_division(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+    ADD CONSTRAINT article_portal_portal_division_id_fkey FOREIGN KEY (portal_division_id) REFERENCES portal_division(id);
+
+
+--
+-- Name: article_portal_portal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY article_portal
+    ADD CONSTRAINT article_portal_portal_id_fkey FOREIGN KEY (portal_id) REFERENCES portal(id);
 
 
 --
@@ -1036,6 +1237,22 @@ ALTER TABLE ONLY company_portal
 
 ALTER TABLE ONLY company_portal
     ADD CONSTRAINT company_portal_portal_id_fkey FOREIGN KEY (portal_id) REFERENCES portal(id);
+
+
+--
+-- Name: department_employee_link_department_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY department_employee_link
+    ADD CONSTRAINT department_employee_link_department_id_fkey FOREIGN KEY (department_id) REFERENCES department(id);
+
+
+--
+-- Name: department_employee_link_employee_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY department_employee_link
+    ADD CONSTRAINT department_employee_link_employee_id_fkey FOREIGN KEY (employee_id) REFERENCES employee(id);
 
 
 --
@@ -1103,11 +1320,19 @@ ALTER TABLE ONLY portal_division
 
 
 --
--- Name: portal_division_portal_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+-- Name: portal_division_portal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY portal_division
-    ADD CONSTRAINT portal_division_portal_id FOREIGN KEY (portal_id) REFERENCES portal(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+    ADD CONSTRAINT portal_division_portal_id_fkey FOREIGN KEY (portal_id) REFERENCES portal(id);
+
+
+--
+-- Name: portal_portal_layout_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_portal_layout_id FOREIGN KEY (portal_layout_id) REFERENCES portal_layout(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -1242,6 +1467,28 @@ INSERT INTO "group" VALUES ('unconfirmed');
 INSERT INTO "group" VALUES ('member');
 INSERT INTO "group" VALUES ('god');
 INSERT INTO "group" VALUES ('banned');
+
+
+--
+-- Data for Name: portal_division_type; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_division_type VALUES ('news');
+INSERT INTO portal_division_type VALUES ('events');
+
+
+--
+-- Data for Name: portal_layout; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_layout VALUES ('55e99785-bda1-4001-922f-ab974923999a', 'bird', 'bird/');
+
+
+--
+-- Data for Name: portal_plan; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_plan VALUES ('55dcb92a-6708-4001-acca-b94c96260506', 'free');
 
 
 --

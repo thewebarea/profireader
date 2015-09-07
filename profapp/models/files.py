@@ -1,10 +1,11 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
-from db_init import Base, db_session
+# from db_init import Base, g.db
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from utils.db_utils import db
+# from utils.db_utils import db
 from sqlalchemy.orm import relationship
-from flask import url_for
+from flask import url_for, g
+from .pr_base import PRBase, Base
 
 
 class File(Base):
@@ -16,7 +17,7 @@ class File(Base):
     description = Column(TABLE_TYPES['text'], default='', nullable=False)
     copyright = Column(TABLE_TYPES['text'], default='', nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
-    author_name = Column(TABLE_TYPES['name'], default='', nullable=False)
+    copyright_author_name = Column(TABLE_TYPES['name'], default='', nullable=False)
     ac_count = Column(Integer, default=0, nullable=False)
     size = Column(Integer, default=0, nullable=False)
     author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
@@ -56,33 +57,34 @@ class File(Base):
         return re.match('^image/.*', file.mime)
 
     def list(parent_id=None):
-        return list({'size': file.size, 'name': file.name, 'id': file.id,
+        return list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'cropable': True if File.is_cropable(file) else False,
-                                'type': 'dir' if file.mime == 'directory' else 'file',
+                                'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0]}
-                                        for file in db(File, parent_id = parent_id))
+                                        for file in db(File))
+                                        #for file in db(File, parent_id = parent_id))# we need all records from the table "file"
 
     @staticmethod
     def createdir(parent_id=None, name=None, author_user_id=None, company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, author_user_id=author_user_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
-        db_session.add(f)
-        db_session.commit()
+        g.db.add(f)
+        g.db.commit()
         return f.id
 
     @staticmethod
     def create_company_dir(company=None, name=None):
         f = File(parent_id=None, author_user_id=company.author_user_id,
                  name=name, size=0, company_id=company.id, mime='directory')
-        db_session.add(f)
+        g.db.add(f)
         company.company_folder.append(f)
-        db_session.commit()
+        g.db.commit()
         for x in company.company_folder:
             return x.id
 
     def upload(self, content):
         file_cont = FileContent(file_content=self, content=content)
-        db_session.add(self, file_cont)
-        db_session.commit()
+        g.db.add(self, file_cont)
+        g.db.commit()
         return self
 
     def get_url(self):
@@ -119,15 +121,15 @@ class FileContent(Base):
         #     os.remove(root+'/'+filenam# e)
         # els# e:
         #     os.removedirs(root+'/'+filenam# e)
-        # db_session.add(file_d# b)
+        # g.db.add(file_d# b)
         # tr# y:
-        #     db_session.commit# ()
+        #     g.db.commit# ()
         # except PermissionErro# r:
         #     result = {"result":#  {
         #             "success": Fals# e,
         #             "error": "Access denied to remove file# "}
         #        #  }
-        #     db_session.rollback#(# )
+        #     g.db.rollback#(# )
         #
         # return result
         # return True

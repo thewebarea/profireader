@@ -19,3 +19,9 @@ class ARTICLE_STATUS_IN_COMPANY:
 
         else:
             return [cls.accepted, cls.declined]
+
+class ARTICLE_STATUS_IN_PORTAL:
+
+    published = 'published'
+    not_published = 'not_published'
+    declined = 'declined'

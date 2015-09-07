@@ -3,18 +3,18 @@ from profapp.forms.article import ArticleForm
 from profapp.models.articles import Article, ArticleCompany
 from profapp.models.users import User
 # from profapp.models.company import Company
-from db_init import db_session
+# from db_init import db_session
 from .blueprints import article_bp
 from .request_wrapers import ok, object_to_dict
 # import os
 
 
 def _A():
-    return db_session.query(Article)
+    return g.db.query(Article)
 
 
 def _C():
-    return db_session.query(ArticleCompany)
+    return g.db.query(ArticleCompany)
 
 
 @article_bp.route('/list/', methods=['GET'])
@@ -57,7 +57,8 @@ def load_form_update(json, article_company_id):
                   methods=['POST'])
 @ok
 def save(json, article_company_id):
-    return Article.save_edited_version(g.user.id, article_company_id, **json).get_client_side_dict()
+    return Article.save_edited_version(g.user.id, article_company_id,
+                                       **json).get_client_side_dict()
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])
