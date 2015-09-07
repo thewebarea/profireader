@@ -57,17 +57,15 @@
     </script>
     {% raw %}
     <script type="text/ng-template" id="customTemplate.html">
-        <a href="#">
+        <a class="typeahead-item" href="#">
             <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
             <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
         </a>
     </script>
     <style>
-        ul.dropdown-menu li a strong {
-            color: #f00;
-        }
+
     </style>
-    <div ng-init="loadData1()" ng-controller="article_my_versions">
+    <div ng-init="loadData()" ng-controller="article_my_versions">
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
             <h2>{{ _('Article title is `%(data.mine.title)s`') }}</h2>
@@ -94,7 +92,8 @@
     <span ng-repeat="a_submitted in data.submitted"
           id="article_submitted_to_company_id_{{ a_submitted.company_id }}">
         <h3>{{ _('Article title is `%(title)s` submitted to company `%(company.name)s` and has status `%(status)s`',
-            a_submitted) }}</h3>
+            a_submitted) }} [<a
+                    href="{{ url_update({article_company_id: a_submitted.id}) }}">edit</a>]</h3>
         {{ a_submitted.short }}
         <h5>{{ _('Created at %(cr_tm)s', a_submitted) }}</h5>
         <h5>{{ _('Last modified at %(md_tm)s by user `%(editor.profireader_name)s`', a_submitted) }}</h5>

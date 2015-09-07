@@ -248,7 +248,8 @@ def password_reset_request():
         return redirect(url_for('general.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(profireader_email=form.email.data).first()
+        user = g.db.query(User).\
+            filter_by(profireader_email=form.email.data).first()
         if user.is_banned():
             flash('Sorry, you are banned')
             return redirect(url_for('general.index'))
@@ -273,7 +274,8 @@ def password_reset(token):
         return redirect(url_for('general.index'))
     form = PasswordResetForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(profireader_email=form.email.data).first()
+        user = g.db.query(User).\
+            filter_by(profireader_email=form.email.data).first()
         if user.is_banned():
             flash('Sorry, you are banned')
             return redirect(url_for('general.index'))

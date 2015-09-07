@@ -3,8 +3,7 @@ from ..models.company import simple_permissions
 # from .request_wrapers import json
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, Right, \
-    UserCompany
+from ..models.company import Company, UserCompany
 # from phonenumbers import NumberParseException
 from ..constants.USER_ROLES import RIGHTS
 from ..models.users import User
@@ -16,6 +15,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
+from ..models.rights import Right, list_of_RightAtomic_attributes
 
 
 # todo: resolve a problem with @json!
@@ -153,14 +153,23 @@ def profile(company_id):
 @login_required
 def employees(comp_id):
     company_user_rights = UserCompany.show_rights(comp_id)
-    curr_user = {g.user_dict['id']: company_user_rights[user] for user
-                 in company_user_rights if user == g.user_dict['id']}
+
+    for user_id in company_user_rights.keys():
+        rights = company_user_rights[user_id]['rights']
+        rez = {}
+        for elem in list_of_RightAtomic_attributes:
+            rez[elem.lower()] = True if elem.lower() in rights else False
+        company_user_rights[user_id]['rights'] = rez
+
+    user_id = current_user.get_id()
+    curr_user = {user_id: company_user_rights[user_id]}
     current_company = db(Company, id=comp_id).one()
 
     return render_template('company/company_employees.html',
                            comp=current_company,
                            company_user_rights=company_user_rights,
-                           curr_user=curr_user
+                           curr_user=curr_user,
+                           Right=Right
                            )
 
 
@@ -249,7 +258,7 @@ def suspend_employee():
     return redirect(url_for('company.employees', comp_id=data['comp_id']))
 
 
-# todo: what actually does it intended?
+# todo: what actually is it intended?
 @company_bp.route('/suspended_employees/<string:comp_id>')
 @check_rights(simple_permissions(frozenset()))
 @login_required
@@ -259,5 +268,5 @@ def suspended_employees_func(comp_id):
         UserCompany.suspend_employee(comp_id, user_id=current_user.get_id())
     return render_template('company/company_suspended.html',
                            suspended_employees=suspended_employees,
-                           company_id=company_id
+                           company_id=comp_id
                            )
