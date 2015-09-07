@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import jsonify, request, g, abort
-from ..models.company import Right
+from functools import reduce
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
 from time import sleep
@@ -20,7 +20,6 @@ def ok(func):
 
     return function_json
 
-
 def replace_brackets(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -34,25 +33,30 @@ def replace_brackets(func):
     return wrapper
 
 
-# def check_rights(rights):
-#     def decorator(func):
-#         @wraps(func)
-#         def wrapper(*args, **kwargs):
-#
-#             if not set(rights) < set(Right.permissions(user_id=g.user_dict['id'], comp_id=kwargs['company_id'])):
-#                 return abort(403)
-#             return func(*args, **kwargs)
-#         return wrapper
-#     return decorator
+# make check for user groups!!!
+def can_global(*rights_lambda_rule, **kwargs):
+    rez = reduce(
+        lambda x, y:
+        x or y[list(y.keys())[0]](**kwargs), rights_lambda_rule, False)
+    return rez
 
-def check_rights(**rulelam):
-    # (rule_name, lambda_func) = rulelam.items()[0]
+# if there is need to use check rights inside the controller (view function)
+# you can do it in the following way:
+#
+# rights_lambda_rule = simple_permissions(frozenset('edit'))
+# if not can_global(rights_lambda_rule,
+#                   user=current_user,
+#                   company_id=company_id):
+#     abort(403)
+
+
+def check_rights(*rights_lambda_rule):
+    # (rights, lambda_func) = rights_lambda_rule.items()[0]
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            has = rulelam
-            for x in has:
-                has[x](**kwargs)
+            if not can_global(*rights_lambda_rule, **kwargs):
+                abort(403)
             return func(*args, **kwargs)
 
         return wrapper

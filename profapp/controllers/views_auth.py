@@ -1,6 +1,6 @@
 from .blueprints import auth_bp
 from flask import g, request, url_for, render_template, flash
-# from db_init import g.db
+#from db_init import db_session
 from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS, \
     SOC_NET_FIELDS_SHORT
 from flask.ext.login import logout_user, current_user, login_required
@@ -37,6 +37,12 @@ def login_signup_general(*soc_network_names):
             if result.user:
                 result.user.update()
                 result_user = result.user
+                if result_user.email is None:
+                    flash("you haven't confirm email bound to your "
+                          "soc-network account yet. "
+                          "Please confirm email first or choose "
+                          "another way of authentication.")
+                    redirect(url_for('auth.login'))
 
                 db_fields = DB_FIELDS[soc_network_names[-1]]
                 #user = g.db.query(User).\
@@ -57,8 +63,8 @@ def login_signup_general(*soc_network_names):
                         setattr(user, db_fields[elem],
                                 getattr(result_user, elem))
 
-                    if ind:  # ToDo: introduce field signup_via instead.
-                             # Todo: If signed_up not via profireader then...
+                    if ind:  # ToDo (AA): introduce field signup_via instead.
+                        # Todo (AA): If signed_up not via profireader then...
                         if soc_network_names[0] == 'profireader':
                             db_fields_profireader = DB_FIELDS['profireader']
                             for elem in SOC_NET_FIELDS_SHORT:

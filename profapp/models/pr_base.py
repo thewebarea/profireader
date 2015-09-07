@@ -2,6 +2,7 @@
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
+from flask.ext.login import current_user, login_required
 import re
 from flask import g
 from sqlalchemy.ext.declarative import declarative_base
@@ -29,8 +30,7 @@ def configure_listener(class_, key, inst):
             return value
 
 
-class PRBase():
-
+class PRBase:
     def __init__(self):
         self.query = g.db.query_property()
 
