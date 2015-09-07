@@ -63,7 +63,7 @@ class PasswordResetForm(Form):
     submit = SubmitField('Reset Password')
 
     def validate_email(self, field):
-        if g.db.query(User).query.\
+        if g.db.query(User).\
                 filter_by(profireader_email=field.data).first() is None:
             raise ValidationError('Unknown email address.')
 
