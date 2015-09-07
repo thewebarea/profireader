@@ -1,10 +1,11 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
-from db_init import Base, db_session
+# from db_init import Base, g.db
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from utils.db_utils import db
+# from utils.db_utils import db
 from sqlalchemy.orm import relationship
 from flask import url_for
+from .pr_base import PRBase, Base
 
 
 class File(Base):
@@ -65,24 +66,24 @@ class File(Base):
     @staticmethod
     def createdir(parent_id=None, name=None, author_user_id=None, company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, author_user_id=author_user_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
-        db_session.add(f)
-        db_session.commit()
+        g.db.add(f)
+        g.db.commit()
         return f.id
 
     @staticmethod
     def create_company_dir(company=None, name=None):
         f = File(parent_id=None, author_user_id=company.author_user_id,
                  name=name, size=0, company_id=company.id, mime='directory')
-        db_session.add(f)
+        g.db.add(f)
         company.company_folder.append(f)
-        db_session.commit()
+        g.db.commit()
         for x in company.company_folder:
             return x.id
 
     def upload(self, content):
         file_cont = FileContent(file_content=self, content=content)
-        db_session.add(self, file_cont)
-        db_session.commit()
+        g.db.add(self, file_cont)
+        g.db.commit()
         return self
 
     def get_url(self):
@@ -119,15 +120,15 @@ class FileContent(Base):
         #     os.remove(root+'/'+filenam# e)
         # els# e:
         #     os.removedirs(root+'/'+filenam# e)
-        # db_session.add(file_d# b)
+        # g.db.add(file_d# b)
         # tr# y:
-        #     db_session.commit# ()
+        #     g.db.commit# ()
         # except PermissionErro# r:
         #     result = {"result":#  {
         #             "success": Fals# e,
         #             "error": "Access denied to remove file# "}
         #        #  }
-        #     db_session.rollback#(# )
+        #     g.db.rollback#(# )
         #
         # return result
         # return True

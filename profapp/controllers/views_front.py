@@ -3,14 +3,14 @@ from flask import render_template, request, url_for, redirect, g
 from ..models.articles import Article
 from ..models.portal import CompanyPortal, PortalDivision, \
     PortalDivisionType, Portal
-from db_init import db_session, Base
+# from db_init import Base
 from config import Config
 
 
 
 @front_bp.route('/', methods=['GET'])
 def index():
-    division = db_session().query(PortalDivision).order_by('id').first()
+    division = g.db().query(PortalDivision).order_by('id').first()
     articles = Article.get_articles_for_portal(
         user_id=g.user_dict['id'], portal_division_id=division.id)
     portal = division.portal.get_client_side_dict()
@@ -24,7 +24,7 @@ def index():
 
 @front_bp.route('<string:division_name>/<int:page>', methods=['GET'])
 def division(division_name, page):
-    division = db_session().query(PortalDivision).filter_by(
+    division = g.db().query(PortalDivision).filter_by(
         name=division_name).one()
     pages = Article.get_pages_count(division.id)
     articles = Article.get_articles_for_portal(

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, ForeignKey, update
 from sqlalchemy.orm import relationship
-from db_init import Base, db_session
+# from db_init import Base, g.db
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from flask import g
 from config import Config
@@ -9,7 +9,9 @@ from ..constants.USER_ROLES import COMPANY_OWNER, RIGHTS
 from utils.db_utils import db
 from .users import User
 from .files import File
-from .pr_base import PRBase
+from .pr_base import PRBase, Base
+
+
 
 class Company(Base, PRBase):
     __tablename__ = 'company'
@@ -120,7 +122,7 @@ class Company(Base, PRBase):
                     file.upload(content=passed_file.stream.read(-1)).id}
             )
 
-        db_session.commit()
+        g.db.commit()
 
     @staticmethod
     def query_employee(comp_id):
@@ -160,13 +162,13 @@ class UserCompanyRight(Base, PRBase):
             stat = STATUS().REJECT()
         db(UserCompany, company_id=comp_id, user_id=user_id,
            status=STATUS().NONACTIVE()).update({'status': stat})
-        db_session.flush()
+        g.db.flush()
 
     @staticmethod
     def suspend_employee(comp_id, user_id):
         db(UserCompany, company_id=comp_id, user_id=user_id).\
             update({'status': STATUS.SUSPEND()})
-        db_session.flush()
+        g.db.flush()
 
 
 class UserCompany(Base, PRBase):

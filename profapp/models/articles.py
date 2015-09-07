@@ -1,31 +1,32 @@
 from sqlalchemy import Column, ForeignKey, text
 from sqlalchemy.orm import relationship
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from db_init import db_session
+# from db_init import db_session
 from ..models.company import Company
 from ..models.portal import PortalDivision
 from ..models.users import User
 from utils.db_utils import db
-from .pr_base import PRBase
-from db_init import Base
+from .pr_base import PRBase, Base
+# from db_init import Base
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from config import Config
 import math
+from flask import g
 
 def _Q(cls):
-    return db_session.query(cls)
+    return g.db.query(cls)
 
 
 def _A():
-    return db_session.query(Article)
+    return g.db.query(Article)
 
 
 def _C():
-    return db_session.query(ArticleCompany)
+    return g.db.query(ArticleCompany)
 
 
 def _P():
-    return db_session.query(ArticlePortal)
+    return g.db.query(ArticlePortal)
 
 
 class ArticlePortal(Base, PRBase):
