@@ -51,9 +51,10 @@ class Config(object):
 # 1.7777777777777777, 1.3333333333333333, 0.6666666666666666, 1
     IMAGE_EDITOR_RATIO = 1.3333333333333333
     HEIGHT_IMAGE = 300   # px
-    ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'JPEG2000',
-                             'MSP', 'PCX', 'PNG', 'PPM', 'SPIDER',
-                             'TIFF', 'WebP', 'XBM', 'XV Thumbnails']
+    ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG',
+                             'JPEG2000', 'MSP', 'PCX', 'PNG', 'PPM',
+                             'SPIDER', 'TIFF', 'WebP', 'XBM',
+                             'XV Thumbnails']
 
 # Pagination
     ITEMS_PER_PAGE = 3

@@ -22,17 +22,21 @@ from config import Config
 #         portal=portal)
 
 
-@front_bp.route('<string:division_name>/<int:page>', methods=['GET'])
-def division(division_name, page):
+@front_bp.route('<string:division_name>/<int:page>/'
+                '<string:search_text>', methods=['GET'])
+def division(division_name, page, search_text):
+
+    search_text = search_text if not request.args.get(
+        'search_text') else request.args.get('search_text')
     division = g.db().query(PortalDivision).filter_by(
         name=division_name).one()
-    pages = Article.get_pages_count(division.id)
+    pages = Article.get_pages_count(division.id,
+                                    search_text=search_text)
     articles = Article.get_articles_for_portal(
         page_size=Config.ITEMS_PER_PAGE,
         user_id=g.user_dict['id'],
-        portal_division_id=division.id, page=page, pages=pages)
-    # articles = Article.pagination(obj=articles, page=page,
-    #                               items_per_page=Config.ITEMS_PER_PAGE)
+        portal_division_id=division.id, page=page, pages=pages,
+        search_text=search_text)
     portal = division.portal.get_client_side_dict()
     return render_template('front/bird/index.html',
                            articles={a.id: a.get_client_side_dict() for
@@ -41,4 +45,5 @@ def division(division_name, page):
                            portal=portal,
                            pages=pages,
                            current_page=page,
-                           page_buttons=Config.PAGINATION_BUTTONS)
+                           page_buttons=Config.PAGINATION_BUTTONS,
+                           search_text=search_text)

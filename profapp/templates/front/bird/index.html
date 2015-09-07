@@ -61,12 +61,18 @@
                     <h4>Search</h4>
 
                     <div class="input-group">
-                        <input type="text" class="form-control">
-                                        <span class="input-group-btn">
-                                            <button class="btn btn-default" type="button">
-                                                <span class="glyphicon glyphicon-search"></span>
-                                            </button>
-                                        </span>
+                        <form onsubmit="{{ url_for('front.division', division_name=division.name, page=1, search_text=search_text) }}">
+                            {% if search_text!='%' %}
+                            <input type="text" name="search_text" value="{{ search_text }}" class="form-control">
+                            {% else %}
+                            <input type="text" name="search_text" class="form-control">
+                            {% endif %}
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="submit">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                </button>
+                            </span>
+                        </form>
                     </div>
                     {#                 /.input-group #}
                 </div>
