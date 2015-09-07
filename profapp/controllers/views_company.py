@@ -227,6 +227,7 @@ def join_to_company(json, company_id):
     return {'companies': [employer.get_client_side_dict() for employer in current_user.employers]}
 
 
+#TODO: VK by OZ:   what this function do? same as join_to_company???
 @company_bp.route('/add_subscriber/', methods=['POST'])
 @check_rights(simple_permissions(frozenset(['add_employee'])))
 @login_required
