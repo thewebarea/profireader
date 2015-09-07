@@ -101,9 +101,7 @@ class Company(Base, PRBase):
                                    rights=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
         user.employer_assoc.append(user_company)  # .all() added
-        #user.companies.append(self)
-        user.employers.append(self)
-
+        user.companies.append(self)
 
         g.db.merge(user)
         g.db.commit()
