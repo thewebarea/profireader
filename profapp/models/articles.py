@@ -12,6 +12,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STAT
 from config import Config
 import math
 from flask import g
+from sqlalchemy.sql import or_
 
 def _Q(cls):
     return g.db.query(cls)
@@ -41,7 +42,6 @@ class ArticlePortal(Base, PRBase):
     long = Column(TABLE_TYPES['text'], default='')
     md_tm = Column(TABLE_TYPES['timestamp'])
     publishing_tm = Column(TABLE_TYPES['timestamp'])
-
     status = Column(TABLE_TYPES['id_profireader'],
                     default=ARTICLE_STATUS_IN_PORTAL.not_published)
     portal_id = Column(TABLE_TYPES['id_profireader'],
@@ -189,11 +189,11 @@ class Article(Base, PRBase):
         # TODO: AA by OZ:    .filter(user_id has to be employee in company and
         # TODO: must have rights to submit article to this company)
         return [x.to_dict('id,name') for x in db(Company)
-            .filter(~db(ArticleCompany).filter_by(
-            company_id=Company.id,
-            article_id=article_id).exists())
-            .filter(Company.name.ilike(
-            "%" + searchtext + "%")).all()]
+                .filter(~db(ArticleCompany).
+                        filter_by(company_id=Company.id,
+                        article_id=article_id).exists())
+                .filter(Company.name.ilike(
+                        "%" + searchtext + "%")).all()]
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
@@ -205,19 +205,41 @@ class Article(Base, PRBase):
         return _A().filter_by(author_user_id=user_id).all()
 
     @staticmethod
-    def get_pages_count(portal_division_id):
+    def get_pages_count(portal_division_id, search_text=None):
         return math.ceil(_P().order_by('publishing_tm').filter(text(
             ' "publishing_tm" < clock_timestamp() ')).filter_by(
             portal_division_id=portal_division_id,
             status=ARTICLE_STATUS_IN_PORTAL.published).count(
-        )/Config.ITEMS_PER_PAGE)
+        )/Config.ITEMS_PER_PAGE) if not search_text else math.ceil(_P(
+        ).order_by('publishing_tm').filter(text(' "publishing_tm" < '
+                                                'clock_timestamp() '
+                                                )).filter_by(
+            portal_division_id=portal_division_id,
+            status=ARTICLE_STATUS_IN_PORTAL.published).filter(
+                or_(
+                    ArticlePortal.title.ilike("%" + search_text + "%"),
+                    ArticlePortal.short.ilike("%" + search_text + "%"),
+                    ArticlePortal.long.ilike("%" + search_text + "%"))
+        ).count()/Config.ITEMS_PER_PAGE)
 
     def get_articles_for_portal(page_size, user_id, portal_division_id,
-                                pages, page=0):
-        query = _P().order_by('publishing_tm').filter(text(
-            ' "publishing_tm" < clock_timestamp() ')).filter_by(
-            portal_division_id=portal_division_id,
-            status=ARTICLE_STATUS_IN_PORTAL.published)
+                                pages, page=1, search_text=None):
+        page -= 1
+        if not search_text:
+            query = _P().order_by('publishing_tm').filter(text(
+                ' "publishing_tm" < clock_timestamp() ')).filter_by(
+                portal_division_id=portal_division_id,
+                status=ARTICLE_STATUS_IN_PORTAL.published)
+        else:
+            query = _P().order_by('publishing_tm').filter(text(
+                ' "publishing_tm" < clock_timestamp() ')).filter_by(
+                portal_division_id=portal_division_id,
+                status=ARTICLE_STATUS_IN_PORTAL.published).filter(
+                or_(
+                    ArticlePortal.title.ilike("%" + search_text + "%"),
+                    ArticlePortal.short.ilike("%" + search_text + "%"),
+                    ArticlePortal.long.ilike("%" + search_text + "%")))
+
         if page_size:
             query = query.limit(page_size)
         if page:
@@ -225,6 +247,8 @@ class Article(Base, PRBase):
                 0, int(pages)) else query.offset(pages*page_size)
 
         return query
+
+
 
     # def pagination(obj, page, items_per_page):
     #
