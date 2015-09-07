@@ -486,7 +486,8 @@ CREATE TABLE file (
     author_user_id character varying(36),
     cr_tm timestamp without time zone NOT NULL,
     md_tm timestamp without time zone NOT NULL,
-    ac_tm timestamp without time zone NOT NULL
+    ac_tm timestamp without time zone NOT NULL,
+    copyright_author_name character varying(100) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -531,7 +532,8 @@ CREATE TABLE portal (
     name character varying(100) NOT NULL,
     portal_plan_id character varying(36) NOT NULL,
     company_owner_id character varying(36) NOT NULL,
-    portal_layout_id character varying(36) DEFAULT '55e99785-bda1-4001-922f-ab974923999a'::character varying NOT NULL
+    portal_layout_id character varying(36) DEFAULT '55e99785-bda1-4001-922f-ab974923999a'::character varying NOT NULL,
+    host character varying(50)
 );
 
 
@@ -889,6 +891,14 @@ ALTER TABLE ONLY file
 
 ALTER TABLE ONLY article_company
     ADD CONSTRAINT for_one_company_one_version UNIQUE (company_id, article_id);
+
+
+--
+-- Name: portal_company_owner_id_key; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+ALTER TABLE ONLY portal
+    ADD CONSTRAINT portal_company_owner_id_key UNIQUE (company_owner_id);
 
 
 --
