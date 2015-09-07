@@ -3,6 +3,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
 from ..models.users import User
+from flask import g
 
 
 class LoginForm(Form):
@@ -27,11 +28,13 @@ class RegistrationForm(Form):
     submit = SubmitField('Register')
 
     def validate_email(self, field):
-        if User.query.filter_by(profireader_email=field.data).first():
+        if g.db.query(User).query.\
+                filter_by(profireader_email=field.data).first():
             raise ValidationError('Email already registered.')
 
     def validate_displayname(self, field):
-        if User.query.filter_by(profireader_name=field.data).first():
+        if g.db.query(User).query.\
+                filter_by(profireader_name=field.data).first():
             pass
             #raise ValidationError('Username already in use.')
 
@@ -60,7 +63,8 @@ class PasswordResetForm(Form):
     submit = SubmitField('Reset Password')
 
     def validate_email(self, field):
-        if User.query.filter_by(profireader_email=field.data).first() is None:
+        if g.db.query(User).query.\
+                filter_by(profireader_email=field.data).first() is None:
             raise ValidationError('Unknown email address.')
 
 
@@ -71,5 +75,6 @@ class ChangeEmailForm(Form):
     submit = SubmitField('Update Email Address')
 
     def validate_email(self, field):
-        if User.query.filter_by(profireader_email=field.data).first():
+        if g.db.query(User).query.\
+                filter_by(profireader_email=field.data).first():
             raise ValidationError('Email already registered.')
