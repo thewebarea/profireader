@@ -265,19 +265,20 @@ class UserCompany(Base, PRBase):
     @staticmethod
     def show_rights(comp_id):
         emplo = {}
-        for x in db(Company, id=comp_id).one().employees:
-            user_in_company = UserCompany.user_in_company(user_id=x.id,
-                                                          company_id=comp_id)
-            emplo[x.id] = {'id': x.id,
-                           'name': x.user_name,
-                           'user': x,
-                           'rights': set(),
-                           'companies': [x.employers],
-                           'status': user_in_company.status,
-                           'date': user_in_company.md_tm}
+        for user in db(Company, id=comp_id).one().employees:
+            user_company = user.employer_assoc.\
+                filter_by(company_id=comp_id).first()
+            emplo[user.id] = {'id': user.id,
+                              'name': user.user_name,
+                              # TODO (AA): don't pass user object
+                              'user': user,
+                              'rights': {},
+                              'companies': [user.employers],
+                              'status': user_company.status,
+                              'date': user_company.md_tm}
 
-            emplo[x.id]['rights'] = \
-                Right.transform_rights_into_set(user_in_company.rights)
+            emplo[user.id]['rights'] = \
+                Right.transform_rights_into_set(user_company.rights)
             # earlier it was a dictionary:
             # {'right_1': True, 'right_2': False, ...}
         return emplo
