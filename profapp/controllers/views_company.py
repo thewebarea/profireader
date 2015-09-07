@@ -15,7 +15,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
-from ..models.rights import Right
+from ..models.rights import Right, list_of_RightAtomic_attributes
 
 
 # todo: resolve a problem with @json!
@@ -153,14 +153,23 @@ def profile(company_id):
 @login_required
 def employees(comp_id):
     company_user_rights = UserCompany.show_rights(comp_id)
-    curr_user = {g.user_dict['id']: company_user_rights[user] for user
-                 in company_user_rights if user == g.user_dict['id']}
+
+    for user_id in company_user_rights.keys():
+        rights = company_user_rights[user_id]['rights']
+        rez = {}
+        for elem in list_of_RightAtomic_attributes:
+            rez[elem.lower()] = True if elem.lower() in rights else False
+        company_user_rights[user_id]['rights'] = rez
+
+    user_id = current_user.get_id()
+    curr_user = {user_id: company_user_rights[user_id]}
     current_company = db(Company, id=comp_id).one()
 
     return render_template('company/company_employees.html',
                            comp=current_company,
                            company_user_rights=company_user_rights,
-                           curr_user=curr_user
+                           curr_user=curr_user,
+                           Right=Right
                            )
 
 
