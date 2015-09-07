@@ -28,12 +28,12 @@ class RegistrationForm(Form):
     submit = SubmitField('Register')
 
     def validate_email(self, field):
-        if g.db.query(User).query.\
+        if g.db.query(User).\
                 filter_by(profireader_email=field.data).first():
             raise ValidationError('Email already registered.')
 
     def validate_displayname(self, field):
-        if g.db.query(User).query.\
+        if g.db.query(User).\
                 filter_by(profireader_name=field.data).first():
             pass
             #raise ValidationError('Username already in use.')
@@ -75,6 +75,6 @@ class ChangeEmailForm(Form):
     submit = SubmitField('Update Email Address')
 
     def validate_email(self, field):
-        if g.db.query(User).query.\
+        if g.db.query(User).\
                 filter_by(profireader_email=field.data).first():
             raise ValidationError('Email already registered.')
