@@ -3,8 +3,7 @@ from ..models.company import simple_permissions
 # from .request_wrapers import json
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, Right, \
-    UserCompany
+from ..models.company import Company, UserCompany
 # from phonenumbers import NumberParseException
 from ..constants.USER_ROLES import RIGHTS
 from ..models.users import User
@@ -16,6 +15,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
+from ..models.rights import Right
 
 
 # todo: resolve a problem with @json!
@@ -248,7 +248,7 @@ def suspend_employee():
     return redirect(url_for('company.employees', comp_id=data['comp_id']))
 
 
-# todo: what actually does it intended?
+# todo: what actually is it intended?
 @company_bp.route('/suspended_employees/<string:comp_id>')
 @check_rights(simple_permissions(frozenset()))
 @login_required
@@ -258,5 +258,5 @@ def suspended_employees_func(comp_id):
         UserCompany.suspend_employee(comp_id, user_id=current_user.get_id())
     return render_template('company/company_suspended.html',
                            suspended_employees=suspended_employees,
-                           company_id=company_id
+                           company_id=comp_id
                            )
