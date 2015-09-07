@@ -7,8 +7,7 @@
 {% include 'company/company_base.html' %}
 {% endblock company_base %}
     <script>
-        module.controller('publication', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
-            {{ init_data()|safe }}
+        module.controller('publication', ['$scope', function ($scope) {
             $scope.publications = {{ raw_url_for('portal.publications')|safe }};
             $scope.url_update_status = '{{ url_for('portal.update_article_portal')|safe }}';
             $scope.getData = function () {return $scope.data;};
@@ -16,7 +15,7 @@
         }]);
     </script>
     {% raw %}
-    <div on-init="initOld" ng-controller="publication">
+    <div on-init="loadData()" ng-controller="publication">
         <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
             <div ng-repeat="dat in data.portal">
                 <div ng-repeat="article in dat.article_portal">
