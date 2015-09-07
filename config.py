@@ -57,6 +57,7 @@ class Config(object):
 
 # Pagination
     ITEMS_PER_PAGE = 3
+    PAGINATION_BUTTONS = 4
 
 # Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']

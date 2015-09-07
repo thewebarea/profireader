@@ -213,7 +213,8 @@ class Article(Base, PRBase):
         )/Config.ITEMS_PER_PAGE)
 
     def get_articles_for_portal(page_size, user_id, portal_division_id,
-                                pages, page=0):
+                                pages, page=1):
+        page -= 1
         query = _P().order_by('publishing_tm').filter(text(
             ' "publishing_tm" < clock_timestamp() ')).filter_by(
             portal_division_id=portal_division_id,
