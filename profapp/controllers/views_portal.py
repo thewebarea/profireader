@@ -2,9 +2,35 @@ from .blueprints import portal_bp
 from flask import render_template, request, url_for, redirect
 from ..models.company import Company
 from flask.ext.login import login_required
-from ..models.portal import CompanyPortal, Portal
+from ..models.portal import CompanyPortal, PortalDivisionType, Portal
 from .request_wrapers import ok
 from ..models.articles import ArticlePortal
+
+@portal_bp.route('/create/<string:company_id>/', methods=['GET'])
+def create(company_id):
+    comp = Company().query_company(company_id=company_id)
+    return render_template('company/portal_create.html',
+                           comp=comp)
+
+@portal_bp.route('/create/<string:company_id>/', methods=['POST'])
+@ok
+def create_load(json, company_id):
+
+    return {'company_id': company_id, 'portal_name': '',
+            'division_name': '', 'division_type': '',
+            'host_name': '', 'divisions':
+                [x.to_dict('id') for x in
+                 PortalDivisionType.get_division_types()]}
+
+@portal_bp.route('/confirm_create/', methods=['POST'])
+@ok
+def confirm_create(json):
+    portal = Portal(name=json['portal_name'],
+                    host=json['host_name'])
+    portal.create_portal(company_id=json['company_id'],
+                         division_type=json['division_type'],
+                         division_name=json['division_name'])
+    return json
 
 @portal_bp.route('/', methods=['POST'])
 @login_required

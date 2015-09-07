@@ -1,0 +1,37 @@
+{% extends "index_lazy_layout.html" %}
+
+{% block title %}Profireader - Company materials{% endblock title %}
+
+{% block portal_content %}
+    {% block company_base %}
+{% include 'company/company_base.html' %}
+{% endblock company_base %}
+    <script>
+        module.controller('create', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
+            {{ init_data()|safe }}
+            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};
+            $scope.url_after_seve = {{ raw_url_for('company.profile')|safe }};
+            $scope.getData = function () {return $scope.data;};
+            $scope.afterSave = function (resp) {window.location.href = $scope.url_after_seve({company_id: resp.company_id})};
+        }]);
+    </script>
+    {% raw %}
+    <div on-init="initOld" ng-controller="create">
+        <h2>Cteate portal</h2>
+        <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_confirm_create({})">
+            <h4>
+                <input type="text" placeholder="Portal name" ng-model="data.portal_name"><br>
+                <input type="text" placeholder="Division name" ng-model="data.division_name"> select division type:
+                <select ng-model="data.division_type">
+                    <option ng-repeat="division_type in data.divisions">{{division_type.id}}</option>
+                </select>
+                <br>
+                <input type="text" placeholder="Host name" ng-model="data.host_name">
+            </h4>
+            <input type="submit" value="Create">
+        </form>
+    </div>
+
+{% endraw %}
+
+{% endblock portal_content %}

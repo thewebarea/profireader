@@ -29,7 +29,7 @@ def configure_listener(class_, key, inst):
             return value
 
 
-class PRBase():
+class PRBase:
 
     def __init__(self):
         self.query = g.db.query_property()
@@ -41,7 +41,7 @@ class PRBase():
 
     def attr(self, dictionary):
         for k in dictionary:
-            setattr(self, k, dictionary[k]);
+            setattr(self, k, dictionary[k])
         return self
 
     def detach(self):
