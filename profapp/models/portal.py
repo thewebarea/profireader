@@ -116,10 +116,9 @@ class CompanyPortal(Base):
             portal else []
 
     @staticmethod
-    def show_portals(company_id):
+    def get_portals(company_id):
         comp_port = db(CompanyPortal, company_id=company_id).all()
-        return [Portal().query_portal(portal.portal_id) for portal in
-                comp_port] if comp_port else []
+        return [Portal().query_portal(portal.portal_id) for portal in comp_port]
 
 
 class PortalDivision(Base, PRBase):
