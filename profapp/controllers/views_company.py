@@ -181,7 +181,7 @@ def update_rights():
 @login_required
 def edit(company_id):
     company = db(Company, id=company_id).one()
-    user = current_user # # or is it UserCompany instance?
+    user = current_user  # # or is it UserCompany instance?
     return render_template('company/company_edit.html',
                            comp=company,
                            user_query=user

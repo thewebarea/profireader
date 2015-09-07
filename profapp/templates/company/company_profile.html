@@ -22,7 +22,8 @@
         {% endfor %}
     </span></h2>
     <h3>{{ comp.country }}, {{ comp.region }}, {{ comp.address }} </h3>
-    <h5>Phone: {{ comp.phone }} |  Fax:  {{ comp.phone2 }}  |  {{ comp.email }}    <span ng-cloak ng-show="{{ user_rights }}">
+    <h5>Phone: {{ comp.phone }} |  Fax:  {{ comp.phone2 }}  |  {{ comp.email }}
+            <span ng-cloak ng-show="{{ user_rights }}">
 
             {% if comp.author_user_id == g.user_dict['id'] %}
                 <a href="#">Create Portal</a>

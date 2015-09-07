@@ -53,6 +53,7 @@ class Company(Base, PRBase):
                                           uselist=False,
                                           backref='logo_owner_company',
                                           foreign_keys='Company.logo_file')
+
     def __init__(self, name=None,
                  portal_consist=False,
                  author_user_id=None,
@@ -100,7 +101,9 @@ class Company(Base, PRBase):
                                    rights=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
         user.employer_assoc.append(user_company)  # .all() added
-        user.companies.append(self)
+        #user.companies.append(self)
+        user.employers.append(self)
+
 
         g.db.merge(user)
         g.db.commit()

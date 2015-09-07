@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
-from db_init import Base, db_session
+from sqlalchemy import Column, Integer, ForeignKey, String, Binary, \
+    Float, TIMESTAMP, UniqueConstraint
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from utils.db_utils import db
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from flask import url_for
+from .pr_base import PRBase, Base
 
 
 class File(Base):

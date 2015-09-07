@@ -4,12 +4,8 @@ from sqlalchemy.orm import relationship
 # from db_init import Base, g.db
 from utils.db_utils import db
 from .company import Company
-<<<<<<< HEAD
-from .pr_base import PRBase
-=======
 from .pr_base import PRBase, Base
-from ..controllers.has_right import has_right
->>>>>>> origin/master
+from flask import g
 
 
 class Portal(Base, PRBase):
@@ -106,10 +102,10 @@ class CompanyPortal(Base):
     @staticmethod
     def apply_company_to_portal(company_id, portal_id):
         g.db.add(CompanyPortal(company_id=company_id,
-                                     portal_id=portal_id,
-                                     company_portal_plan_id=Portal().
-                                     query_portal(portal_id).
-                                     portal_plan_id))
+                               portal_id=portal_id,
+                               company_portal_plan_id=Portal().
+                               query_portal(portal_id).
+                               portal_plan_id))
         g.db.flush()
 
     @staticmethod
