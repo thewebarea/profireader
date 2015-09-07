@@ -1,8 +1,8 @@
-from flask import request, current_app
+from flask import request, current_app, g
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
-from db_init import Base, db_session
+# from db_init import Base, g.db
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
@@ -17,8 +17,9 @@ from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
-from .pr_base import PRBase
+from .pr_base import PRBase, Base
 from sqlalchemy.ext.associationproxy import association_proxy
+
 
 class User(Base, UserMixin, PRBase):
     __tablename__ = 'user'
@@ -33,10 +34,8 @@ class User(Base, UserMixin, PRBase):
     profireader_gender = Column(TABLE_TYPES['gender'])
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
-    employer = relationship('Company', secondary='user_company', backref='employee')
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
-    # SECURITY DATA
 
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False)
@@ -51,8 +50,6 @@ class User(Base, UserMixin, PRBase):
     profireader_small_avatar_url = \
         Column(TABLE_TYPES['avatar_url'],
                nullable=False, default='/static/no_avatar_small.png')
-    #avatar_hash = Column(TABLE_TYPES['avatar_hash'])
-
     #status_id = Column(Integer, db.ForeignKey('status.id'))
 
     email_conf_token = Column(TABLE_TYPES['token'])
@@ -61,6 +58,8 @@ class User(Base, UserMixin, PRBase):
     pass_reset_conf_tm = Column(TABLE_TYPES['timestamp'])
 
     # registered_via = Column(_T['REGISTERED_VIA'])
+
+    employers = relationship('Company', secondary='user_company')
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['profireader', 'google', 'facebook', 'linkedin', 'twitter', 'microsoft', 'yahoo']
@@ -125,13 +124,12 @@ class User(Base, UserMixin, PRBase):
     yahoo_link = Column(TABLE_TYPES['link'])
     yahoo_phone = Column(TABLE_TYPES['phone'])
 
-# get all users in company : company.employee
-# get all users companies : user.employer
+# get all users in company : company.employees
+# get all users companies : user.employers
 
     def __init__(self,
-                 companies=[],
                  user_right_in_company=[],
-                 employer=None,
+                 employers=[],
                  PROFIREADER_ALL=SOC_NET_NONE['profireader'],
                  GOOGLE_ALL=SOC_NET_NONE['google'],
                  FACEBOOK_ALL=SOC_NET_NONE['facebook'],
@@ -151,9 +149,11 @@ class User(Base, UserMixin, PRBase):
                  pass_reset_key=None,
                  pass_reset_conf_tm=None,
                  ):
-        self.companies = companies
-# TODO AA by OK
-        # self.employer = employer
+
+        # self.companies = companies
+
+        self.employers = employers
+
         self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['email']
         self.profireader_first_name = PROFIREADER_ALL['first_name']
@@ -249,20 +249,20 @@ class User(Base, UserMixin, PRBase):
 
     def ban(self):
         self.banned = True
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return self
 
     def unban(self):
         self.banned = False
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return self
 
     def ping(self):
         self.last_seen = datetime.datetime.utcnow()
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
 
     def gravatar(self, size=100, default='identicon', rating='g'):
         if request.is_secure:
@@ -286,8 +286,8 @@ class User(Base, UserMixin, PRBase):
                 completeness = False
                 break
         #self.completeness = completeness
-        #db_session.add(self)
-        #db_session.commit()
+        #g.db.add(self)
+        #g.db.commit()
         return completeness
 
     def logged_in_via(self):
@@ -371,8 +371,8 @@ class User(Base, UserMixin, PRBase):
         if data.get('confirm') != self.id:
             return False
         self.confirmed = True
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return True
 
     def generate_reset_token(self, expiration=3600):
@@ -388,8 +388,8 @@ class User(Base, UserMixin, PRBase):
         if data.get('reset') != self.id:
             return False
         self.password = new_password
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return True
 
     def generate_email_change_token(self, new_email, expiration=3600):
@@ -417,7 +417,6 @@ class User(Base, UserMixin, PRBase):
         content = passed_file.stream.read(-1)
 
         file = File(
-            author=self.profireader_name,
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)
@@ -425,7 +424,6 @@ class User(Base, UserMixin, PRBase):
             file.upload(content=content).get_url()
 
         file = File(
-            author=self.profireader_name,
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)

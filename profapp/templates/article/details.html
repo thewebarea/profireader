@@ -6,8 +6,7 @@
 
 
     <script>
-        module.controller('article_my_versions', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
-            {{ init_data()|safe }}
+        module.controller('article_my_versions', ['$scope', '$ok', function ($scope, $ok) {
             $scope.url_update = {{ raw_url_for('article.show_form_update')|safe }};
             $scope.url_search_for_company = {{ raw_url_for('article.search_for_company_to_submit')|safe }};
             $scope.url_submit = {{ raw_url_for('article.submit_to_company')|safe }};
@@ -15,14 +14,6 @@
             $scope.selectedCompany_name = '';
             $scope.selectedCompany = null;
             $scope.selectedCompany_sending = false;
-
-
-            $scope.submitToCompany = function (company_id) {
-                $scope.selectedCompany_sending = company_id;
-                $http.post($scope.url_send({article_id: $scope.data.id}), {company_id: company_id}).then().finally(function () {
-                    $scope.selectedCompany_sending = false;
-                });
-            };
 
 
             $scope.onSelect = function ($item, $model, $label) {
@@ -76,9 +67,9 @@
             color: #f00;
         }
     </style>
-    <div ng-controller="article_my_versions">
-        <div ng-show="loading">{{ _('Loading...') }}</div>
-        <div ng-show="!loading">
+    <div ng-init="loadData1()" ng-controller="article_my_versions">
+        <div ng-if="loading">{{ _('Loading...') }}</div>
+        <div ng-if="!loading">
             <h2>{{ _('Article title is `%(data.mine.title)s`') }}</h2>
             {{ data.mine.short }}
             <h4>{{ _('Created at %(data.mine.cr_tm)s') }}</h4>
@@ -87,7 +78,7 @@
 
             {{ _('submit my article to company') }} <input typeahead-on-select="onSelect($item, $model, $label)"
                                                            typeahead-template-url="customTemplate.html"
-                                                           typeahead-loading="loadingLocations"
+                                                           typeahead-loading="loadingCompanies"
                                                            ng-model="selectedCompany_name"
                                                            typeahead="company as company.name for company in searchForCompanyToSubmit($viewValue)"
                                                            name="company_id"/>&nbsp;
@@ -95,7 +86,7 @@
                     ng-class="{'disabled': !selectedCompany || selectedCompany_sending}"
                     ng-disabled="!selectedCompany || selectedCompany_sending">{{ _('submit for publication') }}
             </button>
-            <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
+            <i ng-show="loadingCompanies" class="glyphicon glyphicon-refresh"></i>
             <hr/>
             <h2>{{ _('Submitted to following companies') }}</h2>
 

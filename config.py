@@ -1,6 +1,7 @@
 import os
 import secret_data
 
+
 def database_uri(host, username, password, db_name):
     return 'postgresql+psycopg2://{username}:{password}@{host}/{db_name}'. \
         format(**{'db_name': db_name,
@@ -47,15 +48,20 @@ class Config(object):
     # operations using the other.
     THREADS_PER_PAGE = 2
 
-    # Ratio for image_editor, can be : 1.7777777777777777, 1.3333333333333333,
-    # 0.6666666666666666, 1
+# Ratio for image_editor, can be :
+# 1.7777777777777777, 1.3333333333333333, 0.6666666666666666, 1
     IMAGE_EDITOR_RATIO = 1.3333333333333333
     HEIGHT_IMAGE = 300   # px
-    ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'JPEG2000',
-                             'MSP', 'PCX', 'PNG', 'PPM', 'SPIDER',
-                             'TIFF', 'WebP', 'XBM', 'XV Thumbnails']
+    ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG',
+                             'JPEG2000', 'MSP', 'PCX', 'PNG', 'PPM',
+                             'SPIDER', 'TIFF', 'WebP', 'XBM',
+                             'XV Thumbnails']
 
-    #Base rights will added when user is confirmed in company
+# Pagination
+    ITEMS_PER_PAGE = 3
+    PAGINATION_BUTTONS = 4
+
+# Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']
     # Define the application directory
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -82,6 +88,8 @@ class Config(object):
 
     OAUTH_CONFIG = secret_data.OAUTH_CONFIG
 
+    # PRESERVE_CONTEXT_ON_EXCEPTION = False
+
     BABEL_DEFAULT_LOCALE = 'uk'
 #     LANGUAGES = {
 #     'en': 'English',
@@ -93,6 +101,40 @@ class ProductionDevelopmentConfig(Config):
 
     #Define database connection parameters
     host = os.getenv('PRODUCTION_SERVER_DB_HOST', Config.host)
+    username = os.getenv('PRODUCTION_SERVER_DB_USERNAME', Config.username)
+    password = os.getenv('PRODUCTION_SERVER_DB_PASSWORD', Config.password)
+    db_name = os.getenv('PRODUCTION_SERVER_DB_NAME', Config.database)
+
+    SERVER_NAME = os.getenv('PRODUCTION_SERVER_NAME', Config.SERVER_NAME)
+
+    # Define production database
+    SQLALCHEMY_DATABASE_URI = \
+        database_uri(host, username, password, db_name)
+
+    # Use a secure, unique and absolutely secret key for
+    # signing the data.
+    CSRF_SESSION_KEY = os.getenv('PRODUCTION_SERVER_CSRF_SESSION_KEY', None)
+
+    # Secret key for signing cookies
+    SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)
+
+    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', 'Profireader')
+
+    # Facebook settings
+#    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
+#                                Config.CONSUMER_KEY_FB)
+#    CONSUMER_SECRET_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_SECRET',
+#                                   Config.CONSUMER_SECRET_FB)
+
+    if 'PRODUCTION_SERVER_DB_HOST' not in os.environ.keys():
+
+        # Statement for enabling the development environment
+        DEBUG = True
+
+class FrontConfig(Config):
+
+    SERVER_NAME = 'companyportal.d.ntaxa.com'
+    host = os.getenv('PRODUCTION_SERVER_DB_HOST', 'companyportal.d.ntaxa.com')
     username = os.getenv('PRODUCTION_SERVER_DB_USERNAME', Config.username)
     password = os.getenv('PRODUCTION_SERVER_DB_PASSWORD', Config.password)
     db_name = os.getenv('PRODUCTION_SERVER_DB_NAME', Config.database)
@@ -140,4 +182,3 @@ class TestingConfig(Config):
         database_uri(Config.host, Config.username, Config.password, db_name)
 
     SITE_TITLE = "TEST"
-

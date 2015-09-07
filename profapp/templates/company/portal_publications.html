@@ -1,0 +1,52 @@
+{% extends "index_lazy_layout.html" %}
+
+{% block title %}Profireader - Company materials{% endblock title %}
+
+{% block portal_content %}
+    {% block company_base %}
+{% include 'company/company_base.html' %}
+{% endblock company_base %}
+    <script>
+        module.controller('publication', ['$scope', function ($scope) {
+            $scope.publications = {{ raw_url_for('portal.publications')|safe }};
+            $scope.url_update_status = '{{ url_for('portal.update_article_portal')|safe }}';
+            $scope.getData = function () {return $scope.data;};
+            $scope.afterSave = function (resp) {window.location.href = $scope.publications({company_id: resp.comp.id})};
+        }]);
+    </script>
+    {% raw %}
+    <div on-init="loadData()" ng-controller="publication">
+        <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
+            <div ng-repeat="dat in data.portal">
+                <div ng-repeat="article in dat.article_portal">
+                    <div ng-if="article.status!='published'">
+                        Your portal has got a request to publish article: {{ article.title }} from company
+                        <span ng-repeat="comp in article.company_article">
+                            {{ comp.name }}
+                        </span>
+                        Change status to :
+                        <select ng-model="data.new_status">
+                            <option value="{{ article.id }}/published">published</option>
+                            <option value="{{ article.id }}/declined">declined</option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+            <input type="submit" value="Apply">
+        </form>
+        <h4>Your published materials are:</h4>
+        <div ng-repeat="dat in data.portal">
+            <div ng-repeat="article in dat.article_portal">
+                <span ng-if="article.status=='published'">
+                    <h5>
+                        {{ article.title }}
+                    </h5>
+                    was published at <h6>{{ article.md_tm }}<br></h6>
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endraw %}
+
+{% endblock portal_content %}
