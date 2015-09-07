@@ -71,4 +71,4 @@ secret_data.*
 database.*.bak
 .venv/
 
-tmp~
+tmp*
