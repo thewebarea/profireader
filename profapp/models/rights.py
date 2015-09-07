@@ -84,7 +84,7 @@ class Right(RightAtomic):
 
 #  we really need id as RightAtomic is inherited from dict.
 Right = Right()
-# Now Right['edit'] is 'edit'
+# Now Right['edit'] returns 'edit'
 
 
 # Base rights are added when user becomes confirmed in company
