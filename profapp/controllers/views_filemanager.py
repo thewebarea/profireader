@@ -40,7 +40,7 @@ def filemanager():
         if request.args['calledby'] == 'tinymce_file_browse_image':
             options['mime_allow'] = '^image/.*'
             options['max_choose'] = 1
-            options['on_choose'] = 'parent.fileSelected'
+            options['on_choose'] = 'parent.TinyMCE_fileSelected'
 
     return render_template('filemanager.html', library=library, **options)
 

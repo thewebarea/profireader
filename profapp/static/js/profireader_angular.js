@@ -51,27 +51,6 @@ function getObjectsDifference(a, b, setval, notstrict) {
 
 
 angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
-    .factory('$translate', ['$http', function ($http) {
-
-        return function (text, dict) {
-            return text.replace(/%\(([^)]*)\)s/g, function (g0, g1) {
-                var indexes = g1.split('.')
-                var d = dict;
-                for (var i in indexes) {
-                    if (typeof d[indexes[i]] !== undefined) {
-                        d = d[indexes[i]];
-                    }
-                    else {
-                        return g1;
-                    }
-                }
-                return d;
-            });
-
-        }
-    }])
-
-
     .factory('$ok', ['$http', function ($http) {
         return function (url, data, ifok, iferror) {
             function error(result, error_code) {
@@ -179,19 +158,20 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     $(iElement).on('submit',
                         function () {
                             scope.$apply(function () {
-                                $('input[type=submit]', $(iElement)).prop('disabled', true);
-                                $('button[type=submit]', $(iElement)).prop('disabled', true);
+                                $('input, button, textarea, select', $(iElement)).prop('disabled', true);
+                                //$('button', $(iElement)).prop('disabled', true);
 
                                 var dataToSend = scope['ngOnsubmit']()();
                                 if (dataToSend) {
                                     $ok(scope['ngAction'], dataToSend, function (resp) {
-                                        console.log(resp);
+                                        //console.log(resp);
                                         if (scope.ngOnsuccess) {
                                             scope.ngOnsuccess()(resp)
                                         }
                                     }).finally(function () {
-                                        $('input[type=submit]', $(iElement)).prop('disabled', false);
-                                        $('button[type=submit]', $(iElement)).prop('disabled', false);
+                                        $('input, button, textarea, select', $(iElement)).prop('disabled', false);
+                                        //$('input[type=submit]', $(iElement)).prop('disabled', false);
+                                        //$('button[type=submit]', $(iElement)).prop('disabled', false);
                                     });
                                 }
                             });
