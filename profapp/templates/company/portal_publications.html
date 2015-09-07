@@ -7,7 +7,7 @@
 {% include 'company/company_base.html' %}
 {% endblock company_base %}
     <script>
-        module.controller('publication', ['$scope', '$ok', '$translate', function ($scope) {
+        module.controller('publication', ['$scope', function ($scope) {
             $scope.publications = {{ raw_url_for('portal.publications')|safe }};
             $scope.url_update_status = '{{ url_for('portal.update_article_portal')|safe }}';
             $scope.getData = function () {return $scope.data;};
