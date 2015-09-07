@@ -4,6 +4,7 @@ import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from utils.db_utils import db
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from flask import url_for, g
 from .pr_base import PRBase, Base
 
@@ -19,6 +20,9 @@ class File(Base):
     company_id = Column(TABLE_TYPES['id_profireader'],
                         ForeignKey('company.id'),
                         nullable=False)
+    copyright_author_name = Column(TABLE_TYPES['name'],
+                                   default='',
+                                   nullable=False)
     ac_count = Column(Integer, default=0, nullable=False)
     size = Column(Integer, default=0, nullable=False)
     author_user_id = Column(TABLE_TYPES['id_profireader'],
