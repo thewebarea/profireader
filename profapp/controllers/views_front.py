@@ -1,9 +1,7 @@
 from .blueprints import front_bp
 from flask import render_template, request, url_for, redirect, g
-from ..models.articles import Article
-from ..models.portal import CompanyPortal, PortalDivision, \
-    PortalDivisionType, Portal
-# from db_init import Base
+from ..models.articles import Article, ArticlePortal
+from ..models.portal import CompanyPortal, PortalDivision
 from config import Config
 
 
@@ -47,3 +45,15 @@ def division(division_name, page, search_text):
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
                            search_text=search_text)
+
+@front_bp.route('details/<string:article_portal_id>')
+def details(article_portal_id):
+    article = ArticlePortal.get(article_portal_id).\
+        to_dict('id, title,short, cr_tm, md_tm, '
+                'publishing_tm, status, long,'
+                'division.name, division.portal.id,'
+                'company.name')
+    return render_template('front/bird/article_details.html',
+                           article=article,
+                           portal=article['division']['portal']
+                           )
