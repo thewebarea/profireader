@@ -105,7 +105,6 @@ class ArticleCompany(Base, PRBase):
                                   primaryjoin="ArticleCompany.id=="
                                               "ArticlePortal."
                                               "article_company_id",
-                                  uselist=False,
                                   backref='company_article')
 
     def get_client_side_dict(self, fields='id|title|short|'

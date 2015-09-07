@@ -23,7 +23,7 @@ def partners(company_id):
     comp = db(Company, id=company_id).one()
     companies_partners = CompanyPortal.\
         show_companies_on_my_portal(company_id)
-    portals_partners = CompanyPortal.show_portals(company_id)
+    portals_partners = CompanyPortal.get_portals(company_id)
 
     return render_template('company/company_partners.html',
                            comp=comp,

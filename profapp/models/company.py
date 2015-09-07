@@ -158,6 +158,20 @@ class Company(Base, PRBase):
         if employee.status == STATUS().ACTIVE():
             return True
 
+    @staticmethod
+    def search_for_company_to_join(user_id, searchtext):
+        # TODO: AA by OZ:    .filter(user_id has to be employee in company and
+        # TODO: must have rights to submit article to this company)
+        return [x.to_dict('id,name') for x in db(Company)
+                # .filter(~db(ArticleCompany).
+                #         filter_by(company_id=Company.id,
+                #         article_id=article_id).exists())
+                .filter(Company.name.ilike(
+                        "%" + searchtext + "%")).all()]
+
+    def get_client_side_dict(self, fields='id|name'):
+        return self.to_dict(fields)
+
 
 def simple_permissions(set_of_rights):  # .p(right_name)
     def lambda_function(**kwargs):
