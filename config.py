@@ -86,6 +86,8 @@ class Config(object):
 
     OAUTH_CONFIG = secret_data.OAUTH_CONFIG
 
+    # PRESERVE_CONTEXT_ON_EXCEPTION = False
+
     BABEL_DEFAULT_LOCALE = 'uk'
 #     LANGUAGES = {
 #     'en': 'English',

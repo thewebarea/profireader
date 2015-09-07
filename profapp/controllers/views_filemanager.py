@@ -1,7 +1,7 @@
 import os
 from flask import request, render_template, make_response, send_file, g
 from flask.ext.login import current_user
-from db_init import db_session
+# from db_init import db_session
 from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp
 from io import BytesIO
@@ -49,7 +49,7 @@ def filemanager():
 @ok
 # @parent_folder
 def list(json, parent_id=None):
-    return File.list(parent_id=parent_id)
+    return File.list(parent_id)
 
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
@@ -57,7 +57,7 @@ def list(json, parent_id=None):
 # @parent_folder
 def createdir(json, parent_id=None):
     return File.createdir(name=request.json['params']['name'],
-                          parent_id=parent_id)
+                          parent_id=request.json['params']['parent_id'])
 
 
 @filemanager_bp.route('/upload/', methods=['POST'])
@@ -100,22 +100,22 @@ def upload(json):
 #         os.remove(root+'/'+filenam# e)
 #     els# e:
 #         os.removedirs(root+'/'+filenam# e)
-#     db_session.add(file_d# b)
+#     g.db.add(file_d# b)
 #     tr# y:
-#         db_session.commit# ()
+#         g.db.commit# ()
 #     except PermissionErro# r:
 #         result = {"result":#  {
 #                 "success": Fals# e,
 #                 "error": "Access denied to remove file# "}
 #            #  }
-#         db_session.rollback#(# )
+#         g.db.rollback#(# )
 #
 #     return result
 
 @filemanager_bp.route('/get/<string:file_id>')
 def get(file_id):
     image_query = file_query(file_id, File)
-    image_query_content = db_session.query(FileContent).filter_by(
+    image_query_content = g.db.query(FileContent).filter_by(
         id=file_id).first()
     response = make_response()
     response.headers['Content-Type'] = image_query.mime
@@ -126,5 +126,5 @@ def get(file_id):
 
 
 def file_query(file_id, table):
-    query = db_session.query(table).filter_by(id=file_id).first()
+    query = g.db.query(table).filter_by(id=file_id).first()
     return query

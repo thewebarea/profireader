@@ -1,7 +1,6 @@
 from flask import Flask, session, g, request, redirect
 from authomatic.providers import oauth2
 from authomatic import Authomatic
-from profapp.models.users import User
 from profapp.controllers.blueprints import register as register_blueprints
 from profapp.controllers.blueprints import register_front as register_blueprints_front
 
@@ -21,6 +20,28 @@ from flask import globals
 import re
 from flask.ext.babel import Babel, gettext
 import jinja2
+from .models.users import User
+
+
+def load_database():
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import scoped_session, sessionmaker
+    from config import ProductionDevelopmentConfig
+
+
+    engine = create_engine(ProductionDevelopmentConfig.SQLALCHEMY_DATABASE_URI)
+    db_session = scoped_session(sessionmaker(autocommit=False,
+                                             bind=engine))
+    g.db = db_session
+
+def close_database(exception):
+    db = getattr(g, 'db', None)
+    if db is not None:
+        if exception:
+            db.rollback()
+        else:
+            db.commit()
+            db.close()
 
 
 def setup_authomatic(app):
@@ -42,8 +63,9 @@ def load_user():
     #  ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 
     if user_init.is_authenticated():
+        from profapp.models.users import User
         id = user_init.get_id()
-        user = User.query.filter_by(id=id).first()
+        user = g.db.query(User).filter_by(id=id).first()
         logged_via = REGISTERED_WITH[user.logged_in_via()]
         user_dict['logged_via'] = logged_via
 
@@ -173,8 +195,12 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     babel = Babel(app)
 
-    app.before_request(setup_authomatic(app))
+    app.teardown_request(close_database)
+    app.before_request(load_database)
+
     app.before_request(load_user)
+    app.before_request(setup_authomatic(app))
+
 
     if front:
         register_blueprints_front(app)
@@ -197,7 +223,7 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     @login_manager.user_loader
     def load_user_manager(id):
-        return User.query.get(id)
+        return g.db.query(User).get(id)
 
     csrf.init_app(app)
 
@@ -212,11 +238,17 @@ def create_app(config='config.ProductionDevelopmentConfig',
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
     # Flask will automatically remove database sessions at the end of the
     # request or when the application shuts down:
-    from db_init import db_session
+    # from db_init import db_session
 
-    @app.teardown_appcontext
-    def shutdown_session(exception=None):
-        db_session.commit()
-        # db_session.remove()
+    # @app.teardown_appcontext
+    # def shutdown_session(exception=None):
+    #     try:
+    #         db_session.commit()
+    #     except Exception:
+    #         session.rollback()
+    #         raise
+    #     finally:
+    #         session.close()  # optional, depends on use case
+    #     # db_session.remove()
 
     return app

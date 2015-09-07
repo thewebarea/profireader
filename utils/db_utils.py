@@ -1,5 +1,5 @@
-from db_init import db_session
+from flask import g
 
 
 def db(arg, **kwargs):
-    return db_session.query(arg).filter_by(**kwargs)
+    return g.db.query(arg).filter_by(**kwargs)

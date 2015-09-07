@@ -1,10 +1,9 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, Binary, \
-    Float, TIMESTAMP, UniqueConstraint
+from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
 from db_init import Base, db_session
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from utils.db_utils import db
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from flask import url_for
 
 
@@ -67,35 +66,38 @@ class File(Base):
 
     @staticmethod
     def list(parent_id=None):
-        return list({'size': file.size, 'name': file.name, 'id': file.id,
+        return list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'cropable': True if File.is_cropable(file) else False,
-                                'type': 'dir' if file.mime == 'directory' else 'file',
+                                'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0]}
-                                        for file in db(File, parent_id = parent_id))
+                                        #for file in db(File))
+                                        for file in db(File, parent_id = parent_id))# we need all records from the table "file"
 
     @staticmethod
     def createdir(parent_id=None, name=None, author_user_id=None,
                   company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, author_user_id=author_user_id,
                  name=name, size=0, company_id=company_id, mime='directory')
-        db_session.add(f)
-        db_session.commit()
+        # f = File(parent_id=parent_id, author_user_id=author_user_id, 
+        #          name=name, size=0, company_id=company_id, copyright=copyright, mime='directory')
+        g.db.add(f)
+        g.db.commit()
         return f.id
 
     @staticmethod
     def create_company_dir(company=None, name=None):
         f = File(parent_id=None, author_user_id=company.author_user_id,
                  name=name, size=0, company_id=company.id, mime='directory')
-        db_session.add(f)
+        g.db.add(f)
         company.company_folder.append(f)
-        db_session.commit()
+        g.db.commit()
         for x in company.company_folder:
             return x.id
 
     def upload(self, content):
         file_cont = FileContent(file_content=self, content=content)
-        db_session.add(self, file_cont)
-        db_session.commit()
+        g.db.add(self, file_cont)
+        g.db.commit()
         return self
 
     def get_url(self):
@@ -115,34 +117,34 @@ class FileContent(Base):
         self.file_content = file_content
         self.content = content
 
-        # file.save(os.path.join(root, filename# ))
-        # for tmp_file in os.listdir(root# ):
-        #     st = os.stat(root+'/'+filenam# e)
-        #     file_db.name = filena# me
-        #     file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename# ))
-        #     file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename# ))
-        #     file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime(# ))
-        #     file_db.size = st[ST_SIZ# E]
-        #     if os.path.isfile(root+'/'+tmp_file# ):
-        #         file_db.mime = 'fil# e'
+        # file.save(os.path.join(root, filename))
+        # for tmp_file in os.listdir(root):
+        #     st = os.stat(root+'/'+filename)
+        #     file_db.name = filename
+        #     file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename))
+        #     file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename))
+        #     file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        #     file_db.size = st[ST_SIZE]
+        #     if os.path.isfile(root+'/'+tmp_file):
+        #         file_db.mime = 'file'
         #     els# e:
-        #         file_db.mime = 'di# r'
+        #         file_db.mime = 'dir'
 
         #
         # binary_out.close# ()
-        # if os.path.isfile(root+'/'+filename# ):
-        #     os.remove(root+'/'+filenam# e)
-        # els# e:
-        #     os.removedirs(root+'/'+filenam# e)
-        # db_session.add(file_d# b)
-        # tr# y:
-        #     db_session.commit# ()
-        # except PermissionErro# r:
-        #     result = {"result":#  {
-        #             "success": Fals# e,
-        #             "error": "Access denied to remove file# "}
-        #        #  }
-        #     db_session.rollback#(# )
+        # if os.path.isfile(root+'/'+filename):
+        #     os.remove(root+'/'+filename)
+        # else:
+        #     os.removedirs(root+'/'+filename)
+        # g.db.add(file_db)
+        # try:
+        #     g.db.commit()
+        # except PermissionError:
+        #     result = {"result":  {
+        #             "success": False,
+        #             "error": "Access denied to remove file"}
+        #          }
+        #     g.db.rollback()
         #
         # return result
         # return True

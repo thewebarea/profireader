@@ -1,7 +1,7 @@
 from .blueprints import user_bp
 from flask import url_for, render_template, abort, request, flash, redirect, \
-    request
-from db_init import db_session
+    request, g
+# from db_init import db_session
 from ..models.users import User
 from flask.ext.login import current_user, login_required
 from utils.db_utils import db
@@ -11,7 +11,7 @@ from ..forms.user import EditProfileForm
 @user_bp.route('/profile/<user_id>')
 @login_required
 def profile(user_id):
-    user = db_session.query(User).\
+    user = g.db.query(User).\
         filter(User.id == user_id).first()
     if not user:
         abort(404)
@@ -38,8 +38,8 @@ def edit_profile(user_id):
         user = user_query.first()
         image = request.files['avatar']
         user.avatar_update(image)
-        db_session.add(user)
-        db_session.commit()
+        g.db.add(user)
+        g.db.commit()
     else:
         user_fields = dict()
         user_fields['profireader_name'] = request.form['name']

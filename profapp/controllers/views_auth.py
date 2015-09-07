@@ -1,6 +1,6 @@
 from .blueprints import auth_bp
 from flask import g, request, url_for, render_template, flash
-from db_init import db_session
+#from db_init import db_session
 from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS, \
     SOC_NET_FIELDS_SHORT
 from flask.ext.login import logout_user, current_user, login_required
@@ -45,14 +45,14 @@ def login_signup_general(*soc_network_names):
                     redirect(url_for('auth.login'))
 
                 db_fields = DB_FIELDS[soc_network_names[-1]]
-                #user = db_session.query(User).\
+                #user = g.db.query(User).\
                 #    filter(getattr(User, db_fields['id']) == result_user.id)\
                 #    .first()
-                user = db_session.query(User).\
-                    filter(getattr(User, db_fields['email'])
-                           == result_user.email).first()
+                user = g.db.query(User).\
+                    filter(getattr(User, db_fields['email']) == result_user.email)\
+                    .first()
                 if not user:
-                    user = db_session.query(User).\
+                    user = g.db.query(User).\
                         filter(User.profireader_email == result_user.email)\
                         .first()
                     ind = False
@@ -75,9 +75,9 @@ def login_signup_general(*soc_network_names):
                         user.profireader_small_avatar_url = \
                             user.gravatar(size=AVATAR_SMALL_SIZE)
 
-                    db_session.add(user)
+                    g.db.add(user)
                     user.confirmed = True
-                    db_session.commit()
+                    g.db.commit()
 
                 if user.is_banned():
                     flash('Sorry, you are banned')
@@ -140,8 +140,8 @@ def signup():
             user.gravatar(size=AVATAR_SMALL_SIZE)
         # # user.password = form.password.data  # pass is automatically hashed
 
-        db_session.add(user)
-        db_session.commit()
+        g.db.add(user)
+        g.db.commit()
         token = user.generate_confirmation_token()
         send_email(user.profireader_email, 'Confirm Your Account',
                    'auth/email/confirm', user=user, token=token)
@@ -180,7 +180,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = db_session.query(User).\
+        user = g.db.query(User).\
             filter(User.profireader_email == form.email.data).first()
 
         if user.is_banned():
@@ -232,8 +232,8 @@ def change_password():
     if form.validate_on_submit():
         if current_user.verify_password(form.old_password.data):
             current_user.password = form.password.data
-            db_session.add(current_user)
-            db_session.commit()
+            g.db.add(current_user)
+            g.db.commit()
             flash('Your password has been updated.')
             return redirect(url_for('general.index'))
         else:
@@ -312,8 +312,8 @@ def change_email_request():
 def change_email(token):
     if current_user.change_email(token):
         flash('Your email address has been updated.')
-        db_session.add(current_user)
-        db_session.commit()
+        g.db.add(current_user)
+        g.db.commit()
     else:
         flash('Invalid request.')
     return redirect(url_for('general.index'))

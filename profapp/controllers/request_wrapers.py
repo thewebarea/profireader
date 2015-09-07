@@ -3,7 +3,6 @@ from flask import jsonify, request, g, abort
 from functools import reduce
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
-from db_init import Base
 from time import sleep
 
 

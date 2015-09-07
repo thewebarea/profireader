@@ -1,6 +1,9 @@
 from sqlalchemy import Column, String, ForeignKey, UniqueConstraint #, update
 from sqlalchemy.orm import relationship, backref
-from db_init import Base, db_session
+#from db_init import Base, db_session
+from sqlalchemy import Column, String, ForeignKey, update
+from sqlalchemy.orm import relationship
+# from db_init import Base, g.db
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from flask import g
 from config import Config
@@ -12,11 +15,13 @@ from .files import File, FileContent
 from .pr_base import PRBase
 from sqlalchemy import CheckConstraint
 from flask import abort
-from db_init import db_session
+#from db_init import db_session
 #from functools import reduce
 from .rights import Right, ALL_AVAILABLE_RIGHTS_FALSE
 from ..controllers.request_wrapers import check_rights
 from flask.ext.login import current_user
+from .files import File
+from .pr_base import PRBase, Base
 
 
 class Company(Base, PRBase):
@@ -73,7 +78,7 @@ class Company(Base, PRBase):
         # get all users companies : user.employers
 
         if author_user_id:
-            user = db_session.querry(User).get(author_user_id)
+            user = g.db.querry(User).get(author_user_id)
             user_id = author_user_id
         else:
             user_id = user.get_id()
@@ -97,8 +102,8 @@ class Company(Base, PRBase):
         user.employer_assoc.append(user_company)  # .all() added
         user.companies.append(self)
 
-        db_session.merge(user)
-        db_session.commit()
+        g.db.merge(user)
+        g.db.commit()
 
     @staticmethod
     def query_company(company_id):
@@ -135,6 +140,35 @@ class Company(Base, PRBase):
             )
         #db_session.flush()
 
+        g.db.commit()
+
+    @staticmethod
+    def query_employee(comp_id):
+
+        employee = db(UserCompany, company_id=comp_id,
+                      user_id=g.user_dict['id']).first()
+        return employee if employee else False
+
+    def query_owner_or_member(self, company_id):
+
+        employee = self.query_employee(company_id)
+        if not employee:
+            return False
+        if employee.status == STATUS().ACTIVE():
+            return True
+
+
+class UserCompanyRight(Base, PRBase):
+    __tablename__ = 'user_company_right'
+    id = Column(TABLE_TYPES['bigint'], primary_key=True)
+    user_company_id = Column(TABLE_TYPES['bigint'],
+                             ForeignKey('user_company.id'))
+    company_right_id = Column(TABLE_TYPES['rights'],
+                              ForeignKey('company_right.id'))
+
+    def __init__(self, user_company_id=None, company_right_id=None):
+        self.user_company_id = user_company_id
+        self.company_right_id = company_right_id
 
     @staticmethod
     def apply_request(comp_id, user_id, bool):
@@ -283,9 +317,9 @@ class UserCompany(Base, PRBase):
         user = user_object
         company = company_object
         if type(user_object) is int:
-            user = db_session.query(User).filter_by(id=user_object).first()
+            user = g.db.query(User).filter_by(id=user_object).first()
         if type(company_object) is int:
-            company = db_session.query(Company).\
+            company = g.db.query(Company).\
                 filter_by(id=company_object).first()
 
         needed_rights_int = \
