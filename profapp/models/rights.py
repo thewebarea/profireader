@@ -31,7 +31,7 @@ def get_my_attributes(my_class, with_values=False):
                 not(a[0].startswith('__') and a[0].endswith('__'))]
 
 
-class RightAtomic:
+class RightAtomic(dict):
     EDIT = ('edit', 0x0001)
     PUBLISH = ('publish', 0x0002)
     UNPUBLISH = ('unpublish', 0x0004)
@@ -48,6 +48,9 @@ class RightAtomic:
     MANAGE_COMMENTS = ('manage_comments', 0x2000)
     SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x4000)
 
+    @classmethod
+    def __getitem__(cls, attr):
+        return getattr(cls, attr.upper())[0]
 
 list_of_RightAtomic_attributes = get_my_attributes(RightAtomic)
 
@@ -78,6 +81,11 @@ class Right(RightAtomic):
         set_of_rights = set(rights_iterable)
         return reduce(lambda x, y: cls.RIGHT_REVERSED[x] |
                       cls.RIGHT_REVERSED[y], set_of_rights)
+
+#  we really need id as RightAtomic is inherited from dict.
+Right = Right()
+# Now Right['edit'] is 'edit'
+
 
 # Base rights are added when user becomes confirmed in company
 # BASE_RIGHTS_IN_COMPANY = 136
