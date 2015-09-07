@@ -90,10 +90,11 @@ def load_user():
     g.user_dict = user_dict
 
 
-#def load_user():
+# def load_user():
 #    g.user = None
 #    if 'user_id' in session.keys():
-#        g.user = User.query.filter_by(id=session['user_id']).first()
+#        g.user = g.db.query(User).\
+#            query.filter_by(id=session['user_id']).first()
 
 
 def flask_endpoint_to_angular(endpoint, **kwargs):
