@@ -1,8 +1,8 @@
-from flask import request, current_app
+from flask import request, current_app, g
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
-from db_init import Base, db_session
+# from db_init import Base, g.db
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
@@ -17,7 +17,7 @@ from sqlalchemy import String
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
-from .pr_base import PRBase
+from .pr_base import PRBase, Base
 from sqlalchemy.ext.associationproxy import association_proxy
 
 class User(Base, UserMixin, PRBase):
@@ -248,20 +248,20 @@ class User(Base, UserMixin, PRBase):
 
     def ban(self):
         self.banned = True
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return self
 
     def unban(self):
         self.banned = False
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return self
 
     def ping(self):
         self.last_seen = datetime.datetime.utcnow()
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
 
     def gravatar(self, size=100, default='identicon', rating='g'):
         if request.is_secure:
@@ -285,8 +285,8 @@ class User(Base, UserMixin, PRBase):
                 completeness = False
                 break
         #self.completeness = completeness
-        #db_session.add(self)
-        #db_session.commit()
+        #g.db.add(self)
+        #g.db.commit()
         return completeness
 
     def logged_in_via(self):
@@ -370,8 +370,8 @@ class User(Base, UserMixin, PRBase):
         if data.get('confirm') != self.id:
             return False
         self.confirmed = True
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return True
 
     def generate_reset_token(self, expiration=3600):
@@ -387,8 +387,8 @@ class User(Base, UserMixin, PRBase):
         if data.get('reset') != self.id:
             return False
         self.password = new_password
-        db_session.add(self)
-        db_session.commit()
+        g.db.add(self)
+        g.db.commit()
         return True
 
     def generate_email_change_token(self, new_email, expiration=3600):

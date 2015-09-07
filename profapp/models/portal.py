@@ -1,10 +1,10 @@
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
-from db_init import Base, db_session
+# from db_init import Base, g.db
 from utils.db_utils import db
 from .company import Company
-from .pr_base import PRBase
+from .pr_base import PRBase, Base
 from ..controllers.has_right import has_right
 
 class Portal(Base, PRBase):
@@ -102,12 +102,12 @@ class CompanyPortal(Base):
 
     @staticmethod
     def apply_company_to_portal(company_id, portal_id):
-        db_session.add(CompanyPortal(company_id=company_id,
+        g.db.add(CompanyPortal(company_id=company_id,
                                      portal_id=portal_id,
                                      company_portal_plan_id=Portal().
                                      query_portal(portal_id).
                                      portal_plan_id))
-        db_session.flush()
+        g.db.flush()
 
     @staticmethod
     def show_companies_on_my_portal(company_id):

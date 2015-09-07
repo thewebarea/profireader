@@ -1,10 +1,10 @@
 from .blueprints import image_editor_bp
-from flask import render_template, request, url_for, redirect
+from flask import render_template, request, url_for, redirect, g
 from config import Config
 from PIL import Image
 from .errors import BadCoordinates, EmptyFieldName
 from profapp.models.files import File, FileContent
-from db_init import db_session
+# from db_init import db_session
 from io import BytesIO
 from time import gmtime, strftime
 from .views_filemanager import file_query
@@ -50,18 +50,18 @@ def image_editor(img_id):
             thumbnail.name = data['6name']+'.' + \
                              image_query.name.split('.')[-1]
             thumbnail.mime = image_query.mime
-            db_session.add(thumbnail)
-            db_session.commit()
+            g.db.add(thumbnail)
+            g.db.commit()
             thumbnail_content.content = bytes_file.getvalue()
             thumbnail_content.id = thumbnail.id
-            db_session.add(thumbnail_content)
-            db_session.commit()
+            g.db.add(thumbnail_content)
+            g.db.commit()
             image_id = thumbnail.id
             return redirect(url_for('image_editor.cropped',
                                     id=image_id))
 
         else:
-            db_session.rollback()
+            g.db.rollback()
             raise BadCoordinates
 
     return render_template('image_editor.html',

@@ -1,14 +1,42 @@
-from db_init import db_session, Base
+# from db_init import g.db, Base
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
 import re
+from flask import g
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import event
+from utils.validators import validators
+
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
+
+# this event is called whenever an attribute
+# on a class is instrumented
+@event.listens_for(Base, 'attribute_instrument')
+def configure_listener(class_, key, inst):
+    if not hasattr(inst.property, 'columns'):
+        return
+    # this event is called whenever a "set"
+    # occurs on that instrumented attribute
+
+    @event.listens_for(inst, "set", retval=True)
+    def set_(instance, value, oldvalue, initiator):
+        validator = validators.get(inst.property.columns[0].type.__class__)
+        if validator:
+            return validator(value)
+        else:
+            return value
 
 
 class PRBase():
+
+    def __init__(self):
+        self.query = g.db.query_property()
+
     def save(self):
-        db_session.add(self)
-        db_session.flush()
+        g.db.add(self)
+        g.db.flush()
         return self
 
     def attr(self, dictionary):
@@ -17,7 +45,7 @@ class PRBase():
         return self
 
     def detach(self):
-        db_session.expunge(self)
+        g.db.expunge(self)
         make_transient(self)
         self.id = None
         return self
@@ -27,7 +55,7 @@ class PRBase():
 
     @classmethod
     def get(cls, id):
-        return db_session().query(cls).get(id)
+        return g.db().query(cls).get(id)
 
 # TODO: OZ by OZ:**kwargs should accept lambdafunction for fields formattings
     def to_dict(self, *args, prefix=''):
