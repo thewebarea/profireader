@@ -28,11 +28,12 @@ def load_database():
     from sqlalchemy.orm import scoped_session, sessionmaker
     from config import ProductionDevelopmentConfig
 
-
     engine = create_engine(ProductionDevelopmentConfig.SQLALCHEMY_DATABASE_URI)
     db_session = scoped_session(sessionmaker(autocommit=False,
+                                             autoflush=False,
                                              bind=engine))
     g.db = db_session
+
 
 def close_database(exception):
     db = getattr(g, 'db', None)
@@ -48,6 +49,7 @@ def setup_authomatic(app):
     authomatic = Authomatic(app.config['OAUTH_CONFIG'],
                             app.config['SECRET_KEY'],
                             report_errors=True)
+
     def func():
         g.authomatic = authomatic
     return func
