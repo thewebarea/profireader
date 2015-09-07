@@ -161,32 +161,6 @@ class Company(Base, PRBase):
             return True
 
 
-class UserCompanyRight(Base, PRBase):
-    __tablename__ = 'user_company_right'
-    id = Column(TABLE_TYPES['bigint'], primary_key=True)
-    user_company_id = Column(TABLE_TYPES['bigint'],
-                             ForeignKey('user_company.id'))
-    company_right_id = Column(TABLE_TYPES['rights'],
-                              ForeignKey('company_right.id'))
-
-    def __init__(self, user_company_id=None, company_right_id=None):
-        self.user_company_id = user_company_id
-        self.company_right_id = company_right_id
-
-    @staticmethod
-    def apply_request(comp_id, user_id, bool):
-
-        if bool == 'True':
-            stat = STATUS().ACTIVE()
-            UserCompany.update_rights(user_id, comp_id,
-                                      Config.BASE_RIGHT_IN_COMPANY)
-        else:
-            stat = STATUS().REJECT()
-        db(UserCompany, company_id=comp_id, user_id=user_id,
-           status=STATUS().NONACTIVE()).update({'status': stat})
-        #db_session.flush()
-
-
 def simple_permissions(set_of_rights):  # .p(right_name)
     def lambda_function(**kwargs):
         if 'company_id' in kwargs.keys():
