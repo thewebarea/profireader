@@ -43,15 +43,25 @@
             {{ _('Article title') }}<br/>
             <input type="text" ng-model="data.title"><br/><br/>
 
+
+
+
             {{ _('Article image id') }}<br/>
             <input type="text" ng-model="data.image_file_id"><br/><br/>
 
             {{ _('Short Description') }}<br/>
             <textarea placeholder="short" ng-model="data.short"></textarea><br/><br/>
 
-            {{ _('Full text') }}<br/>
-            <textarea ui-tinymce="tinymceOptions" placeholder="text" ng-model="data.long"></textarea><br/><br/>
-            <input type="submit" value="{{ data.id ? 'save' : 'create' }}">
+
+            <div>
+                <div style="display: block; margin-right: 15px; width: 150px; height: 150px; border: 1px solid #ccc; background: #eee; float: left;">{{ _('Select main article image') }}</div>
+                <div style="width: 75%; float: right;">
+                    {{ _('Full text') }}<br/>
+                    <textarea class="" ui-tinymce="tinymceImageOptions" placeholder="text" ng-model="data.long"></textarea><br/><br/>
+                    </div>
+            </div>
+            <input style="clear: both;" type="submit" value="{{ data.id ? 'save' : 'create' }}">
+
         </form>
     </div>
 </div>

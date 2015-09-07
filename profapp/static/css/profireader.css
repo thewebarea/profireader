@@ -12,3 +12,8 @@ We have something similar in bootstrap? Can correct this class to look nicer?
   transition: color 0.5s;
 
 }
+
+
+ul.dropdown-menu li a.typeahead-item strong {
+            color: #f00;
+        }
