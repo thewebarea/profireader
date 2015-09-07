@@ -1,29 +1,42 @@
 <ul class="pager">
     <li class="previous">
-        <a href="#">&larr; Older</a>
+        {% if current_page != 1 %}
+        <a href="{{ url_for('front.division', division_name=division.name, page=current_page - 1, search_text=search_text) }}">&larr; Older</a>
+        {% else %} &larr; Older
+        {% endif %}
     </li>
-
+    {% for button in range(page_buttons) %}
+        {% if current_page - (button + 1)> 0 %}
     <li>
-        <a href="#">1</a>
+        <a href="{{ url_for('front.division', division_name=division.name, page=current_page - (button + 1), search_text=search_text)}}">{{ current_page - (button + 1) }}</a>
     </li>
+        {% endif %}
+    {% endfor %}
     <li class="current-page">
-        <a href="#">2</a>
+        <a href="{{ url_for('front.division', division_name=division.name, page=current_page, search_text=search_text) }}">{{ current_page }}</a>
     </li>
+    {% for button in range(page_buttons) %}
+        {% if current_page + (button + 1)< pages %}
     <li>
-        <a href="#">3</a>
+        <a href="{{ url_for('front.division', division_name=division.name, page=current_page + (button + 1), search_text=search_text) }}">{{ current_page + (button + 1) }}</a>
     </li>
-    <li>
-        <a href="#">4</a>
-    </li>
-    <li>
-        ...
-    </li>
-    <li>
-        <a href="#">25</a>
-    </li>
-
+        {% endif %}
+    {% endfor %}
+    {% if current_page + page_buttons < pages %}
+        <li>
+            ...
+        </li>
+    {% endif %}
+    {% if current_page != pages %}
+        <li>
+            <a href="{{ url_for('front.division', division_name=division.name, page=pages, search_text=search_text) }}">{{ pages }}</a>
+        </li>
+    {% endif %}
 
     <li class="next">
-        <a href="#">Newer &rarr;</a>
+        {% if current_page != pages %}
+        <a href="{{ url_for('front.division', division_name=division.name, page=current_page + 1, search_text=search_text) }}">Newer &rarr;</a>
+        {% else %} Newer &rarr;
+        {% endif %}
     </li>
 </ul>

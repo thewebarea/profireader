@@ -5,10 +5,10 @@ from sqlalchemy.orm import relationship
 from utils.db_utils import db
 from .company import Company
 from .pr_base import PRBase, Base
-from ..controllers.has_right import has_right
+from flask import g
+
 
 class Portal(Base, PRBase):
-
     __tablename__ = 'portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -19,7 +19,7 @@ class Portal(Base, PRBase):
                             ForeignKey('portal_plan.id'))
 
     portal_layout_id = Column(TABLE_TYPES['id_profireader'],
-                            ForeignKey('portal_layout.id'))
+                              ForeignKey('portal_layout.id'))
 
     layout = relationship('PortalLayout')
 
@@ -55,8 +55,8 @@ class Portal(Base, PRBase):
         ret = db(Portal, id=portal_id).one()
         return ret
 
-class PortalPlan(Base, PRBase):
 
+class PortalPlan(Base, PRBase):
     __tablename__ = 'portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -78,7 +78,6 @@ class PortalLayout(Base, PRBase):
 
 
 class CompanyPortal(Base):
-
     __tablename__ = 'company_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -103,10 +102,10 @@ class CompanyPortal(Base):
     @staticmethod
     def apply_company_to_portal(company_id, portal_id):
         g.db.add(CompanyPortal(company_id=company_id,
-                                     portal_id=portal_id,
-                                     company_portal_plan_id=Portal().
-                                     query_portal(portal_id).
-                                     portal_plan_id))
+                               portal_id=portal_id,
+                               company_portal_plan_id=Portal().
+                               query_portal(portal_id).
+                               portal_plan_id))
         g.db.flush()
 
     @staticmethod
@@ -122,8 +121,8 @@ class CompanyPortal(Base):
         return [Portal().query_portal(portal.portal_id) for portal in
                 comp_port] if comp_port else []
 
-class PortalDivision(Base, PRBase):
 
+class PortalDivision(Base, PRBase):
     __tablename__ = 'portal_division'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     cr_tm = Column(TABLE_TYPES['timestamp'])
@@ -144,14 +143,13 @@ class PortalDivision(Base, PRBase):
         self.name = name
         self.portal_id = portal_id
 
-class PortalDivisionType(Base):
 
+class PortalDivisionType(Base):
     __tablename__ = 'portal_division_type'
     id = Column(TABLE_TYPES['short_name'], primary_key=True)
 
 
 class UserPortalReader(Base, PRBase):
-
     __tablename__ = 'user_portal_reader'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     user_id = Column(TABLE_TYPES['id_profireader'],

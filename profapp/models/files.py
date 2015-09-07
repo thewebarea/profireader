@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, Binary, Float, TIMESTAMP, UniqueConstraint
-# from db_init import Base, g.db
+from sqlalchemy import Column, Integer, ForeignKey, String, Binary, \
+    Float, TIMESTAMP, UniqueConstraint
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
-# from utils.db_utils import db
+from utils.db_utils import db
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import relationship
 from flask import url_for, g
 from .pr_base import PRBase, Base
@@ -16,21 +17,30 @@ class File(Base):
     mime = Column(String(30), default='text/plain', nullable=False)
     description = Column(TABLE_TYPES['text'], default='', nullable=False)
     copyright = Column(TABLE_TYPES['text'], default='', nullable=False)
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
-    copyright_author_name = Column(TABLE_TYPES['name'], default='', nullable=False)
+    company_id = Column(TABLE_TYPES['id_profireader'],
+                        ForeignKey('company.id'),
+                        nullable=False)
+    copyright_author_name = Column(TABLE_TYPES['name'],
+                                   default='',
+                                   nullable=False)
     ac_count = Column(Integer, default=0, nullable=False)
     size = Column(Integer, default=0, nullable=False)
-    author_user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    author_user_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('user.id'),
+                            nullable=False)
     cr_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     md_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     ac_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
 
-    UniqueConstraint('name', 'parent_id', name='inique_name_in_folder')
+    UniqueConstraint('name', 'parent_id', name='unique_name_in_folder')
+
+    owner = relationship('User',
+                         backref=backref('files', lazy='dynamic'),
+                         foreign_keys='File.author_user_id')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
-                 company_id=None, author_user_id=None, copyright='',
-                 author=''):
+                 company_id=None, author_user_id=None):
 
         self.parent_id = parent_id
         self.name = name
@@ -45,28 +55,36 @@ class File(Base):
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
-                                self.name, self.mime, self.id, self.parent_id)
+            self.name, self.mime, self.id, self.parent_id)
 
+    @staticmethod
     def is_directory(file_id):
         return db(File, id=file_id)[0].mime == 'directory'
 
+    @staticmethod
     def is_cropable(file):
         return File.is_graphics(file)
 
+    @staticmethod
     def is_graphics(file):
         return re.match('^image/.*', file.mime)
 
+    @staticmethod
     def list(parent_id=None):
         return list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'cropable': True if File.is_cropable(file) else False,
                                 'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0]}
-                                        for file in db(File))
-                                        #for file in db(File, parent_id = parent_id))# we need all records from the table "file"
+                                        #for file in db(File))
+                                        for file in db(File, parent_id = parent_id))# we need all records from the table "file"
 
     @staticmethod
-    def createdir(parent_id=None, name=None, author_user_id=None, company_id=None, copyright='', author=''):
-        f = File(parent_id=parent_id, author_user_id=author_user_id, name=name, size=0, company_id=company_id, copyright=copyright, author=author, mime='directory')
+    def createdir(parent_id=None, name=None, author_user_id=None,
+                  company_id=None, copyright='', author=''):
+        f = File(parent_id=parent_id, author_user_id=author_user_id,
+                 name=name, size=0, company_id=company_id, mime='directory')
+        # f = File(parent_id=parent_id, author_user_id=author_user_id, 
+        #          name=name, size=0, company_id=company_id, copyright=copyright, mime='directory')
         g.db.add(f)
         g.db.commit()
         return f.id
@@ -96,40 +114,42 @@ class FileContent(Base):
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file_content = relationship('File', backref='file_information')
+    file_content = relationship('File',
+                                uselist=False,
+                                backref='file_all_content')
 
     def __init__(self, file_content=None, content=None):
         self.file_content = file_content
         self.content = content
 
-        # file.save(os.path.join(root, filename# ))
-        # for tmp_file in os.listdir(root# ):
-        #     st = os.stat(root+'/'+filenam# e)
-        #     file_db.name = filena# me
-        #     file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename# ))
-        #     file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename# ))
-        #     file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime(# ))
-        #     file_db.size = st[ST_SIZ# E]
-        #     if os.path.isfile(root+'/'+tmp_file# ):
-        #         file_db.mime = 'fil# e'
+        # file.save(os.path.join(root, filename))
+        # for tmp_file in os.listdir(root):
+        #     st = os.stat(root+'/'+filename)
+        #     file_db.name = filename
+        #     file_db.md_tm = time.ctime(os.path.getmtime(root+'/'+filename))
+        #     file_db.ac_tm = time.ctime(os.path.getctime(root+'/'+filename))
+        #     file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        #     file_db.size = st[ST_SIZE]
+        #     if os.path.isfile(root+'/'+tmp_file):
+        #         file_db.mime = 'file'
         #     els# e:
-        #         file_db.mime = 'di# r'
+        #         file_db.mime = 'dir'
 
         #
         # binary_out.close# ()
-        # if os.path.isfile(root+'/'+filename# ):
-        #     os.remove(root+'/'+filenam# e)
-        # els# e:
-        #     os.removedirs(root+'/'+filenam# e)
-        # g.db.add(file_d# b)
-        # tr# y:
-        #     g.db.commit# ()
-        # except PermissionErro# r:
-        #     result = {"result":#  {
-        #             "success": Fals# e,
-        #             "error": "Access denied to remove file# "}
-        #        #  }
-        #     g.db.rollback#(# )
+        # if os.path.isfile(root+'/'+filename):
+        #     os.remove(root+'/'+filename)
+        # else:
+        #     os.removedirs(root+'/'+filename)
+        # g.db.add(file_db)
+        # try:
+        #     g.db.commit()
+        # except PermissionError:
+        #     result = {"result":  {
+        #             "success": False,
+        #             "error": "Access denied to remove file"}
+        #          }
+        #     g.db.rollback()
         #
         # return result
         # return True

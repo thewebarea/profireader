@@ -1,6 +1,7 @@
 import os
 import secret_data
 
+
 def database_uri(host, username, password, db_name):
     return 'postgresql+psycopg2://{username}:{password}@{host}/{db_name}'. \
         format(**{'db_name': db_name,
@@ -51,12 +52,14 @@ class Config(object):
 # 1.7777777777777777, 1.3333333333333333, 0.6666666666666666, 1
     IMAGE_EDITOR_RATIO = 1.3333333333333333
     HEIGHT_IMAGE = 300   # px
-    ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'JPEG2000',
-                             'MSP', 'PCX', 'PNG', 'PPM', 'SPIDER',
-                             'TIFF', 'WebP', 'XBM', 'XV Thumbnails']
+    ALLOWED_IMAGE_FORMATS = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG',
+                             'JPEG2000', 'MSP', 'PCX', 'PNG', 'PPM',
+                             'SPIDER', 'TIFF', 'WebP', 'XBM',
+                             'XV Thumbnails']
 
 # Pagination
     ITEMS_PER_PAGE = 3
+    PAGINATION_BUTTONS = 4
 
 # Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']
@@ -179,4 +182,3 @@ class TestingConfig(Config):
         database_uri(Config.host, Config.username, Config.password, db_name)
 
     SITE_TITLE = "TEST"
-

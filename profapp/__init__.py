@@ -28,11 +28,12 @@ def load_database():
     from sqlalchemy.orm import scoped_session, sessionmaker
     from config import ProductionDevelopmentConfig
 
-
     engine = create_engine(ProductionDevelopmentConfig.SQLALCHEMY_DATABASE_URI)
     db_session = scoped_session(sessionmaker(autocommit=False,
+                                             autoflush=False,
                                              bind=engine))
     g.db = db_session
+
 
 def close_database(exception):
     db = getattr(g, 'db', None)
@@ -48,6 +49,7 @@ def setup_authomatic(app):
     authomatic = Authomatic(app.config['OAUTH_CONFIG'],
                             app.config['SECRET_KEY'],
                             report_errors=True)
+
     def func():
         g.authomatic = authomatic
     return func
@@ -142,6 +144,7 @@ login_manager.login_view = 'auth.login'
 
 
 class AnonymousUser(AnonymousUserMixin):
+    id = 0
     #def gravatar(self, size=100, default='identicon', rating='g'):
         #if request.is_secure:
         #    url = 'https://secure.gravatar.com/avatar'
@@ -153,14 +156,25 @@ class AnonymousUser(AnonymousUserMixin):
         #    url=url, hash=hash, size=size, default=default, rating=rating)
         #return '/static/no_avatar.png'
 
-    def has_rights(self, permissions):
+    @staticmethod
+    def has_rights(permissions):
         return False
 
-    def is_administrator(self):
+    @staticmethod
+    def is_administrator():
         return False
 
-    def is_banned(self):
+    @staticmethod
+    def is_banned():
         return False
+
+    def get_id(self):
+        return self.id
+
+    @staticmethod
+    @property
+    def user_name():
+        return 'Guest'
 
     def __repr__(self):
         return "<User(id = %r)>" % self.id
@@ -168,14 +182,14 @@ class AnonymousUser(AnonymousUserMixin):
 login_manager.anonymous_user = AnonymousUser
 
 
-def create_app(config='config.ProductionDevelopmentConfig', front = False, host='localhost'):
+def create_app(config='config.ProductionDevelopmentConfig',
+               front=False,
+               host='localhost'):
     app = Flask(__name__)
 
     app.config.from_object(config)
     print(host)
     app.config['SERVER_NAME'] = host
-
-
 
     babel = Babel(app)
 
