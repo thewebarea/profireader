@@ -183,7 +183,7 @@ def login():
         user = g.db.query(User).\
             filter(User.profireader_email == form.email.data).first()
 
-        if user.is_banned():
+        if user and user.is_banned():
             flash('Sorry, you are banned')
             return redirect(url_for('general.index'))
         if user and user.verify_password(form.password.data):
