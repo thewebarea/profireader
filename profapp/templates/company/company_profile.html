@@ -9,27 +9,26 @@
 {% endblock portal_base %}
 
 {% block content %}
-{% block company_base %}
+    {% block company_base %}
 {% include 'company/company_base.html' %}
 {% endblock company_base %}
 
     <h2><img  src="{{ image }}" height="100" width="100"> {{ comp.name }}
-    <span ng-cloak ng-show="{{ user_rights }}">
-        {% for right in user_rights %}
-            {% if right=='manage_access_company' %}
+
+        {% for right in user_rights.right %}
+            {% if right.company_right_id=='manage_access_company' %}
                 <a href="{{ url_for('company.edit', company_id=comp.id) }}">Edit company</a>
             {% endif %}
         {% endfor %}
-    </span></h2>
+    </h2>
     <h3>{{ comp.country }}, {{ comp.region }}, {{ comp.address }} </h3>
     <h5>Phone: {{ comp.phone }} |  Fax:  {{ comp.phone2 }}  |  {{ comp.email }}
-            <span ng-cloak ng-show="{{ user_rights }}">
 
             {% if comp.author_user_id == g.user_dict['id'] %}
-                <a href="#">Create Portal</a>
+                <a href="{{ url_for('portal.create', company_id=comp.id) }}">Create Portal</a>
             {% endif %}
 
-    </span></h5>
+    </h5>
     <p><h4> Short description </h4></p>
     <h5>{{ comp.short_description }}</h5>
 

@@ -4,14 +4,14 @@
 
 {% block portal_content %}
     {% block company_base %}
-{% include 'company/company_base.html' %}
+{% include 'company/company_base_angular.html' %}
 {% endblock company_base %}
     <script>
         module.controller('publication', ['$scope', function ($scope) {
             $scope.publications = {{ raw_url_for('portal.publications')|safe }};
             $scope.url_update_status = '{{ url_for('portal.update_article_portal')|safe }}';
             $scope.getData = function () {return $scope.data;};
-            $scope.afterSave = function (resp) {window.location.href = $scope.publications({company_id: resp.comp.id})};
+            $scope.afterSave = function (resp) {window.location.href = $scope.publications({company_id: resp.company_id.id})};
         }]);
     </script>
     {% raw %}

@@ -44,10 +44,11 @@
             };
 
             $scope.joinToCompany = function () {
-                $ok($scope.url_join({article_id: $scope.data['id']}), {company_id: $scope.selectedCompany.id}, function (resp) {
+                $ok($scope.url_join({company_id: $scope.selectedCompany.id}), {company_id: $scope.selectedCompany.id}, function (resp) {
                     $scope.selectedCompany = null;
                     $scope.selectedCompany_name = null;
                     $scope.data['companies'] = resp['companies'];
+{#TODO OZ BY VK: javascript error                #}
                     setTimeout(function () {
                         scrool($('#joined_company_' + resp['companies']['id']), {
                             afterScroll: function () {
