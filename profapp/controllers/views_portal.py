@@ -10,9 +10,8 @@ from ..models.articles import ArticlePortal
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
 def create(company_id):
-    comp = Company().query_company(company_id=company_id)
     return render_template('company/portal_create.html',
-                           comp=comp)
+                           company_id={'id': company_id})
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
 @ok
@@ -32,7 +31,7 @@ def confirm_create(json):
     portal.create_portal(company_id=json['company_id'],
                          division_type=json['division_type'],
                          division_name=json['division_name'])
-    return json
+    return {'company_id': {'id': portal.company_owner_id}}
 
 @portal_bp.route('/', methods=['POST'])
 @login_required
@@ -50,12 +49,13 @@ def partners(company_id):
     comp = db(Company, id=company_id).one()
     companies_partners = CompanyPortal.\
         show_companies_on_my_portal(company_id)
-    portals_partners = CompanyPortal.show_portals(company_id)
+    portals_partners = CompanyPortal.get_portals(company_id)
 
     return render_template('company/company_partners.html',
                            comp=comp,
                            companies_partners=companies_partners,
-                           portals_partners=portals_partners
+                           portals_partners=portals_partners,
+                           company_id=company_id
                            )
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
@@ -63,7 +63,7 @@ def publications(company_id):
 
     comp = Company().query_company(company_id=company_id)
     return render_template('company/portal_publications.html',
-                           comp=comp)
+                           company_id={'id': company_id})
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['POST'])
 @ok
@@ -75,7 +75,8 @@ def publications_load(json, company_id):
                                    'article_portal': []}]}
         portal = [port.to_dict('name|id|portal_id,article_portal.'
                                'status|md_tm|cr_tm|title|long|short|id,'
-                               'article_portal.company_article.company.id|'
+                               'article_portal.'
+                               'company_article.company.id|'
                                'name|short_description|email|phone') for
                   port in portal.divisions if port.article_portal]
 

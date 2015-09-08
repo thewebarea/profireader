@@ -19,24 +19,32 @@ def _C():
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
-    return render_template('article/list.html',
-                           articles=Article.
-                           get_articles_for_user(g.user.id))
+    return render_template('article/list.html')
+
+
+@article_bp.route('/list/', methods=['POST'])
+@ok
+def load_mine(json):
+    return {'articles': [a.get_client_side_dict()
+                         for a in Article.get_articles_for_user(
+            g.user.id)]}
 
 
 @article_bp.route('/create/', methods=['GET'])
 def show_form_create():
     return render_template('article/create.html')
 
+
 @article_bp.route('/create/', methods=['POST'])
 @ok
 def load_form_create(json):
     return {'id': '', 'title': '', 'short': '', 'long': ''}
 
+
 @article_bp.route('/confirm_create/', methods=['POST'])
 @ok
 def confirm_create(json):
-    return Article.save_new_article(g.user_dict['id'], **json).\
+    return Article.save_new_article(g.user_dict['id'], **json). \
         get_client_side_dict()
 
 
@@ -45,6 +53,7 @@ def confirm_create(json):
 def show_form_update(article_company_id):
     return render_template('article/update.html',
                            article_company_id=article_company_id)
+
 
 @article_bp.route('/update/<string:article_company_id>/',
                   methods=['POST'])
@@ -66,10 +75,12 @@ def details(article_id):
     return render_template('article/details.html',
                            article_id=article_id)
 
+
 @article_bp.route('/details/<string:article_id>/', methods=['POST'])
 @ok
 def details_load(json, article_id):
     return Article.get(article_id).get_client_side_dict()
+
 
 @article_bp.route('/search_for_company_to_submit/', methods=['POST'])
 @ok

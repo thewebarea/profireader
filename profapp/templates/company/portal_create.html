@@ -4,19 +4,19 @@
 
 {% block portal_content %}
     {% block company_base %}
-{% include 'company/company_base.html' %}
+{% include 'company/company_base_angular.html' %}
 {% endblock company_base %}
     <script>
-        module.controller('create', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
-            {{ init_data()|safe }}
+        module.controller('create', ['$scope', function ($scope) {
             $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};
             $scope.url_after_seve = {{ raw_url_for('company.profile')|safe }};
             $scope.getData = function () {return $scope.data;};
-            $scope.afterSave = function (resp) {window.location.href = $scope.url_after_seve({company_id: resp.company_id})};
+            $scope.company_id = {{ company_id|safe }}
+            $scope.afterSave = function (resp) {window.location.href = $scope.url_after_seve({company_id: resp.company_id.id})};
         }]);
     </script>
     {% raw %}
-    <div on-init="initOld" ng-controller="create">
+    <div ng-init="loadData()" ng-controller="create">
         <h2>Cteate portal</h2>
         <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_confirm_create({})">
             <h4>
