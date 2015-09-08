@@ -99,7 +99,7 @@ class Company(Base, PRBase):
     @staticmethod
     def search_for_company(user_id, searchtext):
         query_companies = db(Company).filter(
-            Company.name.like("%" + searchtext + "%")).all()
+            Company.name.like("%" + searchtext + "%")).filter.all()
         ret = []
         for x in query_companies:
             ret.append(x.dict())
@@ -143,19 +143,11 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
-        # TODO: AA by OZ:    .filter(user_id has to be employee in company and
-        # TODO: must have rights to submit article to this company)
-        # return [x.to_dict('id,name')
-        ret = []
-        for comp in db(Company).filter(Company.name.ilike(
-                                       "%" + searchtext + "%")).all():
-            for user in comp.employees:
-                if user.id != user_id:
-                    ret.append(comp.to_dict('id,name'))
-        return ret
-            # .filter(~db(ArticleCompany).
-            #         filter_by(company_id=Company.id,
-            #         article_id=article_id).exists())
+        return [comp.get_client_side_dict() for comp in db(Company).\
+                filter(~db(UserCompany, user_id=user_id,
+                           company_id=Company.id).exists()).\
+                filter(Company.name.ilike("%" + searchtext + "%")
+                       ).all()]
 
     def get_client_side_dict(self, fields='id|name'):
         return self.to_dict(fields)

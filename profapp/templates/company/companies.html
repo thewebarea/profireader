@@ -48,6 +48,7 @@
                     $scope.selectedCompany = null;
                     $scope.selectedCompany_name = null;
                     $scope.data['companies'] = resp['companies'];
+{#TODO OZ BY VK: javascript error                #}
                     setTimeout(function () {
                         scrool($('#joined_company_' + resp['companies']['id']), {
                             afterScroll: function () {

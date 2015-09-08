@@ -63,6 +63,8 @@ def load_form_update(json, article_company_id):
                   methods=['POST'])
 @ok
 def save(json, article_company_id):
+    json.pop('company')
+    print(json)
     return Article.save_edited_version(g.user.id, article_company_id,
                                        **json).get_client_side_dict()
 
