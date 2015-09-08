@@ -177,12 +177,10 @@ class Article(Base, PRBase):
 
     @staticmethod
     def save_new_article(user_id, **kwargs):
-        article = Article(mine=ArticleCompany(editor_user_id=user_id,
+        return Article(mine=ArticleCompany(editor_user_id=user_id,
                                               company_id=None,
                                               **kwargs),
-                                              author_user_id=user_id)
-        article.save()
-        return article
+                                              author_user_id=user_id).save()
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):

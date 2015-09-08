@@ -100,7 +100,7 @@ function runsql_dump {
 
 function menu_deb {
     conf_comm "apt-get update
-apt-get install libpq-dev libapache2-mod-wsgi" sudo hosts
+apt-get install libpq-dev python-dev libapache2-mod-wsgi" sudo hosts
     }
 
 function menu_hosts {

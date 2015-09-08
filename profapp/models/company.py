@@ -48,11 +48,13 @@ class Company(Base, PRBase):
     # todo: add company time creation
 
     owner = relationship('User', backref='companies')
-    employees = relationship('User', secondary='user_company', lazy='dynamic')
+    employees = relationship('User', secondary='user_company',
+                             lazy='dynamic')
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
-                                          foreign_keys='Company.logo_file')
+                                          foreign_keys='Company.'
+                                                       'logo_file')
 
 
 
@@ -101,7 +103,7 @@ class Company(Base, PRBase):
     @staticmethod
     def search_for_company(user_id, searchtext):
         query_companies = db(Company).filter(
-            Company.name.like("%" + searchtext + "%")).all()
+            Company.name.like("%" + searchtext + "%")).filter.all()
         ret = []
         for x in query_companies:
             ret.append(x.dict())
@@ -123,12 +125,10 @@ class Company(Base, PRBase):
                         name=passed_file.filename,
                         mime=passed_file.content_type)
             comp.update(
-                {'logo_file':
-                     file.upload(content=passed_file.stream.read(-1)).id}
+                {'logo_file': file.upload(
+                    content=passed_file.stream.read(-1)).id}
             )
         # db_session.flush()
-
-        g.db.commit()
 
     @staticmethod
     def query_employee(comp_id):
@@ -147,14 +147,11 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
-        # TODO: AA by OZ:    .filter(user_id has to be employee in company and
-        # TODO: must have rights to submit article to this company)
-        return [x.to_dict('id,name') for x in db(Company)
-            # .filter(~db(ArticleCompany).
-            #         filter_by(company_id=Company.id,
-            #         article_id=article_id).exists())
-            .filter(Company.name.ilike(
-            "%" + searchtext + "%")).all()]
+        return [comp.get_client_side_dict() for comp in db(Company).\
+                filter(~db(UserCompany, user_id=user_id,
+                           company_id=Company.id).exists()).\
+                filter(Company.name.ilike("%" + searchtext + "%")
+                       ).all()]
 
     def get_client_side_dict(self, fields='id|name'):
         return self.to_dict(fields)
@@ -194,16 +191,19 @@ class UserCompany(Base, PRBase):
     status = Column(TABLE_TYPES['id_profireader'])
     md_tm = Column(TABLE_TYPES['timestamp'])
     rights = Column(TABLE_TYPES['bigint'],
-                    CheckConstraint('rights >= 0', name='unsigned_rights'))
+                    CheckConstraint('rights >= 0',
+                                    name='unsigned_rights'))
 
     employer = relationship('Company', backref='employee_assoc')
     employee = relationship('User',
-                            backref=backref('employer_assoc', lazy='dynamic'))
+                            backref=backref('employer_assoc',
+                                            lazy='dynamic'))
     UniqueConstraint('user_id', 'company_id', name='user_id_company_id')
 
     # todo: check handling md_tm
 
-    def __init__(self, user_id=None, company_id=None, status=None, rights=0):
+    def __init__(self, user_id=None, company_id=None, status=None,
+                 rights=0):
         self.user_id = user_id
         self.company_id = company_id
         self.status = status
@@ -211,15 +211,14 @@ class UserCompany(Base, PRBase):
 
     @staticmethod
     def user_in_company(user_id, company_id):
-        ret = db(UserCompany, user_id=user_id, company_id=company_id).one()
+        ret = db(
+            UserCompany, user_id=user_id, company_id=company_id).one()
         return ret
 
     # do we provide any rights to user at subscribing?
     def subscribe_to_company(self):
-        user = User.user_query(self.user_id)
-        company = db(Company, id=self.company_id).one()
-        user.employers.append(company)
-        company.employee.append(user)
+        self.employee = User.user_query(self.user_id)
+        self.employer = db(Company, id=self.company_id).one()
         self.save()
 
     @staticmethod
@@ -286,11 +285,13 @@ class UserCompany(Base, PRBase):
                 suspended_employees[x.id] = {'name': x.user_name,
                                              'user': x,
                                              'companies': [x.employers],
-                                             'date': user_in_company.md_tm}
+                                             'date':
+                                                 user_in_company.md_tm}
         return suspended_employees
 
     @staticmethod
-    def permissions(user_object, company_object, needed_rights_iterable):
+    def permissions(user_object, company_object,
+                    needed_rights_iterable):
         if not (user_object and company_object):
             return True
         user = user_object

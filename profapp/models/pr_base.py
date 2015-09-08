@@ -2,7 +2,6 @@
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
-from flask.ext.login import current_user, login_required
 import re
 from flask import g
 from sqlalchemy.ext.declarative import declarative_base
@@ -41,7 +40,7 @@ class PRBase:
 
     def attr(self, dictionary):
         for k in dictionary:
-            setattr(self, k, dictionary[k]);
+            setattr(self, k, dictionary[k])
         return self
 
     def detach(self):

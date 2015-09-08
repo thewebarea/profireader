@@ -31,7 +31,7 @@ def filemanager():
         g.user.personal_folder_file_id: {
             'name': 'My personal files',
             'icon': current_user.profireader_small_avatar_url}}
-    for company in g.user.employer:
+    for company in g.user.employers:
         library[company.journalist_folder_file_id] = {'name': "%s materisals" % (company.name,), 'icon': ''}
         library[company.corporate_folder_file_id] = {'name': "%s corporate files" % (company.name,), 'icon': ''}
 

@@ -1,8 +1,0 @@
-{
-  "name": "profireader",
-  "version": "1.0.1",
-  "homepage": "https://github.com/kakabomba/profireader",
-  "dependencies": {
-    "angular-ui-tinymce": "latest"
-  }
-}
