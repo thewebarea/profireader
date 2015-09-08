@@ -146,6 +146,7 @@ class ArticleCompany(Base, PRBase):
         db(ArticleCompany, company_id=company_id, id=article_id).update(
             kwargs)
 
+
 class Article(Base, PRBase):
     __tablename__ = 'article'
 

@@ -3,6 +3,8 @@ from flask import render_template, request, url_for, redirect
 from ..models.company import Company
 from flask.ext.login import login_required
 from ..models.portal import CompanyPortal, PortalDivisionType, Portal
+from utils.db_utils import db
+from ..models.portal import CompanyPortal, Portal
 from .request_wrapers import ok
 from ..models.articles import ArticlePortal
 
@@ -45,11 +47,10 @@ def apply_company():
 @portal_bp.route('/partners/<string:company_id>/')
 @login_required
 def partners(company_id):
-
-    comp = Company().query_company(company_id=company_id)
-    companies_partners = CompanyPortal().\
+    comp = db(Company, id=company_id).one()
+    companies_partners = CompanyPortal.\
         show_companies_on_my_portal(company_id)
-    portals_partners = CompanyPortal().show_portals(company_id)
+    portals_partners = CompanyPortal.show_portals(company_id)
 
     return render_template('company/company_partners.html',
                            comp=comp,
@@ -73,9 +74,9 @@ def publications_load(json, company_id):
             return {'divisions': [{'name': '',
                                    'article_portal': []}]}
         portal = [port.to_dict('name|id|portal_id,article_portal.'
-                           'status|md_tm|cr_tm|title|long|short|id,'
-                           'article_portal.company_article.company.id|'
-                           'name|short_description|email|phone') for
+                               'status|md_tm|cr_tm|title|long|short|id,'
+                               'article_portal.company_article.company.id|'
+                               'name|short_description|email|phone') for
                   port in portal.divisions if port.article_portal]
 
     return {'portal': portal, 'new_status': ''}

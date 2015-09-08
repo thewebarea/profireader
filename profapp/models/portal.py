@@ -6,10 +6,9 @@ from flask import g
 from utils.db_utils import db
 from .company import Company
 from .pr_base import PRBase, Base
-from ..controllers.has_right import has_right
+
 
 class Portal(Base, PRBase):
-
     __tablename__ = 'portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -20,14 +19,17 @@ class Portal(Base, PRBase):
                               unique=True)
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('portal_plan.id'))
+
     portal_layout_id = Column(TABLE_TYPES['id_profireader'],
-                            ForeignKey('portal_layout.id'))
+                              ForeignKey('portal_layout.id'))
+
     layout = relationship('PortalLayout')
     divisions = relationship('PortalDivision', backref='portal',
                              primaryjoin='Portal.id=='
                                          'PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
+
     company = relationship('Company', backref='portal')
     company_portal = relationship('CompanyPortal', backref='portal')
 
@@ -152,8 +154,8 @@ class CompanyPortal(Base):
         return [Portal().query_portal(portal.portal_id) for portal in
                 comp_port] if comp_port else []
 
-class PortalDivision(Base, PRBase):
 
+class PortalDivision(Base, PRBase):
     __tablename__ = 'portal_division'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     cr_tm = Column(TABLE_TYPES['timestamp'])

@@ -12,7 +12,7 @@
 <h1>Your Profile</h1>
 
 {#<img class="img-rounded profile-thumbnail" src="{{ g.user.gravatar(size=256) }}"><br>#}
-<img class="img-rounded profile-thumbnail" src="{{ current_user.profireader_avatar_url }}" style="width:256px;border:0"><br>
+<img class="img-rounded profile-thumbnail" src="{{ current_user.profireader_avatar_url }}" style="width:{{ avatar_size }}px;height:{{ avatar_size }}px;border:0"><br>
 <a ng-click="mySwitch = !mySwitch">
     <span ng-hide="mySwitch">[upload picture]</span>
     <span ng-show="mySwitch">[hide]</span>

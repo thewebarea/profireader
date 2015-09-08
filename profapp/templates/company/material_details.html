@@ -7,8 +7,7 @@
 {% include 'company/company_base.html' %}
 {% endblock company_base %}
     <script>
-        module.controller('materials_articles', ['$scope', '$ok', '$translate', function ($scope, $ok, $translate) {
-            {{ init_data()|safe }}
+        module.controller('materials_articles', ['$scope', function ($scope) {
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
             $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
@@ -17,7 +16,7 @@
         }]);
     </script>
     {% raw %}
-    <div on-init="initOld" ng-controller="materials_articles">
+    <div on-init="loadData()" ng-controller="materials_articles">
     <h3>{{data.article.title}}</h3>
     <h4>Created at {{data.article.cr_tm}}</h4>
         <h4>Last modified at {{data.article.md_tm}}</h4>

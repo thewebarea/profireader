@@ -30,7 +30,6 @@ def configure_listener(class_, key, inst):
 
 
 class PRBase:
-
     def __init__(self):
         self.query = g.db.query_property()
 

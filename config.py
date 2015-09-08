@@ -1,6 +1,7 @@
 import os
 import secret_data
 
+
 def database_uri(host, username, password, db_name):
     return 'postgresql+psycopg2://{username}:{password}@{host}/{db_name}'. \
         format(**{'db_name': db_name,
@@ -181,4 +182,3 @@ class TestingConfig(Config):
         database_uri(Config.host, Config.username, Config.password, db_name)
 
     SITE_TITLE = "TEST"
-

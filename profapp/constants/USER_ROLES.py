@@ -17,9 +17,9 @@ ROLE = {
     GUEST: 'guest',
     READER: 'reader'
 }
-COMPANY_OWNER = ['edit', 'publish', 'un_publish', 'upload_files', 'delete_files', 'add_employee',
-                 'suspend_employee', 'send_publications', 'manage_access_company', 'manage_access_portal',
-                 'article_priority', 'manage_readers', 'manage_companies_partners', 'manage_comments']
+
+COMPANY_OWNER_RIGHTS = 0x7fffffffffffffff  # 2**63-1
+
 
 class RIGHTS:
 
