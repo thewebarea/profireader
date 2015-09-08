@@ -80,7 +80,6 @@ class Portal(Base, PRBase):
         return ret
 
 class PortalPlan(Base, PRBase):
-
     __tablename__ = 'portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -102,7 +101,6 @@ class PortalLayout(Base, PRBase):
 
 
 class CompanyPortal(Base):
-
     __tablename__ = 'company_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -192,7 +190,6 @@ class PortalDivisionType(Base, PRBase):
         return db(PortalDivisionType).all()
 
 class UserPortalReader(Base, PRBase):
-
     __tablename__ = 'user_portal_reader'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     user_id = Column(TABLE_TYPES['id_profireader'],

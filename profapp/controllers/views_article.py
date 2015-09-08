@@ -34,12 +34,10 @@ def load_mine(json):
 def show_form_create():
     return render_template('article/create.html')
 
-
 @article_bp.route('/create/', methods=['POST'])
 @ok
 def load_form_create(json):
     return {'id': '', 'title': '', 'short': '', 'long': ''}
-
 
 @article_bp.route('/confirm_create/', methods=['POST'])
 @ok
@@ -53,7 +51,6 @@ def confirm_create(json):
 def show_form_update(article_company_id):
     return render_template('article/update.html',
                            article_company_id=article_company_id)
-
 
 @article_bp.route('/update/<string:article_company_id>/',
                   methods=['POST'])
@@ -75,12 +72,10 @@ def details(article_id):
     return render_template('article/details.html',
                            article_id=article_id)
 
-
 @article_bp.route('/details/<string:article_id>/', methods=['POST'])
 @ok
 def details_load(json, article_id):
     return Article.get(article_id).get_client_side_dict()
-
 
 @article_bp.route('/search_for_company_to_submit/', methods=['POST'])
 @ok

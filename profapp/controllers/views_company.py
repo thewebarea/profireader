@@ -1,9 +1,9 @@
 from .blueprints import company_bp
 from ..models.company import simple_permissions
-# from .request_wrapers import json
+#from .request_wrapers import json
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, UserCompany
+from ..models.company import Company, UserCompany, Right
 # from phonenumbers import NumberParseException
 from ..constants.USER_ROLES import RIGHTS
 from ..models.users import User
@@ -15,7 +15,6 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
-from ..models.rights import Right, list_of_RightAtomic_attributes
 
 
 # todo: resolve a problem with @json!
@@ -93,20 +92,20 @@ def load_material_details(json, company_id, article_id):
 @login_required
 @ok
 def update_article(json):
+
     ArticleCompany.update_article(
         company_id=json['comp']['id'], article_id=json['article']['id'],
         **{'status': json['article']['status']})
     return json
 
-
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
 @ok
 def submit_to_portal(json):
+
     article = ArticleCompany.get(json['article']['id'])
     article.clone_for_portal(json['selected_division'])
     return json
-
 
 @company_bp.route('/add/')
 @check_rights(simple_permissions(frozenset()))
@@ -242,7 +241,7 @@ def join_to_company(json, company_id):
                           for employer in current_user.employers]}
 
 
-#TODO: VK by OZ:   what this function do? same as join_to_company???
+
 @company_bp.route('/add_subscriber/', methods=['POST'])
 @check_rights(simple_permissions(frozenset(['add_employee'])))
 @login_required
