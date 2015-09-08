@@ -30,10 +30,10 @@ class Portal(Base, PRBase):
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
 
-    company = relationship('Company', backref='portal')
-    company_portal = relationship('CompanyPortal', backref='portal')
+    company = relationship('Company', backref='portals')
+    companies = relationship('Company', secondary='company_portal')
 
-    def __init__(self, name=None, company_portal=[],
+    def __init__(self, name=None, companies=[],
                  portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
                  company_owner_id=None, company=None, article=None,
                  host=None, divisions=[],
@@ -44,10 +44,10 @@ class Portal(Base, PRBase):
         self.company_owner_id = company_owner_id
         self.company = company
         self.article = article
-        self.company_portal = company_portal
         self.host = host
         self.portal_layout_id = portal_layout_id
         self.divisions = divisions
+        self.companies = companies
 
     def create_portal(self, company_id, division_name, division_type):
         self.company = db(Company, id=company_id).one()
@@ -55,11 +55,11 @@ class Portal(Base, PRBase):
         self.divisions.append(PortalDivision.add_new_division(
             portal_id=self.id, name=division_name,
             division_type=division_type))
-        self.company_portal.append(
-            CompanyPortal.add_portal_to_company_portal(
-                portal_plan_id=self.portal_plan_id,
-                company_id=self.company_owner_id,
-                portal_id=self.id))
+        company_assoc = CompanyPortal(
+            company_portal_plan_id=self.portal_plan_id)
+        company_assoc.portal = self
+        company_assoc.company = self.company
+
         return self
 
     def get_client_side_dict(self, fields='id|name, divisions.*, '
@@ -109,6 +109,8 @@ class CompanyPortal(Base):
     portal_id = Column(TABLE_TYPES['id_profireader'],
                        ForeignKey('portal.id'))
     company_portal_plan_id = Column(TABLE_TYPES['id_profireader'])
+    portal = relationship(Portal, backref='company_assoc')
+    company = relationship(Company, backref='portal_assoc')
 
     def __init__(self, company_id=None, portal_id=None,
                  company_portal_plan_id=None):

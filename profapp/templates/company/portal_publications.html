@@ -15,11 +15,12 @@
         }]);
     </script>
     {% raw %}
-    <div on-init="loadData()" ng-controller="publication">
+    <div ng-init="loadData()" ng-controller="publication">
         <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
             <div ng-repeat="dat in data.portal">
                 <div ng-repeat="article in dat.article_portal">
                     <div ng-if="article.status!='published'">
+                        <input type="hidden" ng-model="data.not_published" value="{{ article.status }}">
                         Your portal has got a request to publish article: {{ article.title }} from company
                         <span ng-repeat="comp in article.company_article">
                             {{ comp.name }}
@@ -30,10 +31,9 @@
                             <option value="{{ article.id }}/declined">declined</option>
                         </select>
                     </div>
-
+                    {{ data.not_published }}
                 </div>
             </div>
-            <input type="submit" value="Apply">
         </form>
         <h4>Your published materials are:</h4>
         <div ng-repeat="dat in data.portal">

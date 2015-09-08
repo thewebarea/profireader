@@ -16,7 +16,7 @@
             };
             $scope.afterSave = function (resp) {
                 window.location.href =
-                        $scope.url_article_details({company_id: resp.comp.id, article_id: resp.article.id})
+                        $scope.url_article_details({company_id: resp.company.id, article_id: resp.article.id})
             };
         }]);
     </script>
@@ -45,8 +45,8 @@
 
             <form>
                 Introduce user to work on this material
-                <input type="hidden" ng-model="data.comp.id">
-            <span ng-repeat="user in data.comp.employee">
+                <input type="hidden" ng-model="data.company.id">
+            <span ng-repeat="user in data.company.employees">
                 <input type="hidden" ng-model="user.id">
                 <select>
                     <option>
