@@ -285,6 +285,94 @@ areAllEmpty = function () {
     return are;
 }
 
+function TinyMCE_fileSelected(selectedfiles) {
+    var args = top.tinymce.activeEditor.windowManager.getParams();
+    var win = (args.window);
+    var input = (args.input);
+    $.each(selectedfiles, function (ind, val) {
+        win.document.getElementById(input).value = val['url'];
+    });
+    top.tinymce.activeEditor.windowManager.close();
+}
+
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce']);
+
+module.config(function ($provide) {
+    $provide.decorator('$controller', function ($delegate) {
+        return function (constructor, locals, later, indent) {
+            if (typeof constructor === 'string' && !locals.$scope.controllerName) {
+                locals.$scope.controllerName = constructor;
+            }
+            return $delegate(constructor, locals, later, indent);
+        };
+    });
+});
+
+module.run(function ($rootScope, $ok) {
+    angular.extend($rootScope, {
+        _: function (phrase, dict) {
+            var scope = this;
+            try {
+                return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {
+                    var indexes = g1.split('.')
+                    var d = dict ? dict : scope;
+                    for (var i in indexes) {
+                        if (typeof d[indexes[i]] !== undefined) {
+                            d = d[indexes[i]];
+                        }
+                        else {
+                            return g1;
+                        }
+                    }
+                    return d;
+                });
+            } catch (a) {
+                return phrase
+            }
+        },
+        loadData: function (url, senddata) {
+            var scope = this;
+            scope.loading = true;
+            $ok(url ? url : '', senddata ? senddata : {}, function (data) {
+                scope.data = data;
+                scope.original_data = data;
+            }).finally(function () {
+                scope.loading = false;
+            });
+        },
+        tinymceImageOptions: {
+            inline: false,
+            plugins: 'advlist autolink link image lists charmap print preview',
+            skin: 'lightgray',
+            theme: 'modern',
+            file_browser_callback: function (field_name, url, type, win) {
+                var cmsURL = '/filemanager/?calledby=tinymce_file_browse_' + type;
+                tinymce.activeEditor.windowManager.open({
+                        file: cmsURL,
+                        title: 'Select an Image',
+                        width: 600,  // Your dimensions may differ - toy around with them!
+                        height: 600,
+                        resizable: "yes",
+                        //inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+                        close_previous: "yes"
+                    }
+                    ,
+                    {
+                        window: win,
+                        input: field_name
+                    }
+                )
+                ;
+            }
+        }
+    })
+});
+
+module.controller('filemanagerCtrl', ['$scope', '$modal', function ($scope, $modal) {
+    console.log('filemanagerCtrl controller started');
+}]);
+
+
 None = null;
 False = false;
 True = true;
