@@ -17,6 +17,7 @@
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
             $scope.url_search_for_company = {{ raw_url_for('company.search_for_company_to_join')|safe }};
             $scope.url_join = {{ raw_url_for('company.join_to_company')|safe }};
+            $scope.url_create_own_company = {{ raw_url_for('company.add')|safe }};
 
             $scope.selectedCompany_name = '';
             $scope.selectedCompany = null;
@@ -74,8 +75,9 @@
             color: #f00;
         }
     </style>
-    <h2><a href="{{ url_for('company.add') }}">{{ _('CREATE OWN COMPANY') }}</a></h2>
+
     <div ng-init="loadData()" ng-controller="companies_list">
+        <h2><a href="{{ url_create_own_company() }}">{{ _('CREATE OWN COMPANY') }}</a></h2>
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
             <div ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">

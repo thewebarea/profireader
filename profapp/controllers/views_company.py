@@ -113,15 +113,9 @@ def add():
 
 @company_bp.route('/confirm_add/', methods=['POST'])
 @check_rights(simple_permissions(frozenset()))
-@login_required
-def confirm_add():
-    data = request.form
-    comp_dict = {}
-    for x, y in zip(data.keys(), data.values()):
-        comp_dict[x] = y
-    comp_dict['passed_file'] = request.files['logo_file']
-    Company(**comp_dict)
-    return redirect(url_for('company.show'))
+@ok
+def confirm_add(json):
+    return Company(**json).create_new_company(g.user.id).get_client_side_dict()
 
 
 @company_bp.route('/profile/<string:company_id>/')
