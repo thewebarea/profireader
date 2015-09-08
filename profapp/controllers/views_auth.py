@@ -123,6 +123,9 @@ def unconfirmed():
 def signup():
     # (Andriy) I suppose it is not necessary
     if g.user_init and g.user_init.is_authenticated():
+        # flash('To sign up Profireader with new account you '
+        #       'should logout first')
+        #return redirect(url_for('auth.login'))
         raise BadDataProvided
 
     form = RegistrationForm()
@@ -158,7 +161,9 @@ def login_soc_network(soc_network_name):
 
 @auth_bp.route('/signup/<soc_network_name>', methods=['GET', 'POST'])
 def signup_soc_network(soc_network_name):
-    return login_signup_general('profireader', soc_network_name)
+    return redirect(url_for('auth.login_soc_network',
+                     soc_network_name=soc_network_name))
+    #return login_signup_general('profireader', soc_network_name)
 
 
 # read: flask.ext.login
