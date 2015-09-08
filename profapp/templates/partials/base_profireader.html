@@ -1,105 +1,12 @@
-<style>
-    .modal-fullscreen {
-        width: 95%;
-        height: 95%;
-    }
-</style>
 <script>
-
-    function TinyMCE_fileSelected(selectedfiles) {
-        var args = top.tinymce.activeEditor.windowManager.getParams();
-        var win = (args.window);
-        var input = (args.input);
-        $.each(selectedfiles, function (ind, val) {
-            win.document.getElementById(input).value = val['url'];
-        });
-        top.tinymce.activeEditor.windowManager.close();
-    }
-
-    module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce']);
-
-    module.config(function ($provide) {
-        $provide.decorator('$controller', function ($delegate) {
-            return function (constructor, locals, later, indent) {
-                if (typeof constructor === 'string' && !locals.$scope.controllerName) {
-                    locals.$scope.controllerName = constructor;
-                }
-                return $delegate(constructor, locals, later, indent);
-            };
-        });
-    });
-
-    module.run(function ($rootScope, $ok) {
-        angular.extend($rootScope, {
-            _: function (phrase, dict) {
-                var scope = this;
-                try {
-                    return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {
-                        var indexes = g1.split('.')
-                        var d = dict ? dict : scope;
-                        for (var i in indexes) {
-                            if (typeof d[indexes[i]] !== undefined) {
-                                d = d[indexes[i]];
-                            }
-                            else {
-                                return g1;
-                            }
-                        }
-                        return d;
-                    });
-                } catch (a) {
-                    return phrase
-                }
-            },
-            loadData: function (url, senddata) {
-                var scope = this;
-                scope.loading = true;
-                $ok(url ? url : '', senddata ? senddata : {}, function (data) {
-                    scope.data = data;
-                    scope.original_data= $.extend(true, {},data);
-                }).finally(function () {
-                    scope.loading = false;
-                });
-            },
-            tinymceImageOptions: {
-                inline: false,
-                plugins: 'advlist autolink link image lists charmap print preview',
-                skin: 'lightgray',
-                theme: 'modern',
-                file_browser_callback: function (field_name, url, type, win) {
-                    var cmsURL = '/filemanager/?calledby=tinymce_file_browse_' + type;
-                    tinymce.activeEditor.windowManager.open({
-                        file: cmsURL,
-                        title: 'Select an Image',
-                        width: 600,  // Your dimensions may differ - toy around with them!
-                        height: 600,
-                        resizable: "yes",
-                        {#                    inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!#}
-                        close_previous: "yes"
-                    }, {
-                        window: win,
-                        input: field_name
-                    });
-                }
-            }
-        })
-    });
-
-    module.controller('filemanagerCtrl', ['$scope', '$modal', function ($scope, $modal) {
-    }]);
-
     module.controller('UserLoginController', ['$scope', '$modal', function ($scope, $modal) {
         $scope.user = {{ g.user_dict|tojson|safe }};
         $scope.open_filemanager = function () {
+            console.log('dialog opened');
             var modalInstance = $modal.open({
                 templateUrl: 'filemanager.html',
                 controller: 'filemanagerCtrl',
-                size: 'fullscreen',
-                resolve: {
-                    url: function () {
-                        return '';
-                    }
-                }
+                size: 'filemanager-fullscreen'
             });
 
             modalInstance.result.then(function () {
@@ -114,7 +21,8 @@
 <!-- read this -->
 <nav ng-controller="UserLoginController" class="navbar navbar-default">
     <script type="text/ng-template" id="filemanager.html">
-        <iframe style="border: none; margin: 0px; padding: 0px; width: 100%; height: 100%" src="/filemanager/"></iframe>
+        <iframe style="border: none; margin: 0px; padding: 0px; width: 100%; height: 100%"
+                src="/filemanager/"></iframe>
     </script>
     <div class="container-fluid">
         <!-- Profireader and toggle get grouped for better mobile display -->
@@ -149,12 +57,16 @@
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">Your
-                                    Profile</a></li>
-                                <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
-                                <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
+                                <li>
+                                    <a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">Your
+                                        Profile</a></li>
+                                <li><a href="{{ url_for('auth.change_password') }}">Change
+                                    Password</a></li>
+                                <li><a href="{{ url_for('auth.change_email_request') }}">Change
+                                    Email</a></li>
                                 <li><a href="{{ url_for('company.show') }}">Company</a></li>
-                                <li><a href="{{ url_for('article.show_mine') }}">My articles</a></li>
+                                <li><a href="{{ url_for('article.show_mine') }}">My articles</a>
+                                </li>
                                 <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
                                 <li><a href="#" ng-click="open_filemanager()">file manager</a></li>
 
