@@ -176,8 +176,9 @@ def employees(comp_id):
 @login_required
 def update_rights():
     data = request.form
+    new_rights=data.getlist('right')
     UserCompany.update_rights(user_id=data['user_id'],
-                              comp_id=data['comp_id'],
+                              company_id=data['comp_id'],
                               new_rights=data.getlist('right')
                               )
     return redirect(url_for('company.employees',

@@ -56,8 +56,12 @@ class Company(Base, PRBase):
                                           foreign_keys='Company.'
                                                        'logo_file')
 
+
+
     # get all users in company : company.employees
     # get all users companies : user.employers
+
+
 
     def create_new_company(self, user_id):
         user = g.db.query(User).get(user_id)
@@ -237,12 +241,11 @@ class UserCompany(Base, PRBase):
         # db_session.flush()
 
     ## corrected
-    @check_rights(*simple_permissions(frozenset()))
-    def update_rights(self, user, company, new_rights):
-        new_rights_binary = Right.transform_rights_into_integer(
-            new_rights)
-        user_company = db(UserCompany, user_id=user.id,
-                          company_id=company.id)
+    @staticmethod
+    @check_rights(simple_permissions(frozenset()))
+    def update_rights(user_id, company_id, new_rights):
+        new_rights_binary = Right.transform_rights_into_integer(new_rights)
+        user_company = db(UserCompany, user_id=user_id, company_id=company_id)
         rights_dict = {'rights': new_rights_binary}
         user_company.update(rights_dict)
 
@@ -293,21 +296,26 @@ class UserCompany(Base, PRBase):
             return True
         user = user_object
         company = company_object
-        if type(user_object) is int:
+        if type(user_object) is str:
             user = g.db.query(User).filter_by(id=user_object).first()
-        if type(company_object) is int:
-            company = g.db.query(Company). \
+        if type(company_object) is str:
+            company = g.db.query(Company).\
                 filter_by(id=company_object).first()
 
         needed_rights_int = \
             Right.transform_rights_into_integer(needed_rights_iterable)
 
-        available_rights = \
-            [user_company.rights for user_company in user.employers
-             if user_company.company == company
-             ][0] or 0
+        # available_rights = \
+        #     [user_company.rights for user_company in user.employers
+        #      if user_company.company == company
+        #      ][0] or 0
 
-        if available_rights & needed_rights_int != needed_rights_int:
+        user_company = \
+            user.employer_assoc.filter_by(company_id=company.id).first()
+
+        available_rights = user_company.rights if user_company else 0
+
+        if (available_rights & needed_rights_int) != needed_rights_int:
             return abort(403)
         else:
             return True
