@@ -4,9 +4,38 @@
 
 {% block portal_content %}
 
-<h2><a href="{{ url_for('article.show_form_create') }}">Create article</a></h2>
 
-{% for article in articles %}
-    <a href="{{ url_for('article.details', article_id=article.id) }}">{{ article.mine['title'] }}</a><br/>
-{% endfor %}
+    <script>
+        module.controller('article_list', ['$scope', '$ok', function ($scope, $ok) {
+            $scope.url_details = {{ raw_url_for('article.details')|safe }};
+            $scope.url_create_article = {{ raw_url_for('article.show_form_create')|safe }};
+            $scope.data = {};
+            $scope.cancel = function () {
+                window.location.href = $scope.url_back();
+                return false;
+            };
+            $scope.getData = function () {
+                return $scope.data;
+            };
+
+            $scope.afterSave = function () {
+                window.location.href = $scope.url_back();
+            };
+
+        }])
+    </script>
+    {% raw %}
+    <div ng-init="loadData()" ng-controller="article_list">
+
+        <div ng-if="loading">Loading...</div>
+        <div ng-if="!loading">
+            <h2><a href="{{ url_create_article() }}">Create article</a></h2>
+
+            <div ng-repeat="article in data.articles">
+                <a href="{{ url_details({article_id: article.id}) }}">{{ article.mine.title }}</a><br/>
+            </div>
+
+        </div>
+    </div>
+    {% endraw %}
 {% endblock portal_content %}

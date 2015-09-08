@@ -13,13 +13,11 @@
 
     <script>
         module.controller('companies_list', ['$scope', '$ok', function ($scope, $ok) {
-            {#            $scope.url_update = {{ raw_url_for('article.show_form_update')|safe }};#}
-
-            {#            $scope.url_submit = {{ raw_url_for('article.submit_to_company')|safe }};#}
 
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
             $scope.url_search_for_company = {{ raw_url_for('company.search_for_company_to_join')|safe }};
-            $scope.url_submit = {{ raw_url_for('company.join_to_company')|safe }};
+            $scope.url_join = {{ raw_url_for('company.join_to_company')|safe }};
+            $scope.url_create_own_company = {{ raw_url_for('company.add')|safe }};
 
             $scope.selectedCompany_name = '';
             $scope.selectedCompany = null;
@@ -46,7 +44,7 @@
             };
 
             $scope.joinToCompany = function () {
-                $ok($scope.url_submit({article_id: $scope.data['id']}), {company_id: $scope.selectedCompany.id}, function (resp) {
+                $ok($scope.url_join({article_id: $scope.data['id']}), {company_id: $scope.selectedCompany.id}, function (resp) {
                     $scope.selectedCompany = null;
                     $scope.selectedCompany_name = null;
                     $scope.data['companies'] = resp['companies'];
@@ -77,8 +75,9 @@
             color: #f00;
         }
     </style>
-    <h2><a href="{{ url_for('company.add') }}">{{ _('CREATE OWN COMPANY') }}</a></h2>
+
     <div ng-init="loadData()" ng-controller="companies_list">
+        <h2><a href="{{ url_create_own_company() }}">{{ _('CREATE OWN COMPANY') }}</a></h2>
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
             <div ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">
@@ -102,17 +101,9 @@
 
     </div>
 
-
-
     {% endraw %}
 {% endblock content %}
 
 {% block footer %}
     {% include 'partials/portal_footer_Profireader.html' %}
 {% endblock footer %}
-{#    <form class="subscribe" action="{{ url_for('company.subscribe_search_form') }}" onsubmit="return AjaxPost()"#}
-{#          id="subscribe" method="post">#}
-{#        <h3><p>Subscribe to company</p></h3>#}
-{#        <p>Enter company id<input type="text" id="company" placeholder="ID" name="company"></p>#}
-{#        <input type="submit" value="submit">#}
-{#    </form>#}
