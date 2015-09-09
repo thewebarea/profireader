@@ -15,9 +15,10 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
+from ..models.rights import list_of_RightAtomic_attributes
 
 
-# todo: resolve a problem with @json!
+# todo (AA to OZ): is @json necessary here? 
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 # @json
 def search_to_submit_article(json):
