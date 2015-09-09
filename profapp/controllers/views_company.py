@@ -138,7 +138,7 @@ def profile(company_id):
         company.logo_file else ''
 
     return render_template('company/company_profile.html',
-                           comp=company,
+                           company=company,
                            user_rights=user_rights_list,
                            image=image,
                            company_id=company_id
@@ -164,7 +164,7 @@ def employees(comp_id):
     current_company = db(Company, id=comp_id).one()
 
     return render_template('company/company_employees.html',
-                           comp=current_company,
+                           company=current_company,
                            company_id=comp_id,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
@@ -195,7 +195,7 @@ def edit(company_id):
     company = db(Company, id=company_id).one()
     user = current_user  # # or is it UserCompany instance?
     return render_template('company/company_edit.html',
-                           comp=company,
+                           company=company,
                            user_query=user
                            )
 
@@ -272,12 +272,12 @@ def suspend_employee():
 @company_bp.route('/suspended_employees/<string:comp_id>')
 @check_rights(simple_permissions(frozenset()))
 @login_required
-def suspended_employees_func(comp_id):
-    comp = Company.query_company(company_id=comp_id)
+def suspended_employees_func(company_id):
+    company = Company.query_company(company_id=company_id)
     suspended_employees = \
-        UserCompany.suspend_employee(comp_id,
+        UserCompany.suspend_employee(company_id,
                                      user_id=current_user.get_id())
     return render_template('company/company_suspended.html',
                            suspended_employees=suspended_employees,
-                           company_id=comp_id
+                           company_id=company_id
                            )

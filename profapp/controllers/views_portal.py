@@ -46,13 +46,13 @@ def apply_company():
 @portal_bp.route('/partners/<string:company_id>/')
 @login_required
 def partners(company_id):
-    comp = db(Company, id=company_id).one()
+    company = db(Company, id=company_id).one()
     companies_partners = CompanyPortal.\
         show_companies_on_my_portal(company_id)
     portals_partners = CompanyPortal.get_portals(company_id)
 
     return render_template('company/company_partners.html',
-                           comp=comp,
+                           company=company,
                            companies_partners=companies_partners,
                            portals_partners=portals_partners,
                            company_id=company_id
@@ -61,7 +61,7 @@ def partners(company_id):
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
 def publications(company_id):
 
-    comp = Company().query_company(company_id=company_id)
+    company = Company().query_company(company_id=company_id)
     return render_template('company/portal_publications.html',
                            company_id={'id': company_id})
 

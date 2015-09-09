@@ -114,17 +114,17 @@ class Company(Base, PRBase):
     @staticmethod
     def update_comp(company_id, data, passed_file):
 
-        comp = db(Company, id=company_id)
+        company = db(Company, id=company_id)
         upd = {x: y for x, y in zip(data.keys(), data.values())}
-        comp.update(upd)
+        company.update(upd)
 
         if passed_file:
             file = File(company_id=company_id,
-                        parent_id=comp.one().corporate_folder_file_id,
+                        parent_id=company.one().corporate_folder_file_id,
                         author_user_id=g.user_dict['id'],
                         name=passed_file.filename,
                         mime=passed_file.content_type)
-            comp.update(
+            company.update(
                 {'logo_file': file.upload(
                     content=passed_file.stream.read(-1)).id}
             )
@@ -147,7 +147,7 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
-        return [comp.get_client_side_dict() for comp in db(Company).\
+        return [company.get_client_side_dict() for company in db(Company).\
                 filter(~db(UserCompany, user_id=user_id,
                            company_id=Company.id).exists()).\
                 filter(Company.name.ilike("%" + searchtext + "%")
