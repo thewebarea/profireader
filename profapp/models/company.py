@@ -44,6 +44,7 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
+    portal = relationship('Portal', secondary='company_portal')
 
     # todo: add company time creation
 
@@ -55,44 +56,19 @@ class Company(Base, PRBase):
                                           backref='logo_owner_company',
                                           foreign_keys='Company.'
                                                        'logo_file')
-
-
-
     # get all users in company : company.employees
     # get all users companies : user.employers
 
-
-
     def create_new_company(self, user_id):
-        user = g.db.query(User).get(user_id)
-        # if author_user_id:
-        #     user = g.db.querry(User).get(user_id)
-        #     user_id = author_user_id
-        # else:
-        #     user_id = user.get_id()
-        #
-        # if passed_file:
-        #     file = File(company_id=self.id,
-        #                 parent_id=self.corporate_folder_file_id,
-        #                 author_user_id=user_id,
-        #                 name=passed_file.filename,
-        #                 mime=passed_file.content_type)
-        #
-        #     file_content = FileContent(file_content=file,
-        #                                content=passed_file.stream.read(-1))
-        #     file.file_all_content = file_content
-        #     self.logo_file_relationship = file
-        #     user.files.all().append(file)
 
+    #TODO VK TO VK: CHECK G>USER INSTANSE QUERY
+        user = g.db.query(User).get(user_id)
         user_company = UserCompany(status=STATUS.ACTIVE(),
                                    rights=COMPANY_OWNER_RIGHTS)
-
         user_company.employer = self
         user.employer_assoc.append(user_company)  # .all() added
         user.companies.append(self)
 
-        g.db.merge(user)
-        g.db.commit()
         return self
 
     @staticmethod
@@ -147,9 +123,9 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
-        return [comp.get_client_side_dict() for comp in db(Company).\
-                filter(~db(UserCompany, user_id=user_id,
-                           company_id=Company.id).exists()).\
+        return [comp.get_client_side_dict() for comp in
+                db(Company).filter(~db(UserCompany, user_id=user_id,
+                                       company_id=Company.id).exists()).
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 
