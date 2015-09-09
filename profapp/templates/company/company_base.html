@@ -5,7 +5,7 @@
         <a href="{{ url_for('company.show') }}">Readers</a>
         <a href="{{ url_for('portal.partners', company_id = company_id) }}">Companies Partners</a>
         <a href="{{ url_for('company.show') }}">Comments</a>
-        <a href="{{ url_for('company.employees', comp_id = company_id) }}">Employees</a>
+        <a href="{{ url_for('company.employees', company_id = company_id) }}">Employees</a>
         <a href="{{ url_for('company.profile', company_id = company_id) }}">Profile</a>
     </span>
 </span>

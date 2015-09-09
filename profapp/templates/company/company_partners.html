@@ -15,7 +15,7 @@
     <form class="subscribe" action="{{ url_for('portal.apply_company') }}" onsubmit="return AjaxPost()" id="subscribe" method="post">
         <h3><p>Subscribe to portal</p></h3>
         <p>Enter portal id<input type="text" id="portal_id" placeholder="ID" name="portal_id"></p>
-        <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+        <input type="hidden" id="company_id" name="company_id" value="{{ company.id }}">
         <input type="submit" value="Subscribe">
     </form>
 
@@ -23,7 +23,7 @@
  function AjaxPost() {
   $.post('', {
              'portal_id': $("#portal_id").val(),
-              'comp_id': $("#comp_id").val()
+              'company_id': $("#company_id").val()
  }, function (resp) {
              console.log(resp);
            },
@@ -31,15 +31,15 @@
    return true;
  };
 </script>
-    {% if not comp.portal %}
+    {% if not company.portal %}
         <h3>This company does not have portal</h3>
     {% else %}
         {% if not companies_partners %}
-            <h3> There are no companies partners on {% for portal in comp.portal %}"{{ portal.name }}"{% endfor %} portal </h3>
+            <h3> There are no companies partners on {% for portal in company.portal %}"{{ portal.name }}"{% endfor %} portal </h3>
         {% else %}
             <h3>Companies Partners :
-                {% for comp in companies_partners %}
-                    <a href="{{ url_for('company.profile', company_id = comp.id) }}"> "{{ comp.name }}" </a>
+                {% for company in companies_partners %}
+                    <a href="{{ url_for('company.profile', company_id = company.id) }}"> "{{ company.name }}" </a>
                 {% endfor %}</h3>
         {% endif %}
     {% endif %}

@@ -15,7 +15,7 @@
 
         {% for key in company_user_rights %}
             {% if not curr_user %}
-                <a href="{{ url_for('company.subscribe', company_id=comp.id)}}">Subscribe to this company</a>
+                <a href="{{ url_for('company.subscribe', company_id=company.id)}}">Subscribe to this company</a>
             {% endif %}
         {% endfor %}
     </span>
@@ -26,7 +26,7 @@
         {% if company_user_rights[key]['status']=='active' %}
         <form class="add_rights" action="{{ url_for('company.update_rights') }}" method="post">
         <input type="hidden" name="user_id" id="user_id" value="{{ key }}">
-        <input type="hidden" name="comp_id" id="comp_id" value="{{ comp.id }}">
+        <input type="hidden" name="company_id" id="company_id" value="{{ company.id }}">
               <dt>
                 <img src="{{ company_user_rights[key]['user'].profireader_small_avatar_url }}" style="width:100px;height:100px;border:0">
                 {{ company_user_rights[key]['name'] }}<br>
@@ -68,7 +68,7 @@
     {% for c_user in curr_user %}
         {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[key]['status']=='active' and c_user != key%}
         <form class="suspend_employee" action="{{ url_for('company.suspend_employee') }}" onsubmit="return AjaxPost()" method="post">
-        <input type="hidden" id='comp_id' name="comp_id" value="{{ comp.id }}">
+        <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
         <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
         <input type="submit" value="Suspend {{ company_user_rights[key]['name'] }} from your company">
         </form>
@@ -80,7 +80,7 @@
       <script type="text/javascript">
  function AjaxPost() {
   $.post('', {
-             'comp_id': $("#comp_id").val(),
+             'company_id': $("#company_id").val(),
               'user_id': $("#user_id").val()
  }, function (resp) {
              console.log(resp);
@@ -93,17 +93,17 @@
 {% for key in company_user_rights %}
     {% if curr_user %}
         {% for c_user in curr_user %}
-            {% if curr_user[c_user]['rights'][Right['manage_access_company']]==true or comp.author_user_id==g.user_dict['id'] %}
+            {% if curr_user[c_user]['rights'][Right['manage_access_company']]==true or company.author_user_id==g.user_dict['id'] %}
                 {% if company_user_rights[key]['status'] == 'nonactive' %}
                     User {{ company_user_rights[key]['name'] }} send query to your company<br>
                     <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
-                        <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+                        <input type="hidden" id="company_id" name="company_id" value="{{ company.id }}">
                         <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
                         <input type="hidden" id="req1" name="req" value="True">
                         <input type="submit" id="apply" value="Add {{ company_user_rights[key]['name'] }} to your company">
                     </form>
                     <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">
-                        <input type="hidden" id="comp_id" name="comp_id" value="{{ comp.id }}">
+                        <input type="hidden" id="company_id" name="company_id" value="{{ company.id }}">
                         <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
                         <input type="hidden" id="req1" name="req" value='False'>
                         <input type="submit" id="reject" value="Don't add {{ company_user_rights[key]['name'] }} to your company">
@@ -118,7 +118,7 @@
     <script type="text/javascript">
  function AjaxPost2() {
   $.post('', {
-             'comp_id': $("#comp_id").val(),
+             'company_id': $("#company_id").val(),
       'user_id': $("#user_id").val(),
              'req': $("#req1").val()
  }, function (resp) {
@@ -129,7 +129,7 @@
  };
     </script>
     <br>
-    <a href="{{ url_for('company.suspended_employees_func', comp_id=comp.id) }}">SUSPENDED EMPLOYEES</a>
+    <a href="{{ url_for('company.suspended_employees_func', company_id=company.id) }}">SUSPENDED EMPLOYEES</a>
 
 {% endblock content %}
 

@@ -13,24 +13,24 @@
 {% include 'company/company_base.html' %}
 {% endblock company_base %}
 
-    <h2><img  src="{{ image }}" height="100" width="100"> {{ comp.name }}
+    <h2><img  src="{{ image }}" height="100" width="100"> {{ company.name }}
 
         {% for right in user_rights.right %}
             {% if right.company_right_id=='manage_access_company' %}
-                <a href="{{ url_for('company.edit', company_id=comp.id) }}">Edit company</a>
+                <a href="{{ url_for('company.edit', company_id=company.id) }}">Edit company</a>
             {% endif %}
         {% endfor %}
     </h2>
-    <h3>{{ comp.country }}, {{ comp.region }}, {{ comp.address }} </h3>
-    <h5>Phone: {{ comp.phone }} |  Fax:  {{ comp.phone2 }}  |  {{ comp.email }}
+    <h3>{{ company.country }}, {{ company.region }}, {{ company.address }} </h3>
+    <h5>Phone: {{ company.phone }} |  Fax:  {{ company.phone2 }}  |  {{ company.email }}
 
-            {% if comp.author_user_id == g.user_dict['id'] %}
-                <a href="{{ url_for('portal.create', company_id=comp.id) }}">Create Portal</a>
+            {% if company.author_user_id == g.user_dict['id'] %}
+                <a href="{{ url_for('portal.create', company_id=company.id) }}">Create Portal</a>
             {% endif %}
 
     </h5>
     <p><h4> Short description </h4></p>
-    <h5>{{ comp.short_description }}</h5>
+    <h5>{{ company.short_description }}</h5>
 
 
 

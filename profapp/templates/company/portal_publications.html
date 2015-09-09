@@ -21,8 +21,8 @@
                 <div ng-repeat="article in dat.article_portal">
                     <div ng-if="article.status!='published'">
                         Your portal has got a request to publish article: {{ article.title }} from company
-                        <span ng-repeat="comp in article.company_article">
-                            {{ comp.name }}
+                        <span ng-repeat="company in article.company_article">
+                            {{ company.name }}
                         </span>
                         Change status to :
                         <select ng-model="data.new_status">
