@@ -36,7 +36,7 @@ def confirm_create(json):
     portal.create_portal(company_id=json['company_id'],
                          division_type=json['division_type'],
                          division_name=json['division_name'])
-    return {'company_id': {'id': portal.company_owner_id}}
+    return {'company_id': {'id': json['company_id']}}
 
 @portal_bp.route('/', methods=['POST'])
 @check_rights(simple_permissions(frozenset()))
