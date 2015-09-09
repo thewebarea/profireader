@@ -2,6 +2,7 @@ from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 # from db_init import Base, g.db
+from ..controllers import errors
 from flask import g
 from utils.db_utils import db
 from .company import Company
@@ -29,20 +30,17 @@ class Portal(Base, PRBase):
                                          'PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
-
-    company = relationship('Company', backref='portals')
     companies = relationship('Company', secondary='company_portal')
 
     def __init__(self, name=None, companies=[],
                  portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
-                 company_owner_id=None, company=None, article=None,
+                 company_owner_id=None, article=None,
                  host=None, divisions=[],
                  portal_layout_id='55e99785-bda1-4001-922f-ab974923999a'
                  ):
         self.name = name
         self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
-        self.company = company
         self.article = article
         self.host = host
         self.portal_layout_id = portal_layout_id
@@ -50,7 +48,14 @@ class Portal(Base, PRBase):
         self.companies = companies
 
     def create_portal(self, company_id, division_name, division_type):
-        self.company = db(Company, id=company_id).one()
+
+        if db(Portal, company_owner_id=company_id).count():
+            raise errors.PortalAlreadyExist({
+                'message': "_('PortalAlreadyExist')"})
+            # except errors.PortalAlreadyExist as e:
+            #     details = e.args[0]
+            #     print(details['message'])
+        self.own_company = db(Company, id=company_id).one()
         self.save()
         self.divisions.append(PortalDivision.add_new_division(
             portal_id=self.id, name=division_name,
@@ -58,7 +63,7 @@ class Portal(Base, PRBase):
         company_assoc = CompanyPortal(
             company_portal_plan_id=self.portal_plan_id)
         company_assoc.portal = self
-        company_assoc.company = self.company
+        company_assoc.company = self.own_company
 
         return self
 

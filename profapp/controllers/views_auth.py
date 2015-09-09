@@ -18,8 +18,10 @@ from flask import redirect, make_response
 from flask.ext.login import login_user
 from ..constants.SOCIAL_NETWORKS import SOC_NET_NONE
 from ..constants.UNCATEGORIZED import AVATAR_SIZE, AVATAR_SMALL_SIZE
+from ..models.rights import list_of_RightAtomic_attributes
 
-#def _session_saver():
+
+# def _session_saver():
 #    session.modified = True
 
 EMAIL_REGEX = re.compile(r'[^@]+@[^@]+\.[^@]+')
@@ -123,10 +125,12 @@ def unconfirmed():
 def signup():
     # (Andriy) I suppose it is not necessary
     if g.user_init and g.user_init.is_authenticated():
-        # flash('To sign up Profireader with new account you '
-        #       'should logout first')
-        #return redirect(url_for('auth.login'))
-        raise BadDataProvided
+        if request.method != 'GET':
+            flash('You are already logged in.'
+                  'To sign up Profireader with new account you '
+                  'should logout first')
+            return redirect(url_for('auth.login'))
+            # raise BadDataProvided
 
     form = RegistrationForm()
     if form.validate_on_submit():  # # pass1 == pass2

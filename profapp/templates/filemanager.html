@@ -1,38 +1,48 @@
 <!doctype html>
-<html lang="en" data-ng-app="FileManagerApp">
+<html lang="en">
 <head>
     <!--
       * Angular FileManager v0.9 (https://github.com/joni2back/angular-filemanager)
       * Jonas Sciangula Street <joni2back@gmail.com>
       * Licensed under MIT (https://github.com/joni2back/angular-filemanager/blob/master/LICENSE)
     -->
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <title>angular-filemanager</title>
-    <script src="/static/angular/angular.min.js"></script>
-    <script src="/static/angular/angular-translate.min.js"></script>
-    <script src="/static/angular/angular-cookies.min.js"></script>
-    <script src="/static/jquery/jquery.min.js"></script>
-    {#  <script src="/static/bootstrap/bootstrap.min.js"></script>#}
-    <script src="{{ bootstrap_find_resource('js/bootstrap.js', cdn='bootstrap') }}"></script>
-    <!-- Uncomment if you need to use raw source code
-      <script src="assets/js/app.js"></script>
-      <script src="assets/js/config.js"></script>
-      <script src="assets/js/chmod.js"></script>
-      <script src="assets/js/item.js"></script>
-      <script src="assets/js/filenavigator.js"></script>
-      <script src="assets/js/fileuploader.js"></script>
-      <script src="assets/js/translations.js"></script>
-      <script src="assets/js/controller.js"></script>
-      <script src="assets/js/selector-controller.js"></script>
-    -->
+    {#    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">#}
+    {#    <meta charset="utf-8">#}
+    {#    <title>angular-filemanager</title>#}
+        <script src="/static/jquery/jquery.min.js"></script>
+        <script src="/static/angular/angular.min.js"></script>
+        <script src="/static/angular/angular-cookies.min.js"></script>
+        <script src="/static/angular/angular-translate.min.js"></script>
+    {##}
+    {##}
+        <link rel="stylesheet"
+              href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+    {##}
+    {#    <!-- Uncomment if you need to use raw source code#}
+    {#      <script src="assets/js/app.js"></script>#}
+    {#      <script src="assets/js/config.js"></script>#}
+    {#      <script src="assets/js/chmod.js"></script>#}
+    {#      <script src="assets/js/item.js"></script>#}
+    {#      <script src="assets/js/filenavigator.js"></script>#}
+    {#      <script src="assets/js/fileuploader.js"></script>#}
+    {#      <script src="assets/js/translations.js"></script>#}
+    {#      <script src="assets/js/controller.js"></script>#}
+    {#      <script src="assets/js/selector-controller.js"></script>#}
+    {#    -->#}
+    {##}
+    {##}
+    {#    <!-- Comment if you need to use raw source code -->#}
+        <script src="/static/filemanager/angular-filemanager.min.js"></script>
+        <script src="/static/filemanager/cached-templates.js"></script>
+    {#    <!-- Comment if you need to use raw source code -->#}
+    {##}
+        <link rel="stylesheet" href="/static/filemanager/angular-filemanager.css">
 
-    <script src="/static/filemanager/angular-filemanager.min.js"></script>
-    <!-- Comment if you need to use raw source code -->
-    <script src="/static/filemanager/cached-templates.js"></script>
-    <!-- Comment if you need to use raw source code -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="/static/filemanager/angular-filemanager.css">
+
+
+    <script src="/static/fileuploader/ng-file-upload.min.js"></script>
+
+
 </head>
 
 <body>
@@ -49,7 +59,8 @@
         var on_choose = function (files_selected) {
             if (_.isFunction({{ on_choose|safe }})) {
                 try {
-                    {{ on_choose|safe }}.apply(this, [files_selected]);
+                    {{ on_choose|safe }}.
+                    apply(this, [files_selected]);
                 }
                 catch (e) {
 
@@ -63,10 +74,35 @@
         var max_choose = 0;
     {% endif %}
 
+
     var library = {{ library|safe }};
+{#    var app = angular.module('FileUpload', ['ngFileUpload']);#}
+
+    angular.module('FileManagerApp').controller('MyCtrl', ['$scope', 'Upload', function ($scope, Upload) {
+        // upload later on form submit or something similar
+        $scope.submit = function () {
+            $scope.upload($scope.files);
+        };
+
+
+        // for multiple files:
+        $scope.upload = function (files) {
+            if (files && files.length) {
+                for (var i = 0; i < files.length; i++) {
+                    Upload.upload({
+                                url: '/filemanager/upload/',
+                                file: files[i]
+                            }
+                    );
+                }
+            }
+        }
+    }]);
 
 </script>
-<!-- Comment if you need to use raw source code -->
-<angular-file-manager></angular-file-manager>
+
+<body ng-app="FileManagerApp">
+    <angular-file-manager></angular-file-manager>
+
 </body>
 </html>

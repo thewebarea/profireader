@@ -22,6 +22,7 @@ from ..controllers.request_wrapers import check_rights
 from flask.ext.login import current_user
 from .files import File
 from .pr_base import PRBase, Base
+from ..controllers import errors
 
 
 class Company(Base, PRBase):
@@ -45,6 +46,9 @@ class Company(Base, PRBase):
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
     portal = relationship('Portal', secondary='company_portal')
+    own_portal = relationship('Portal', backref='own_company',
+                              foreign_keys='Portal.company_owner_id',
+                              uselist=False)
 
     # todo: add company time creation
 
@@ -193,6 +197,9 @@ class UserCompany(Base, PRBase):
 
     # do we provide any rights to user at subscribing?
     def subscribe_to_company(self):
+        if db(UserCompany, user_id=self.user_id,
+              company_id=self.company_id).count():
+            raise errors.AlreadyJoined({'message': 'UserAlreadyJoined'})
         self.employee = User.user_query(self.user_id)
         self.employer = db(Company, id=self.company_id).one()
         self.save()
@@ -214,14 +221,15 @@ class UserCompany(Base, PRBase):
             stat = STATUS().REJECT()
         db(UserCompany, company_id=comp_id, user_id=user_id,
            status=STATUS().NONACTIVE()).update({'status': stat})
-        # db_session.flush()
 
     ## corrected
     @staticmethod
     @check_rights(simple_permissions(frozenset()))
     def update_rights(user_id, company_id, new_rights):
-        new_rights_binary = Right.transform_rights_into_integer(new_rights)
-        user_company = db(UserCompany, user_id=user_id, company_id=company_id)
+        new_rights_binary = Right.transform_rights_into_integer(
+            new_rights)
+        user_company = db(UserCompany, user_id=user_id,
+                          company_id=company_id)
         rights_dict = {'rights': new_rights_binary}
         user_company.update(rights_dict)
 
