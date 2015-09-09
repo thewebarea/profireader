@@ -19,9 +19,10 @@
         <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
             <div ng-repeat="dat in data.portal">
                 <div ng-repeat="article in dat.article_portal">
+
                     <div ng-if="article.status!='published'">
-                        <input type="hidden" ng-model="data.not_published" value="{{ article.status }}">
-                        Your portal has got a request to publish article: {{ article.title }} from company
+                        <input type="hidden" ng-model="data.not_published">
+                        Your portal rejected materials: {{ article.title }} from company
                         <span ng-repeat="comp in article.company_article">
                             {{ comp.name }}
                         </span>
@@ -30,19 +31,31 @@
                             <option value="{{ article.id }}/published">published</option>
                             <option value="{{ article.id }}/declined">declined</option>
                         </select>
+                        <input type="submit" value="Accept">
                     </div>
-                    {{ data.not_published }}
                 </div>
             </div>
+
         </form>
         <h4>Your published materials are:</h4>
         <div ng-repeat="dat in data.portal">
             <div ng-repeat="article in dat.article_portal">
                 <span ng-if="article.status=='published'">
+
+                         -----------------------------------------------------
+                    <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
                     <h5>
                         {{ article.title }}
                     </h5>
-                    was published at <h6>{{ article.md_tm }}<br></h6>
+                        was published at <h6>{{ article.md_tm }}<br></h6>
+                        Change status to :
+                        <select ng-model="data.new_status">
+                            <option value="{{ article.id }}/not_published">reject</option>
+                        </select>
+                    <input type="submit" value="Accept"><br>
+                         -----------------------------------------------------
+                    </form>
+
                 </span>
             </div>
         </div>

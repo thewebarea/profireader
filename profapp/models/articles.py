@@ -43,7 +43,7 @@ class ArticlePortal(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     publishing_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'],
-                    default=ARTICLE_STATUS_IN_PORTAL.not_published)
+                    default=ARTICLE_STATUS_IN_PORTAL.published)
     portal_id = Column(TABLE_TYPES['id_profireader'],
                        ForeignKey('portal.id'))
 

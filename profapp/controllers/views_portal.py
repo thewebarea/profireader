@@ -80,7 +80,8 @@ def publications_load(json, company_id):
                                'name|short_description|email|phone') for
                   port in portal.divisions if port.article_portal]
 
-    return {'portal': portal, 'new_status': '', 'not_published': 'c'}
+    return {'portal': portal, 'new_status': '',
+            'company_id': {'id': company_id}}
 
 @portal_bp.route('/update_article_portal/', methods=['POST'])
 @ok
