@@ -123,9 +123,9 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
-        return [comp.get_client_side_dict() for comp in db(Company).\
-                filter(~db(UserCompany, user_id=user_id,
-                           company_id=Company.id).exists()).\
+        return [comp.get_client_side_dict() for comp in
+                db(Company).filter(~db(UserCompany, user_id=user_id,
+                                       company_id=Company.id).exists()).
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 

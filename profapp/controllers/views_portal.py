@@ -2,11 +2,13 @@ from .blueprints import portal_bp
 from flask import render_template, request, url_for, redirect
 from ..models.company import Company
 from flask.ext.login import login_required
-from ..models.portal import CompanyPortal, PortalDivisionType, Portal
+from ..models.portal import PortalDivisionType
 from utils.db_utils import db
 from ..models.portal import CompanyPortal, Portal
-from .request_wrapers import ok
+from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
+from ..models.company import simple_permissions
+from flask import g
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
 def create(company_id):
@@ -35,28 +37,52 @@ def confirm_create(json):
 
 @portal_bp.route('/', methods=['POST'])
 @login_required
-def apply_company():
+@ok
+def apply_company(json):
 
-    data = request.form
-    CompanyPortal.apply_company_to_portal(company_id=data['comp_id'],
-                                          portal_id=data['portal_id'])
-    return redirect(url_for('portal.partners',
-                            company_id=data['comp_id']))
+    CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
+                                          portal_id=json['portal_id'])
+    print(json)
+    return {'companies_partners': [comp.to_dict('id, name') for comp in
+                                   CompanyPortal.
+                                   show_companies_on_my_portal(
+                                   json['company_id'])]}
 
 @portal_bp.route('/partners/<string:company_id>/')
 @login_required
 def partners(company_id):
-    comp = db(Company, id=company_id).one()
-    companies_partners = CompanyPortal.\
-        show_companies_on_my_portal(company_id)
-    portals_partners = CompanyPortal.get_portals(company_id)
 
     return render_template('company/company_partners.html',
-                           comp=comp,
-                           companies_partners=companies_partners,
-                           portals_partners=portals_partners,
-                           company_id=company_id
+                           company_id={'id': company_id}
                            )
+
+@portal_bp.route('/partners/<string:company_id>/', methods=['POST'])
+@login_required
+@ok
+def partners_load(json, company_id):
+
+    portal = Portal.own_portal(company_id)
+    portal = portal.to_dict('name') if portal else []
+    companies_partners = [comp.to_dict('id, name') for comp in
+                          CompanyPortal.show_companies_on_my_portal(
+                              company_id)]
+    portals_partners = [portal.portal.to_dict('name, company_owner_id,'
+                                              'id')
+                        for portal in CompanyPortal.get_portals(
+                        company_id)]
+    return {'portal': portal, 'companies_partners': companies_partners,
+            'portals_partners': portals_partners,
+            'company_id': {'id': company_id}}
+
+
+
+@portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
+@ok
+def search_for_portal_to_join(json):
+    portals = Portal.search_for_portal_to_join(json['company_id'],
+                                               json['search'])
+    return portals
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
 def publications(company_id):

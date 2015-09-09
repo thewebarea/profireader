@@ -1,12 +1,8 @@
 from .blueprints import company_bp
 from ..models.company import simple_permissions
-#from .request_wrapers import json
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompany, Right
-# from phonenumbers import NumberParseException
-from ..constants.USER_ROLES import RIGHTS
-from ..models.users import User
 from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS

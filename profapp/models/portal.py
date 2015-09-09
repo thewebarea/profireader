@@ -67,6 +67,15 @@ class Portal(Base, PRBase):
         return self.to_dict(fields)
 
     @staticmethod
+    def search_for_portal_to_join(company_id, searchtext):
+        return [port.get_client_side_dict() for port in
+                db(Portal).filter(~db(CompanyPortal,
+                                      company_id=company_id,
+                                      portal_id=Portal.id).exists()
+                                  ).filter(
+                    Portal.name.ilike("%" + searchtext + "%")).all()]
+
+    @staticmethod
     def own_portal(company_id):
         try:
             ret = db(Portal, company_owner_id=company_id).one()
@@ -100,7 +109,7 @@ class PortalLayout(Base, PRBase):
         self.name = name
 
 
-class CompanyPortal(Base):
+class CompanyPortal(Base, PRBase):
     __tablename__ = 'company_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -150,9 +159,8 @@ class CompanyPortal(Base):
 
     @staticmethod
     def get_portals(company_id):
-        comp_port = db(CompanyPortal, company_id=company_id).all()
-        return [Portal().query_portal(portal.portal_id)
-                for portal in comp_port]
+
+        return db(CompanyPortal, company_id=company_id).all()
 
 
 class PortalDivision(Base, PRBase):
