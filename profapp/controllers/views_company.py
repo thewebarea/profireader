@@ -145,11 +145,11 @@ def profile(company_id):
                            )
 
 
-@company_bp.route('/employees/<string:comp_id>/')
+@company_bp.route('/employees/<string:company_id>/')
 @check_rights(simple_permissions(frozenset()))
 @login_required
-def employees(comp_id):
-    company_user_rights = UserCompany.show_rights(comp_id)
+def employees(company_id):
+    company_user_rights = UserCompany.show_rights(company_id)
 
     for user_id in company_user_rights.keys():
         rights = company_user_rights[user_id]['rights']
@@ -161,11 +161,11 @@ def employees(comp_id):
 
     user_id = current_user.get_id()
     curr_user = {user_id: company_user_rights[user_id]}
-    current_company = db(Company, id=comp_id).one()
+    current_company = db(Company, id=company_id).one()
 
     return render_template('company/company_employees.html',
                            company=current_company,
-                           company_id=comp_id,
+                           company_id=company_id,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
                            Right=Right
@@ -179,11 +179,11 @@ def update_rights():
     data = request.form
     new_rights=data.getlist('right')
     UserCompany.update_rights(user_id=data['user_id'],
-                              company_id=data['comp_id'],
+                              company_id=data['company_id'],
                               new_rights=data.getlist('right')
                               )
     return redirect(url_for('company.employees',
-                            comp_id=data['comp_id']))
+                            company_id=data['company_id']))
 
 
 # todo: it must be checked!!!
@@ -213,10 +213,10 @@ def confirm_edit(company_id):
 @check_rights(simple_permissions(frozenset()))
 @login_required
 def subscribe(company_id):
-    comp_role = UserCompany(user_id=g.user_dict['id'],
+    company_role = UserCompany(user_id=g.user_dict['id'],
                             company_id=company_id,
                             status=STATUS().NONACTIVE())
-    comp_role.subscribe_to_company()
+    company_role.subscribe_to_company()
 
     return redirect(url_for('company.profile', company_id=company_id))
 
@@ -235,10 +235,10 @@ def search_for_company_to_join(json):
 @check_rights(simple_permissions(frozenset()))
 @ok
 def join_to_company(json, company_id):
-    comp_role = UserCompany(user_id=g.user_dict['id'],
+    company_role = UserCompany(user_id=g.user_dict['id'],
                             company_id=json['company_id'],
                             status=STATUS().NONACTIVE())
-    comp_role.subscribe_to_company()
+    company_role.subscribe_to_company()
     return {'companies': [employer.get_client_side_dict()
                           for employer in current_user.employers]}
 
@@ -248,13 +248,13 @@ def join_to_company(json, company_id):
 @check_rights(simple_permissions(frozenset(['add_employee'])))
 @login_required
 def confirm_subscriber():
-    comp_role = UserCompany()
+    company_role = UserCompany()
     data = request.form
-    comp_role.apply_request(comp_id=data['comp_id'],
+    company_role.apply_request(company_id=data['company_id'],
                             user_id=data['user_id'],
                             bool=data['req'])
     return redirect(url_for('company.profile',
-                            company_id=data['comp_id']))
+                            company_id=data['company_id']))
 
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
@@ -263,13 +263,13 @@ def confirm_subscriber():
 def suspend_employee():
     data = request.form
     UserCompany.suspend_employee(user_id=data['user_id'],
-                                 comp_id=data['comp_id'])
+                                 company_id=data['company_id'])
     return redirect(url_for('company.employees',
-                            comp_id=data['comp_id']))
+                            company_id=data['company_id']))
 
 
 # todo: what actually is it intended?
-@company_bp.route('/suspended_employees/<string:comp_id>')
+@company_bp.route('/suspended_employees/<string:company_id>')
 @check_rights(simple_permissions(frozenset()))
 @login_required
 def suspended_employees_func(company_id):

@@ -131,9 +131,9 @@ class Company(Base, PRBase):
         # db_session.flush()
 
     @staticmethod
-    def query_employee(comp_id):
+    def query_employee(company_id):
 
-        employee = db(UserCompany, company_id=comp_id,
+        employee = db(UserCompany, company_id=company_id,
                       user_id=g.user_dict['id']).first()
         return employee if employee else False
 
@@ -158,7 +158,7 @@ class Company(Base, PRBase):
 
 
 def simple_permissions(set_of_rights):  # .p(right_name)
-    def business_rule(**kwargs):
+    def business_rule(rights, **kwargs):
         if 'company_id' in kwargs.keys():
             company_object = kwargs['company_id']
         elif 'company' in kwargs.keys():
@@ -229,21 +229,21 @@ class UserCompany(Base, PRBase):
         self.save()
 
     @staticmethod
-    def suspend_employee(comp_id, user_id):
-        db(UserCompany, company_id=comp_id, user_id=user_id). \
+    def suspend_employee(company_id, user_id):
+        db(UserCompany, company_id=company_id, user_id=user_id). \
             update({'status': STATUS.SUSPEND()})
         # db_session.flush()
 
     @staticmethod
-    def apply_request(comp_id, user_id, bool):
+    def apply_request(company_id, user_id, bool):
         if bool == 'True':
             stat = STATUS().ACTIVE()
             UserCompany.update_rights(user_id,
-                                      comp_id,
+                                      company_id,
                                       Config.BASE_RIGHT_IN_COMPANY)
         else:
             stat = STATUS().REJECT()
-        db(UserCompany, company_id=comp_id, user_id=user_id,
+        db(UserCompany, company_id=company_id, user_id=user_id,
            status=STATUS().NONACTIVE()).update({'status': stat})
         # db_session.flush()
 
@@ -258,11 +258,11 @@ class UserCompany(Base, PRBase):
 
     #  corrected
     @staticmethod
-    def show_rights(comp_id):
+    def show_rights(company_id):
         emplo = {}
-        for user in db(Company, id=comp_id).one().employees:
+        for user in db(Company, id=company_id).one().employees:
             user_company = user.employer_assoc. \
-                filter_by(company_id=comp_id).first()
+                filter_by(company_id=company_id).first()
             emplo[user.id] = {'id': user.id,
                               'name': user.user_name,
                               # TODO (AA): don't pass user object
@@ -280,12 +280,12 @@ class UserCompany(Base, PRBase):
 
     # it is correct
     @staticmethod
-    def suspended_employees(comp_id):
+    def suspended_employees(company_id):
         suspended_employees = {}
-        for x in Company.query_company(comp_id).employees:
+        for x in Company.query_company(company_id).employees:
             user_in_company = UserCompany.user_in_company(
                 user_id=x.id,
-                company_id=comp_id)
+                company_id=company_id)
 
             if user_in_company.status == STATUS.SUSPEND():
                 suspended_employees[x.id] = x.id

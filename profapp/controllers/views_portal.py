@@ -38,10 +38,10 @@ def confirm_create(json):
 def apply_company():
 
     data = request.form
-    CompanyPortal.apply_company_to_portal(company_id=data['comp_id'],
+    CompanyPortal.apply_company_to_portal(company_id=data['company_id'],
                                           portal_id=data['portal_id'])
     return redirect(url_for('portal.partners',
-                            company_id=data['comp_id']))
+                            company_id=data['company_id']))
 
 @portal_bp.route('/partners/<string:company_id>/')
 @login_required
