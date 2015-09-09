@@ -23,13 +23,13 @@ gulp.task('install_angular', function() {
 });
 
 gulp.task('install_angular_ui_tinymce', function() {
-  return gulp.src(src + 'angular/angular-ui-tinymce/angular.min.js')
+  return gulp.src(src + 'angular-ui-tinymce/src/tinymce.js')
     .pipe(gulp.dest('angular-ui-tinymce/'));
 });
 
 gulp.task('install_tinymce', function() {
   return gulp.src(src + 'tinymce-dist/tinymce.jquery.min.js')
-    .pipe(gulp.dest('angular-ui-tinymce/'));
+    .pipe(gulp.dest('tinymce/'));
 });
 
 
