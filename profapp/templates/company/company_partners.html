@@ -55,16 +55,15 @@
                 $ok($scope.url_join(), {company_id: $scope.data.company_id.id, portal_id: $scope.selectedPortal.id}, function (resp) {
                     $scope.selectedPortal = null;
                     $scope.selectedPortal_name = null;
-                    $scope.data['portals'] = resp['portals'];
+                    $scope.data['portals_partners'] = resp['portals_partners'];
 {#TODO OZ BY VK: javascript error                #}
                     setTimeout(function () {
-                        scrool($('#joined_portal_' + resp['portals']['id']), {
+                        scrool($('#joined_portal_' + resp['portals_partners']['id']), {
                             afterScroll: function () {
-                                highlight($('#joined_portal_' + resp['portals']['id']));
+                                highlight($('#joined_portal_' + resp['portals_partners']['id']));
                             }
                         });
                     }, 500);
-{#TODO OZ BY VK: javascript page does't reload              #}
                 }).finally(function () {
                     $scope.selectedPortal_sending = false;
                 });

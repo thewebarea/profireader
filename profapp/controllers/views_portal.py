@@ -11,11 +11,13 @@ from ..models.company import simple_permissions
 from flask import g
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
+@check_rights(simple_permissions(frozenset()))
 def create(company_id):
     return render_template('company/portal_create.html',
                            company_id={'id': company_id})
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
 @ok
 def create_load(json, company_id):
 
@@ -26,6 +28,7 @@ def create_load(json, company_id):
                  PortalDivisionType.get_division_types()]}
 
 @portal_bp.route('/confirm_create/', methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
 @ok
 def confirm_create(json):
     portal = Portal(name=json['portal_name'],
@@ -36,20 +39,19 @@ def confirm_create(json):
     return {'company_id': {'id': portal.company_owner_id}}
 
 @portal_bp.route('/', methods=['POST'])
-@login_required
+@check_rights(simple_permissions(frozenset()))
 @ok
 def apply_company(json):
 
     CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
                                           portal_id=json['portal_id'])
-    print(json)
-    return {'companies_partners': [comp.to_dict('id, name') for comp in
-                                   CompanyPortal.
-                                   show_companies_on_my_portal(
-                                   json['company_id'])]}
+    return {'portals_partners': [portal.portal.to_dict(
+        'name, company_owner_id,id')for portal in CompanyPortal.
+        get_portals(json['company_id'])],
+        'company_id': {'id': json['company_id']}}
 
 @portal_bp.route('/partners/<string:company_id>/')
-@login_required
+@check_rights(simple_permissions(frozenset()))
 def partners(company_id):
 
     return render_template('company/company_partners.html',
@@ -57,7 +59,7 @@ def partners(company_id):
                            )
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['POST'])
-@login_required
+@check_rights(simple_permissions(frozenset()))
 @ok
 def partners_load(json, company_id):
 
@@ -80,11 +82,12 @@ def partners_load(json, company_id):
 @check_rights(simple_permissions(frozenset()))
 @ok
 def search_for_portal_to_join(json):
-    portals = Portal.search_for_portal_to_join(json['company_id'],
-                                               json['search'])
-    return portals
+    portals_partners = Portal.search_for_portal_to_join(
+        json['company_id'], json['search'])
+    return portals_partners
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
+@check_rights(simple_permissions(frozenset()))
 def publications(company_id):
 
     comp = Company().query_company(company_id=company_id)
