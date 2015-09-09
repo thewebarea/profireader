@@ -158,7 +158,7 @@ class Company(Base, PRBase):
 
 
 def simple_permissions(set_of_rights):  # .p(right_name)
-    def lambda_function(**kwargs):
+    def business_rule(**kwargs):
         if 'company_id' in kwargs.keys():
             company_object = kwargs['company_id']
         elif 'company' in kwargs.keys():
@@ -171,11 +171,19 @@ def simple_permissions(set_of_rights):  # .p(right_name)
             user_object = kwargs['user']
         else:
             user_object = None
-        return UserCompany.permissions(user_object,
-                                       company_object,
-                                       set_of_rights)
 
-    return {set_of_rights: lambda_function}
+        def user_company_permissions_rule(rights):
+            return UserCompany.permissions(user_object,
+                                           company_object,
+                                           rights)
+
+        # return UserCompany.permissions(user_object,
+        #                                company_object,
+        #                                set_of_rights)
+
+        return user_company_permissions_rule
+
+    return {set_of_rights: business_rule}
 
 
 class UserCompany(Base, PRBase):

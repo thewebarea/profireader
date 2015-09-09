@@ -177,7 +177,7 @@ def signup_soc_network(soc_network_name):
 # ted during transit, defeating any efforts put into securing passwords
 # in the server.
 #
-# read this before push!!!: http://flask.pocoo.org/snippets/62/
+# read this!: http://flask.pocoo.org/snippets/62/
 @auth_bp.route('/login/', methods=['GET', 'POST'])
 def login():
     # (Andriy) I suppose it is not necessary
