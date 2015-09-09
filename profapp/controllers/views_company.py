@@ -18,7 +18,7 @@ from utils.db_utils import db
 from ..models.rights import list_of_RightAtomic_attributes
 
 
-# todo (AA to OZ): is @json necessary here? 
+# todo (AA to OZ): is @json necessary here?
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 # @json
 def search_to_submit_article(json):

@@ -83,13 +83,7 @@ class Right(RightAtomic):
         return reduce(lambda x, y: x |
                       cls.RIGHT_REVERSED[y], set_of_rights, 0)
 
-    # @classmethod
-    # def transform_rights_into_integer(cls, rights_iterable):
-    #     set_of_rights = set(rights_iterable)
-    #     return reduce(lambda x, y: cls.RIGHT_REVERSED[x] |
-    #                   cls.RIGHT_REVERSED[y], set_of_rights)
-
-#  we really need id as RightAtomic is inherited from dict.
+#  we really need RightAtomic to be inherited from dict.
 Right = Right()
 # Now Right['edit'] returns 'edit'
 

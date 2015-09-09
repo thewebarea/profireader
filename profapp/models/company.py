@@ -173,9 +173,8 @@ def simple_permissions(set_of_rights):  # .p(right_name)
             user_object = None
 
         def user_company_permissions_rule(rights):
-            return UserCompany.permissions(user_object,
-                                           company_object,
-                                           rights)
+            return UserCompany.permissions(rights, user_object,
+                                           company_object)
 
         # return UserCompany.permissions(user_object,
         #                                company_object,
@@ -298,8 +297,7 @@ class UserCompany(Base, PRBase):
         return suspended_employees
 
     @staticmethod
-    def permissions(user_object, company_object,
-                    needed_rights_iterable):
+    def permissions(needed_rights_iterable, user_object, company_object):
         if not (user_object and company_object):
             return True
         user = user_object

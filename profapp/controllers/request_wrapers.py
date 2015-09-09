@@ -37,7 +37,8 @@ def replace_brackets(func):
 def can_global(*rights_lambda_rule, **kwargs):
     rez = reduce(
         lambda x, y:
-        x or y[list(y.keys())[0]](**kwargs), rights_lambda_rule, False)
+        x or y[list(y.keys())[0]](list(y.keys()), **kwargs),
+        rights_lambda_rule, False)
     return rez
 
 # if there is need to use check rights inside the controller (view function)
