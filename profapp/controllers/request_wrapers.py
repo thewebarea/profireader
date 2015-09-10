@@ -20,6 +20,7 @@ def ok(func):
         #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
     return function_json
 
+
 def replace_brackets(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -33,7 +34,16 @@ def replace_brackets(func):
     return wrapper
 
 
-# make check for user groups!!!
+def check_user_status_rights(func):
+    def decorated(*args, **kwargs):
+        rez = True
+        if not rez:
+            abort(403)
+        return func(*args, **kwargs)
+    return decorated
+
+
+@check_user_status_rights
 def can_global(*rights_lambda_rule, **kwargs):
     rez = reduce(
         lambda x, y:
