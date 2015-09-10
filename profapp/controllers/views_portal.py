@@ -27,7 +27,7 @@ def create_load(json, company_id):
              PortalDivisionType.get_division_types()];
 
     return {'company_id': company_id,
-            'portal': {'company_id': company_id, 'name': '', 'host': '',
+            'portal': {'company_id': company_id, 'name': '', 'host_name': '',
                        'portal_layout_id': layouts[0]['id'],
                        'divisions': [
                            {'name': 'some news', 'portal_division_type_id': 'news'}]},
@@ -38,11 +38,12 @@ def create_load(json, company_id):
 @check_rights(simple_permissions(frozenset()))
 @ok
 def confirm_create(json, company_id):
-    portal = Portal(name=json['name'], host=json['host'],
+    portal = Portal(name=json['name'], host=json['host_name'],
                     portal_layout_id=json['portal_layout_id'],
                     company_owner_id=company_id,
                     divisions=[PortalDivision(**division) for division in json['divisions']])
-    return {'company_id': company_id, 'portal_id': portal.save().id}
+    portal_id = portal.save()
+    return {'company_id': company_id, 'portal_id': portal_id.id}
 
 
 @portal_bp.route('/', methods=['POST'])
@@ -95,7 +96,7 @@ def search_for_portal_to_join(json):
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
 @check_rights(simple_permissions(frozenset()))
 def publications(company_id):
-    #company = Company().query_company(company_id=company_id)
+    comp = Company().query_company(company_id=company_id)
     return render_template('company/portal_publications.html',
                            company_id=company_id)
 
