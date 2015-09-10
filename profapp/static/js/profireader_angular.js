@@ -335,7 +335,7 @@ module.run(function ($rootScope, $ok) {
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
                 scope.data = data;
-                scope.original_data = data;
+                scope.original_data = $.extend(true, {},data);
             }).finally(function () {
                 scope.loading = false;
             });

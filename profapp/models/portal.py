@@ -2,6 +2,7 @@ from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
 # from db_init import Base, g.db
+from ..controllers import errors
 from flask import g
 from utils.db_utils import db
 from .company import Company
@@ -29,42 +30,59 @@ class Portal(Base, PRBase):
                                          'PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
+    companies = relationship('Company', secondary='company_portal')
 
-    company = relationship('Company', backref='portal')
-    company_portal = relationship('CompanyPortal', backref='portal')
-
-    def __init__(self, name=None, company_portal=[],
+    def __init__(self, name=None, companies=[],
                  portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
-                 company_owner_id=None, company=None, article=None,
+                 company_owner_id=None, article=None,
                  host=None, divisions=[],
                  portal_layout_id='55e99785-bda1-4001-922f-ab974923999a'
                  ):
         self.name = name
         self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
-        self.company = company
         self.article = article
-        self.company_portal = company_portal
         self.host = host
         self.portal_layout_id = portal_layout_id
         self.divisions = divisions
+        self.companies = companies
 
     def create_portal(self, company_id, division_name, division_type):
-        self.company = db(Company, id=company_id).one()
+
+        if db(Portal, company_owner_id=company_id).count():
+            raise errors.PortalAlreadyExist({
+                'message': 'portal for company %(name)s',
+                'data': self.get_client_side_dict()
+            })
+
+            raise errors.PortalAlreadyExist('portal for company already exists')
+            # except errors.PortalAlreadyExist as e:
+            #     details = e.args[0]
+            #     print(details['message'])
+        self.own_company = db(Company, id=company_id).one()
         self.save()
         self.divisions.append(PortalDivision.add_new_division(
             portal_id=self.id, name=division_name,
             division_type=division_type))
-        self.company_portal.append(
-            CompanyPortal.add_portal_to_company_portal(
-                portal_plan_id=self.portal_plan_id,
-                company_id=self.company_owner_id,
-                portal_id=self.id))
+        company_assoc = CompanyPortal(
+            company_portal_plan_id=self.portal_plan_id)
+        company_assoc.portal = self
+        company_assoc.company = self.own_company
+
         return self
 
     def get_client_side_dict(self, fields='id|name, divisions.*, '
                                           'layout.*'):
         return self.to_dict(fields)
+
+    @staticmethod
+    def search_for_portal_to_join(company_id, searchtext):
+        return [port.get_client_side_dict() for port in
+                db(Portal).filter(~db(CompanyPortal,
+                                      company_id=company_id,
+                                      portal_id=Portal.id).exists()
+                                  ).filter(
+                    Portal.name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
     def own_portal(company_id):
@@ -78,6 +96,7 @@ class Portal(Base, PRBase):
     def query_portal(portal_id):
         ret = db(Portal, id=portal_id).one()
         return ret
+
 
 class PortalPlan(Base, PRBase):
     __tablename__ = 'portal_plan'
@@ -99,8 +118,11 @@ class PortalLayout(Base, PRBase):
     def __init__(self, name=None):
         self.name = name
 
+    def get_client_side_dict(self, fields='id|name'):
+        return self.to_dict(fields)
 
-class CompanyPortal(Base):
+
+class CompanyPortal(Base, PRBase):
     __tablename__ = 'company_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
@@ -109,6 +131,8 @@ class CompanyPortal(Base):
     portal_id = Column(TABLE_TYPES['id_profireader'],
                        ForeignKey('portal.id'))
     company_portal_plan_id = Column(TABLE_TYPES['id_profireader'])
+    portal = relationship(Portal, backref='company_assoc')
+    company = relationship(Company, backref='portal_assoc')
 
     def __init__(self, company_id=None, portal_id=None,
                  company_portal_plan_id=None):
@@ -141,16 +165,13 @@ class CompanyPortal(Base):
 
     @staticmethod
     def show_companies_on_my_portal(company_id):
-
         portal = Portal().own_portal(company_id)
         return CompanyPortal().all_companies_on_portal(portal.id) if \
             portal else []
 
     @staticmethod
     def get_portals(company_id):
-        company_port = db(CompanyPortal, company_id=company_id).all()
-        return [Portal().query_portal(portal.portal_id)
-                for portal in company_port]
+        return db(CompanyPortal, company_id=company_id).all()
 
 
 class PortalDivision(Base, PRBase):
@@ -180,14 +201,16 @@ class PortalDivision(Base, PRBase):
                               name=name,
                               portal_division_type_id=division_type)
 
-class PortalDivisionType(Base, PRBase):
 
+class PortalDivisionType(Base, PRBase):
     __tablename__ = 'portal_division_type'
     id = Column(TABLE_TYPES['short_name'], primary_key=True)
 
     @staticmethod
     def get_division_types():
         return db(PortalDivisionType).all()
+
+
 
 class UserPortalReader(Base, PRBase):
     __tablename__ = 'user_portal_reader'

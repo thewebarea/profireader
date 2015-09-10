@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, flash
 from flask_wtf.csrf import CsrfProtect
 from .blueprints import exception_bp
 
@@ -40,6 +40,15 @@ class StatusNonActivate(Error):
 class SubscribeToOwn(Error):
     pass
 
+class PortalAlreadyExist(Error):
+
+            # except errors.PortalAlreadyExist as e:
+            #     details = e.args[0]
+            #     print(details['message'])
+    pass
+
+class AlreadyJoined(Error):
+    pass
 
 @csrf.error_handler
 def csrf_error(reason):

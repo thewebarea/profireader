@@ -2,68 +2,104 @@ from .blueprints import portal_bp
 from flask import render_template, request, url_for, redirect
 from ..models.company import Company
 from flask.ext.login import login_required
-from ..models.portal import CompanyPortal, PortalDivisionType, Portal
+from ..models.portal import PortalDivisionType
 from utils.db_utils import db
-from ..models.portal import CompanyPortal, Portal
-from .request_wrapers import ok
+from ..models.portal import CompanyPortal, Portal, PortalLayout, PortalDivision
+from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
+from ..models.company import simple_permissions
+from flask import g
+
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
+@check_rights(simple_permissions(frozenset()))
 def create(company_id):
     return render_template('company/portal_create.html',
-                           company_id={'id': company_id})
+                           company_id=company_id)
+
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
 @ok
 def create_load(json, company_id):
+    layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()];
+    types = [x.get_client_side_dict() for x in
+             PortalDivisionType.get_division_types()];
 
-    return {'company_id': company_id, 'portal_name': '',
-            'division_name': '', 'division_type': '',
-            'host_name': '', 'divisions':
-                [x.to_dict('id') for x in
-                 PortalDivisionType.get_division_types()]}
+    return {'company_id': company_id,
+            'portal': {'company_id': company_id, 'name': '', 'host_name': '',
+                       'portal_layout_id': layouts[0]['id'],
+                       'divisions': [
+                           {'name': 'some news', 'portal_division_type_id': 'news'}]},
+            'layouts': layouts, 'division_types': types}
 
-@portal_bp.route('/confirm_create/', methods=['POST'])
+
+@portal_bp.route('/confirm_create/<string:company_id>/', methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
 @ok
-def confirm_create(json):
-    portal = Portal(name=json['portal_name'],
-                    host=json['host_name'])
-    portal.create_portal(company_id=json['company_id'],
-                         division_type=json['division_type'],
-                         division_name=json['division_name'])
-    return {'company_id': {'id': portal.company_owner_id}}
+def confirm_create(json, company_id):
+    portal = Portal(name=json['name'], host=json['host_name'],
+                    portal_layout_id=json['portal_layout_id'],
+                    company_owner_id=company_id,
+                    divisions=[PortalDivision(**division) for division in json['divisions']])
+    portal_id = portal.save()
+    return {'company_id': company_id, 'portal_id': portal_id.id}
+
 
 @portal_bp.route('/', methods=['POST'])
-@login_required
-def apply_company():
+@check_rights(simple_permissions(frozenset()))
+@ok
+def apply_company(json):
+    CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
+                                          portal_id=json['portal_id'])
+    return {'portals_partners': [portal.portal.to_dict(
+        'name, company_owner_id,id') for portal in CompanyPortal.
+                                     get_portals(json['company_id'])],
+            'company_id': {'id': json['company_id']}}
 
-    data = request.form
-    CompanyPortal.apply_company_to_portal(company_id=data['company_id'],
-                                          portal_id=data['portal_id'])
-    return redirect(url_for('portal.partners',
-                            company_id=data['company_id']))
 
 @portal_bp.route('/partners/<string:company_id>/')
-@login_required
+@check_rights(simple_permissions(frozenset()))
 def partners(company_id):
-    company = db(Company, id=company_id).one()
-    companies_partners = CompanyPortal.\
-        show_companies_on_my_portal(company_id)
-    portals_partners = CompanyPortal.get_portals(company_id)
-
     return render_template('company/company_partners.html',
-                           company=company,
-                           companies_partners=companies_partners,
-                           portals_partners=portals_partners,
                            company_id=company_id
                            )
 
-@portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
-def publications(company_id):
 
-    company = Company().query_company(company_id=company_id)
+@portal_bp.route('/partners/<string:company_id>/', methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
+@ok
+def partners_load(json, company_id):
+    portal = Portal.own_portal(company_id)
+    portal = portal.to_dict('name') if portal else []
+    companies_partners = [comp.to_dict('id, name') for comp in
+                          CompanyPortal.show_companies_on_my_portal(
+                              company_id)]
+    portals_partners = [portal.portal.to_dict('name, company_owner_id,'
+                                              'id')
+                        for portal in CompanyPortal.get_portals(
+            company_id)]
+    return {'portal': portal, 'companies_partners': companies_partners,
+            'portals_partners': portals_partners,
+            'company_id': {'id': company_id}}
+
+
+@portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
+@ok
+def search_for_portal_to_join(json):
+    portals_partners = Portal.search_for_portal_to_join(
+        json['company_id'], json['search'])
+    return portals_partners
+
+
+@portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
+@check_rights(simple_permissions(frozenset()))
+def publications(company_id):
+    #company = Company().query_company(company_id=company_id)
     return render_template('company/portal_publications.html',
-                           company_id={'id': company_id})
+                           company_id=company_id)
+
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['POST'])
 @ok
@@ -80,13 +116,14 @@ def publications_load(json, company_id):
                                'name|short_description|email|phone') for
                   port in portal.divisions if port.article_portal]
 
-    return {'portal': portal, 'new_status': ''}
+    return {'portal': portal, 'new_status': '',
+            'company_id': {'id': company_id}}
+
 
 @portal_bp.route('/update_article_portal/', methods=['POST'])
 @ok
 def update_article_portal(json):
-
     update = json['new_status'].split('/')
     ArticlePortal.update_article_portal(update[0], **{'status':
-                                                      update[1]})
+                                                          update[1]})
     return json

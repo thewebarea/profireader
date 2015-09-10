@@ -9,7 +9,7 @@
     <script>
         module.controller('materials_articles', ['$scope', function ($scope) {
             $scope.articles = {{ articles|safe }};
-            $scope.company_id = {{ company_id|safe }};
+            $scope.company_id = '{{ company_id|safe }}';
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
 
         }]);
@@ -18,7 +18,7 @@
     <div ng-controller="materials_articles">
 
     <span ng-repeat="article in articles">
-    <a href="{{ url_article_details({company_id: company_id.id, article_id: article.id}) }}">{{ article.title }}</a><br/>
+    <a href="{{ url_article_details({company_id: company_id, article_id: article.id}) }}">{{ article.title }}</a><br/>
         </span>
     </div>
     {% endraw %}

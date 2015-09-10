@@ -43,7 +43,7 @@ class ArticlePortal(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     publishing_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'],
-                    default=ARTICLE_STATUS_IN_PORTAL.not_published)
+                    default=ARTICLE_STATUS_IN_PORTAL.published)
     portal_id = Column(TABLE_TYPES['id_profireader'],
                        ForeignKey('portal.id'))
 
@@ -126,12 +126,10 @@ class ArticleCompany(Base, PRBase):
         # self.status = status
     def clone_for_portal(self, division):
 
-        self.portal_article = ArticlePortal(title=self.title,
-                                            short=self.short,
-                                            long=self.long,
-                                            portal_division_id=division,
-                                            article_company_id=self.id,
-                                            ).save()
+        self.portal_article.append(
+            ArticlePortal(title=self.title, short=self.short,
+                          long=self.long, portal_division_id=division,
+                          article_company_id=self.id).save())
         return self
 
     # def update_article(self, **kwargs):

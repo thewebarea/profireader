@@ -13,7 +13,7 @@
 
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
-        }
+        };
 
         $scope.getData = function () {
             return $scope.data;

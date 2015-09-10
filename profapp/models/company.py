@@ -22,6 +22,7 @@ from ..controllers.request_wrapers import check_rights
 from flask.ext.login import current_user
 from .files import File
 from .pr_base import PRBase, Base
+from ..controllers import errors
 
 
 class Company(Base, PRBase):
@@ -44,6 +45,10 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
+    portal = relationship('Portal', secondary='company_portal')
+    own_portal = relationship('Portal', backref='own_company',
+                              foreign_keys='Portal.company_owner_id',
+                              uselist=False)
 
     # todo: add company time creation
 
@@ -55,44 +60,19 @@ class Company(Base, PRBase):
                                           backref='logo_owner_company',
                                           foreign_keys='Company.'
                                                        'logo_file')
-
-
-
     # get all users in company : company.employees
     # get all users companies : user.employers
 
-
-
     def create_new_company(self, user_id):
-        user = g.db.query(User).get(user_id)
-        # if author_user_id:
-        #     user = g.db.querry(User).get(user_id)
-        #     user_id = author_user_id
-        # else:
-        #     user_id = user.get_id()
-        #
-        # if passed_file:
-        #     file = File(company_id=self.id,
-        #                 parent_id=self.corporate_folder_file_id,
-        #                 author_user_id=user_id,
-        #                 name=passed_file.filename,
-        #                 mime=passed_file.content_type)
-        #
-        #     file_content = FileContent(file_content=file,
-        #                                content=passed_file.stream.read(-1))
-        #     file.file_all_content = file_content
-        #     self.logo_file_relationship = file
-        #     user.files.all().append(file)
 
+    #TODO VK TO VK: CHECK G>USER INSTANSE QUERY
+        user = g.db.query(User).get(user_id)
         user_company = UserCompany(status=STATUS.ACTIVE(),
                                    rights=COMPANY_OWNER_RIGHTS)
-
         user_company.employer = self
         user.employer_assoc.append(user_company)  # .all() added
         user.companies.append(self)
 
-        g.db.merge(user)
-        g.db.commit()
         return self
 
     @staticmethod
@@ -147,9 +127,9 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
-        return [company.get_client_side_dict() for company in db(Company).\
-                filter(~db(UserCompany, user_id=user_id,
-                           company_id=Company.id).exists()).\
+        return [company.get_client_side_dict() for company in
+                db(Company).filter(~db(UserCompany, user_id=user_id,
+                                       company_id=Company.id).exists()).
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 
@@ -222,6 +202,9 @@ class UserCompany(Base, PRBase):
 
     # do we provide any rights to user at subscribing?
     def subscribe_to_company(self):
+        if db(UserCompany, user_id=self.user_id,
+              company_id=self.company_id).count():
+            raise errors.AlreadyJoined({'message': 'UserAlreadyJoined'})
         self.employee = User.user_query(self.user_id)
         self.employer = db(Company, id=self.company_id).one()
         self.save()
@@ -243,14 +226,15 @@ class UserCompany(Base, PRBase):
             stat = STATUS().REJECT()
         db(UserCompany, company_id=company_id, user_id=user_id,
            status=STATUS().NONACTIVE()).update({'status': stat})
-        # db_session.flush()
 
     ## corrected
     @staticmethod
     @check_rights(simple_permissions([]))
     def update_rights(user_id, company_id, new_rights):
-        new_rights_binary = Right.transform_rights_into_integer(new_rights)
-        user_company = db(UserCompany, user_id=user_id, company_id=company_id)
+        new_rights_binary = Right.transform_rights_into_integer(
+            new_rights)
+        user_company = db(UserCompany, user_id=user_id,
+                          company_id=company_id)
         rights_dict = {'rights': new_rights_binary}
         user_company.update(rights_dict)
 

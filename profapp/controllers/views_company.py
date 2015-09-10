@@ -1,12 +1,9 @@
 from .blueprints import company_bp
 from ..models.company import simple_permissions
-#from .request_wrapers import json
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompany, Right
-# from phonenumbers import NumberParseException
-from ..constants.USER_ROLES import RIGHTS
-from ..models.users import User
+from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
@@ -47,7 +44,7 @@ def load_companies(json):
 @login_required
 def materials(company_id):
     return render_template('company/materials.html',
-                           company_id={'id': company_id},
+                           company_id=company_id,
                            articles=[art.to_dict(
                                'id, title') for art in Article.
                                get_articles_submitted_to_company(
@@ -67,25 +64,23 @@ def material_details(company_id, article_id):
                   '<string:article_id>/', methods=['POST'])
 @ok
 def load_material_details(json, company_id, article_id):
-    article = Article.get_one_article(article_id). \
-        to_dict('id, title,short, cr_tm, md_tm, '
-                'company_id, status, long,'
-                'editor_user_id, company.name|id,'
-                'portal_article.division.portal.id')
+    article = Article.get_one_article(article_id)
     portals = {port.id: port.to_dict('id, name, divisions.name|id')
                for port in CompanyPortal.get_portals(company_id)}
-    if article['portal_article'] and \
-            article['portal_article']['division']:
-        portals = [port for port in portals if port['id'] !=
-                   article['portal_article']['division']
-                   ['portal']['id']]
-
+    if article.portal_article:
+        portals = [port for port, articles in zip(
+            portals, article.portal_article)
+            if portals[port]['id'] != articles.division.portal.id]
+    article = article.to_dict('id, title,short, cr_tm, md_tm, '
+                              'company_id, status, long,'
+                              'editor_user_id, company.name|id,'
+                              'portal_article.division.portal.id')
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
         article['status'])
 
     return {'article': article, 'status': status, 'portals':
-        portals, 'company': Company.get(company_id).
-        to_dict('id, employee.id|profireader_name'),
+            portals, 'company': Company.get(company_id).
+            to_dict('id, employees.id|profireader_name'),
             'selected_portal': {}, 'selected_division': {}}
 
 
@@ -95,7 +90,8 @@ def load_material_details(json, company_id, article_id):
 def update_article(json):
 
     ArticleCompany.update_article(
-        company_id=json['comp']['id'], article_id=json['article']['id'],
+        company_id=json['company']['id'],
+        article_id=json['article']['id'],
         **{'status': json['article']['status']})
     return json
 
@@ -127,15 +123,17 @@ def confirm_add(json):
 @check_rights(simple_permissions([]))
 @login_required
 def profile(company_id):
-    company = db(Company, id=company_id).one()
+    company = db(Company, id=company_id).one().to_dict('*,'
+                                                       'own_portal.*')
     user_rights_int = current_user.employer_assoc.filter_by(
         company_id=company_id).one().rights
 
     user_rights_list = list(Right.transform_rights_into_set(
         user_rights_int))
+    print(company)
 
     image = url_for('filemanager.get', file_id=company.logo_file) if \
-        company.logo_file else ''
+        company['logo_file'] else ''
 
     return render_template('company/company_profile.html',
                            company=company,
@@ -176,8 +174,8 @@ def employees(company_id):
 @check_rights(simple_permissions(['manage_access_company']))
 @login_required
 def update_rights():
+
     data = request.form
-    new_rights=data.getlist('right')
     UserCompany.update_rights(user_id=data['user_id'],
                               company_id=data['company_id'],
                               new_rights=data.getlist('right')
@@ -188,9 +186,10 @@ def update_rights():
 
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
-@check_rights(simple_permissions(['manage_access_company', 'edit']))
+@check_rights(simple_permissions(['manage_access_company']))
 @login_required
 def edit(company_id):
+
     company = db(Company, id=company_id).one()
     user = current_user  # # or is it UserCompany instance?
     return render_template('company/company_edit.html',

@@ -15,16 +15,15 @@
 
     <h2><img  src="{{ image }}" height="100" width="100"> {{ company.name }}
 
-        {% for right in user_rights.right %}
-            {% if right.company_right_id=='manage_access_company' %}
+
+            {% if 'manage_access_company' in user_rights %}
                 <a href="{{ url_for('company.edit', company_id=company.id) }}">Edit company</a>
             {% endif %}
-        {% endfor %}
+
     </h2>
     <h3>{{ company.country }}, {{ company.region }}, {{ company.address }} </h3>
     <h5>Phone: {{ company.phone }} |  Fax:  {{ company.phone2 }}  |  {{ company.email }}
-
-            {% if company.author_user_id == g.user_dict['id'] %}
+            {% if 'manage_access_company' in user_rights and not company.own_portal %}
                 <a href="{{ url_for('portal.create', company_id=company.id) }}">Create Portal</a>
             {% endif %}
 
