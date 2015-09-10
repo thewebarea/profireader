@@ -75,6 +75,13 @@ class Company(Base, PRBase):
 
         return self
 
+    def suspended_employees(self):
+        suspended_employees = [x.to_dict('md_tm, employee.*,'
+                                         'employee.employers.*')
+                               for x in self.employee_assoc
+                               if x.status == STATUS.SUSPEND()]
+        return suspended_employees
+
     @staticmethod
     def query_company(company_id):
         ret = db(Company, id=company_id).one()
@@ -254,24 +261,6 @@ class UserCompany(Base, PRBase):
             # earlier it was a dictionary:
             # {'right_1': True, 'right_2': False, ...}
         return emplo
-
-    # it is correct
-    @staticmethod
-    def suspended_employees(comp_id):
-        suspended_employees = {}
-        for x in Company.query_company(comp_id).employees:
-            user_in_company = UserCompany.user_in_company(
-                user_id=x.id,
-                company_id=comp_id)
-
-            if user_in_company.status == STATUS.SUSPEND():
-                suspended_employees[x.id] = x.id
-                suspended_employees[x.id] = {'name': x.user_name,
-                                             'user': x,
-                                             'companies': [x.employers],
-                                             'date':
-                                                 user_in_company.md_tm}
-        return suspended_employees
 
     @staticmethod
     def permissions(user_object, company_object,
