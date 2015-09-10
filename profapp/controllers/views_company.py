@@ -64,7 +64,7 @@ def material_details(company_id, article_id):
 @ok
 def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
-    portals = {port.id: port.to_dict('id, name, divisions.name|id')
+    portals = {port.id: port.portal.to_dict('id, name, divisions.name, divisions.id')
                for port in CompanyPortal.get_portals(company_id)}
     if article.portal_article:
         portals = [port for port, articles in zip(
@@ -99,6 +99,7 @@ def update_article(json):
 @ok
 def submit_to_portal(json):
 
+    print(json)
     article = ArticleCompany.get(json['article']['id'])
     article.clone_for_portal(json['selected_division'])
     return json
