@@ -38,7 +38,7 @@ def replace_brackets(func):
 def can_global(*rights_lambda_rule, **kwargs):
     rez = reduce(
         lambda x, y:
-        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())),
+        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())[0]),
         rights_lambda_rule, False)
     return rez
 

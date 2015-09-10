@@ -173,7 +173,6 @@ def employees(company_id):
 @check_rights(simple_permissions([Right['manage_access_company']]))
 @login_required
 def update_rights():
-
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
                               company_id=data['company_id'],
