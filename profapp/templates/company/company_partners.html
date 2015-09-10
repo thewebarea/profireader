@@ -103,12 +103,12 @@
         <span ng-if="data.companies_partners!=''">
             <h3>{{ companies_partners_text }}
                 {{ companies_partner('There are no companies partners on this portal') }}
-                <span ng-repeat="comp in data.companies_partners">
-                    <span ng-if="comp.id!=data.company_id">
+                <span ng-repeat="company in data.companies_partners">
+                    <span ng-if="company.id!=data.company_id">
                         <span hidden>
                             {{ companies_partner('Companies partners :') }}
                         </span>
-                    <a href="{{ url_company_profile({company_id: comp.id}) }}"> "{{ comp.name }}"</a>
+                    <a href="{{ url_company_profile({company_id: company.id}) }}"> "{{ company.name }}"</a>
                     </span>
                </span>
             </h3>

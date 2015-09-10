@@ -15,10 +15,9 @@ def ok(func):
             del kwargs['json']
         ret = func(request.json, *args, **kwargs)
         return jsonify({'data': ret, 'ok': True,
-                        'error_code': 'ERROR_NO_ERROR'})
+                         'error_code': 'ERROR_NO_ERROR'})
         # except Exception as e:
         #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
-
     return function_json
 
 def replace_brackets(func):
@@ -38,7 +37,8 @@ def replace_brackets(func):
 def can_global(*rights_lambda_rule, **kwargs):
     rez = reduce(
         lambda x, y:
-        x or y[list(y.keys())[0]](**kwargs), rights_lambda_rule, False)
+        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())),
+        rights_lambda_rule, False)
     return rez
 
 # if there is need to use check rights inside the controller (view function)
@@ -56,7 +56,8 @@ def check_rights(*rights_lambda_rule):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if not can_global(*rights_lambda_rule, **kwargs):
+            rez = can_global(*rights_lambda_rule, **kwargs)
+            if not rez:
                 abort(403)
             return func(*args, **kwargs)
 

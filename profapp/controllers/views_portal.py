@@ -74,7 +74,7 @@ def partners_load(json, company_id):
 
     portal = Portal.own_portal(company_id)
     companies_partners = [comp.to_dict('id, name') for comp in
-                          portal.companies] if portal else []
+                          portal.companies]
     portals_partners = [port.portal.to_dict('name, company_owner_id,'
                                               'id')
                         for port in CompanyPortal.get_portals(

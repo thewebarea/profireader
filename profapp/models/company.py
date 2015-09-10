@@ -101,26 +101,26 @@ class Company(Base, PRBase):
     @staticmethod
     def update_comp(company_id, data, passed_file):
 
-        comp = db(Company, id=company_id)
+        company = db(Company, id=company_id)
         upd = {x: y for x, y in zip(data.keys(), data.values())}
-        comp.update(upd)
+        company.update(upd)
 
         if passed_file:
             file = File(company_id=company_id,
-                        parent_id=comp.one().corporate_folder_file_id,
+                        parent_id=company.one().corporate_folder_file_id,
                         author_user_id=g.user_dict['id'],
                         name=passed_file.filename,
                         mime=passed_file.content_type)
-            comp.update(
+            company.update(
                 {'logo_file': file.upload(
                     content=passed_file.stream.read(-1)).id}
             )
         # db_session.flush()
 
     @staticmethod
-    def query_employee(comp_id):
+    def query_employee(company_id):
 
-        employee = db(UserCompany, company_id=comp_id,
+        employee = db(UserCompany, company_id=company_id,
                       user_id=g.user_dict['id']).first()
         return employee if employee else False
 
@@ -134,7 +134,7 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
-        return [comp.get_client_side_dict() for comp in
+        return [company.get_client_side_dict() for company in
                 db(Company).filter(~db(UserCompany, user_id=user_id,
                                        company_id=Company.id).exists()).
                 filter(Company.name.ilike("%" + searchtext + "%")
@@ -144,8 +144,10 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
-def simple_permissions(set_of_rights):  # .p(right_name)
-    def lambda_function(**kwargs):
+def simple_permissions(rights):  # .p(right_name)
+    set_of_rights = frozenset(rights)
+
+    def business_rule(**kwargs):
         if 'company_id' in kwargs.keys():
             company_object = kwargs['company_id']
         elif 'company' in kwargs.keys():
@@ -158,11 +160,14 @@ def simple_permissions(set_of_rights):  # .p(right_name)
             user_object = kwargs['user']
         else:
             user_object = None
-        return UserCompany.permissions(user_object,
-                                       company_object,
-                                       set_of_rights)
 
-    return {set_of_rights: lambda_function}
+        def user_company_permissions_rule(rights):
+            return UserCompany.permissions(rights, user_object,
+                                           company_object)
+
+        return user_company_permissions_rule
+
+    return {set_of_rights: business_rule}
 
 
 class UserCompany(Base, PRBase):
@@ -212,26 +217,26 @@ class UserCompany(Base, PRBase):
         self.save()
 
     @staticmethod
-    def suspend_employee(comp_id, user_id):
-        db(UserCompany, company_id=comp_id, user_id=user_id). \
+    def suspend_employee(company_id, user_id):
+        db(UserCompany, company_id=company_id, user_id=user_id). \
             update({'status': STATUS.SUSPEND()})
         # db_session.flush()
 
     @staticmethod
-    def apply_request(comp_id, user_id, bool):
+    def apply_request(company_id, user_id, bool):
         if bool == 'True':
             stat = STATUS().ACTIVE()
             UserCompany.update_rights(user_id,
-                                      comp_id,
+                                      company_id,
                                       Config.BASE_RIGHT_IN_COMPANY)
         else:
             stat = STATUS().REJECT()
-        db(UserCompany, company_id=comp_id, user_id=user_id,
+        db(UserCompany, company_id=company_id, user_id=user_id,
            status=STATUS().NONACTIVE()).update({'status': stat})
 
     ## corrected
     @staticmethod
-    @check_rights(simple_permissions(frozenset()))
+    @check_rights(simple_permissions([]))
     def update_rights(user_id, company_id, new_rights):
         new_rights_binary = Right.transform_rights_into_integer(
             new_rights)
@@ -242,11 +247,11 @@ class UserCompany(Base, PRBase):
 
     #  corrected
     @staticmethod
-    def show_rights(comp_id):
+    def show_rights(company_id):
         emplo = {}
-        for user in db(Company, id=comp_id).one().employees:
+        for user in db(Company, id=company_id).one().employees:
             user_company = user.employer_assoc. \
-                filter_by(company_id=comp_id).first()
+                filter_by(company_id=company_id).first()
             emplo[user.id] = {'id': user.id,
                               'name': user.user_name,
                               # TODO (AA): don't pass user object
@@ -263,8 +268,7 @@ class UserCompany(Base, PRBase):
         return emplo
 
     @staticmethod
-    def permissions(user_object, company_object,
-                    needed_rights_iterable):
+    def permissions(needed_rights_iterable, user_object, company_object):
         if not (user_object and company_object):
             return True
         user = user_object

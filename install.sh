@@ -109,7 +109,19 @@ sed -i '/\(companyportal\|aprofi\).d.ntaxa.com/d' /etc/hosts
 echo '' >> /etc/hosts
 echo '127.0.0.1 aprofi.d.ntaxa.com companyportal.d.ntaxa.com' >> /etc/hosts
 echo '127.0.0.1 db.profi web.profi mail.profi' >> /etc/hosts
-cat /etc/hosts" sudo secret_data
+cat /etc/hosts" sudo haproxy
+    }
+
+function menu_haproxy {
+    conf_comm "apt-get purge haproxy
+sed -i '/haproxy-1.5/d' /etc/apt/sources.list
+echo '' >> /etc/apt/sources.list
+echo 'deb http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main' >> /etc/apt/sources.list
+echo 'deb-src http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main' >> /etc/apt/sources.list
+apt-get update
+apt-get install haproxy
+mv ./haproxy.cfg /etc/haproxy/
+service haproxy restart" sudo secret_data
     }
 
 function menu_secret_data {
@@ -149,6 +161,8 @@ cd /tmp
 rm -rf 'Python-$pversion'" sudo venv
     fi
     }
+
+
 
 function menu_venv {
     destdir=$(rr 'destination dir for virtual directory' .venv)
@@ -229,6 +243,7 @@ do
 dialog --title "profireader" --nocancel --default-item $next --menu "Choose an option" 22 78 17 \
 "deb" "install deb packages" \
 "hosts" "create virtual domain zone in /etc/hosts" \
+"haproxy" "install haproxy" \
 "secret_data" "download secret data" \
 "python_3" "install python 3" \
 "venv" "create virtual environment" \
