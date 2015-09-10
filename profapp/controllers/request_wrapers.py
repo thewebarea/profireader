@@ -45,8 +45,8 @@ def can_global(*rights_lambda_rule, **kwargs):
 # if there is need to use check rights inside the controller (view function)
 # you can do it in the following way:
 #
-# rights_lambda_rule = simple_permissions(frozenset('edit'))
-# if not can_global(rights_lambda_rule,
+# business_rule = simple_permissions([Right['edit']])
+# if not can_global(business_rule,
 #                   user=current_user,
 #                   company_id=company_id):
 #     abort(403)
