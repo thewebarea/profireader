@@ -165,9 +165,10 @@ class CompanyPortal(Base, PRBase):
 
     @staticmethod
     def show_companies_on_my_portal(company_id):
-        portal = Portal().own_portal(company_id)
-        return CompanyPortal().all_companies_on_portal(portal.id) if \
-            portal else []
+        portal = Portal().own_portal(company_id).companies
+        return portal
+#	    CompanyPortal().all_companies_on_portal(portal.id) if \
+#            portal else []
 
     @staticmethod
     def get_portals(company_id):
