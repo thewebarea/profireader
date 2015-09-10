@@ -23,8 +23,8 @@
                     <div ng-if="article.status!='published'">
                         <input type="hidden" ng-model="data.not_published">
                         Your portal rejected materials: {{ article.title }} from company
-                        <span ng-repeat="comp in article.company_article">
-                            {{ comp.name }}
+                        <span ng-repeat="company in article.company_article">
+                            {{ company.name }}
                         </span>
                         Change status to :
                         <select ng-model="data.new_status">

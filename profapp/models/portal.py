@@ -142,9 +142,9 @@ class CompanyPortal(Base, PRBase):
 
     @staticmethod
     def all_companies_on_portal(portal_id):
-        comp_port = db(CompanyPortal, portal_id=portal_id).all()
+        company_port = db(CompanyPortal, portal_id=portal_id).all()
         return [db(Company, id=company.company_id).one() for company in
-                comp_port] if comp_port else False
+                company_port] if company_port else False
 
     @staticmethod
     def add_portal_to_company_portal(portal_plan_id,
