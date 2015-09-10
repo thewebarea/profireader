@@ -33,7 +33,7 @@ class Portal(Base, PRBase):
     companies = relationship('Company', secondary='company_portal')
 
     def __init__(self, name=None, companies=[],
-                 portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
+                 portal_plan_id=None,
                  company_owner_id=None, article=None,
                  host=None, divisions=[],
                  portal_layout_id=None):
@@ -45,6 +45,7 @@ class Portal(Base, PRBase):
         self.portal_layout_id = portal_layout_id
         self.divisions = divisions
         self.companies = companies
+        self.portal_plan_id = portal_plan_id if portal_plan_id else db(PortalPlan).first().id
 
     def create_portal(self, company_id, division_name, division_type):
 
