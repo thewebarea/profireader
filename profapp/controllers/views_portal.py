@@ -14,7 +14,7 @@ from flask import g
 @check_rights(simple_permissions(frozenset()))
 def create(company_id):
     return render_template('company/portal_create.html',
-                           company_id={'id': company_id})
+                           company_id=company_id)
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
 @check_rights(simple_permissions(frozenset()))
@@ -55,7 +55,7 @@ def apply_company(json):
 def partners(company_id):
 
     return render_template('company/company_partners.html',
-                           company_id={'id': company_id}
+                           company_id=company_id
                            )
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['POST'])
@@ -92,7 +92,7 @@ def publications(company_id):
 
     comp = Company().query_company(company_id=company_id)
     return render_template('company/portal_publications.html',
-                           company_id={'id': company_id})
+                           company_id=company_id)
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['POST'])
 @ok

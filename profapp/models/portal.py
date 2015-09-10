@@ -51,7 +51,11 @@ class Portal(Base, PRBase):
 
         if db(Portal, company_owner_id=company_id).count():
             raise errors.PortalAlreadyExist({
-                'message': "_('PortalAlreadyExist')"})
+                'message': 'portal for company %(name)s',
+                'data': self.get_client_side_dict()
+            })
+
+            raise errors.PortalAlreadyExist('portal for company already exists')
             # except errors.PortalAlreadyExist as e:
             #     details = e.args[0]
             #     print(details['message'])
