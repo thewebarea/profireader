@@ -9,24 +9,31 @@
 {% endblock portal_base %}
 {% block content %}
     {% block company_base %}
-{% include 'company/company_base.html' %}
+{% include 'company/company_base_angular.html' %}
 {% endblock company_base %}
-{% for emplo in suspended_employees %}
-
-    <dt><img src="{{ suspended_employees[emplo]['user'].gravatar() }}">{{ suspended_employees[emplo]['name'] }}<br>
-        Phone number : {{ suspended_employees[emplo]['user'].phone_number }}<br>
-        Email : {{ suspended_employees[emplo]['user'].show_email }}
-        Suspended : {{ suspended_employees[emplo]['date'] }}
-    </dt>
-    {% for company in suspended_employees[emplo]['companies'] %}
-        <dt> ALL COMPANIES :
-            {% for c in company %}
-                <a href="{{ url_for('company.profile', company_id=c.id) }}">{{ c.name }}</a>
-            {% endfor %}</dt><br>
-    {% endfor %}
-
-
-{% endfor %}
+        <script>
+        module.controller('suspended', ['$scope', function ($scope) {
+            $scope.url_after_seve = {{ raw_url_for('company.profile')|safe }};
+            $scope.getData = function () {return $scope.data;};
+        }]);
+    </script>
+    {% raw %}
+    <div ng-init="loadData()" ng-controller="suspended">
+        <div ng-repeat="emplo in data">
+            <dt><img src="{{ emplo.employee.profireader_small_avatar_url }}">{{ emplo.employee.profireader_name }}<br>
+                Phone number : {{ emplo.employee.profireader_phone }}<br>
+                Email : {{ emplo.employee.profireader_email }}<br>
+                Suspended : {{ emplo.md_tm }}
+            </dt>
+            <dt> ALL COMPANIES :
+            <div ng-repeat="company in emplo.employee.employers">
+            <a href="{{ url_for('company.profile', company_id=company.id) }}">{{ company.name }}</a>
+            </div>
+            </dt>
+        </div>
+    <br>
+    </div>
+{% endraw %}
 {% endblock content %}
 
 {% block footer %}
