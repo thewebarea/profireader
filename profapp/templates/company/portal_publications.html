@@ -11,7 +11,7 @@
             $scope.publications = {{ raw_url_for('portal.publications')|safe }};
             $scope.url_update_status = '{{ url_for('portal.update_article_portal')|safe }}';
             $scope.getData = function () {return $scope.data;};
-            $scope.afterSave = function (resp) {window.location.href = $scope.publications({company_id: resp.company_id.id})};
+            $scope.afterSave = function (resp) {window.location.href = $scope.publications({company_id: resp.company_id})};
         }]);
     </script>
     {% raw %}

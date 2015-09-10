@@ -43,7 +43,7 @@ def load_companies(json):
 @login_required
 def materials(company_id):
     return render_template('company/materials.html',
-                           company_id={'id': company_id},
+                           company_id=company_id,
                            articles=[art.to_dict(
                                'id, title') for art in Article.
                                get_articles_submitted_to_company(
@@ -261,7 +261,7 @@ def suspend_employee():
 def suspended_employees(company_id):
 
     return render_template('company/company_suspended.html',
-                           company_id={'id': company_id}
+                           company_id=company_id
                            )
 
 @company_bp.route('/suspended_employees/<string:company_id>',

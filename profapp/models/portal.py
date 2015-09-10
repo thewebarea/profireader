@@ -51,7 +51,11 @@ class Portal(Base, PRBase):
 
         if db(Portal, company_owner_id=company_id).count():
             raise errors.PortalAlreadyExist({
-                'message': "_('PortalAlreadyExist')"})
+                'message': 'portal for company %(name)s',
+                'data': self.get_client_side_dict()
+            })
+
+            raise errors.PortalAlreadyExist('portal for company already exists')
             # except errors.PortalAlreadyExist as e:
             #     details = e.args[0]
             #     print(details['message'])
@@ -93,6 +97,7 @@ class Portal(Base, PRBase):
         ret = db(Portal, id=portal_id).one()
         return ret
 
+
 class PortalPlan(Base, PRBase):
     __tablename__ = 'portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
@@ -112,6 +117,9 @@ class PortalLayout(Base, PRBase):
 
     def __init__(self, name=None):
         self.name = name
+
+    def get_client_side_dict(self, fields='id|name'):
+        return self.to_dict(fields)
 
 
 class CompanyPortal(Base, PRBase):
@@ -157,14 +165,12 @@ class CompanyPortal(Base, PRBase):
 
     @staticmethod
     def show_companies_on_my_portal(company_id):
-
         portal = Portal().own_portal(company_id)
         return CompanyPortal().all_companies_on_portal(portal.id) if \
             portal else []
 
     @staticmethod
     def get_portals(company_id):
-
         return db(CompanyPortal, company_id=company_id).all()
 
 
@@ -195,14 +201,16 @@ class PortalDivision(Base, PRBase):
                               name=name,
                               portal_division_type_id=division_type)
 
-class PortalDivisionType(Base, PRBase):
 
+class PortalDivisionType(Base, PRBase):
     __tablename__ = 'portal_division_type'
     id = Column(TABLE_TYPES['short_name'], primary_key=True)
 
     @staticmethod
     def get_division_types():
         return db(PortalDivisionType).all()
+
+
 
 class UserPortalReader(Base, PRBase):
     __tablename__ = 'user_portal_reader'
