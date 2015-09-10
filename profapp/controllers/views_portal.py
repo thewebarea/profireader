@@ -42,8 +42,7 @@ def confirm_create(json, company_id):
                     portal_layout_id=json['portal_layout_id'],
                     company_owner_id=company_id,
                     divisions=[PortalDivision(**division) for division in json['divisions']])
-    portal_id = portal.save()
-    return {'company_id': company_id, 'portal_id': portal_id.id}
+    return {'company_id': company_id, 'portal_id': portal.save().id}
 
 
 @portal_bp.route('/', methods=['POST'])
