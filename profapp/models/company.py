@@ -157,8 +157,10 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
-def simple_permissions(set_of_rights):  # .p(right_name)
-    def business_rule(rights, **kwargs):
+def simple_permissions(rights):  # .p(right_name)
+    set_of_rights = frozenset(rights)
+
+    def business_rule(**kwargs):
         if 'company_id' in kwargs.keys():
             company_object = kwargs['company_id']
         elif 'company' in kwargs.keys():
@@ -175,10 +177,6 @@ def simple_permissions(set_of_rights):  # .p(right_name)
         def user_company_permissions_rule(rights):
             return UserCompany.permissions(rights, user_object,
                                            company_object)
-
-        # return UserCompany.permissions(user_object,
-        #                                company_object,
-        #                                set_of_rights)
 
         return user_company_permissions_rule
 
@@ -249,7 +247,7 @@ class UserCompany(Base, PRBase):
 
     ## corrected
     @staticmethod
-    @check_rights(simple_permissions(frozenset()))
+    @check_rights(simple_permissions([]))
     def update_rights(user_id, company_id, new_rights):
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id, company_id=company_id)

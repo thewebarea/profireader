@@ -37,7 +37,7 @@ def replace_brackets(func):
 def can_global(*rights_lambda_rule, **kwargs):
     rez = reduce(
         lambda x, y:
-        x or y[list(y.keys())[0]](list(y.keys()), **kwargs),
+        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())),
         rights_lambda_rule, False)
     return rez
 
@@ -56,7 +56,8 @@ def check_rights(*rights_lambda_rule):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if not can_global(*rights_lambda_rule, **kwargs):
+            rez = can_global(*rights_lambda_rule, **kwargs)
+            if not rez:
                 abort(403)
             return func(*args, **kwargs)
 

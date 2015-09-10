@@ -28,14 +28,14 @@ def search_to_submit_article(json):
 
 
 @company_bp.route('/', methods=['GET'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def show():
     return render_template('company/companies.html')
 
 
 @company_bp.route('/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def load_companies(json):
     return {'companies': [employer.get_client_side_dict()
@@ -43,7 +43,7 @@ def load_companies(json):
 
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def materials(company_id):
     return render_template('company/materials.html',
@@ -56,7 +56,7 @@ def materials(company_id):
 
 @company_bp.route('/material_details/<string:company_id>/'
                   '<string:article_id>/', methods=['GET'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def material_details(company_id, article_id):
     return render_template('company/material_details.html',
@@ -109,14 +109,14 @@ def submit_to_portal(json):
     return json
 
 @company_bp.route('/add/')
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def add():
     return render_template('company/company_add.html', user=g.user_dict)
 
 
 @company_bp.route('/confirm_add/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def confirm_add(json):
     return Company(**json).create_new_company(g.user.id).\
@@ -124,7 +124,7 @@ def confirm_add(json):
 
 
 @company_bp.route('/profile/<string:company_id>/')
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def profile(company_id):
     company = db(Company, id=company_id).one()
@@ -146,7 +146,7 @@ def profile(company_id):
 
 
 @company_bp.route('/employees/<string:company_id>/')
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def employees(company_id):
     company_user_rights = UserCompany.show_rights(company_id)
@@ -173,7 +173,7 @@ def employees(company_id):
 
 
 @company_bp.route('/update_rights', methods=['POST'])
-@check_rights(simple_permissions(frozenset(['manage_access_company'])))
+@check_rights(simple_permissions(['manage_access_company']))
 @login_required
 def update_rights():
     data = request.form
@@ -188,8 +188,7 @@ def update_rights():
 
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
-@check_rights(simple_permissions(frozenset(['manage_access_company',
-                                            'edit'])))
+@check_rights(simple_permissions(['manage_access_company', 'edit']))
 @login_required
 def edit(company_id):
     company = db(Company, id=company_id).one()
@@ -201,7 +200,7 @@ def edit(company_id):
 
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
-@check_rights(simple_permissions(frozenset(['add_employee'])))
+@check_rights(simple_permissions(['add_employee']))
 @login_required
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
@@ -210,19 +209,19 @@ def confirm_edit(company_id):
 
 
 @company_bp.route('/subscribe/<string:company_id>/')
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def subscribe(company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
-                            company_id=company_id,
-                            status=STATUS().NONACTIVE())
+                               company_id=company_id,
+                               status=STATUS().NONACTIVE())
     company_role.subscribe_to_company()
 
     return redirect(url_for('company.profile', company_id=company_id))
 
 
 @company_bp.route('/search_for_company_to_join/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def search_for_company_to_join(json):
     companies = Company().search_for_company_to_join(g.user_dict['id'],
@@ -232,33 +231,32 @@ def search_for_company_to_join(json):
 
 @company_bp.route('/join_to_company/<string:company_id>/',
                   methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def join_to_company(json, company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
-                            company_id=json['company_id'],
-                            status=STATUS().NONACTIVE())
+                               company_id=json['company_id'],
+                               status=STATUS().NONACTIVE())
     company_role.subscribe_to_company()
     return {'companies': [employer.get_client_side_dict()
                           for employer in current_user.employers]}
 
 
-
 @company_bp.route('/add_subscriber/', methods=['POST'])
-@check_rights(simple_permissions(frozenset(['add_employee'])))
+@check_rights(simple_permissions(['add_employee']))
 @login_required
 def confirm_subscriber():
     company_role = UserCompany()
     data = request.form
     company_role.apply_request(company_id=data['company_id'],
-                            user_id=data['user_id'],
-                            bool=data['req'])
+                               user_id=data['user_id'],
+                               bool=data['req'])
     return redirect(url_for('company.profile',
                             company_id=data['company_id']))
 
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
-@check_rights(simple_permissions(frozenset(['suspend_employee'])))
+@check_rights(simple_permissions(['suspend_employee']))
 @login_required
 def suspend_employee():
     data = request.form
@@ -270,7 +268,7 @@ def suspend_employee():
 
 # todo: what actually is it intended?
 @company_bp.route('/suspended_employees/<string:company_id>')
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @login_required
 def suspended_employees_func(company_id):
     company = Company.query_company(company_id=company_id)
