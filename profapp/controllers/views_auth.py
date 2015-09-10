@@ -18,8 +18,6 @@ from flask import redirect, make_response
 from flask.ext.login import login_user
 from ..constants.SOCIAL_NETWORKS import SOC_NET_NONE
 from ..constants.UNCATEGORIZED import AVATAR_SIZE, AVATAR_SMALL_SIZE
-from ..models.rights import list_of_RightAtomic_attributes
-
 
 # def _session_saver():
 #    session.modified = True
@@ -177,7 +175,7 @@ def signup_soc_network(soc_network_name):
 # ted during transit, defeating any efforts put into securing passwords
 # in the server.
 #
-# read this before push!!!: http://flask.pocoo.org/snippets/62/
+# read this!: http://flask.pocoo.org/snippets/62/
 @auth_bp.route('/login/', methods=['GET', 'POST'])
 def login():
     # (Andriy) I suppose it is not necessary

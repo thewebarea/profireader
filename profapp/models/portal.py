@@ -47,17 +47,23 @@ class Portal(Base, PRBase):
         self.divisions = divisions
         self.companies = companies
 
-    def create_portal(self):
+    def create_portal(self, company_id, division_name, division_type):
 
-        if db(Portal, company_owner_id=self.company_owner_id).count():
+        if db(Portal, company_owner_id=company_id).count():
             raise errors.PortalAlreadyExist({
                 'message': 'portal for company %(name)s',
                 'data': self.get_client_side_dict()
             })
+
+            raise errors.PortalAlreadyExist('portal for company already exists')
             # except errors.PortalAlreadyExist as e:
             #     details = e.args[0]
             #     print(details['message'])
-        self.own_company = db(Company, id=self.company_owner_id).one()
+        self.own_company = db(Company, id=company_id).one()
+        self.save()
+        self.divisions.append(PortalDivision.add_new_division(
+            portal_id=self.id, name=division_name,
+            division_type=division_type))
         company_assoc = CompanyPortal(
             company_portal_plan_id=self.portal_plan_id)
         company_assoc.portal = self
@@ -65,7 +71,8 @@ class Portal(Base, PRBase):
 
         return self
 
-    def get_client_side_dict(self, fields='id|name, divisions.*, layout.*'):
+    def get_client_side_dict(self, fields='id|name, divisions.*, '
+                                          'layout.*'):
         return self.to_dict(fields)
 
     @staticmethod
@@ -134,6 +141,12 @@ class CompanyPortal(Base, PRBase):
         self.company_portal_plan_id = company_portal_plan_id
 
     @staticmethod
+    def all_companies_on_portal(portal_id):
+        comp_port = db(CompanyPortal, portal_id=portal_id).all()
+        return [db(Company, id=company.company_id).one() for company in
+                comp_port] if comp_port else False
+
+    @staticmethod
     def add_portal_to_company_portal(portal_plan_id,
                                      company_id,
                                      portal_id):
@@ -149,6 +162,12 @@ class CompanyPortal(Base, PRBase):
                                query_portal(portal_id).
                                portal_plan_id))
         g.db.flush()
+
+    @staticmethod
+    def show_companies_on_my_portal(company_id):
+        portal = Portal().own_portal(company_id)
+        return CompanyPortal().all_companies_on_portal(portal.id) if \
+            portal else []
 
     @staticmethod
     def get_portals(company_id):
