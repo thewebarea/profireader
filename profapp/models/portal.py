@@ -33,19 +33,20 @@ class Portal(Base, PRBase):
     companies = relationship('Company', secondary='company_portal')
 
     def __init__(self, name=None, companies=[],
-                 portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
+                 portal_plan_id=None,
                  company_owner_id=None, article=None,
                  host=None, divisions=[],
-                 portal_layout_id='55e99785-bda1-4001-922f-ab974923999a'
+                 portal_layout_id=None
                  ):
         self.name = name
-        self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
         self.article = article
         self.host = host
         self.portal_layout_id = portal_layout_id
         self.divisions = divisions
         self.companies = companies
+        self.portal_plan_id = portal_plan_id if portal_plan_id else db(PortalPlan).first().id
+        self.portal_layout_id = portal_layout_id if portal_layout_id else db(PortalLayout).first().id
 
     def create_portal(self):
 
@@ -149,6 +150,13 @@ class CompanyPortal(Base, PRBase):
                                query_portal(portal_id).
                                portal_plan_id))
         g.db.flush()
+
+    @staticmethod
+    def show_companies_on_my_portal(company_id):
+        portal = Portal().own_portal(company_id).companies
+        return portal
+#	    CompanyPortal().all_companies_on_portal(portal.id) if \
+#            portal else []
 
     @staticmethod
     def get_portals(company_id):

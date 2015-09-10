@@ -99,8 +99,6 @@ def update_article(json):
 @login_required
 @ok
 def submit_to_portal(json):
-
-    print(json)
     article = ArticleCompany.get(json['article']['id'])
     article.clone_for_portal(json['selected_division'])
     return json
@@ -132,8 +130,8 @@ def profile(company_id):
     user_rights_list = list(Right.transform_rights_into_set(
         user_rights_int))
 
-    image = url_for('filemanager.get', file_id=company.logo_file) if \
-        company['logo_file'] else ''
+    image = url_for('filemanager.get', file_id=company['logo_file']) if \
+        'logo_file' in company else ''
 
     return render_template('company/company_profile.html',
                            company=company,
