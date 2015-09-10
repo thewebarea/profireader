@@ -95,7 +95,7 @@ def search_for_portal_to_join(json):
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
 @check_rights(simple_permissions(frozenset()))
 def publications(company_id):
-    comp = Company().query_company(company_id=company_id)
+    #company = Company().query_company(company_id=company_id)
     return render_template('company/portal_publications.html',
                            company_id=company_id)
 

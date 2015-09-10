@@ -36,8 +36,7 @@ class Portal(Base, PRBase):
                  portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
                  company_owner_id=None, article=None,
                  host=None, divisions=[],
-                 portal_layout_id='55e99785-bda1-4001-922f-ab974923999a'
-                 ):
+                 portal_layout_id=None):
         self.name = name
         self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
@@ -142,9 +141,9 @@ class CompanyPortal(Base, PRBase):
 
     @staticmethod
     def all_companies_on_portal(portal_id):
-        comp_port = db(CompanyPortal, portal_id=portal_id).all()
+        company_port = db(CompanyPortal, portal_id=portal_id).all()
         return [db(Company, id=company.company_id).one() for company in
-                comp_port] if comp_port else False
+                company_port] if company_port else False
 
     @staticmethod
     def add_portal_to_company_portal(portal_plan_id,
