@@ -238,8 +238,7 @@ class UserCompany(Base, PRBase):
     @staticmethod
     @check_rights(simple_permissions([]))
     def update_rights(user_id, company_id, new_rights):
-        new_rights_binary = Right.transform_rights_into_integer(
-            new_rights)
+        new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id,
                           company_id=company_id)
         rights_dict = {'rights': new_rights_binary}

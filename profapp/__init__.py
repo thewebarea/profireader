@@ -158,7 +158,7 @@ class AnonymousUser(AnonymousUserMixin):
         #return '/static/no_avatar.png'
 
     @staticmethod
-    def has_rights(permissions):
+    def check_rights(permissions):
         return False
 
     @staticmethod
