@@ -33,37 +33,32 @@ class Portal(Base, PRBase):
     companies = relationship('Company', secondary='company_portal')
 
     def __init__(self, name=None, companies=[],
-                 portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
+                 portal_plan_id=None,
                  company_owner_id=None, article=None,
                  host=None, divisions=[],
-                 portal_layout_id='55e99785-bda1-4001-922f-ab974923999a'
+                 portal_layout_id=None
                  ):
         self.name = name
-        self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
         self.article = article
         self.host = host
         self.portal_layout_id = portal_layout_id
         self.divisions = divisions
         self.companies = companies
+        self.portal_plan_id = portal_plan_id if portal_plan_id else db(PortalPlan).first().id
+        self.portal_layout_id = portal_layout_id if portal_layout_id else db(PortalLayout).first().id
 
-    def create_portal(self, company_id, division_name, division_type):
+    def create_portal(self):
 
-        if db(Portal, company_owner_id=company_id).count():
+        if db(Portal, company_owner_id=self.company_owner_id).count():
             raise errors.PortalAlreadyExist({
                 'message': 'portal for company %(name)s',
                 'data': self.get_client_side_dict()
             })
-
-            raise errors.PortalAlreadyExist('portal for company already exists')
             # except errors.PortalAlreadyExist as e:
             #     details = e.args[0]
             #     print(details['message'])
-        self.own_company = db(Company, id=company_id).one()
-        self.save()
-        self.divisions.append(PortalDivision.add_new_division(
-            portal_id=self.id, name=division_name,
-            division_type=division_type))
+        self.own_company = db(Company, id=self.company_owner_id).one()
         company_assoc = CompanyPortal(
             company_portal_plan_id=self.portal_plan_id)
         company_assoc.portal = self
@@ -71,8 +66,7 @@ class Portal(Base, PRBase):
 
         return self
 
-    def get_client_side_dict(self, fields='id|name, divisions.*, '
-                                          'layout.*'):
+    def get_client_side_dict(self, fields='id|name, divisions.*, layout.*'):
         return self.to_dict(fields)
 
     @staticmethod
@@ -139,12 +133,6 @@ class CompanyPortal(Base, PRBase):
         self.company_id = company_id
         self.portal_id = portal_id
         self.company_portal_plan_id = company_portal_plan_id
-
-    @staticmethod
-    def all_companies_on_portal(portal_id):
-        comp_port = db(CompanyPortal, portal_id=portal_id).all()
-        return [db(Company, id=company.company_id).one() for company in
-                comp_port] if comp_port else False
 
     @staticmethod
     def add_portal_to_company_portal(portal_plan_id,
