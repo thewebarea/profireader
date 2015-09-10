@@ -130,7 +130,6 @@ def profile(company_id):
 
     user_rights_list = list(Right.transform_rights_into_set(
         user_rights_int))
-    print(company)
 
     image = url_for('filemanager.get', file_id=company.logo_file) if \
         company['logo_file'] else ''
@@ -241,6 +240,7 @@ def join_to_company(json, company_id):
                           for employer in current_user.employers]}
 
 
+
 @company_bp.route('/add_subscriber/', methods=['POST'])
 @check_rights(simple_permissions(['add_employee']))
 @login_required
@@ -264,17 +264,22 @@ def suspend_employee():
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
 
+@company_bp.route('/suspended_employees/<string:company_id>',
+                  methods=['GET'])
+@check_rights(simple_permissions(frozenset()))
 
-# todo: what actually is it intended?
-@company_bp.route('/suspended_employees/<string:company_id>')
-@check_rights(simple_permissions([]))
-@login_required
-def suspended_employees_func(company_id):
-    company = Company.query_company(company_id=company_id)
-    suspended_employees = \
-        UserCompany.suspend_employee(company_id,
-                                     user_id=current_user.get_id())
+def suspended_employees(company_id):
+
     return render_template('company/company_suspended.html',
-                           suspended_employees=suspended_employees,
                            company_id=company_id
                            )
+
+@company_bp.route('/suspended_employees/<string:company_id>',
+                  methods=['POST'])
+@check_rights(simple_permissions(frozenset()))
+@ok
+def load_suspended_employees(json, company_id):
+
+    suspend_employees = Company.query_company(company_id)
+    suspend_employees = suspend_employees.suspended_employees()
+    return suspend_employees

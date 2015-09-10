@@ -55,7 +55,7 @@ def apply_company(json):
     return {'portals_partners': [portal.portal.to_dict(
         'name, company_owner_id,id') for portal in CompanyPortal.
                                      get_portals(json['company_id'])],
-            'company_id': {'id': json['company_id']}}
+            'company_id': json['company_id']}
 
 
 @portal_bp.route('/partners/<string:company_id>/')
@@ -81,7 +81,7 @@ def partners_load(json, company_id):
             company_id)]
     return {'portal': portal, 'companies_partners': companies_partners,
             'portals_partners': portals_partners,
-            'company_id': {'id': company_id}}
+            'company_id': company_id}
 
 
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
@@ -117,7 +117,7 @@ def publications_load(json, company_id):
                   port in portal.divisions if port.article_portal]
 
     return {'portal': portal, 'new_status': '',
-            'company_id': {'id': company_id}}
+            'company_id': company_id}
 
 
 @portal_bp.route('/update_article_portal/', methods=['POST'])
