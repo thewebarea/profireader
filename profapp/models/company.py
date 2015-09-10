@@ -34,7 +34,7 @@ class Company(Base, PRBase):
                                        ForeignKey('file.id'))
     corporate_folder_file_id = Column(String(36),
                                       ForeignKey('file.id'))
-    portal_consist = Column(TABLE_TYPES['boolean'])
+#    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
                             nullable=False)

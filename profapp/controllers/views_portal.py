@@ -27,7 +27,7 @@ def create_load(json, company_id):
              PortalDivisionType.get_division_types()]
 
     return {'company_id': company_id,
-            'portal': {'company_id': company_id, 'name': '', 'host_name': '',
+            'portal': {'company_id': company_id, 'name': '', 'host': '',
                        'portal_layout_id': layouts[0]['id'],
                        'divisions': [
                            {'name': 'some news', 'portal_division_type_id': 'news'}]},
@@ -38,7 +38,7 @@ def create_load(json, company_id):
 @check_rights(simple_permissions(frozenset()))
 @ok
 def confirm_create(json, company_id):
-    portal = Portal(name=json['name'], host=json['host_name'],
+    portal = Portal(name=json['name'], host=json['host'],
                     portal_layout_id=json['portal_layout_id'],
                     company_owner_id=company_id,
                     divisions=[PortalDivision(**division)
