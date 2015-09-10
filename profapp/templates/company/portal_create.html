@@ -9,10 +9,12 @@
     <script>
         module.controller('create', ['$scope', function ($scope) {
             $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};
-            $scope.url_after_seve = {{ raw_url_for('company.profile')|safe }};
-            $scope.getData = function () {return $scope.data;};
-            $scope.company_id = {{ company_id|safe }}
-            $scope.afterSave = function (resp) {window.location.href = $scope.url_after_seve({company_id: resp.company_id.id})};
+            $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};
+            $scope.getData = function () {
+                return $scope.data;
+                };
+            $scope.company_id = '{{ company_id|safe }}';
+            $scope.afterSave = function (resp) {window.location.href = $scope.url_after_save({company_id: resp.company_id})};
         }]);
     </script>
     {% raw %}

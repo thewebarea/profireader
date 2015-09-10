@@ -30,7 +30,7 @@
 
 
             $scope.afterSave = function (resp) {
-            window.location.href = $scope.partners({company_id: resp['company_id']['id']})
+            window.location.href = $scope.partners({company_id: resp['company_id']})
             };
             $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {
@@ -44,7 +44,7 @@
 
             $scope.searchForPortalToJoin = function (val) {
                 return $ok($scope.url_search_for_portal(), {
-                    company_id: $scope.data.company_id.id,
+                    company_id: $scope.data.company_id,
                     search: val
                 }, function (resp) {
                     return resp.length ? resp : [{id: false, name: 'No results'}];
@@ -52,7 +52,7 @@
             };
 
             $scope.joinToPortal = function () {
-                $ok($scope.url_join(), {company_id: $scope.data.company_id.id, portal_id: $scope.selectedPortal.id}, function (resp) {
+                $ok($scope.url_join(), {company_id: $scope.data.company_id, portal_id: $scope.selectedPortal.id}, function (resp) {
                     $scope.selectedPortal = null;
                     $scope.selectedPortal_name = null;
                     $scope.data['portals_partners'] = resp['portals_partners'];
@@ -104,7 +104,7 @@
             <h3>{{ companies_partners_text }}
                 {{ companies_partner('There are no companies partners on this portal') }}
                 <span ng-repeat="comp in data.companies_partners">
-                    <span ng-if="comp.id!=data.company_id.id">
+                    <span ng-if="comp.id!=data.company_id">
                         <span hidden>
                             {{ companies_partner('Companies partners :') }}
                         </span>
