@@ -267,12 +267,11 @@ def suspend_employee():
 @company_bp.route('/suspended_employees/<string:company_id>',
                   methods=['GET'])
 @check_rights(simple_permissions(frozenset()))
-
-def suspended_employees(company_id):
-
+def suspended_employees_func(company_id):
     return render_template('company/company_suspended.html',
                            company_id=company_id
                            )
+
 
 @company_bp.route('/suspended_employees/<string:company_id>',
                   methods=['POST'])
