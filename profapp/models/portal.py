@@ -36,8 +36,7 @@ class Portal(Base, PRBase):
                  portal_plan_id='55dcb92a-6708-4001-acca-b94c96260506',
                  company_owner_id=None, article=None,
                  host=None, divisions=[],
-                 portal_layout_id='55e99785-bda1-4001-922f-ab974923999a'
-                 ):
+                 portal_layout_id=None):
         self.name = name
         self.portal_plan_id = portal_plan_id
         self.company_owner_id = company_owner_id
