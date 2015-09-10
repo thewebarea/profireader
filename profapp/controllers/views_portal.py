@@ -78,7 +78,7 @@ def partners_load(json, company_id):
     portals_partners = [portal.portal.to_dict('name, company_owner_id,'
                                               'id')
                         for portal in CompanyPortal.get_portals(
-                        company_id)]
+            company_id)]
     return {'portal': portal, 'companies_partners': companies_partners,
             'portals_partners': portals_partners,
             'company_id': company_id}
@@ -125,5 +125,5 @@ def publications_load(json, company_id):
 def update_article_portal(json):
     update = json['new_status'].split('/')
     ArticlePortal.update_article_portal(update[0], **{'status':
-                                                      update[1]})
+                                                          update[1]})
     return json
