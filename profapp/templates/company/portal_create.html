@@ -4,36 +4,69 @@
 
 {% block portal_content %}
     {% block company_base %}
-{% include 'company/company_base_angular.html' %}
-{% endblock company_base %}
+        {% include 'company/company_base_angular.html' %}
+    {% endblock company_base %}
     <script>
         module.controller('create', ['$scope', function ($scope) {
             $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};
             $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};
+
             $scope.getData = function () {
-                return $scope.data;
-                };
-            $scope.company_id = '{{ company_id|safe }}';
-            $scope.afterSave = function (resp) {window.location.href = $scope.url_after_save({company_id: resp.company_id})};
+                return $scope.data.portal;
+            };
+            $scope.afterSave = function (resp) {
+                window.location.href = $scope.url_after_save({company_id: resp.company_id})
+            };
+            $scope.addDivision = function () {
+                $scope.data.portal.divisions.push({
+                    name: '',
+                    portal_division_type_id: 'news'
+                });
+                return false;
+            }
+
+            $scope.removeDivision = function (index) {
+                $scope.data.portal.divisions.splice(index, 1);
+            }
         }]);
     </script>
     {% raw %}
+    {{ data.portal.divisions }}
     <div ng-init="loadData()" ng-controller="create">
         <h2>Cteate portal</h2>
-        <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_confirm_create({})">
-            <h4>
-                <input type="text" placeholder="Portal name" ng-model="data.portal_name"><br>
-                <input type="text" placeholder="Division name" ng-model="data.division_name"> select division type:
-                <select ng-model="data.division_type">
-                    <option ng-repeat="division_type in data.divisions">{{division_type.id}}</option>
-                </select>
-                <br>
-                <input type="text" placeholder="Host name" ng-model="data.host_name">
-            </h4>
-            <input type="submit" value="Create">
-        </form>
+
+        <div ng-if="loading">Loading...</div>
+        <div ng-if="!loading">
+
+            <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData"
+                  ng-action="url_confirm_create({company_id: data.company_id})">
+
+                portal name <input type="text" placeholder="Portal name"
+                                   ng-model="data.portal.name"><br/>
+                portal host http://<input type="text" placeholder="Host name"
+                                          ng-model="data.portal.host_name"><br/>
+                portal layout <select ng-model="data.portal.portal_layout_id"
+                                      ng-options="layout.id as layout.name for layout in data.layouts"></select>
+
+                <div>
+                    <h4>Portal divisions</h4>
+
+                    <div ng-repeat="division in data.portal.divisions">
+                        <input type="text" placeholder="Division name"
+                               ng-model="division.name">
+                        <select ng-model="division.portal_division_type_id"
+                                ng-options="division_type.id as division_type.id for division_type in data.division_types"></select>
+                        <button type="button" ng-click="removeDivision($index)">remove division
+                        </button>
+                    </div>
+                    <button type="button" ng-click="addDivision()">add division</button>
+                </div>
+                <br/><br/>
+                <input type="submit" value="Create portal">
+            </form>
+        </div>
     </div>
 
-{% endraw %}
+    {% endraw %}
 
 {% endblock portal_content %}
