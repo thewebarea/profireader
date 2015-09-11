@@ -1,25 +1,18 @@
-from sqlalchemy import Column, String, ForeignKey, UniqueConstraint  # , update
-from sqlalchemy.orm import relationship, backref
-# from db_init import Base, db_session
-from sqlalchemy import Column, String, ForeignKey, update
+from sqlalchemy import UniqueConstraint, update
+from sqlalchemy.orm import backref
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
-# from db_init import Base, g.db
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from flask import g
 from config import Config
 from ..constants.STATUS import STATUS
-from ..constants.USER_ROLES import COMPANY_OWNER_RIGHTS, RIGHTS
+from ..constants.USER_ROLES import COMPANY_OWNER_RIGHTS
 from utils.db_utils import db
 from .users import User
-from .files import File, FileContent
-from .pr_base import PRBase
 from sqlalchemy import CheckConstraint
 from flask import abort
-# from db_init import db_session
-# from functools import reduce
-from .rights import Right, ALL_AVAILABLE_RIGHTS_FALSE
+from .rights import Right
 from ..controllers.request_wrapers import check_rights
-from flask.ext.login import current_user
 from .files import File
 from .pr_base import PRBase, Base
 from ..controllers import errors
@@ -144,7 +137,7 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
-def simple_permissions(rights):  # .p(right_name)
+def simple_permissions(rights):
     set_of_rights = frozenset(rights)
 
     def business_rule(**kwargs):

@@ -1,7 +1,7 @@
 from .blueprints import portal_bp
-from flask import render_template
+from flask import render_template, g
 from ..models.company import Company
-from flask.ext.login import current_user
+from flask.ext.login import current_user, login_required
 from ..models.portal import PortalDivisionType
 from utils.db_utils import db
 from ..models.portal import CompanyPortal, Portal, PortalLayout, PortalDivision
@@ -9,8 +9,10 @@ from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
 from ..models.company import simple_permissions
 from ..models.rights import Right
+from ..constants.USER_ROLES import RIGHTS
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
+@login_required
 @check_rights(simple_permissions([]))
 def create(company_id):
     return render_template('company/portal_create.html',
@@ -18,7 +20,8 @@ def create(company_id):
 
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
-@check_rights(simple_permissions([]))
+@login_required
+@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
 @ok
 def create_load(json, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
@@ -34,7 +37,8 @@ def create_load(json, company_id):
 
 
 @portal_bp.route('/confirm_create/<string:company_id>/', methods=['POST'])
-@check_rights(simple_permissions([]))
+@login_required
+@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
 @ok
 def confirm_create(json, company_id):
     portal = Portal(name=json['name'], host=json['host'],
@@ -47,7 +51,8 @@ def confirm_create(json, company_id):
 
 
 @portal_bp.route('/', methods=['POST'])
-@check_rights(simple_permissions([]))
+@login_required
+@check_rights(simple_permissions([Right[RIGHTS.MANAGE_COMPANIES_PARTNERS()]]))
 @ok
 def apply_company(json):
     CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
@@ -59,6 +64,7 @@ def apply_company(json):
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
+@login_required
 @check_rights(simple_permissions([]))
 def partners(company_id):
     return render_template('company/company_partners.html',
@@ -67,6 +73,7 @@ def partners(company_id):
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['POST'])
+@login_required
 @check_rights(simple_permissions([]))
 @ok
 def partners_load(json, company_id):
@@ -77,20 +84,17 @@ def partners_load(json, company_id):
     portals_partners = [port.portal.to_dict('name, company_owner_id, id')
                         for port in CompanyPortal.get_portals(
                         company_id) if port]
-    user_rights_int = current_user.employer_assoc.filter_by(
-        company_id=company_id).one().rights
-
-    user_rights_list = list(Right.transform_rights_into_set(
-        user_rights_int))
+    user_rights = g.user.user_rights_in_company(company_id)
     return {'portal': portal.to_dict('name') if portal else [],
             'companies_partners': companies_partners,
             'portals_partners': portals_partners,
             'company_id': company_id,
-            'user_rights': user_rights_list}
+            'user_rights': user_rights}
 
 
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
-@check_rights(simple_permissions([]))
+@login_required
+@check_rights(simple_permissions([RIGHTS.SUBSCRIBE_TO_PORTALS()]))
 @ok
 def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(
@@ -99,6 +103,7 @@ def search_for_portal_to_join(json):
 
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
+@login_required
 @check_rights(simple_permissions([]))
 def publications(company_id):
 
@@ -107,6 +112,8 @@ def publications(company_id):
 
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['POST'])
+@login_required
+@check_rights(simple_permissions([]))
 @ok
 def publications_load(json, company_id):
     portal = Portal.own_portal(company_id)
@@ -121,11 +128,15 @@ def publications_load(json, company_id):
                                'name|short_description|email|phone') for
                   port in portal.divisions if port.article_portal]
 
+    user_rights = g.user.user_rights_in_company(company_id)
+
     return {'portal': portal, 'new_status': '',
-            'company_id': company_id}
+            'company_id': company_id, 'user_rights': user_rights}
 
 
 @portal_bp.route('/update_article_portal/', methods=['POST'])
+@login_required
+@check_rights(simple_permissions(Right[RIGHTS.PUBLISH()]))
 @ok
 def update_article_portal(json):
     update = json['new_status'].split('/')

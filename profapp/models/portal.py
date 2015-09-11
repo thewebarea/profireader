@@ -1,7 +1,6 @@
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship
-# from db_init import Base, g.db
 from ..controllers import errors
 from flask import g
 from utils.db_utils import db

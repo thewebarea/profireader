@@ -39,7 +39,8 @@
                 <select ng-model="data.article.status">
                     <option ng-repeat="stat in data.status">{{stat}}</option>
                 </select>
-                <input type="submit" value="Submit status">
+                <input type="submit" ng-if="data.status" value="Submit status">
+                <input type="submit" ng-if="!data.status" value="Submit status" disabled>
             </form>
             <br/>
 
