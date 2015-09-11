@@ -1,0 +1,127 @@
+{% extends "index_layout.html" %}
+{% block title %}Profireader{% endblock title %}
+{% block head %}
+    {{ super() }}
+{% endblock head %}
+
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
+{% block content %}
+    {% block company_base %}
+{% include 'company/company_base_angular.html' %}
+{% endblock company_base %}
+
+    <script>
+        module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
+            $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
+            $scope.url_search_for_portal = {{ raw_url_for('portal.search_for_portal_to_join')|safe }};
+            $scope.url_join = {{ raw_url_for('portal.apply_company')|safe }};
+            $scope.partners = {{ raw_url_for('portal.partners')|safe }};
+            $scope.selectedPortal_name = '';
+            $scope.selectedPortal = null;
+            $scope.selectedPortal_sending = false;
+            $scope.companies_partners_text = ''
+            $scope.companies_partner = function (a) {
+            $scope.companies_partners_text = a
+            };
+            $scope.afterSave = function (resp) {
+            window.location.href = $scope.partners({company_id: resp['company_id']})
+            };
+            $scope.onSelect = function ($item, $model, $label) {
+                if (!$item || !$item.id) {
+                    $scope.selectedPortal_name = '';
+                    $scope.selectedPortal = null;
+                }
+                else {
+                    $scope.selectedPortal = $item;
+                }
+            };
+            $scope.searchForPortalToJoin = function (val) {
+                return $ok($scope.url_search_for_portal(), {
+                    company_id: $scope.data.company_id,
+                    search: val
+                }, function (resp) {
+                    return resp.length ? resp : [{id: false, name: 'No results'}];
+                });
+            };
+            $scope.joinToPortal = function () {
+                $ok($scope.url_join(), {company_id: $scope.data.company_id, portal_id: $scope.selectedPortal.id}, function (resp) {
+                    $scope.selectedPortal = null;
+                    $scope.selectedPortal_name = null;
+                    $scope.data['portals_partners'] = resp['portals_partners'];
+{#TODO OZ BY VK: javascript error                #}
+                    setTimeout(function () {
+                        scrool($('#joined_portal_' + resp['portals_partners']['id']), {
+                            afterScroll: function () {
+                                highlight($('#joined_portal_' + resp['portals_partners']['id']));
+                            }
+                        });
+                    }, 500);
+                }).finally(function () {
+                    $scope.selectedPortal_sending = false;
+                });
+            }
+        }]);
+    </script>
+    {% raw %}
+    <script type="text/ng-template" id="customTemplate.html">
+        <a href="#">
+            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
+        </a>
+    </script>
+    <style>
+        ul.dropdown-menu li a strong {
+            color: #f00;
+        }
+    </style>
+    <div ng-init="loadData()" ng-controller="portal_list">
+        <h3> {{ _('Join to portal') }} </h3>
+        <input typeahead-on-select="onSelect($item, $model, $label)"
+                                               typeahead-template-url="customTemplate.html"
+                                               typeahead-loading="loadingPortals"
+                                               ng-model="selectedPortal_name"
+                                               typeahead="portal as portal.name for portal in searchForPortalToJoin($viewValue)"
+                                               name="portal_id"/>&nbsp;
+        <button class="btn" ng-click="joinToPortal()"
+                ng-class="{'disabled': !selectedPortal || selectedPortal_sending}"
+                ng-disabled="!selectedPortal || selectedPortal_sending">{{ _('join to this portal') }}
+        </button>
+        <i ng-show="loadingPortals" class="glyphicon glyphicon-refresh"></i>
+    <div ng-if="data.portal==''">
+        <h3>This company does not have portal</h3>
+    </div>
+    <div ng-if="data.portal!=''">
+        <span ng-if="data.companies_partners!=''">
+            <h3>{{ companies_partners_text }}
+                {{ companies_partner('There are no companies partners on this portal') }}
+                <span ng-repeat="company in data.companies_partners">
+                    <span ng-if="company.id!=data.company_id">
+                        <span hidden>
+                            {{ companies_partner('Companies partners :') }}
+                        </span>
+                    <a href="{{ url_company_profile({company_id: company.id}) }}"> "{{ company.name }}"</a>
+                    </span>
+               </span>
+            </h3>
+        </span>
+    </div>
+    <h3>
+        <span ng-if="data.portals_partners==''">
+            This company does not subscribed to any portal
+        </span>
+
+        <div ng-if="data.portals_partners!=''">
+            This company portals-partners:
+            <span ng-repeat="portals in data.portals_partners">
+                <a href="{{ url_company_profile({company_id: portals.company_owner_id}) }}">"{{ portals.name }}" </a>
+            </span>
+        </div>
+    </h3>
+    </div>
+{% endraw %}
+{% endblock content %}
+{% block footer %}
+    {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock footer %}

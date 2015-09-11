@@ -126,12 +126,9 @@ def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights_int = current_user.employer_assoc.filter_by(
         company_id=company_id).one().rights
-
     user_rights_list = list(Right.transform_rights_into_set(
         user_rights_int))
-
-    image = url_for('filemanager.get', file_id=company.logo_file) if \
-        company.logo_file else ''
+    image = url_for('filemanager.get', file_id=company.logo_file) if company.logo_file else ''
 
     return render_template('company/company_profile.html',
                            company=company.to_dict('*, own_portal.*'),

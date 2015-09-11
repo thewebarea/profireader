@@ -58,7 +58,7 @@ def apply_company(json):
             'company_id': json['company_id']}
 
 
-@portal_bp.route('/partners/<string:company_id>/')
+@portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
 @check_rights(simple_permissions([]))
 def partners(company_id):
     return render_template('company/company_partners.html',
@@ -101,7 +101,7 @@ def search_for_portal_to_join(json):
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
 @check_rights(simple_permissions([]))
 def publications(company_id):
-    comp = Company().query_company(company_id=company_id)
+
     return render_template('company/portal_publications.html',
                            company_id=company_id)
 

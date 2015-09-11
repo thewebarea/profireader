@@ -1,11 +1,16 @@
-{% extends "index_lazy_layout.html" %}
+{% extends "index_layout.html" %}
+{% block title %}Profireader{% endblock title %}
+{% block head %}
+    {{ super() }}
+{% endblock head %}
 
-{% block title %}Profireader - Company materials{% endblock title %}
-
-{% block portal_content %}
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
+{% block content %}
     {% block company_base %}
-{% include 'company/company_base_angular.html' %}
-{% endblock company_base %}
+        {% include 'company/company_base_angular.html' %}
+    {% endblock company_base %}
     <script>
         module.controller('publication', ['$scope', function ($scope) {
             $scope.publications = {{ raw_url_for('portal.publications')|safe }};
@@ -15,6 +20,7 @@
         }]);
     </script>
     {% raw %}
+    SSSSSSSSSSSSSSSSSSSSSSSS
     <div ng-init="loadData()" ng-controller="publication">
         <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
             <div ng-repeat="dat in data.portal">
@@ -62,4 +68,8 @@
     </div>
     {% endraw %}
 
-{% endblock portal_content %}
+{% endblock content %}
+
+{% block footer %}
+    {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock footer %}
