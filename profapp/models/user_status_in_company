@@ -13,20 +13,20 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from utils.db_utils import db
-from sqlalchemy import String
+from sqlalchemy import Enum
 import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase, Base
+from ..constants.STATUS import STATUS_NAME
 from sqlalchemy.ext.associationproxy import association_proxy
 
 
-class UserStatusInCompany(Base, UserMixin, PRBase):
+class UserStatusInCompanyRights(Base, UserMixin, PRBase):
     __tablename__ = 'user_status_in_company'
 
-    # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    status = Column(TABLE_TYPES['text'])
+    status_name = Column(Enum(*list(STATUS_NAME.keys()), name='status_name_type'), unique=True)
     rights_defined = Column(TABLE_TYPES['bigint'],
                             CheckConstraint('rights_defined >= 0',
                                             name='unsigned_rights_def'))
@@ -40,32 +40,3 @@ class UserStatusInCompany(Base, UserMixin, PRBase):
     # if it is 1 then this right (permission) should be taken from user_company table.
     # such construction of rights defines the CheckConstraint presented below.
     CheckConstraint('rights_defined & rights_undefined = 0', name='right_dependency')
-
-    @staticmethod
-    def NONACTIVE():
-        return 'nonactive'
-
-    @staticmethod
-    def ACTIVE():
-        return 'active'
-
-    @staticmethod
-    def BLOCKED():
-        return 'blocked'
-
-    @staticmethod
-    def DELETED():
-        return 'deleted'
-
-    @staticmethod
-    def BANED():
-        return 'baned'
-
-    @staticmethod
-    def REJECT():
-        return 'reject'
-
-    @staticmethod
-    def SUSPEND():
-        return 'suspend'
-

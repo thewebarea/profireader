@@ -1,3 +1,19 @@
+class STATUS_NAME(dict):
+    ACTIVE = ('edit', 1)
+    NONACTIVE = ('nonactive', 2)
+    BLOCKED = ('blocked', 3)
+    DELETED = ('deleted', 4)
+    BANNED = ('banned', 5)
+    REJECTED = ('rejected', 6)
+    SUSPENDED = ('suspended', 7)
+
+    @classmethod
+    def __getitem__(cls, attr):
+        return getattr(cls, attr.upper())[0]
+
+STATUS_NAME = STATUS_NAME()
+
+
 class STATUS:
 
     @staticmethod
@@ -17,13 +33,13 @@ class STATUS:
         return 'deleted'
 
     @staticmethod
-    def BANED():
-        return 'baned'
+    def BANNED():
+        return 'banned'
 
     @staticmethod
-    def REJECT():
-        return 'reject'
+    def REJECTED():
+        return 'rejected'
 
     @staticmethod
-    def SUSPEND():
-        return 'suspend'
+    def SUSPENDED():
+        return 'suspended'

@@ -79,7 +79,7 @@ class Company(Base, PRBase):
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc
-                               if x.status == STATUS.SUSPEND()]
+                               if x.status == STATUS.SUSPENDED()]
         return suspended_employees
 
     @staticmethod
@@ -129,7 +129,7 @@ class Company(Base, PRBase):
         employee = self.query_employee(company_id)
         if not employee:
             return False
-        if employee.status == STATUS().ACTIVE():
+        if employee.status == STATUS.ACTIVE():
             return True
 
     @staticmethod
@@ -219,20 +219,20 @@ class UserCompany(Base, PRBase):
     @staticmethod
     def suspend_employee(company_id, user_id):
         db(UserCompany, company_id=company_id, user_id=user_id). \
-            update({'status': STATUS.SUSPEND()})
+            update({'status': STATUS.SUSPENDED()})
         # db_session.flush()
 
     @staticmethod
     def apply_request(company_id, user_id, bool):
         if bool == 'True':
-            stat = STATUS().ACTIVE()
+            stat = STATUS.ACTIVE()
             UserCompany.update_rights(user_id,
                                       company_id,
                                       Config.BASE_RIGHT_IN_COMPANY)
         else:
-            stat = STATUS().REJECT()
+            stat = STATUS.REJECTED()
         db(UserCompany, company_id=company_id, user_id=user_id,
-           status=STATUS().NONACTIVE()).update({'status': stat})
+           status=STATUS.NONACTIVE()).update({'status': stat})
 
     ## corrected
     @staticmethod
