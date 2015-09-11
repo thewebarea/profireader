@@ -4,6 +4,8 @@ from functools import reduce
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
 from time import sleep
+from flask.ext.login import current_user
+from ..models.rights import Right
 
 
 def ok(func):
@@ -34,21 +36,36 @@ def replace_brackets(func):
     return wrapper
 
 
-def check_user_status_rights(func):
+def check_user_status_in_company_rights(func):
     def decorated(*args, **kwargs):
-        rez = True
+        print(type(args))  # todo: find out is it tuple or list???
+        if 'company_id' not in kwargs.keys():
+            return func(*args, **kwargs)
+        else:
+            user_status = current_user.employer_assoc.filter_by(
+                company_id=kwargs['company_id']).one().status
+            args_new = ()
+            for arg in args:
+                rez = False
+                needed_rights_in_int = Right.transform_rights_into_integer(list(arg.keys())[0])
+                needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
+                if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
+                    arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2):
+                                arg[list(arg.keys())[0]]},)
+                    args_new += arg_new
+                    rez = True
         if not rez:
             abort(403)
-        return func(*args, **kwargs)
+        return func(*args_new, **kwargs)
     return decorated
 
 
-@check_user_status_rights
-def can_global(*rights_lambda_rule, **kwargs):
+@check_user_status_in_company_rights
+def can_global(*rights_business_rule, **kwargs):
     rez = reduce(
         lambda x, y:
         x or y[list(y.keys())[0]](**kwargs)(list(y.keys())[0]),
-        rights_lambda_rule, False)
+        rights_business_rule, False)
     return rez
 
 # if there is need to use check rights inside the controller (view function)

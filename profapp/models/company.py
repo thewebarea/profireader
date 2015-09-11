@@ -174,22 +174,16 @@ class UserCompany(Base, PRBase):
     __tablename__ = 'user_company'
 
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    user_id = Column(TABLE_TYPES['id_profireader'],
-                     ForeignKey('user.id'),
-                     nullable=False)
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'),
-                        nullable=False)
-    status = Column(TABLE_TYPES['id_profireader'])
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
+    status_name = Column(TABLE_TYPES['id_profireader'], ForeignKey('UserStatusInCompanyRights.id'),
+                         nullable=False)
     md_tm = Column(TABLE_TYPES['timestamp'])
-    rights = Column(TABLE_TYPES['bigint'],
-                    CheckConstraint('rights >= 0',
-                                    name='unsigned_rights'))
+    rights = Column(TABLE_TYPES['bigint'], CheckConstraint('rights >= 0', name='unsigned_rights'))
 
     employer = relationship('Company', backref='employee_assoc')
-    employee = relationship('User',
-                            backref=backref('employer_assoc',
-                                            lazy='dynamic'))
+    employee = relationship('User', backref=backref('employer_assoc', lazy='dynamic'))
+    status = relationship('UserStatusInCompanyRights', uselist=False)
     UniqueConstraint('user_id', 'company_id', name='user_id_company_id')
 
     # todo: check handling md_tm

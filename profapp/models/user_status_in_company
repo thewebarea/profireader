@@ -19,14 +19,11 @@ from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase, Base
 from ..constants.STATUS import STATUS_NAME
-from sqlalchemy.ext.associationproxy import association_proxy
-
 
 class UserStatusInCompanyRights(Base, UserMixin, PRBase):
-    __tablename__ = 'user_status_in_company'
+    __tablename__ = 'user_status_in_company_rights'
 
-    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    status_name = Column(Enum(*list(STATUS_NAME.keys()), name='status_name_type'), unique=True)
+    name = Column(Enum(*list(STATUS_NAME.keys()), name='status_name_type'), primary_key=True)
     rights_defined = Column(TABLE_TYPES['bigint'],
                             CheckConstraint('rights_defined >= 0',
                                             name='unsigned_rights_def'))
