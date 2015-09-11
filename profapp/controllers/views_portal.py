@@ -11,14 +11,14 @@ from ..models.company import simple_permissions
 from ..models.rights import Right
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 def create(company_id):
     return render_template('company/portal_create.html',
                            company_id=company_id)
 
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def create_load(json, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
@@ -26,7 +26,7 @@ def create_load(json, company_id):
              PortalDivisionType.get_division_types()]
 
     return {'company_id': company_id,
-            'portal': {'company_id': company_id, 'name': '', 'host_name': '',
+            'portal': {'company_id': company_id, 'name': '', 'host': '',
                        'portal_layout_id': layouts[0]['id'],
                        'divisions': [
                            {'name': 'some news', 'portal_division_type_id': 'news'}]},
@@ -34,10 +34,10 @@ def create_load(json, company_id):
 
 
 @portal_bp.route('/confirm_create/<string:company_id>/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def confirm_create(json, company_id):
-    portal = Portal(name=json['name'], host=json['host_name'],
+    portal = Portal(name=json['name'], host=json['host'],
                     portal_layout_id=json['portal_layout_id'],
                     company_owner_id=company_id,
                     divisions=[PortalDivision(**division)
@@ -47,7 +47,7 @@ def confirm_create(json, company_id):
 
 
 @portal_bp.route('/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def apply_company(json):
     CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
@@ -59,7 +59,7 @@ def apply_company(json):
 
 
 @portal_bp.route('/partners/<string:company_id>/')
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 def partners(company_id):
     return render_template('company/company_partners.html',
                            company_id=company_id
@@ -67,7 +67,7 @@ def partners(company_id):
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def partners_load(json, company_id):
 
@@ -90,7 +90,7 @@ def partners_load(json, company_id):
 
 
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(
@@ -99,7 +99,7 @@ def search_for_portal_to_join(json):
 
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['GET'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 def publications(company_id):
     comp = Company().query_company(company_id=company_id)
     return render_template('company/portal_publications.html',

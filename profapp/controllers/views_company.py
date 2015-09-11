@@ -123,8 +123,7 @@ def confirm_add(json):
 @check_rights(simple_permissions([]))
 @login_required
 def profile(company_id):
-    company = db(Company, id=company_id).one().to_dict('*,'
-                                                       'own_portal.*')
+    company = db(Company, id=company_id).one()
     user_rights_int = current_user.employer_assoc.filter_by(
         company_id=company_id).one().rights
 
@@ -132,10 +131,10 @@ def profile(company_id):
         user_rights_int))
 
     image = url_for('filemanager.get', file_id=company.logo_file) if \
-        company['logo_file'] else ''
+        company.logo_file else ''
 
     return render_template('company/company_profile.html',
-                           company=company,
+                           company=company.to_dict('*, own_portal.*'),
                            user_rights=user_rights_list,
                            image=image,
                            company_id=company_id
@@ -170,7 +169,7 @@ def employees(company_id):
 
 
 @company_bp.route('/update_rights', methods=['POST'])
-@check_rights(simple_permissions(['manage_access_company']))
+@check_rights(simple_permissions([Right['manage_access_company']]))
 @login_required
 def update_rights():
 
@@ -185,7 +184,7 @@ def update_rights():
 
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
-@check_rights(simple_permissions(['manage_access_company']))
+@check_rights(simple_permissions([Right['manage_access_company']]))
 @login_required
 def edit(company_id):
 
@@ -198,7 +197,7 @@ def edit(company_id):
 
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
-@check_rights(simple_permissions(['add_employee']))
+@check_rights(simple_permissions([Right['add_employee']]))
 @login_required
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
@@ -242,7 +241,7 @@ def join_to_company(json, company_id):
 
 
 @company_bp.route('/add_subscriber/', methods=['POST'])
-@check_rights(simple_permissions(['add_employee']))
+@check_rights(simple_permissions([Right['add_employee']]))
 @login_required
 def confirm_subscriber():
     company_role = UserCompany()
@@ -255,7 +254,7 @@ def confirm_subscriber():
 
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
-@check_rights(simple_permissions(['suspend_employee']))
+@check_rights(simple_permissions([Right['suspend_employee']]))
 @login_required
 def suspend_employee():
     data = request.form
@@ -266,7 +265,7 @@ def suspend_employee():
 
 @company_bp.route('/suspended_employees/<string:company_id>',
                   methods=['GET'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 def suspended_employees_func(company_id):
     return render_template('company/company_suspended.html',
                            company_id=company_id
@@ -275,7 +274,7 @@ def suspended_employees_func(company_id):
 
 @company_bp.route('/suspended_employees/<string:company_id>',
                   methods=['POST'])
-@check_rights(simple_permissions(frozenset()))
+@check_rights(simple_permissions([]))
 @ok
 def load_suspended_employees(json, company_id):
 

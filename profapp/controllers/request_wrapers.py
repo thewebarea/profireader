@@ -37,15 +37,15 @@ def replace_brackets(func):
 def can_global(*rights_lambda_rule, **kwargs):
     rez = reduce(
         lambda x, y:
-        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())),
+        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())[0]),
         rights_lambda_rule, False)
     return rez
 
 # if there is need to use check rights inside the controller (view function)
 # you can do it in the following way:
 #
-# rights_lambda_rule = simple_permissions(frozenset('edit'))
-# if not can_global(rights_lambda_rule,
+# business_rule = simple_permissions([Right['edit']])
+# if not can_global(business_rule,
 #                   user=current_user,
 #                   company_id=company_id):
 #     abort(403)

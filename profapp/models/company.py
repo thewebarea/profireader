@@ -34,7 +34,7 @@ class Company(Base, PRBase):
                                        ForeignKey('file.id'))
     corporate_folder_file_id = Column(String(36),
                                       ForeignKey('file.id'))
-    portal_consist = Column(TABLE_TYPES['boolean'])
+#    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
                             nullable=False)
@@ -238,8 +238,7 @@ class UserCompany(Base, PRBase):
     @staticmethod
     @check_rights(simple_permissions([]))
     def update_rights(user_id, company_id, new_rights):
-        new_rights_binary = Right.transform_rights_into_integer(
-            new_rights)
+        new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id,
                           company_id=company_id)
         rights_dict = {'rights': new_rights_binary}

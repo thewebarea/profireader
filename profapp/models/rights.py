@@ -79,9 +79,10 @@ class Right(RightAtomic):
     # TODO (AA to AA): check the correctness!!!
     @classmethod
     def transform_rights_into_integer(cls, rights_iterable):
-        set_of_rights = set(rights_iterable)
-        return reduce(lambda x, y: x |
-                      cls.RIGHT_REVERSED[y], set_of_rights, 0)
+        # set_of_rights = set([*rights_iterable])
+        rez = reduce(lambda x, y: x |
+                     cls.RIGHT_REVERSED[y], rights_iterable, 0)
+        return rez
 
 #  we really need RightAtomic to be inherited from dict.
 Right = Right()
