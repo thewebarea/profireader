@@ -1,7 +1,7 @@
 from flask import request, current_app, g
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 # from db_init import Base, g.db
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -60,7 +60,7 @@ class User(Base, UserMixin, PRBase):
 
     # registered_via = Column(_T['REGISTERED_VIA'])
 
-    employers = relationship('Company', secondary='user_company')
+    employers = relationship('Company', secondary='user_company', backref='employees')  # Correct
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['profireader', 'google', 'facebook', 'linkedin', 'twitter', 'microsoft', 'yahoo']

@@ -46,8 +46,8 @@ class Company(Base, PRBase):
     # todo: add company time creation
 
     owner = relationship('User', backref='companies')
-    employees = relationship('User', secondary='user_company',
-                             lazy='dynamic')
+    # employees = relationship('User', secondary='user_company',
+    #                          lazy='dynamic')
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
