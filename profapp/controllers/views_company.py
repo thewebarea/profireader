@@ -100,7 +100,6 @@ def update_article(json):
 @ok
 def submit_to_portal(json):
 
-    print(json)
     article = ArticleCompany.get(json['article']['id'])
     article.clone_for_portal(json['selected_division'])
     return json

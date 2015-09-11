@@ -1,15 +1,14 @@
 from .blueprints import portal_bp
-from flask import render_template, request, url_for, redirect
+from flask import render_template
 from ..models.company import Company
-from flask.ext.login import login_required
+from flask.ext.login import current_user
 from ..models.portal import PortalDivisionType
 from utils.db_utils import db
 from ..models.portal import CompanyPortal, Portal, PortalLayout, PortalDivision
 from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
 from ..models.company import simple_permissions
-from flask import g
-
+from ..models.rights import Right
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
 @check_rights(simple_permissions(frozenset()))
@@ -78,10 +77,16 @@ def partners_load(json, company_id):
     portals_partners = [port.portal.to_dict('name, company_owner_id, id')
                         for port in CompanyPortal.get_portals(
                         company_id) if port]
+    user_rights_int = current_user.employer_assoc.filter_by(
+        company_id=company_id).one().rights
+
+    user_rights_list = list(Right.transform_rights_into_set(
+        user_rights_int))
     return {'portal': portal.to_dict('name') if portal else [],
             'companies_partners': companies_partners,
             'portals_partners': portals_partners,
-            'company_id': company_id}
+            'company_id': company_id,
+            'user_rights': user_rights_list}
 
 
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
