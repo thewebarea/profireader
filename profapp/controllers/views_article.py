@@ -6,6 +6,7 @@ from profapp.models.users import User
 # from db_init import db_session
 from .blueprints import article_bp
 from .request_wrapers import ok, object_to_dict
+from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 # import os
 
 
@@ -98,3 +99,13 @@ def submit_to_company(json, article_id):
     a.mine.clone_for_company(json['company_id'])
     return {'article': a.get(article_id).get_client_side_dict(),
             'company_id': json['company_id']}
+
+@article_bp.route('/resubmit_to_company/<string:article_company_id>/',
+                  methods=['POST'])
+@ok
+def resubmit_to_company(json, article_company_id):
+    a = ArticleCompany.get(article_company_id)
+    if not a.status == ARTICLE_STATUS_IN_COMPANY.declined:
+        raise Exception('article should have %s to be resubmited' % ARTICLE_STATUS_IN_COMPANY.declined)
+    a.status = ARTICLE_STATUS_IN_COMPANY.submitted
+    return {'article': a.save().get_client_side_dict()}
