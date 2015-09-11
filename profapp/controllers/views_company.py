@@ -3,6 +3,7 @@ from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompany, Right
+from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
@@ -134,8 +135,8 @@ def confirm_add(json):
 def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = g.user.user_rights_in_company(company_id)
-    image = url_for('filemanager.get', file_id=company.logo_file) if company.logo_file else ''
-
+    image = url_for('filemanager.get', file_id=company.logo_file) \
+        if company.logo_file else '/static/img/company_no_logo.png'
     return render_template('company/company_profile.html',
                            company=company.to_dict('*, own_portal.*'),
                            user_rights=user_rights,
