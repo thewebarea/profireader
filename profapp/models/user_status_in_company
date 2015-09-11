@@ -1,0 +1,62 @@
+from flask import request, current_app, g
+#from sqlalchemy.orm import relationship, backref
+from sqlalchemy import Column, ForeignKey, CheckConstraint
+from sqlalchemy.orm import relationship
+# from db_init import Base, g.db
+
+from ..constants.TABLE_TYPES import TABLE_TYPES
+from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
+from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
+    REGISTERED_WITH
+from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
+import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from utils.db_utils import db
+from sqlalchemy import String
+import hashlib
+from flask.ext.login import UserMixin, AnonymousUserMixin
+from .files import File
+from .pr_base import PRBase, Base
+from sqlalchemy.ext.associationproxy import association_proxy
+
+
+class UserStatusInCompany(Base, UserMixin, PRBase):
+    __tablename__ = 'user_status_in_company'
+
+    # PROFIREADER REGISTRATION DATA
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    status = Column(TABLE_TYPES['text'])
+    rights_defined = Column(TABLE_TYPES['bigint'],
+                            CheckConstraint('rights_defined >= 0',
+                                            name='unsigned_rights_def'))
+    rights_undefined = Column(TABLE_TYPES['bigint'],
+                              CheckConstraint('rights_undefined >= 0',
+                                              name='unsigned_rights_undef'))
+    # Some explanation is needed.
+    # if rights_defined is 1 on some bit then this right (permission) is available.
+    # if 0 then we should check the value of rights_undefined column
+    # if it is really 0 then right (permission) is not available.
+    # if it is 1 then this right (permission) should be taken from user_company table.
+    # such construction of rights defines the CheckConstraint presented below.
+    CheckConstraint('rights_defined & rights_undefined = 0', name='right_dependency')
+
+    @staticmethod
+    def NONACTIVE():
+        return 'nonactive'
+
+    @staticmethod
+    def ACTIVE():
+        return 'active'
+
+    @staticmethod
+    def BLOCKED():
+        return 'blocked'
+
+    @staticmethod
+    def DELETED():
+        return 'deleted'
+
+    @staticmethod
+    def BANED():
+        return 'baned'
