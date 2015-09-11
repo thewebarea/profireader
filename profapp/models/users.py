@@ -1,7 +1,7 @@
 from flask import request, current_app, g
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 # from db_init import Base, g.db
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -18,6 +18,7 @@ import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase, Base
+from .rights import Right
 from sqlalchemy.ext.associationproxy import association_proxy
 
 
@@ -58,8 +59,8 @@ class User(Base, UserMixin, PRBase):
     pass_reset_conf_tm = Column(TABLE_TYPES['timestamp'])
 
     # registered_via = Column(_T['REGISTERED_VIA'])
-
-    employers = relationship('Company', secondary='user_company')
+    employers = relationship('Company', secondary='user_company',
+                             backref=backref("employees", lazy='dynamic'))  # Correct
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['profireader', 'google', 'facebook', 'linkedin', 'twitter', 'microsoft', 'yahoo']
@@ -438,6 +439,9 @@ class User(Base, UserMixin, PRBase):
 
     #def is_administrator(self):
     #    return self.can(Permission.ADMINISTER)
+    def user_rights_in_company(self, company_id):
+        user_rights_int = self.employer_assoc.filter_by(company_id=company_id).one().rights
+        return list(Right.transform_rights_into_set(user_rights_int))
 
 class Group(Base, PRBase):
 
