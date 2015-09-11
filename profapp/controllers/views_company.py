@@ -122,7 +122,7 @@ def add():
 @check_rights(simple_permissions([]))
 @ok
 def confirm_add(json):
-    return Company(**json).create_new_company(g.user.id).\
+    return Company(**json).create_new_company().\
         get_client_side_dict()
 
 

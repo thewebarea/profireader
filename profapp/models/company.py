@@ -56,15 +56,13 @@ class Company(Base, PRBase):
     # get all users in company : company.employees
     # get all users companies : user.employers
 
-    def create_new_company(self, user_id):
+    def create_new_company(self):
 
-    #TODO VK TO VK: CHECK G>USER INSTANSE QUERY
-        user = g.db.query(User).get(user_id)
         user_company = UserCompany(status=STATUS.ACTIVE(),
                                    rights=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
-        user.employer_assoc.append(user_company)  # .all() added
-        user.companies.append(self)
+        g.user.employer_assoc.append(user_company)  # .all() added
+        g.user.companies.append(self)
 
         return self
 
