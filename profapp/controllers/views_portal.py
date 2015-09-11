@@ -41,13 +41,10 @@ def create_load(json, company_id):
 @check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
 @ok
 def confirm_create(json, company_id):
-    portal = Portal(name=json['name'], host=json['host'],
-                    portal_layout_id=json['portal_layout_id'],
-                    company_owner_id=company_id,
-                    divisions=[PortalDivision(**division)
-                               for division in json['divisions']])
-    portal_id = portal.create_portal().id
-    return {'company_id': company_id, 'portal_id': portal_id}
+    Portal(name=json['name'], host=json['host'], portal_layout_id=json['portal_layout_id'],
+           company_owner_id=company_id, divisions=[PortalDivision(**division)
+           for division in json['divisions']]).create_portal()
+    return {'company_id': company_id}
 
 
 @portal_bp.route('/', methods=['POST'])
@@ -55,6 +52,8 @@ def confirm_create(json, company_id):
 @check_rights(simple_permissions([Right[RIGHTS.MANAGE_COMPANIES_PARTNERS()]]))
 @ok
 def apply_company(json):
+    print(json['company_id'])
+    print(json['portal_id'])
     CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
                                           portal_id=json['portal_id'])
     return {'portals_partners': [portal.portal.to_dict(
@@ -78,7 +77,7 @@ def partners(company_id):
 @ok
 def partners_load(json, company_id):
 
-    portal = Portal.own_portal(company_id)
+    portal = db(Company, id=company_id).one().own_portal
     companies_partners = [comp.to_dict('id, name') for comp in
                           portal.companies] if portal else []
     portals_partners = [port.portal.to_dict('name, company_owner_id, id')
@@ -116,7 +115,7 @@ def publications(company_id):
 @check_rights(simple_permissions([]))
 @ok
 def publications_load(json, company_id):
-    portal = Portal.own_portal(company_id)
+    portal = db(Company, id=company_id).one().own_portal
     if portal:
         if not portal.divisions[0]:
             return {'divisions': [{'name': '',

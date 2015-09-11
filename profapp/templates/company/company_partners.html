@@ -21,11 +21,14 @@
             $scope.selectedPortal_name = '';
             $scope.selectedPortal = null;
             $scope.selectedPortal_sending = false;
-            $scope.myRights = function(right){for (i = 0; i < $scope.data.user_rights.length; i++) {
-                if (right == $scope.data.user_rights[i]) {
-                    return true;
+            $scope.myRights = function(){
+                for (var i = 0; i < arguments.length; i++) {
+                     if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
+                         return false;
+                     }
                 }
-            }};
+                return true;
+            };
             $scope.companies_partners_text = '';
             $scope.companies_partner = function (a) {
             $scope.companies_partners_text = a

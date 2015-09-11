@@ -29,9 +29,9 @@ class Portal(Base, PRBase):
                                          'PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
-    companies = relationship('Company', secondary='company_portal')
+    # companies = relationship('Company', secondary='company_portal')
 
-    def __init__(self, name=None, companies=[],
+    def __init__(self, name=None,
                  portal_plan_id=None,
                  company_owner_id=None, article=None,
                  host=None, divisions=[],
@@ -43,9 +43,9 @@ class Portal(Base, PRBase):
         self.host = host
         self.portal_layout_id = portal_layout_id
         self.divisions = divisions
-        self.companies = companies
         self.portal_plan_id = portal_plan_id if portal_plan_id else db(PortalPlan).first().id
-        self.portal_layout_id = portal_layout_id if portal_layout_id else db(PortalLayout).first().id
+        self.portal_layout_id = portal_layout_id if portal_layout_id \
+            else db(PortalLayout).first().id
 
     def create_portal(self):
 
@@ -58,11 +58,9 @@ class Portal(Base, PRBase):
             #     details = e.args[0]
             #     print(details['message'])
         self.own_company = db(Company, id=self.company_owner_id).one()
-        company_assoc = CompanyPortal(
-            company_portal_plan_id=self.portal_plan_id)
+        company_assoc = CompanyPortal(company_portal_plan_id=self.portal_plan_id)
         company_assoc.portal = self
         company_assoc.company = self.own_company
-
         return self
 
     def get_client_side_dict(self, fields='id|name, divisions.*, layout.*'):
@@ -76,14 +74,6 @@ class Portal(Base, PRBase):
                                       portal_id=Portal.id).exists()
                                   ).filter(
                     Portal.name.ilike("%" + searchtext + "%")).all()]
-
-    @staticmethod
-    def own_portal(company_id):
-        try:
-            ret = db(Portal, company_owner_id=company_id).one()
-            return ret
-        except:
-            return []
 
     @staticmethod
     def query_portal(portal_id):
@@ -127,9 +117,11 @@ class CompanyPortal(Base, PRBase):
     portal = relationship(Portal, backref='company_assoc')
     company = relationship(Company, backref='portal_assoc')
 
-    def __init__(self, company_id=None, portal_id=None,
+    def __init__(self, company_id=None, portal_id=None, portal=None, company=None,
                  company_portal_plan_id=None):
         self.company_id = company_id
+        self.portal = portal
+        self.company = company
         self.portal_id = portal_id
         self.company_portal_plan_id = company_portal_plan_id
 
@@ -143,8 +135,8 @@ class CompanyPortal(Base, PRBase):
 
     @staticmethod
     def apply_company_to_portal(company_id, portal_id):
-        g.db.add(CompanyPortal(company_id=company_id,
-                               portal_id=portal_id,
+        g.db.add(CompanyPortal(company=db(Company, id=company_id).one(),
+                               portal=db(Portal, id=portal_id).one(),
                                company_portal_plan_id=Portal().
                                query_portal(portal_id).
                                portal_plan_id))
@@ -154,8 +146,6 @@ class CompanyPortal(Base, PRBase):
     def show_companies_on_my_portal(company_id):
         portal = Portal().own_portal(company_id).companies
         return portal
-#	    CompanyPortal().all_companies_on_portal(portal.id) if \
-#            portal else []
 
     @staticmethod
     def get_portals(company_id):

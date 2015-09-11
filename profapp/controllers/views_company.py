@@ -81,11 +81,13 @@ def load_material_details(json, company_id, article_id):
 
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
         article['status'])
+    user_rights = g.user.user_rights_in_company(company_id)
 
     return {'article': article, 'status': status, 'portals':
             portals, 'company': Company.get(company_id).
             to_dict('id, employees.id|profireader_name'),
-            'selected_portal': {}, 'selected_division': {}}
+            'selected_portal': {}, 'selected_division': {},
+            'user_rights': user_rights}
 
 
 @company_bp.route('/update_article/', methods=['POST'])
@@ -146,8 +148,8 @@ def profile(company_id):
 @login_required
 @check_rights(simple_permissions([]))
 def employees(company_id):
-    company_user_rights = UserCompany.show_rights(company_id)
 
+    company_user_rights = UserCompany.show_rights(company_id)
     for user_id in company_user_rights.keys():
         rights = company_user_rights[user_id]['rights']
         rez = {}

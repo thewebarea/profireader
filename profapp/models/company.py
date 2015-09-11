@@ -38,14 +38,13 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    portal = relationship('Portal', secondary='company_portal')
-    own_portal = relationship('Portal', backref='own_company',
+    portal = relationship('Portal', secondary='company_portal', backref=backref('companies',
+                                                                                lazy='dynamic'))
+    own_portal = relationship('Portal',
+                              backref="own_company", uselist=False,
                               foreign_keys='Portal.company_owner_id',
-                              uselist=False)
-
-    # todo: add company time creation
-
-    owner = relationship('User', backref='companies')
+                              )
+    user_owner = relationship('User', backref='companies')
     # employees = relationship('User', secondary='user_company',
     #                          lazy='dynamic')
     logo_file_relationship = relationship('File',
@@ -61,9 +60,8 @@ class Company(Base, PRBase):
         user_company = UserCompany(status=STATUS.ACTIVE(),
                                    rights=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
-        g.user.employer_assoc.append(user_company)  # .all() added
+        g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
-
         return self
 
     def suspended_employees(self):
@@ -106,22 +104,6 @@ class Company(Base, PRBase):
                 {'logo_file': file.upload(
                     content=passed_file.stream.read(-1)).id}
             )
-        # db_session.flush()
-
-    @staticmethod
-    def query_employee(company_id):
-
-        employee = db(UserCompany, company_id=company_id,
-                      user_id=g.user_dict['id']).first()
-        return employee if employee else False
-
-    def query_owner_or_member(self, company_id):
-
-        employee = self.query_employee(company_id)
-        if not employee:
-            return False
-        if employee.status == STATUS().ACTIVE():
-            return True
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
@@ -194,8 +176,7 @@ class UserCompany(Base, PRBase):
 
     @staticmethod
     def user_in_company(user_id, company_id):
-        ret = db(
-            UserCompany, user_id=user_id, company_id=company_id).one()
+        ret = db(UserCompany, user_id=user_id, company_id=company_id).one()
         return ret
 
     # do we provide any rights to user at subscribing?
@@ -241,7 +222,7 @@ class UserCompany(Base, PRBase):
         emplo = {}
         for user in db(Company, id=company_id).one().employees:
             user_company = user.employer_assoc. \
-                filter_by(company_id=company_id).first()
+                filter_by(company_id=company_id).one()
             emplo[user.id] = {'id': user.id,
                               'name': user.user_name,
                               # TODO (AA): don't pass user object

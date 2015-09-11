@@ -59,8 +59,8 @@ class User(Base, UserMixin, PRBase):
     pass_reset_conf_tm = Column(TABLE_TYPES['timestamp'])
 
     # registered_via = Column(_T['REGISTERED_VIA'])
-
-    employers = relationship('Company', secondary='user_company', backref='employees')  # Correct
+    employers = relationship('Company', secondary='user_company',
+                             backref=backref("employees", lazy='dynamic'))  # Correct
 
 # FB_NET_FIELD_NAMES = ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 # SOCIAL_NETWORKS = ['profireader', 'google', 'facebook', 'linkedin', 'twitter', 'microsoft', 'yahoo']

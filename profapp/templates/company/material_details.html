@@ -11,6 +11,14 @@
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
             $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
+            $scope.myRights = function(){
+                for (var i = 0; i < arguments.length; i++) {
+                     if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
+                         return false;
+                     }
+                }
+                return true;
+            };
             $scope.getData = function () {
                 return $scope.data;
             };
@@ -32,8 +40,8 @@
             <br>
             <h4>Text</h4>
             <h5><input type="text" disabled="disabled" value="{{ data.article.long }}"></h5>
+                 <div ng-if="myRights('publish', 'unpublish')">
             Current status is {{ original_data.article.status }}<br>
-
             <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
                 Change material status to
                 <select ng-model="data.article.status">
@@ -43,7 +51,9 @@
                 <input type="submit" ng-if="!data.status" value="Submit status" disabled>
             </form>
             <br/>
+                          </div>
 
+            <div ng-if="myRights('publish', 'unpublish', 'edit')">
             <form>
                 Introduce user to work on this material
                 <input type="hidden" ng-model="data.company.id">
@@ -57,6 +67,8 @@
             </span>
                 <input type="submit" value="Send article">
             </form>
+                </div>
+            <div ng-if="myRights('publish')">
             <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_submit_to_portal">
                 Publish this material at portal
             <span ng-if="original_data.article.status=='accepted'">
@@ -76,9 +88,8 @@
                 </select>
                 <input type="submit" value="Publish" disabled>
             </span>
-
-
             </form>
+                </div>
         </div>
     </div>
 
