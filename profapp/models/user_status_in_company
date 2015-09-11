@@ -60,3 +60,12 @@ class UserStatusInCompany(Base, UserMixin, PRBase):
     @staticmethod
     def BANED():
         return 'baned'
+
+    @staticmethod
+    def REJECT():
+        return 'reject'
+
+    @staticmethod
+    def SUSPEND():
+        return 'suspend'
+
