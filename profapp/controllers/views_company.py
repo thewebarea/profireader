@@ -130,8 +130,9 @@ def profile(company_id):
     user_rights_list = list(Right.transform_rights_into_set(
         user_rights_int))
 
-    image = url_for('filemanager.get', file_id=company['logo_file']) if \
-        'logo_file' in company else ''
+    print(company['logo_file'])
+    image = url_for('filemanager.get', file_id=company['logo_file']) if 'logo_file' in company and company['logo_file'] \
+        else '/static/img/company_no_logo.png'
 
     return render_template('company/company_profile.html',
                            company=company,
