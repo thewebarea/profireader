@@ -80,12 +80,12 @@ def can_global(*rights_business_rule, **kwargs):
 #     abort(403)
 
 
-def check_rights(*rights_lambda_rule):
+def check_rights(*rights_business_rule):
     # (rights, lambda_func) = rights_lambda_rule.items()[0]
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            rez = can_global(*rights_lambda_rule, **kwargs)
+            rez = can_global(*rights_business_rule, **kwargs)
             if not rez:
                 abort(403)
             return func(*args, **kwargs)
