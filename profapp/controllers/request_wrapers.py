@@ -38,15 +38,15 @@ def replace_brackets(func):
 
 def check_user_status_in_company_rights(func):
     def decorated(*args, **kwargs):
-        print(type(args))  # todo: find out is it tuple or list???
-        if 'company_id' not in kwargs.keys():
+        # here args is a tuple
+        if ('company_id' not in kwargs.keys()) or not args:
             return func(*args, **kwargs)
         else:
             user_status = current_user.employer_assoc.filter_by(
                 company_id=kwargs['company_id']).one().status
             args_new = ()
+            rez = False
             for arg in args:
-                rez = False
                 needed_rights_in_int = Right.transform_rights_into_integer(list(arg.keys())[0])
                 needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
                 if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
@@ -54,14 +54,16 @@ def check_user_status_in_company_rights(func):
                                 arg[list(arg.keys())[0]]},)
                     args_new += arg_new
                     rez = True
-        if not rez:
-            abort(403)
-        return func(*args_new, **kwargs)
+            if not rez:
+                abort(403)
+            return func(*args_new, **kwargs)
     return decorated
 
 
 @check_user_status_in_company_rights
 def can_global(*rights_business_rule, **kwargs):
+    if not rights_business_rule:
+        return True
     rez = reduce(
         lambda x, y:
         x or y[list(y.keys())[0]](**kwargs)(list(y.keys())[0]),
