@@ -1,24 +1,14 @@
-from flask import request, current_app, g
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 # from db_init import Base, g.db
-
+from ..models.rights import Right
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from ..constants.SOCIAL_NETWORKS import SOCIAL_NETWORKS, SOC_NET_NONE
-from ..constants.USER_REGISTERED import REGISTERED_WITH_FLIPPED, \
-    REGISTERED_WITH
-from ..constants.PROFILE_NECESSARY_FIELDS import PROFILE_NECESSARY_FIELDS
-import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from utils.db_utils import db
 from sqlalchemy import Enum
-import hashlib
 from flask.ext.login import UserMixin, AnonymousUserMixin
-from .files import File
 from .pr_base import PRBase, Base
 from ..constants.STATUS import STATUS_NAME
+
 
 class UserStatusInCompanyRights(Base, UserMixin, PRBase):
     __tablename__ = 'user_status_in_company_rights'
@@ -37,3 +27,125 @@ class UserStatusInCompanyRights(Base, UserMixin, PRBase):
     # if it is 1 then this right (permission) should be taken from user_company table.
     # such construction of rights defines the CheckConstraint presented below.
     CheckConstraint('rights_defined & rights_undefined = 0', name='right_dependency')
+
+
+status_rights = dict()
+
+
+def check(rts_def, rts_undef):
+    rez = True
+    if not (set(rts_def) & set(rts_undef)):
+        raise Exception
+    return rez
+
+# Right['edit']
+# Right['publish']
+# Right['unpublish']
+# Right['upload_files']
+# Right['delete_files']
+# Right['add_employee']
+# Right['suspend_employee']
+# Right['send_publications']
+# Right['manage_access_company']
+# Right['manage_access_portal']
+# Right['article_priority']
+# Right['manage_readers']
+# Right['manage_companies_partners']
+# Right['manage_comments']
+# Right['subscribe_to_portals']
+
+status = 'active'
+status_name = STATUS_NAME[status]
+stat_r = UserStatusInCompanyRights()
+stat_r.name = status_name
+rights_defined = [Right['upload_files'], Right['send_publications']]
+rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['delete_files'],
+                    Right['add_employee'], Right['suspend_employee'],
+                    Right['manage_access_company'], Right['manage_access_portal'],
+                    Right['article_priority'], Right['manage_readers'],
+                    Right['manage_companies_partners'], Right['manage_comments'],
+                    Right['subscribe_to_portals']]
+check(rights_defined, rights_undefined)
+stat_r.rights_defined = \
+    Right.transform_rights_into_integer(rights_defined)
+stat_r.rights_undefined = \
+    Right.transform_rights_into_integer(rights_undefined)
+status_rights[status_name] = stat_r
+
+status = 'nonactive'
+status_name = STATUS_NAME[status]
+stat_r = UserStatusInCompanyRights()
+stat_r.name = status_name
+rights_defined = ['']
+rights_undefined = ['']
+check(rights_defined, rights_undefined)
+stat_r.rights_defined = \
+    Right.transform_rights_into_integer(rights_defined)
+stat_r.rights_undefined = \
+    Right.transform_rights_into_integer(rights_undefined)
+status_rights[status_name] = stat_r
+
+status = 'blocked'
+status_name = STATUS_NAME[status]
+stat_r = UserStatusInCompanyRights()
+stat_r.name = status_name
+rights_defined = ['']
+rights_undefined = ['']
+check(rights_defined, rights_undefined)
+stat_r.rights_defined = \
+    Right.transform_rights_into_integer(rights_defined)
+stat_r.rights_undefined = \
+    Right.transform_rights_into_integer(rights_undefined)
+status_rights[status_name] = stat_r
+
+status = 'deleted'
+status_name = STATUS_NAME[status]
+stat_r = UserStatusInCompanyRights()
+stat_r.name = status_name
+rights_defined = ['']
+rights_undefined = ['']
+check(rights_defined, rights_undefined)
+stat_r.rights_defined = \
+    Right.transform_rights_into_integer(rights_defined)
+stat_r.rights_undefined = \
+    Right.transform_rights_into_integer(rights_undefined)
+status_rights[status_name] = stat_r
+
+status = 'banned'
+status_name = STATUS_NAME[status]
+stat_r = UserStatusInCompanyRights()
+stat_r.name = status_name
+rights_defined = ['']
+rights_undefined = ['']
+check(rights_defined, rights_undefined)
+stat_r.rights_defined = \
+    Right.transform_rights_into_integer(rights_defined)
+stat_r.rights_undefined = \
+    Right.transform_rights_into_integer(rights_undefined)
+status_rights[status_name] = stat_r
+
+status = 'rejected'
+status_name = STATUS_NAME[status]
+stat_r = UserStatusInCompanyRights()
+stat_r.name = status_name
+rights_defined = ['']
+rights_undefined = ['']
+check(rights_defined, rights_undefined)
+stat_r.rights_defined = \
+    Right.transform_rights_into_integer(rights_defined)
+stat_r.rights_undefined = \
+    Right.transform_rights_into_integer(rights_undefined)
+status_rights[status_name] = stat_r
+
+status = 'suspended'
+status_name = STATUS_NAME[status]
+stat_r = UserStatusInCompanyRights()
+stat_r.name = status_name
+rights_defined = ['']
+rights_undefined = ['']
+check(rights_defined, rights_undefined)
+stat_r.rights_defined = \
+    Right.transform_rights_into_integer(rights_defined)
+stat_r.rights_undefined = \
+    Right.transform_rights_into_integer(rights_undefined)
+status_rights[status_name] = stat_r

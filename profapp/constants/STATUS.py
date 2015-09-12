@@ -1,5 +1,5 @@
 class STATUS_NAME(dict):
-    ACTIVE = ('edit', 1)
+    ACTIVE = ('active', 1)
     NONACTIVE = ('nonactive', 2)
     BLOCKED = ('blocked', 3)
     DELETED = ('deleted', 4)
