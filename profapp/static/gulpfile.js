@@ -37,6 +37,16 @@ gulp.task('install_angular_cookies', function () {
         .pipe(gulp.dest('angular/'));
 });
 
+gulp.task('install_angular_animate', function () {
+    return gulp.src(src + 'angular-animate/angular-animate.min.js')
+        .pipe(gulp.dest('angular-animate/'));
+});
+
+gulp.task('install_angular_bootstrap', function () {
+    return gulp.src([src + 'angular-bootstrap/ui-bootstrap.min.js', src + 'angular-bootstrap/ui-bootstrap-tpls.min.js'])
+        .pipe(gulp.dest('angular-bootstrap/'));
+});
+
 gulp.task('install_angular_ui_tinymce', function () {
     return gulp.src(src + 'angular-ui-tinymce/src/tinymce.js')
         .pipe(gulp.dest('angular-ui-tinymce/'));
@@ -49,5 +59,5 @@ gulp.task('install_tinymce', function () {
 });
 
 
-gulp.task('default', ['clean', 'install_filemanager', 'install_fileuploader', 'install_angular', 'install_angular_translate', 'install_angular_cookies', 'install_angular_ui_tinymce', 'install_tinymce']);
+gulp.task('default', ['clean', 'install_filemanager', 'install_fileuploader', 'install_angular', 'install_angular_translate', 'install_angular_cookies', 'install_angular_ui_tinymce', 'install_tinymce', 'install_angular_bootstrap', 'install_angular_animate']);
 
