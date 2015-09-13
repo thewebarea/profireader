@@ -7,6 +7,7 @@ from .blueprints import filemanager_bp
 from io import BytesIO
 from .request_wrapers import ok
 from functools import wraps
+from time import sleep
 
 
 def parent_folder(func):
@@ -60,9 +61,10 @@ def createdir(json, parent_id=None):
                           parent_id=request.json['params']['parent_id'])
 
 
-@filemanager_bp.route('/upload/', methods=['POST'])
+@filemanager_bp.route('/upload/<string:rootdir_id>/', methods=['POST'])
 @ok
-def upload(json):
+def upload(json, rootdir_id):
+    sleep(1.5)
     parent_id = None if (request.form['parent_id'] == '') \
         else (request.form['parent_id'])
     got_file = request.files['file-0']

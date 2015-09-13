@@ -9,34 +9,41 @@
     {#    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">#}
     {#    <meta charset="utf-8">#}
     {#    <title>angular-filemanager</title>#}
-        <script src="/static/jquery/jquery.min.js"></script>
-        <script src="/static/angular/angular.min.js"></script>
-        <script src="/static/angular/angular-cookies.min.js"></script>
-        <script src="/static/angular/angular-translate.min.js"></script>
+    <script src="/static/jquery/jquery.min.js"></script>
+    <script src="/static/angular/angular.min.js"></script>
+    <script src="/static/angular/angular-cookies.min.js"></script>
+    <script src="/static/angular/angular-translate.min.js"></script>
+
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     {##}
     {##}
-        <link rel="stylesheet"
-              href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
     {##}
     {#    <!-- Uncomment if you need to use raw source code#}
-    {#      <script src="assets/js/app.js"></script>#}
-    {#      <script src="assets/js/config.js"></script>#}
-    {#      <script src="assets/js/chmod.js"></script>#}
-    {#      <script src="assets/js/item.js"></script>#}
-    {#      <script src="assets/js/filenavigator.js"></script>#}
-    {#      <script src="assets/js/fileuploader.js"></script>#}
-    {#      <script src="assets/js/translations.js"></script>#}
-    {#      <script src="assets/js/controller.js"></script>#}
-    {#      <script src="assets/js/selector-controller.js"></script>#}
+    <script src="/static/filemanager/app.js"></script>
+    <script src="/static/filemanager/config.js"></script>
+    <script src="/static/filemanager/chmod.js"></script>
+    <script src="/static/filemanager/item.js"></script>
+    <script src="/static/filemanager/filenavigator.js"></script>
+    <script src="/static/filemanager/fileuploader.js"></script>
+    <script src="/static/filemanager/translations.js"></script>
+    <script src="/static/filemanager/controller.js"></script>
+    <script src="/static/filemanager/selector-controller.js"></script>
     {#    -->#}
     {##}
     {##}
     {#    <!-- Comment if you need to use raw source code -->#}
-        <script src="/static/filemanager/angular-filemanager.min.js"></script>
-        <script src="/static/filemanager/cached-templates.js"></script>
+    {#        <script src="/static/filemanager/angular-filemanager.min.js"></script>#}
+    <script src="/static/filemanager/cached-templates.js"></script>
     {#    <!-- Comment if you need to use raw source code -->#}
     {##}
-        <link rel="stylesheet" href="/static/filemanager/angular-filemanager.css">
+    <link rel="stylesheet" href="/static/filemanager/angular-filemanager.css">
+
+    <script src="{{ url_for('static', filename = 'angular-bootstrap/ui-bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'angular-bootstrap/ui-bootstrap-tpls.min.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'angular-animate/angular-animate.min.js') }}"></script>
 
 
 
@@ -76,7 +83,7 @@
 
 
     var library = {{ library|safe }};
-{#    var app = angular.module('FileUpload', ['ngFileUpload']);#}
+    {#    var app = angular.module('FileUpload', ['ngFileUpload']);#}
 
     angular.module('FileManagerApp').controller('MyCtrl', ['$scope', 'Upload', function ($scope, Upload) {
         // upload later on form submit or something similar
@@ -102,7 +109,7 @@
 </script>
 
 <body ng-app="FileManagerApp">
-    <angular-file-manager></angular-file-manager>
+<angular-file-manager></angular-file-manager>
 
 </body>
 </html>
