@@ -62,17 +62,19 @@ def createdir(json, parent_id=None):
                           parent_id=request.json['params']['folder_id'])
 
 
-@filemanager_bp.route('/upload/<string:rootdir_id>/', methods=['POST'])
+@filemanager_bp.route('/upload/', methods=['POST'])
 @ok
-def upload(json, rootdir_id):
-    sleep(0.5)
-    parent_id = None if (request.form['parent_id'] == '') \
-        else (request.form['parent_id'])
-    got_file = request.files['file-0']
-
-    file = File(parent_id=parent_id, name=got_file.filename,
-                mime=got_file.content_type)
-    return file.upload(content=got_file.stream.read(-1)).id
+def upload(json):
+    sleep(0.1)
+    parent_id = request.form['folder_id']
+    ret = {}
+    for uploaded_file_name in request.files:
+        uploaded_file = request.files[uploaded_file_name]
+        file = File(parent_id=parent_id, name=uploaded_file.filename,
+                mime=uploaded_file.content_type)
+        uploaded = file.upload(content=uploaded_file.stream.read(-1))
+        ret[uploaded.id] = True
+    return ret
 
 
 # # # #

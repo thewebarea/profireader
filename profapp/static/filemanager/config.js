@@ -7,7 +7,7 @@
             defaultLang: "en",
 
             listUrl: "/filemanager/list/",
-            uploadUrl: "bridges/php/handler.php",
+            uploadUrl: "/filemanager/upload/",
             renameUrl: "bridges/php/handler.php",
             copyUrl: "bridges/php/handler.php",
             removeUrl: "bridges/php/handler.php",
