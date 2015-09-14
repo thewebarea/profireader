@@ -316,7 +316,7 @@ def change_email_request():
     return render_template("auth/change_email.html", form=form)
 
 
-@auth_bp.route('/change-email/<token>')
+@auth_bp.route('/change-email/<tokren>')
 @login_required
 def change_email(token):
     if current_user.change_email(token):
