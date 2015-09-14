@@ -7,8 +7,8 @@ from profapp.models.files import File, FileContent
 # from db_init import db_session
 from io import BytesIO
 from time import gmtime, strftime
-from .views_filemanager import file_query
 import sys
+from ..models.files import File
 
 @image_editor_bp.route('/<string:img_id>', methods=['GET', 'POST'])
 def image_editor(img_id):
@@ -67,11 +67,11 @@ def image_editor(img_id):
     return render_template('image_editor.html',
                            ratio=ratio,
                            img_id=img_id,
-                           image=url_for('filemanager.get', id=image_id)
+                           image=File.get(image_id).url()
                            )
 
 @image_editor_bp.route('/cropped/<string:id>')
 def cropped(id):
     return render_template('cropped_image.html',
-                           image=url_for('filemanager.get', id=id)
+                           image=File.get(id).url()
                            )

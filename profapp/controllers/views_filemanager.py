@@ -4,7 +4,6 @@ from flask.ext.login import current_user
 # from db_init import db_session
 from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp
-from io import BytesIO
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
@@ -65,6 +64,7 @@ def list(json):
 @ok
 def createdir(json, parent_id=None):
     return File.createdir(name=request.json['params']['name'],
+                          root_folder_id=request.json['params']['root_id'],
                           parent_id=request.json['params']['folder_id'])
 
 
@@ -73,10 +73,13 @@ def createdir(json, parent_id=None):
 def upload(json):
     sleep(0.1)
     parent_id = request.form['folder_id']
+    root_id = request.form['root_id']
     ret = {}
     for uploaded_file_name in request.files:
         uploaded_file = request.files[uploaded_file_name]
-        file = File(parent_id=parent_id, name=uploaded_file.filename,
+        file = File(parent_id=parent_id,
+                    root_folder_id=root_id,
+                    name=uploaded_file.filename,
                 mime=uploaded_file.content_type)
         uploaded = file.upload(content=uploaded_file.stream.read(-1))
         ret[uploaded.id] = True
@@ -123,19 +126,4 @@ def upload(json):
 #
 #     return result
 
-@filemanager_bp.route('/get/<string:file_id>/')
-def get(file_id):
-    image_query = file_query(file_id, File)
-    image_query_content = g.db.query(FileContent).filter_by(
-        id=file_id).first()
-    response = make_response()
-    response.headers['Content-Type'] = image_query.mime
-    response.headers['Content-Disposition'] = 'filename=%s' % \
-                                              image_query.name
-    return send_file(BytesIO(image_query_content.content),
-                     mimetype=image_query.mime, as_attachment=False)
 
-
-def file_query(file_id, table):
-    query = g.db.query(table).filter_by(id=file_id).first()
-    return query

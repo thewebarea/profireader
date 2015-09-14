@@ -10,6 +10,7 @@ image_editor_bp = Blueprint('image_editor', __name__)
 company_bp = Blueprint('company', __name__)
 portal_bp = Blueprint('portal', __name__)
 front_bp = Blueprint('front', __name__)
+file_bp = Blueprint('file', __name__)
 exception_bp = Blueprint('exception', __name__)
 
 
@@ -47,6 +48,10 @@ def register(app):
 def register_front(app):
     from . import views_front
     app.register_blueprint(front_bp, url_prefix='/')
+
+def register_file(app):
+    from . import views_file
+    app.register_blueprint(file_bp, url_prefix='/')
 
 
 
