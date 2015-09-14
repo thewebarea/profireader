@@ -1,28 +1,29 @@
 (function(window, angular, $) {
     "use strict";
     angular.module('FileManagerApp').controller('FileManagerCtrl', [
-    '$scope', '$translate', '$cookies', 'fileManagerConfig', 'item', 'fileNavigator', 'fileUploader',
-    function($scope, $translate, $cookies, fileManagerConfig, Item, FileNavigator, FileUploader) {
+    '$scope', '$translate', '$cookies', 'fileManagerConfig', 'item', 'fileNavigator', 'Upload','$modal',
+    function($scope, $translate, $cookies, fileManagerConfig, Item, FileNavigator, Upload, $modal) {
 
         $scope.config = fileManagerConfig;
         $scope.appName = fileManagerConfig.appName;
         $scope.orderProp = ['model.type', 'model.name'];
         $scope.query = '';
         $scope.temp = new Item();
-        $scope.fileNavigator = new FileNavigator();
-        $scope.fileUploader = FileUploader;
+        $scope.fileNavigator = new FileNavigator(_.keys(library)[0]);
+        $scope.fileUploader = Upload;
         $scope.uploadFileList = [];
         $scope.viewTemplate = $cookies.viewTemplate || 'main-table.html';
+        $scope.rootdirs = library;
+        $scope.root_id = '';
+        $scope.root_name = '';
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
         };
 
-        $scope.changeLanguage = function (locale) {
-            if (locale) {
-                return $translate.use($cookies.language = locale);
-            }
-            $translate.use($cookies.language || fileManagerConfig.defaultLang);
+        $scope.changeRoot = function (root_id, root_name) {
+            $scope.fileNavigator.setRoot(root_id);
+            $scope.root_name = root_name;
         };
 
         $scope.touch = function(item) {
@@ -32,6 +33,7 @@
         };
 
         $scope.smartClick = function(item) {
+            console.log(item);
             if (item.isFolder()) {
                 return $scope.fileNavigator.folderClick(item);
             }
@@ -116,6 +118,9 @@
             var name = item.tempModel.name && item.tempModel.name.trim();
             item.tempModel.type = 'dir';
             item.tempModel.path = $scope.fileNavigator.currentPath;
+            item.tempModel.root_id = $scope.fileNavigator.root_id;
+            item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
+
             if (name && !$scope.fileNavigator.fileNameExists(name)) {
                 item.createFolder(function() {
                     $scope.fileNavigator.refresh();
@@ -128,13 +133,14 @@
         };
 
         $scope.uploadFiles = function() {
-            $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath).success(function() {
-                $scope.fileNavigator.refresh();
-                $('#uploadfile').modal('hide');
-            }).error(function(data) {
-                var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
-                $scope.temp.error = errorMsg;
-            });
+            alert(1);
+            //$scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath).success(function() {
+            //    $scope.fileNavigator.refresh();
+            //    $('#uploadfile').modal('hide');
+            //}).error(function(data) {
+            //    var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
+            //    $scope.temp.error = errorMsg;
+            //});
         };
 
         $scope.getQueryParam = function(param) {
@@ -148,7 +154,7 @@
             return found;
         };
 
-        $scope.changeLanguage($scope.getQueryParam('lang'));
+        $scope.changeRoot(_.keys($scope.rootdirs)[0], _.values($scope.rootdirs)[0]['name']);
         $scope.isWindows = $scope.getQueryParam('server') === 'Windows';
         $scope.fileNavigator.refresh();
 

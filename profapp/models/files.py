@@ -68,6 +68,16 @@ class File(Base):
         return re.match('^image/.*', file.mime)
 
     @staticmethod
+    def ancestors(folder_id=None):
+        ret = []
+        nextf = g.db.query(File).get(folder_id)
+        while nextf and len(ret) < 50:
+            ret.append(nextf.id)
+            nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
+        return ret[::-1]
+
+
+    @staticmethod
     def list(parent_id=None):
         return list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'cropable': True if File.is_cropable(file) else False,

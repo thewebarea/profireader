@@ -1,42 +1,64 @@
 (function(angular) {
     "use strict";
+
     angular.module('FileManagerApp').service('fileNavigator', [
         '$http', 'fileManagerConfig', 'item', function ($http, fileManagerConfig, Item) {
 
         $http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-        var FileNavigator = function() {
+        var FileNavigator = function(root_id) {
             this.requesting = false;
             this.fileList = [];
             this.currentPath = [];
+            self.root_id = root_id;
+            self.ancestors = [root_id];
             this.history = [];
             this.error = '';
         };
 
-        FileNavigator.prototype.refresh = function(success, error) {
+            FileNavigator.prototype.getCurrentFolder = function() {
+                var self = this;
+                return self.ancestors[self.ancestors.length - 1];
+            };
+
+        FileNavigator.prototype.setRoot = function(root_id) {
+            var self = this;
+            self.root_id = root_id;
+            self.ancestors = [root_id];
+            self.history = [];
+            this.fileList = [];
+            this.currentPath = [];
+            self.goTo(-1);
+        };
+
+
+        FileNavigator.prototype.refresh = function(folder_id, success, error) {
             var self = this;
             var path = self.currentPath.join('/');
             var data = {params: {
                 mode: "list",
                 onlyFolders: false,
-                path: '/' + path
+                path: '/' + path,
+                root_id: self.root_id,
+                folder_id: folder_id ? folder_id : self.ancestors[self.ancestors.length - 1]
             }};
 
             self.requesting = true;
             self.fileList = [];
             self.error = '';
-            $http.post(fileManagerConfig.listUrl, data).success(function(data) {
+            $http.post(fileManagerConfig.listUrl, data).success(function(resp) {
                 self.fileList = [];
-                angular.forEach(data.result, function(file) {
+                self.ancestors = resp.data.ancestors;
+                angular.forEach(resp.data.list, function(file) {
                     self.fileList.push(new Item(file, self.currentPath));
                 });
                 self.requesting = false;
                 self.buildTree(path);
-                if (data.error) {
-                    self.error = data.error;
-                    return typeof error === 'function' && error(data);
+                if (resp.error) {
+                    self.error = resp.error;
+                    return typeof error === 'function' && error(resp);
                 }
-                typeof success === 'function' && success(data);
+                typeof success === 'function' && success(resp);
             }).error(function(data) {
                 self.requesting = false;
                 typeof error === 'function' && error(data);
@@ -81,13 +103,15 @@
                 self.currentPath = item.model.fullPath().split('/').splice(1);
                 //self.currentPath.push(item.model.name);
             }
-            self.refresh();
+            self.refresh(item.model.id, function () {
+            });
         };
 
         FileNavigator.prototype.upDir = function() {
             var self = this;
             if (self.currentPath[0]) {
                 self.currentPath = self.currentPath.slice(0, -1);
+                self.ancestors = self.ancestors.slice(0, -1);
                 self.refresh();
             }
         };
@@ -95,6 +119,7 @@
         FileNavigator.prototype.goTo = function(index) {
             var self = this;
             self.currentPath = self.currentPath.slice(0, index + 1);
+            self.ancestors = self.ancestors.slice(0, index + 2);
             self.refresh();
         };
 
