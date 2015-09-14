@@ -15,13 +15,15 @@
         $scope.viewTemplate = $cookies.viewTemplate || 'main-table.html';
         $scope.rootdirs = library;
         $scope.root_id = '';
+        $scope.root_name = '';
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
         };
 
-        $scope.changeRoot = function (root_id) {
+        $scope.changeRoot = function (root_id, root_name) {
             $scope.fileNavigator.setRoot(root_id);
+            $scope.root_name = root_name;
         };
 
         $scope.touch = function(item) {
@@ -152,7 +154,7 @@
             return found;
         };
 
-        $scope.changeRoot(_.keys($scope.rootdirs)[0]);
+        $scope.changeRoot(_.keys($scope.rootdirs)[0], _.values($scope.rootdirs)[0]['name']);
         $scope.isWindows = $scope.getQueryParam('server') === 'Windows';
         $scope.fileNavigator.refresh();
 

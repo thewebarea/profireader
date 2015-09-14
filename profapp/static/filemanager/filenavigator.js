@@ -25,6 +25,10 @@
             var self = this;
             self.root_id = root_id;
             self.ancestors = [root_id];
+            self.history = [];
+            this.fileList = [];
+            this.currentPath = [];
+            self.goTo(-1);
         };
 
 
@@ -95,11 +99,11 @@
         FileNavigator.prototype.folderClick = function(item) {
             var self = this;
             self.currentPath = [];
+            if (item && item.isFolder()) {
+                self.currentPath = item.model.fullPath().split('/').splice(1);
+                //self.currentPath.push(item.model.name);
+            }
             self.refresh(item.model.id, function () {
-                if (item && item.isFolder()) {
-                    self.currentPath = item.model.fullPath().split('/').splice(1);
-                    //self.currentPath.push(item.model.name);
-                }
             });
         };
 
@@ -115,7 +119,7 @@
         FileNavigator.prototype.goTo = function(index) {
             var self = this;
             self.currentPath = self.currentPath.slice(0, index + 1);
-            self.ancestors = self.ancestors.slice(0, index + 1);
+            self.ancestors = self.ancestors.slice(0, index + 2);
             self.refresh();
         };
 
