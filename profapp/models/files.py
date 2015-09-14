@@ -11,6 +11,7 @@ class File(Base):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     parent_id = Column(String(36), ForeignKey('file.id'))
+    root_folder_id = Column(String(36), ForeignKey('file.id'))
     name = Column(TABLE_TYPES['name'], default='', nullable=False)
     mime = Column(String(30), default='text/plain', nullable=False)
     description = Column(TABLE_TYPES['text'], default='', nullable=False)
@@ -38,6 +39,7 @@ class File(Base):
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
+                 root_folder_id=None,
                  company_id=None, author_user_id=None):
 
         self.parent_id = parent_id
@@ -47,6 +49,7 @@ class File(Base):
         self.user_id = user_id
         self.cr_tm = cr_tm
         self.md_tm = md_tm
+        self.root_folder_id = root_folder_id
         self.ac_tm = ac_tm
         self.author_user_id = author_user_id
         self.company_id = company_id
@@ -96,7 +99,7 @@ class File(Base):
         ret = list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0],
-                    'url': url_for('filemanager.get', file_id = file.id),
+                    'url': file.url(),
                     'actions': {action:actions[action](file) for action in actions}
                     }
                                         for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
@@ -105,8 +108,10 @@ class File(Base):
 
     @staticmethod
     def createdir(parent_id=None, name=None, author_user_id=None,
+                  root_folder_id = None,
                   company_id=None, copyright='', author=''):
         f = File(parent_id=parent_id, author_user_id=author_user_id,
+                 root_folder_id = root_folder_id,
                  name=name, size=0, company_id=company_id, mime='directory')
         # f = File(parent_id=parent_id, author_user_id=author_user_id, 
         #          name=name, size=0, company_id=company_id, copyright=copyright, mime='directory')
@@ -130,8 +135,9 @@ class File(Base):
         g.db.commit()
         return self
 
-    def get_url(self):
-        return url_for('filemanager.get', file_id=self.id)
+    def url(self):
+        server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
+        return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
 
 
 class FileContent(Base):

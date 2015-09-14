@@ -3,6 +3,7 @@ from authomatic.providers import oauth2
 from authomatic import Authomatic
 from profapp.controllers.blueprints import register as register_blueprints
 from profapp.controllers.blueprints import register_front as register_blueprints_front
+from profapp.controllers.blueprints import register_file as register_blueprints_file
 
 from flask import url_for
 from profapp.controllers.errors import csrf
@@ -184,7 +185,7 @@ login_manager.anonymous_user = AnonymousUser
 
 
 def create_app(config='config.ProductionDevelopmentConfig',
-               front=False,
+               front='n',
                host='localhost'):
     app = Flask(__name__)
 
@@ -200,13 +201,15 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.before_request(setup_authomatic(app))
 
 
-    if front:
+    if front == 'y':
         register_blueprints_front(app)
         my_loader = jinja2.ChoiceLoader([
             app.jinja_loader,
             jinja2.FileSystemLoader('templates_front'),
             ])
         app.jinja_loader = my_loader
+    if front == 'f':
+        register_blueprints_file(app)
     else:
         register_blueprints(app)
 
