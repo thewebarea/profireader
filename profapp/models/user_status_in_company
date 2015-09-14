@@ -8,56 +8,49 @@ from sqlalchemy import Enum
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from .pr_base import PRBase, Base
 from ..constants.STATUS import STATUS_NAME
+from .rights import get_my_attributes
 
 
-class UserStatusInCompanyRights(Base, UserMixin, PRBase):
-    __tablename__ = 'user_status_in_company_rights'
+class UserStatusInCompanyRights:
+    _status_name = None
+    _rights = (0, 0)
 
-    name = Column(Enum(*list(STATUS_NAME.keys()), name='status_name_type'), primary_key=True)
-    rights_defined = Column(TABLE_TYPES['bigint'],
-                            CheckConstraint('rights_defined >= 0',
-                                            name='unsigned_rights_def'))
-    rights_undefined = Column(TABLE_TYPES['bigint'],
-                              CheckConstraint('rights_undefined >= 0',
-                                              name='unsigned_rights_undef'))
-    # Some explanation is needed.
-    # if rights_defined is 1 on some bit then this right (permission) is available.
-    # if 0 then we should check the value of rights_undefined column
-    # if it is really 0 then right (permission) is not available.
-    # if it is 1 then this right (permission) should be taken from user_company table.
-    # such construction of rights defines the CheckConstraint presented below.
-    CheckConstraint('rights_defined & rights_undefined = 0', name='right_dependency')
+    def __init__(self, status, rights_defined=[], rights_undefined=[]):
+        self.status_name = STATUS_NAME[status]
+        self.rights = (rights_defined, rights_undefined)
+
+    @property
+    def status_name(self):
+        return self._status_name
+
+    @status_name.setter
+    def status_name(self, stat_name):
+        self._status_name = stat_name
+
+    @property
+    def rights(self):
+        return self._rights
+
+    @rights.setter
+    def rights(self, rights_def_undef=([], [])):
+        # Some explanation is needed.
+        # if rights_defined is 1 on some bit then this right (permission) is available.
+        # if 0 then we should check the value of rights_undefined column
+        # if it is really 0 then right (permission) is not available.
+        # if it is 1 then this right (permission) should be taken from user_company table.
+        # such construction of rights defines the CheckConstraint presented below.
+        rights_defined = rights_def_undef[0]
+        rights_undefined = rights_def_undef[1]
+        if set(rights_defined) & set(rights_undefined):
+            raise Exception
+        rights_defined_int = Right.transform_rights_into_integer(rights_defined)
+        rights_undefined_int = Right.transform_rights_into_integer(rights_undefined)
+        self._rights = (rights_defined_int, rights_undefined_int)
 
 
 status_rights = dict()
 
-
-def check(rts_def, rts_undef):
-    rez = True
-    if not (set(rts_def) & set(rts_undef)):
-        raise Exception
-    return rez
-
-# Right['edit']
-# Right['publish']
-# Right['unpublish']
-# Right['upload_files']
-# Right['delete_files']
-# Right['add_employee']
-# Right['suspend_employee']
-# Right['send_publications']
-# Right['manage_access_company']
-# Right['manage_access_portal']
-# Right['article_priority']
-# Right['manage_readers']
-# Right['manage_companies_partners']
-# Right['manage_comments']
-# Right['subscribe_to_portals']
-
 status = 'active'
-status_name = STATUS_NAME[status]
-stat_r = UserStatusInCompanyRights()
-stat_r.name = status_name
 rights_defined = [Right['upload_files'], Right['send_publications']]
 rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['delete_files'],
                     Right['add_employee'], Right['suspend_employee'],
@@ -65,87 +58,31 @@ rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['
                     Right['article_priority'], Right['manage_readers'],
                     Right['manage_companies_partners'], Right['manage_comments'],
                     Right['subscribe_to_portals']]
-check(rights_defined, rights_undefined)
-stat_r.rights_defined = \
-    Right.transform_rights_into_integer(rights_defined)
-stat_r.rights_undefined = \
-    Right.transform_rights_into_integer(rights_undefined)
-status_rights[status_name] = stat_r
+stat_r = UserStatusInCompanyRights(status,
+                                   rights_defined=rights_defined,
+                                   rights_undefined=rights_undefined)
+status_rights[stat_r.name] = stat_r
 
 status = 'nonactive'
-status_name = STATUS_NAME[status]
-stat_r = UserStatusInCompanyRights()
-stat_r.name = status_name
-rights_defined = ['']
-rights_undefined = ['']
-check(rights_defined, rights_undefined)
-stat_r.rights_defined = \
-    Right.transform_rights_into_integer(rights_defined)
-stat_r.rights_undefined = \
-    Right.transform_rights_into_integer(rights_undefined)
-status_rights[status_name] = stat_r
+stat_r = UserStatusInCompanyRights(status)
+status_rights[stat_r.name] = stat_r
 
 status = 'blocked'
-status_name = STATUS_NAME[status]
-stat_r = UserStatusInCompanyRights()
-stat_r.name = status_name
-rights_defined = ['']
-rights_undefined = ['']
-check(rights_defined, rights_undefined)
-stat_r.rights_defined = \
-    Right.transform_rights_into_integer(rights_defined)
-stat_r.rights_undefined = \
-    Right.transform_rights_into_integer(rights_undefined)
-status_rights[status_name] = stat_r
+stat_r = UserStatusInCompanyRights(status)
+status_rights[stat_r.name] = stat_r
 
 status = 'deleted'
-status_name = STATUS_NAME[status]
-stat_r = UserStatusInCompanyRights()
-stat_r.name = status_name
-rights_defined = ['']
-rights_undefined = ['']
-check(rights_defined, rights_undefined)
-stat_r.rights_defined = \
-    Right.transform_rights_into_integer(rights_defined)
-stat_r.rights_undefined = \
-    Right.transform_rights_into_integer(rights_undefined)
-status_rights[status_name] = stat_r
+stat_r = UserStatusInCompanyRights(status)
+status_rights[stat_r.name] = stat_r
 
 status = 'banned'
-status_name = STATUS_NAME[status]
-stat_r = UserStatusInCompanyRights()
-stat_r.name = status_name
-rights_defined = ['']
-rights_undefined = ['']
-check(rights_defined, rights_undefined)
-stat_r.rights_defined = \
-    Right.transform_rights_into_integer(rights_defined)
-stat_r.rights_undefined = \
-    Right.transform_rights_into_integer(rights_undefined)
-status_rights[status_name] = stat_r
+stat_r = UserStatusInCompanyRights(status)
+status_rights[stat_r.name] = stat_r
 
 status = 'rejected'
-status_name = STATUS_NAME[status]
-stat_r = UserStatusInCompanyRights()
-stat_r.name = status_name
-rights_defined = ['']
-rights_undefined = ['']
-check(rights_defined, rights_undefined)
-stat_r.rights_defined = \
-    Right.transform_rights_into_integer(rights_defined)
-stat_r.rights_undefined = \
-    Right.transform_rights_into_integer(rights_undefined)
-status_rights[status_name] = stat_r
+stat_r = UserStatusInCompanyRights(status)
+status_rights[stat_r.name] = stat_r
 
 status = 'suspended'
-status_name = STATUS_NAME[status]
-stat_r = UserStatusInCompanyRights()
-stat_r.name = status_name
-rights_defined = ['']
-rights_undefined = ['']
-check(rights_defined, rights_undefined)
-stat_r.rights_defined = \
-    Right.transform_rights_into_integer(rights_defined)
-stat_r.rights_undefined = \
-    Right.transform_rights_into_integer(rights_undefined)
-status_rights[status_name] = stat_r
+stat_r = UserStatusInCompanyRights(status)
+status_rights[stat_r.name] = stat_r
