@@ -38,6 +38,7 @@ def show():
 @check_rights(simple_permissions([]))
 @ok
 def load_companies(json):
+
     return {'companies': [employer.get_client_side_dict()
                           for employer in current_user.employers]}
 
@@ -69,12 +70,11 @@ def material_details(company_id, article_id):
 @ok
 def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
-    portals = {port.id: port.portal.to_dict('id, name, divisions.name, divisions.id')
+    portals = {port.portal_id: port.portal.to_dict('id, name, divisions.name, divisions.id')
                for port in CompanyPortal.get_portals(company_id)}
     if article.portal_article:
-        portals = [port for port, articles in zip(
-            portals, article.portal_article)
-            if portals[port]['id'] != articles.division.portal.id]
+        [portals.pop(articles.division.portal.id) for articles in article.portal_article
+         if articles.division.portal.id in portals]
     article = article.to_dict('id, title,short, cr_tm, md_tm, '
                               'company_id, status, long,'
                               'editor_user_id, company.name|id,'
@@ -143,7 +143,6 @@ def profile(company_id):
                            image=image,
                            company_id=company_id
                            )
-
 
 @company_bp.route('/employees/<string:company_id>/')
 @login_required
