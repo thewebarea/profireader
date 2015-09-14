@@ -49,22 +49,23 @@ def filemanager():
 @filemanager_bp.route('/list/', methods=['POST'])
 @ok
 # @parent_folder
-def list(json, parent_id=None):
-    return File.list(parent_id)
+def list(json):
+    list = File.list(json['params']['folder_id'])
+    ancestors = File.ancestors(json['params']['folder_id'])
+    return {'list': list, 'ancestors': ancestors}
 
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @ok
-# @parent_folder
 def createdir(json, parent_id=None):
     return File.createdir(name=request.json['params']['name'],
-                          parent_id=request.json['params']['parent_id'])
+                          parent_id=request.json['params']['folder_id'])
 
 
 @filemanager_bp.route('/upload/<string:rootdir_id>/', methods=['POST'])
 @ok
 def upload(json, rootdir_id):
-    sleep(1.5)
+    sleep(0.5)
     parent_id = None if (request.form['parent_id'] == '') \
         else (request.form['parent_id'])
     got_file = request.files['file-0']
