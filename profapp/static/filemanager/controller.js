@@ -1,19 +1,21 @@
 (function(window, angular, $) {
     "use strict";
     angular.module('FileManagerApp').controller('FileManagerCtrl', [
-    '$scope', '$translate', '$cookies', 'fileManagerConfig', 'item', 'fileNavigator', 'Upload','$modal',
-    function($scope, $translate, $cookies, fileManagerConfig, Item, FileNavigator, Upload, $modal) {
+    '$scope', '$translate', '$cookies', 'fileManagerConfig', 'item', 'fileNavigator', 'fileUploader',
+    function($scope, $translate, $cookies, fileManagerConfig, Item, FileNavigator, fileUploader) {
 
         $scope.config = fileManagerConfig;
         $scope.appName = fileManagerConfig.appName;
         $scope.orderProp = ['model.type', 'model.name'];
         $scope.query = '';
         $scope.temp = new Item();
-        $scope.fileNavigator = new FileNavigator(_.keys(library)[0]);
-        $scope.fileUploader = Upload;
+        $scope.fileNavigator = new FileNavigator(_.keys(library)[0], file_manager_called_for);
+        $scope.fileUploader = fileUploader;
         $scope.uploadFileList = [];
         $scope.viewTemplate = $cookies.viewTemplate || 'main-table.html';
         $scope.rootdirs = library;
+        $scope.file_manager_called_for = file_manager_called_for;
+        $scope.file_manager_on_action = file_manager_on_action;
         $scope.root_id = '';
         $scope.root_name = '';
 
@@ -33,7 +35,6 @@
         };
 
         $scope.smartClick = function(item) {
-            console.log(item);
             if (item.isFolder()) {
                 return $scope.fileNavigator.folderClick(item);
             }
@@ -132,16 +133,28 @@
             }
         };
 
+        $scope.take_action = function(item, action) {
+            if ($scope.file_manager_on_action[action]) {
+                try {
+                    eval($scope.file_manager_on_action[action] + '(item);');
+                }
+                catch(e) {
+
+                }
+            }
+        }
+
         $scope.uploadFiles = function() {
-            alert(1);
-            //$scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath).success(function() {
-            //    $scope.fileNavigator.refresh();
-            //    $('#uploadfile').modal('hide');
-            //}).error(function(data) {
-            //    var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
-            //    $scope.temp.error = errorMsg;
-            //});
+            $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath,
+                $scope.fileNavigator.root_id, $scope.fileNavigator.getCurrentFolder()).success(function() {
+                $scope.fileNavigator.refresh();
+                $('#uploadfile').modal('hide');
+            }).error(function(data) {
+                var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
+                $scope.temp.error = errorMsg;
+            });
         };
+
 
         $scope.getQueryParam = function(param) {
             var found;

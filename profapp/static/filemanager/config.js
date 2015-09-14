@@ -7,7 +7,7 @@
             defaultLang: "en",
 
             listUrl: "/filemanager/list/",
-            uploadUrl: "bridges/php/handler.php",
+            uploadUrl: "/filemanager/upload/",
             renameUrl: "bridges/php/handler.php",
             copyUrl: "bridges/php/handler.php",
             removeUrl: "bridges/php/handler.php",
@@ -22,16 +22,17 @@
             sidebar: true,
             breadcrumb: true,
             allowedActions: {
-                rename: true,
-                copy: true,
-                edit: true,
-                changePermissions: true,
-                compress: true,
-                compressChooseName: true,
-                extract: true,
+                rename: !true,
+                copy: !true,
+                edit: !true,
+                changePermissions: !true,
+                compress: !true,
+                compressChooseName: !true,
+                extract: !true,
                 download: true,
-                preview: true,
-                remove: true
+                preview: !true,
+                choose: true,
+                remove: !true
             },
 
             enablePermissionsRecursive: true,

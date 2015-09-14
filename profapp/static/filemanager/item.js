@@ -11,9 +11,11 @@
                 date: convertDate(model && model.date),
                 perms: new Chmod(model && model.rights),
                 content: model && model.content || '',
+                actions: model && model.actions || {},
                 id: model && model.id || '',
                 parent_id: model && model.parent_id || '',
                 recursive: false,
+                url: model && model.url || '',
                 sizeKb: function() {
                     return Math.round(this.size / 1024, 1);
                 },
@@ -191,6 +193,10 @@
             }
         };
 
+        Item.prototype.choose = function() {
+            return true;
+        };
+
         Item.prototype.preview = function() {
             var self = this;
             return self.download(true);
@@ -292,6 +298,10 @@
 
         Item.prototype.isImage = function() {
             return fileManagerConfig.isImageFilePattern.test(this.model.name);
+        };
+
+        Item.prototype.actionAllowed = function(action) {
+            return true;
         };
 
         Item.prototype.isCompressible = function() {

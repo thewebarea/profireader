@@ -78,13 +78,30 @@ class File(Base):
 
 
     @staticmethod
-    def list(parent_id=None):
-        return list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
-                                'cropable': True if File.is_cropable(file) else False,
+    def list(parent_id=None, file_manager_called_for = ''):
+
+        default_actions = {}
+        # default_actions['choose'] = lambda file: None
+        default_actions['download'] = lambda file: None if ((file.mime == 'directory') or (file.mime == 'root')) else True
+
+        actions = {act: default_actions[act] for act in default_actions}
+
+        show = lambda file: True
+
+        if file_manager_called_for == 'file_browse_image':
+            actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
+
+
+            # 'cropable': True if File.is_cropable(file) else False,
+        ret = list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
-                                'date': str(file.md_tm).split('.')[0]}
-                                        #for file in db(File))
-                                        for file in db(File, parent_id = parent_id))# we need all records from the table "file"
+                                'date': str(file.md_tm).split('.')[0],
+                    'url': url_for('filemanager.get', file_id = file.id),
+                    'actions': {action:actions[action](file) for action in actions}
+                    }
+                                        for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
+
+        return ret
 
     @staticmethod
     def createdir(parent_id=None, name=None, author_user_id=None,
@@ -114,7 +131,7 @@ class File(Base):
         return self
 
     def get_url(self):
-        return url_for('filemanager.get', id=self.id)
+        return url_for('filemanager.get', file_id=self.id)
 
 
 class FileContent(Base):

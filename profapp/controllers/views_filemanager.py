@@ -8,6 +8,7 @@ from io import BytesIO
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
+import json as jsonmodule
 
 
 def parent_folder(func):
@@ -32,25 +33,30 @@ def filemanager():
         g.user.personal_folder_file_id: {
             'name': 'My personal files',
             'icon': current_user.profireader_small_avatar_url}}
-    for company in g.user.employers:
-        library[company.journalist_folder_file_id] = {'name': "%s materisals" % (company.name,), 'icon': ''}
-        library[company.corporate_folder_file_id] = {'name': "%s corporate files" % (company.name,), 'icon': ''}
+    for user_company in g.user.employer_assoc:
 
-    options = {'mime_allow': '.*', 'mime_deny': '^directory$', 'max_choose': 0, 'on_choose': ''}
-    if 'calledby' in request.args:
-        if request.args['calledby'] == 'tinymce_file_browse_image':
-            options['mime_allow'] = '^image/.*'
-            options['max_choose'] = 1
-            options['on_choose'] = 'parent.TinyMCE_fileSelected'
+# TODO VK by OZ: we need function that get all emploees with specific right
+# Company.get_emploees('can_read', status = 'active')
+# Company.get_emploees(['can_read', 'can_write'], status = ['active','banned'])
+# similar function User.get_emploers ...
 
-    return render_template('filemanager.html', library=library, **options)
+        if user_company.status == 'active' and 'upload_files' in g.user.user_rights_in_company(user_company.company_id):
+            library[user_company.employer.journalist_folder_file_id] = {'name': "%s materisals" % (user_company.employer.name,), 'icon': ''}
+            library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
+
+    file_manager_called_for = request.args['file_manager_called_for'] if 'file_manager_called_for' in request.args else ''
+    file_manager_on_action = jsonmodule.loads(request.args['file_manager_on_action']) if 'file_manager_on_action' in request.args else {}
+
+    return render_template('filemanager.html', library=library,
+                           file_manager_called_for=file_manager_called_for,
+                           file_manager_on_action = file_manager_on_action)
 
 
 @filemanager_bp.route('/list/', methods=['POST'])
 @ok
 # @parent_folder
 def list(json):
-    list = File.list(json['params']['folder_id'])
+    list = File.list(json['params']['folder_id'], json['params']['file_manager_called_for'])
     ancestors = File.ancestors(json['params']['folder_id'])
     return {'list': list, 'ancestors': ancestors}
 
@@ -62,17 +68,19 @@ def createdir(json, parent_id=None):
                           parent_id=request.json['params']['folder_id'])
 
 
-@filemanager_bp.route('/upload/<string:rootdir_id>/', methods=['POST'])
+@filemanager_bp.route('/upload/', methods=['POST'])
 @ok
-def upload(json, rootdir_id):
-    sleep(0.5)
-    parent_id = None if (request.form['parent_id'] == '') \
-        else (request.form['parent_id'])
-    got_file = request.files['file-0']
-
-    file = File(parent_id=parent_id, name=got_file.filename,
-                mime=got_file.content_type)
-    return file.upload(content=got_file.stream.read(-1)).id
+def upload(json):
+    sleep(0.1)
+    parent_id = request.form['folder_id']
+    ret = {}
+    for uploaded_file_name in request.files:
+        uploaded_file = request.files[uploaded_file_name]
+        file = File(parent_id=parent_id, name=uploaded_file.filename,
+                mime=uploaded_file.content_type)
+        uploaded = file.upload(content=uploaded_file.stream.read(-1))
+        ret[uploaded.id] = True
+    return ret
 
 
 # # # #
@@ -115,7 +123,7 @@ def upload(json, rootdir_id):
 #
 #     return result
 
-@filemanager_bp.route('/get/<string:file_id>')
+@filemanager_bp.route('/get/<string:file_id>/')
 def get(file_id):
     image_query = file_query(file_id, File)
     image_query_content = g.db.query(FileContent).filter_by(

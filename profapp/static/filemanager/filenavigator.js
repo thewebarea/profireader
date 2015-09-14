@@ -6,7 +6,7 @@
 
         $http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-        var FileNavigator = function(root_id) {
+        var FileNavigator = function(root_id, file_manager_called_for) {
             this.requesting = false;
             this.fileList = [];
             this.currentPath = [];
@@ -14,6 +14,7 @@
             self.ancestors = [root_id];
             this.history = [];
             this.error = '';
+            this.file_manager_called_for = file_manager_called_for;
         };
 
             FileNavigator.prototype.getCurrentFolder = function() {
@@ -39,6 +40,7 @@
                 mode: "list",
                 onlyFolders: false,
                 path: '/' + path,
+                file_manager_called_for: self.file_manager_called_for,
                 root_id: self.root_id,
                 folder_id: folder_id ? folder_id : self.ancestors[self.ancestors.length - 1]
             }};
