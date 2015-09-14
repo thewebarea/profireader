@@ -14,21 +14,25 @@
 
     <script>
         module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
-
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
             $scope.url_search_for_portal = {{ raw_url_for('portal.search_for_portal_to_join')|safe }};
             $scope.url_join = {{ raw_url_for('portal.apply_company')|safe }};
             $scope.partners = {{ raw_url_for('portal.partners')|safe }};
-
             $scope.selectedPortal_name = '';
             $scope.selectedPortal = null;
             $scope.selectedPortal_sending = false;
-            $scope.companies_partners_text = ''
+            $scope.myRights = function(){
+                for (var i = 0; i < arguments.length; i++) {
+                     if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
+                         return false;
+                     }
+                }
+                return true;
+            };
+            $scope.companies_partners_text = '';
             $scope.companies_partner = function (a) {
             $scope.companies_partners_text = a
             };
-
-
             $scope.afterSave = function (resp) {
             window.location.href = $scope.partners({company_id: resp['company_id']})
             };
@@ -41,7 +45,6 @@
                     $scope.selectedPortal = $item;
                 }
             };
-
             $scope.searchForPortalToJoin = function (val) {
                 return $ok($scope.url_search_for_portal(), {
                     company_id: $scope.data.company_id,
@@ -50,7 +53,6 @@
                     return resp.length ? resp : [{id: false, name: 'No results'}];
                 });
             };
-
             $scope.joinToPortal = function () {
                 $ok($scope.url_join(), {company_id: $scope.data.company_id, portal_id: $scope.selectedPortal.id}, function (resp) {
                     $scope.selectedPortal = null;
@@ -84,6 +86,7 @@
     </style>
     <div ng-init="loadData()" ng-controller="portal_list">
 
+        <span ng-if="myRights('subscribe_to_portals')">
         <h3> {{ _('Join to portal') }} </h3>
         <input typeahead-on-select="onSelect($item, $model, $label)"
                                                typeahead-template-url="customTemplate.html"
@@ -96,6 +99,7 @@
                 ng-disabled="!selectedPortal || selectedPortal_sending">{{ _('join to this portal') }}
         </button>
         <i ng-show="loadingPortals" class="glyphicon glyphicon-refresh"></i>
+</span>
     <div ng-if="data.portal==''">
         <h3>This company does not have portal</h3>
     </div>

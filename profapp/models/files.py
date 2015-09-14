@@ -1,10 +1,8 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, Binary, \
-    Float, TIMESTAMP, UniqueConstraint
+from sqlalchemy import Column, Integer, ForeignKey, String, Binary, UniqueConstraint
 import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from utils.db_utils import db
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.orm import relationship
 from flask import url_for, g
 from .pr_base import PRBase, Base
 
