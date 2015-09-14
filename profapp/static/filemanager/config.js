@@ -3,17 +3,17 @@
     angular.module('FileManagerApp').provider("fileManagerConfig", function() {
 
         var values = {
-            appName: "https://github.com/joni2back/angular-filemanager",
+            appName: "Profireader",
             defaultLang: "en",
 
-            listUrl: "bridges/php/handler.php",
+            listUrl: "/filemanager/list/",
             uploadUrl: "bridges/php/handler.php",
             renameUrl: "bridges/php/handler.php",
             copyUrl: "bridges/php/handler.php",
             removeUrl: "bridges/php/handler.php",
             editUrl: "bridges/php/handler.php",
             getContentUrl: "bridges/php/handler.php",
-            createFolderUrl: "bridges/php/handler.php",
+            createFolderUrl: "/filemanager/createdir/",
             downloadFileUrl: "bridges/php/handler.php",
             compressUrl: "bridges/php/handler.php",
             extractUrl: "bridges/php/handler.php",

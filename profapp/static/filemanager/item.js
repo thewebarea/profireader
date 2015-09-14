@@ -11,6 +11,8 @@
                 date: convertDate(model && model.date),
                 perms: new Chmod(model && model.rights),
                 content: model && model.content || '',
+                id: model && model.id || '',
+                parent_id: model && model.parent_id || '',
                 recursive: false,
                 sizeKb: function() {
                     return Math.round(this.size / 1024, 1);
@@ -63,7 +65,9 @@
             var data = {params: {
                 mode: "addfolder",
                 path: self.tempModel.path.join('/'),
-                name: self.tempModel.name
+                name: self.tempModel.name,
+                root_id: self.tempModel.root_id,
+                folder_id: self.tempModel.folder_id
             }};
 
             if (self.tempModel.name.trim()) {
