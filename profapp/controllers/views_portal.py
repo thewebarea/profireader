@@ -52,8 +52,7 @@ def confirm_create(json, company_id):
 @check_rights(simple_permissions([Right[RIGHTS.MANAGE_COMPANIES_PARTNERS()]]))
 @ok
 def apply_company(json):
-    print(json['company_id'])
-    print(json['portal_id'])
+
     CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
                                           portal_id=json['portal_id'])
     return {'portals_partners': [portal.portal.to_dict(
