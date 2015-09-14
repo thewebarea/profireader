@@ -9,11 +9,13 @@
         $scope.orderProp = ['model.type', 'model.name'];
         $scope.query = '';
         $scope.temp = new Item();
-        $scope.fileNavigator = new FileNavigator(_.keys(library)[0]);
+        $scope.fileNavigator = new FileNavigator(_.keys(library)[0], file_manager_called_for);
         $scope.fileUploader = fileUploader;
         $scope.uploadFileList = [];
         $scope.viewTemplate = $cookies.viewTemplate || 'main-table.html';
         $scope.rootdirs = library;
+        $scope.file_manager_called_for = file_manager_called_for;
+        $scope.file_manager_on_action = file_manager_on_action;
         $scope.root_id = '';
         $scope.root_name = '';
 
@@ -131,6 +133,17 @@
             }
         };
 
+        $scope.take_action = function(item, action) {
+            if ($scope.file_manager_on_action[action]) {
+                try {
+                    eval($scope.file_manager_on_action[action] + '(item);');
+                }
+                catch(e) {
+
+                }
+            }
+        }
+
         $scope.uploadFiles = function() {
             $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath,
                 $scope.fileNavigator.root_id, $scope.fileNavigator.getCurrentFolder()).success(function() {
@@ -141,6 +154,7 @@
                 $scope.temp.error = errorMsg;
             });
         };
+
 
         $scope.getQueryParam = function(param) {
             var found;
