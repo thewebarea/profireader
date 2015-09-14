@@ -56,9 +56,8 @@ def apply_company(json):
     CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
                                           portal_id=json['portal_id'])
     return {'portals_partners': [portal.portal.to_dict(
-        'name, company_owner_id,id') for portal in CompanyPortal.
-                                     get_portals(json['company_id'])],
-            'company_id': json['company_id']}
+        'name, company_owner_id,id') for portal in CompanyPortal.get_portals(json['company_id'])],
+        'company_id': json['company_id']}
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
