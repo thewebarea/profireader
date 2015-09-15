@@ -120,7 +120,7 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
-def forbidden_for_current_user(**kwargs):
+def forbidden_for_current_user(rights, **kwargs):
     if 'user_id' in kwargs.keys():
         user_id = kwargs['user_id']
     elif 'user' in kwargs.keys():
@@ -128,18 +128,14 @@ def forbidden_for_current_user(**kwargs):
     else:
         user_id = None
 
-    def user_company_permissions_rule(rights):
-        def check_user(rights, user_id):
-            return current_user.id != user_id
-        return check_user(rights, user_id)
-
-    return user_company_permissions_rule
+    rez = current_user.id != user_id
+    return rez
 
 
 def simple_permissions(rights):
     set_of_rights = frozenset(rights)
 
-    def business_rule(**kwargs):
+    def business_rule(rights, **kwargs):
         if 'company_id' in kwargs.keys():
             company_object = kwargs['company_id']
         elif 'company' in kwargs.keys():
@@ -153,10 +149,7 @@ def simple_permissions(rights):
         else:
             user_object = None
 
-        def user_company_permissions_rule(rights):
-            return UserCompany.permissions(rights, user_object, company_object)
-
-        return user_company_permissions_rule
+        return UserCompany.permissions(rights, user_object, company_object)
 
     return {set_of_rights: business_rule}
 
