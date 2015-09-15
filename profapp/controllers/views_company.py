@@ -73,9 +73,12 @@ def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
     portals = {port.portal_id: port.portal.to_dict('id, name, divisions.name, divisions.id')
                for port in CompanyPortal.get_portals(company_id)}
+    joined_portals = {}
     if article.portal_article:
-        [portals.pop(articles.division.portal.id) for articles in article.portal_article
-         if articles.division.portal.id in portals]
+        joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
+                          for articles in article.portal_article
+                          if articles.division.portal.id in portals}
+
     article = article.to_dict('id, title,short, cr_tm, md_tm, '
                               'company_id, status, long,'
                               'editor_user_id, company.name|id,'
@@ -89,7 +92,8 @@ def load_material_details(json, company_id, article_id):
             portals, 'company': Company.get(company_id).
             to_dict('id, employees.id|profireader_name'),
             'selected_portal': {}, 'selected_division': {},
-            'user_rights': user_rights, 'send_to_user': {}}
+            'user_rights': user_rights, 'send_to_user': {},
+            'joined_portals': joined_portals}
 
 
 @company_bp.route('/update_article/', methods=['POST'])

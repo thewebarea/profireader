@@ -198,6 +198,13 @@
                             {{ division.name }}
                         </option>
                     </optgroup>
+                    <option disabled>---Below materials sent---</option>
+                    <optgroup ng-repeat="joined_portal in data.joined_portals"
+                              label="| {{ joined_portal.name }} |" disabled>
+                        <option disabled ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
+                            {{ division.name }}
+                        </option>
+                    </optgroup>
                 </select>
                 <span ng-if="data.selected_division[0]">
                 <input type="submit" value="Publish">
