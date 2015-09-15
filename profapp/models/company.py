@@ -171,7 +171,7 @@ class UserCompany(Base, PRBase):
                  rights=0):
         self.user_id = user_id
         self.company_id = company_id
-        self.status = status
+        self.status_name = status
         self.rights = rights
 
     @staticmethod
@@ -229,7 +229,7 @@ class UserCompany(Base, PRBase):
                               'user': user,
                               'rights': {},
                               'companies': [user.employers],
-                              'status': user_company.status,
+                              'status': user_company.status_name,
                               'date': user_company.md_tm}
 
             emplo[user.id]['rights'] = \

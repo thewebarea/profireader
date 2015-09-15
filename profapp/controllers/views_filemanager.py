@@ -39,7 +39,7 @@ def filemanager():
 # Company.get_emploees(['can_read', 'can_write'], status = ['active','banned'])
 # similar function User.get_emploers ...
 
-        if user_company.status == 'active' and 'upload_files' in g.user.user_rights_in_company(user_company.company_id):
+        if user_company.status_name == 'active' and 'upload_files' in g.user.user_rights_in_company(user_company.company_id):
             library[user_company.employer.journalist_folder_file_id] = {'name': "%s materisals" % (user_company.employer.name,), 'icon': ''}
             library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
 
