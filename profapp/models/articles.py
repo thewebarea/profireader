@@ -99,6 +99,8 @@ class ArticleCompany(Base, PRBase):
     status = Column(TABLE_TYPES['status'], nullable=False)
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
+    image_file_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('file.id'), nullable=False)
     company = relationship(Company)
     editor = relationship(User)
     portal_article = relationship('ArticlePortal',
@@ -109,7 +111,7 @@ class ArticleCompany(Base, PRBase):
 
     def get_client_side_dict(self, fields='id|title|short|'
                                           'long|cr_tm|md_tm|company_id|'
-                                          'article_id|'
+                                          'article_id|image_file_id|'
                                           'status, company.name'):
         return self.to_dict(fields)
     
