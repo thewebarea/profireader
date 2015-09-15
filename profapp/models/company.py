@@ -1,6 +1,7 @@
-from sqlalchemy import UniqueConstraint, update
-from sqlalchemy.orm import backref
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, UniqueConstraint, Enum  # , update
+from sqlalchemy.orm import relationship, backref
+# from db_init import Base, db_session
+from sqlalchemy import Column, String, ForeignKey, update
 from sqlalchemy.orm import relationship
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from flask import g
@@ -16,6 +17,8 @@ from ..controllers.request_wrapers import check_rights
 from .files import File
 from .pr_base import PRBase, Base
 from ..controllers import errors
+from ..constants.STATUS import STATUS_NAME
+from ..models.rights import get_my_attributes
 
 
 class Company(Base, PRBase):
@@ -47,6 +50,7 @@ class Company(Base, PRBase):
     user_owner = relationship('User', backref='companies')
     # employees = relationship('User', secondary='user_company',
     #                          lazy='dynamic')
+    # todo: add company time creation
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
@@ -68,7 +72,7 @@ class Company(Base, PRBase):
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc
-                               if x.status == STATUS.SUSPEND()]
+                               if x.status == STATUS.SUSPENDED()]
         return suspended_employees
 
     @staticmethod
@@ -104,6 +108,7 @@ class Company(Base, PRBase):
                 {'logo_file': file.upload(
                     content=passed_file.stream.read(-1)).id}
             )
+        # db_session.flush()
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
@@ -147,25 +152,20 @@ class UserCompany(Base, PRBase):
     __tablename__ = 'user_company'
 
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    user_id = Column(TABLE_TYPES['id_profireader'],
-                     ForeignKey('user.id'),
-                     nullable=False)
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'),
-                        nullable=False)
-    status = Column(TABLE_TYPES['id_profireader'])
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
+    status = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
+                                get_my_attributes(STATUS_NAME))),
+                         name='status_name_type'), nullable=False)
+
     md_tm = Column(TABLE_TYPES['timestamp'])
-    rights = Column(TABLE_TYPES['bigint'],
-                    CheckConstraint('rights >= 0',
-                                    name='unsigned_rights'))
+    rights = Column(TABLE_TYPES['bigint'], CheckConstraint('rights >= 0', name='unsigned_rights'))
 
     employer = relationship('Company', backref='employee_assoc')
-    employee = relationship('User',
-                            backref=backref('employer_assoc',
-                                            lazy='dynamic'))
+    employee = relationship('User', backref=backref('employer_assoc', lazy='dynamic'))
     UniqueConstraint('user_id', 'company_id', name='user_id_company_id')
 
-    # todo: check handling md_tm
+    # todo (AA to AA): check handling md_tm
 
     def __init__(self, user_id=None, company_id=None, status=None,
                  rights=0):
@@ -191,20 +191,20 @@ class UserCompany(Base, PRBase):
     @staticmethod
     def suspend_employee(company_id, user_id):
         db(UserCompany, company_id=company_id, user_id=user_id). \
-            update({'status': STATUS.SUSPEND()})
+            update({'status': STATUS.SUSPENDED()})
         # db_session.flush()
 
     @staticmethod
     def apply_request(company_id, user_id, bool):
         if bool == 'True':
-            stat = STATUS().ACTIVE()
+            stat = STATUS.ACTIVE()
             UserCompany.update_rights(user_id,
                                       company_id,
                                       Config.BASE_RIGHT_IN_COMPANY)
         else:
-            stat = STATUS().REJECT()
+            stat = STATUS.REJECTED()
         db(UserCompany, company_id=company_id, user_id=user_id,
-           status=STATUS().NONACTIVE()).update({'status': stat})
+           status=STATUS.NONACTIVE()).update({'status': stat})
 
     ## corrected
     @staticmethod
@@ -237,6 +237,12 @@ class UserCompany(Base, PRBase):
             # earlier it was a dictionary:
             # {'right_1': True, 'right_2': False, ...}
         return emplo
+
+    @staticmethod
+    def search_for_user_to_join(company_id, searchtext):
+        return [user.to_dict('profireader_name|id') for user in
+                db(User).filter(~db(UserCompany, user_id=User.id, company_id=company_id).exists()).
+                filter(User.profireader_name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
     def permissions(needed_rights_iterable, user_object, company_object):
