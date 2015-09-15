@@ -16,8 +16,10 @@
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
             $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
             $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
+            $scope.url_send_article_user = {{ raw_url_for('company.send_article_to_user')|safe }};
             $scope.data_resp = '';
             $scope.data_resp_user = '';
+            $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
             $scope.statuses = '';
             $scope.porals_divisions = function (portals) {
@@ -80,16 +82,14 @@
                 });
             };
             $scope.joinToUser = function () {
-                $ok($scope.url_send_article_to_user(), {company_id: $scope.data.company_id, portal_id: $scope.selectedPortal.id}, function (resp) {
+                $ok($scope.url_send_article_user(), {
+                send_to_user:{'id':$scope.selectedUser.id, 'profireader_name': $scope.selectedUser.profireader_name}}, function (resp) {
                     $scope.selectedUser = null;
                     $scope.selectedUser_name = null;
                     $scope.data['users'] = resp['users'];
+                    $scope.data_resp_user_search = resp;
                     setTimeout(function () {
-                        scrool($('#joined_user_' + resp['users']['id']), {
-                            afterScroll: function () {
-                                highlight($('#joined_user_' + resp['users']['id']));
-                            }
-                        });
+
                     }, 500);
                 }).finally(function () {
                     $scope.selectedUser_sending = false;
@@ -144,21 +144,8 @@
                 <br/>
             </div>
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                <div ng-if="!data_resp_user.user">
-                    <form ng-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
-                          ng-action="url_send_article_to_user">
-                        Introduce user to work with this material
-                        <select ng-init="data.send_to_user = data.company.employees[0]"
-                                ng-model="data.send_to_user"
-                                ng-options="user.profireader_name for user in data.company.employees">
-                            <option value="" selected hidden/>
-                        </select>
-                        <input type="submit" value="Send article">
-                    </form>
-
-
-                    <h3> {{ _('Search for user') }} </h3>
-        <input typeahead-on-select="onSelect($item, $model, $label)"
+                                    <h3> {{ _('Search for user') }} </h3>
+        <input disabled typeahead-on-select="onSelect($item, $model, $label)"
                                                typeahead-template-url="customTemplate.html"
                                                typeahead-loading="loadingUsers"
                                                ng-model="selectedUser_name"
@@ -169,6 +156,23 @@
                 ng-disabled="!selectedUser || selectedUser_sending">{{ _('Send article to this user') }}
         </button>
         <i ng-show="loadingUsers" class="glyphicon glyphicon-refresh"></i>
+                <div ng-if="data_resp_user_search.user">
+                    Article "{{ data.article.title }}" was successfully sent to user {{
+                    data_resp_user_search.user.profireader_name }}
+                </div>
+                <div ng-if="!data_resp_user.user">
+                    <form ng-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
+                          ng-action="url_send_article_to_user">
+                        Introduce user to work with this material
+                        <select disabled ng-init="data.send_to_user = data.company.employees[0]"
+                                ng-model="data.send_to_user"
+                                ng-options="user.profireader_name for user in data.company.employees">
+                            <option value="" selected hidden/>
+                        </select>
+                        <input disabled type="submit" value="Send article">
+                    </form>
+
+
 
 
 
@@ -177,6 +181,8 @@
                     Article "{{ data.article.title }}" was successfully sent to user {{
                     data_resp_user.user.profireader_name }}
                 </div>
+
+
 
             </div>
             <div ng-if="myRights('publish')">

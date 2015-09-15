@@ -4,7 +4,7 @@ from config import Config
 from PIL import Image
 from .errors import BadCoordinates, EmptyFieldName
 from profapp.models.files import File, FileContent
-# from db_init import db_session
+from utils.db_utils import db
 from io import BytesIO
 from time import gmtime, strftime
 import sys
@@ -63,11 +63,12 @@ def image_editor(img_id):
         else:
             g.db.rollback()
             raise BadCoordinates
+    file = db(File, id=image_id).one()
 
     return render_template('image_editor.html',
                            ratio=ratio,
                            img_id=img_id,
-                           image=File.get(image_id).url()
+                           image=file.url()
                            )
 
 @image_editor_bp.route('/cropped/<string:id>')

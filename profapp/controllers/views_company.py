@@ -238,16 +238,16 @@ def search_for_company_to_join(json):
 @check_rights(simple_permissions([]))
 @ok
 def search_for_user(json, company_id):
-    print(json)
-    print(company_id)
+
     users = UserCompany().search_for_user_to_join(company_id, json['search'])
-    print(users)
     return users
+
 @company_bp.route('/send_article_to_user/', methods=['POST'])
 @login_required
 @check_rights(simple_permissions([]))
 @ok
 def send_article_to_user(json):
+
     return {'user': json['send_to_user']}
 
 @company_bp.route('/join_to_company/<string:company_id>/',
