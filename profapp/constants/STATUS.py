@@ -49,20 +49,20 @@ class STATUS:
 
 
 class UserStatusInCompanyRights:
-    _status_name = None
+    _status = None
     _rights = (0, 0)
 
     def __init__(self, status, rights_defined=[], rights_undefined=[]):
-        self.status_name = STATUS_NAME[status]
+        self.status = STATUS_NAME[status]
         self.rights = (rights_defined, rights_undefined)
 
     @property
-    def status_name(self):
-        return self._status_name
+    def status(self):
+        return self._status
 
-    @status_name.setter
-    def status_name(self, stat_name):
-        self._status_name = stat_name
+    @status.setter
+    def status(self, stat_name):
+        self._status = stat_name
 
     @property
     def rights(self):
@@ -105,23 +105,23 @@ rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['
 stat_r = UserStatusInCompanyRights(status,
                                    rights_defined=rights_defined,
                                    rights_undefined=rights_undefined)
-STATUS_RIGHTS[stat_r.status_name] = stat_r
+STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('nonactive')
-STATUS_RIGHTS[stat_r.status_name] = stat_r
+STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('blocked')
-STATUS_RIGHTS[stat_r.status_name] = stat_r
+STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('deleted')
-STATUS_RIGHTS[stat_r.status_name] = stat_r
+STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('banned')
-STATUS_RIGHTS[stat_r.status_name] = stat_r
+STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('rejected')
-STATUS_RIGHTS[stat_r.status_name] = stat_r
+STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('suspended')
-STATUS_RIGHTS[stat_r.status_name] = stat_r
+STATUS_RIGHTS[stat_r.status] = stat_r
 

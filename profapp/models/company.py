@@ -154,9 +154,9 @@ class UserCompany(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
-    status_name = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
-                                         get_my_attributes(STATUS_NAME))),
-                              name='status_name_type'), nullable=False)
+    status = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
+                                get_my_attributes(STATUS_NAME))),
+                         name='status_name_type'), nullable=False)
 
     md_tm = Column(TABLE_TYPES['timestamp'])
     rights = Column(TABLE_TYPES['bigint'], CheckConstraint('rights >= 0', name='unsigned_rights'))
@@ -171,7 +171,7 @@ class UserCompany(Base, PRBase):
                  rights=0):
         self.user_id = user_id
         self.company_id = company_id
-        self.status_name = status
+        self.status = status
         self.rights = rights
 
     @staticmethod
@@ -229,7 +229,7 @@ class UserCompany(Base, PRBase):
                               'user': user,
                               'rights': {},
                               'companies': [user.employers],
-                              'status': user_company.status_name,
+                              'status': user_company.status,
                               'date': user_company.md_tm}
 
             emplo[user.id]['rights'] = \

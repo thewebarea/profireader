@@ -43,7 +43,7 @@ def check_user_status_in_company_rights(func):
             return func(*args, **kwargs)
         else:
             status_name = current_user.employer_assoc.filter_by(
-                company_id=kwargs['company_id']).one().status_name
+                company_id=kwargs['company_id']).one().status
             user_status = STATUS_RIGHTS[status_name]
 
             args_new = ()
