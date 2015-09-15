@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, ForeignKey, UniqueConstraint, Enum  # , update
 from sqlalchemy.orm import relationship, backref
 # from db_init import Base, db_session
+from flask.ext.login import current_user
 from sqlalchemy import Column, String, ForeignKey, update
 from sqlalchemy.orm import relationship
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -119,6 +120,22 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
+def forbidden_for_current_user(**kwargs):
+    if 'user_id' in kwargs.keys():
+        user_id = kwargs['user_id']
+    elif 'user' in kwargs.keys():
+        user_id = kwargs['user'].id
+    else:
+        user_id = None
+
+    def user_company_permissions_rule(rights):
+        def check_user(rights, user_id):
+            return current_user.id != user_id
+        return check_user(rights, user_id)
+
+    return user_company_permissions_rule
+
+
 def simple_permissions(rights):
     set_of_rights = frozenset(rights)
 
@@ -137,8 +154,7 @@ def simple_permissions(rights):
             user_object = None
 
         def user_company_permissions_rule(rights):
-            return UserCompany.permissions(rights, user_object,
-                                           company_object)
+            return UserCompany.permissions(rights, user_object, company_object)
 
         return user_company_permissions_rule
 
@@ -203,13 +219,12 @@ class UserCompany(Base, PRBase):
         db(UserCompany, company_id=company_id, user_id=user_id,
            status=STATUS.NONACTIVE()).update({'status': stat})
 
-    ## corrected
     @staticmethod
-    @check_rights(simple_permissions([]))
+    @check_rights(simple_permissions([Right['manage_access_company']]))
+    @check_rights({frozenset(): forbidden_for_current_user})
     def update_rights(user_id, company_id, new_rights):
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
-        user_company = db(UserCompany, user_id=user_id,
-                          company_id=company_id)
+        user_company = db(UserCompany, user_id=user_id, company_id=company_id)
         rights_dict = {'rights': new_rights_binary}
         user_company.update(rights_dict)
 
