@@ -189,7 +189,7 @@ class UserCompany(Base, PRBase):
     employee = relationship('User', backref=backref('employer_assoc', lazy='dynamic'))
     UniqueConstraint('user_id', 'company_id', name='user_id_company_id')
 
-    # todo: check handling md_tm
+    # todo (AA to AA): check handling md_tm
 
     def __init__(self, user_id=None, company_id=None, status=None,
                  rights=0):
