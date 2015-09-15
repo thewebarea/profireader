@@ -71,6 +71,7 @@ def load_user():
         user = g.db.query(User).filter_by(id=id).first()
         logged_via = REGISTERED_WITH[user.logged_in_via()]
         user_dict['logged_via'] = logged_via
+        user_dict['profile_completed'] = user.profile_completed()
 
         for attr in SOC_NET_FIELDS:
             if attr == 'link' or attr == 'phone':
