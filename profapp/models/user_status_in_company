@@ -63,26 +63,20 @@ stat_r = UserStatusInCompanyRights(status,
                                    rights_undefined=rights_undefined)
 status_rights[stat_r.status_name] = stat_r
 
-status = 'nonactive'
-stat_r = UserStatusInCompanyRights(status)
+stat_r = UserStatusInCompanyRights('nonactive')
 status_rights[stat_r.status_name] = stat_r
 
-status = 'blocked'
-stat_r = UserStatusInCompanyRights(status)
+stat_r = UserStatusInCompanyRights('blocked')
 status_rights[stat_r.status_name] = stat_r
 
-status = 'deleted'
-stat_r = UserStatusInCompanyRights(status)
+stat_r = UserStatusInCompanyRights('deleted')
 status_rights[stat_r.status_name] = stat_r
 
-status = 'banned'
-stat_r = UserStatusInCompanyRights(status)
+stat_r = UserStatusInCompanyRights('banned')
 status_rights[stat_r.status_name] = stat_r
 
-status = 'rejected'
-stat_r = UserStatusInCompanyRights(status)
+stat_r = UserStatusInCompanyRights('rejected')
 status_rights[stat_r.status_name] = stat_r
 
-status = 'suspended'
-stat_r = UserStatusInCompanyRights(status)
+stat_r = UserStatusInCompanyRights('suspended')
 status_rights[stat_r.status_name] = stat_r
