@@ -89,7 +89,7 @@ def load_material_details(json, company_id, article_id):
             portals, 'company': Company.get(company_id).
             to_dict('id, employees.id|profireader_name'),
             'selected_portal': {}, 'selected_division': {},
-            'user_rights': user_rights}
+            'user_rights': user_rights, 'send_to_user': {}}
 
 
 @company_bp.route('/update_article/', methods=['POST'])
@@ -102,7 +102,7 @@ def update_article(json):
         company_id=json['company']['id'],
         article_id=json['article']['id'],
         **{'status': json['article']['status']})
-    return json
+    return {'article': json['article'], 'status': 'ok'}
 
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
@@ -111,8 +111,9 @@ def update_article(json):
 def submit_to_portal(json):
 
     article = ArticleCompany.get(json['article']['id'])
-    article.clone_for_portal(json['selected_division'])
-    return json
+    article_portal = article.clone_for_portal(json['selected_division'])
+    portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
+    return {'portal': portal.name}
 
 @company_bp.route('/add/')
 @login_required
@@ -195,7 +196,8 @@ def edit(company_id):
     company = db(Company, id=company_id).one()
     return render_template('company/company_edit.html',
                            company=company,
-                           user_query=current_user
+                           user_query=current_user,
+                           company_id=company_id
                            )
 
 
@@ -229,6 +231,12 @@ def search_for_company_to_join(json):
                                                      json['search'])
     return companies
 
+@company_bp.route('/send_article_to_user/', methods=['POST'])
+@login_required
+@check_rights(simple_permissions([]))
+@ok
+def send_article_to_user(json):
+    return {'user': json['send_to_user']}
 
 @company_bp.route('/join_to_company/<string:company_id>/',
                   methods=['POST'])

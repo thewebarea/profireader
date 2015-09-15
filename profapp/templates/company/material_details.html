@@ -11,20 +11,30 @@
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
             $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
+            $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
             $scope.data_resp = '';
+            $scope.data_resp_user = '';
+            $scope.data_resp_portal = '';
             $scope.statuses = '';
-            $scope.porals_divisions = function(portals){
+            $scope.porals_divisions = function (portals) {
                 var divisions = {};
-                $.each(portals, function(k, v) {divisions[k]=v;
+                $.each(portals, function (k, v) {
+                    divisions[k] = v;
                 });
-{#    var count = Object.keys(portals).length; #}
+                {#    var count = Object.keys(portals).length; #}
                 return divisions;
             };
-            $scope.change_status = function(status){
-              $scope.statuses = status;
+            $scope.change_status = function (status) {
+                $scope.statuses = status;
             };
             $scope.resp_data = function (resp) {
                 $scope.data_resp = resp;
+            };
+            $scope.resp_data_user = function (resp) {
+                $scope.data_resp_user = resp;
+            };
+            $scope.resp_data_portal = function (resp) {
+                $scope.data_resp_portal = resp;
             };
             $scope.myRights = function () {
                 for (var i = 0; i < arguments.length; i++) {
@@ -65,12 +75,15 @@
                 Current status is <span ng-if="!data_resp.article.status">{{ original_data.article.status }}</span>{{
                 data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(original_data.article.status) }}</span>
                 <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
+
                 <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData"
                       ng-action="url_update_status">
                     <div ng-if="!data_resp.status">
                         Change material status to
-                        <select ng-init="data.article.status = data.status[0]" ng-model="data.article.status" ng-options="stat for stat in data.status">
-                            <option value="" selected hidden />
+                        <select ng-init="data.article.status = data.status[0]"
+                                ng-model="data.article.status"
+                                ng-options="stat for stat in data.status">
+                            <option value="" selected hidden/>
                         </select>
                         <input type="submit" ng-if="data.status" value="Submit status">
                         <input type="submit" ng-if="!data.status" value="Submit status" disabled>
@@ -82,30 +95,34 @@
                 </form>
                 <br/>
             </div>
-
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData"
-                      ng-action="url_update_status">
+                <div ng-if="!data_resp_user.user">
+                    <form ng-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
+                          ng-action="url_send_article_to_user">
+                        Introduce user to work with this material
+                        <select ng-init="data.send_to_user = data.company.employees[0]"
+                                ng-model="data.send_to_user"
+                                ng-options="user.profireader_name for user in data.company.employees">
+                            <option value="" selected hidden/>
+                        </select>
+                        <input type="submit" value="Send article">
+                    </form>
+                </div>
+                <div ng-if="data_resp_user.user">
+                    Article "{{ data.article.title }}" was successfully sent to user {{
+                    data_resp_user.user.profireader_name }}
+                </div>
 
-
-
-                    Introduce user to work on this material
-                    <input type="hidden" ng-model="data.company.id">
-                    <select>
-                        <option ng-repeat="user in data.company.employees" selected>
-                            {{ user.profireader_name }}
-                        </option>
-                    </select>
-                    <input type="submit" value="Send article">
-                </form>
             </div>
             <div ng-if="myRights('publish')">
-                <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData"
+                <div ng-if="!data_resp_portal.portal">
+                <form ng-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData"
                       ng-action="url_submit_to_portal">
                     Publish this material at portal
             <span ng-if="statuses=='accepted'">
                 <select ng-model="data.selected_division">
-                    <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
+                    <optgroup ng-repeat="port in porals_divisions(data.portals)"
+                              label="{{ port.name }}">
                         <option ng-repeat="division in port.divisions" value="{{ division.id }}">
                             {{ division.name }}
                         </option>
@@ -127,6 +144,10 @@
                 <input type="submit" value="Publish" disabled>
             </span>
                 </form>
+                    </div>
+                <span ng-if="data_resp_portal.portal">
+                    Article {{ data.article.title }} successfully was published at portal {{ data_resp_portal.portal }}
+                </span>
             </div>
         </div>
     </div>

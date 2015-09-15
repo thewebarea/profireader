@@ -138,6 +138,9 @@ class ArticleCompany(Base, PRBase):
     #     self.save()
     #     return self
 
+    def get_article_owner_portal(self, **kwargs):
+        return [art_port.division.portal for art_port in self.portal_article if kwargs][0]
+
     @staticmethod
     def update_article(company_id, article_id, **kwargs):
         db(ArticleCompany, company_id=company_id, id=article_id).update(
