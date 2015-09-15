@@ -19,7 +19,11 @@
 </script>
 
 <!-- read this -->
-<nav ng-controller="UserLoginController" class="navbar navbar-default">
+<nav ng-controller="UserLoginController" class="navbar navbar-default widewrapper ">
+
+    <div class="top-style-line" style="height: 1px;"></div>
+    <div class="container">
+
     <script type="text/ng-template" id="filemanager.html">
         <iframe style="border: none; margin: 0px; padding: 0px; width: 100%; height: 100%"
                 src="/filemanager/"></iframe>
@@ -41,10 +45,10 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
                 <li ng-cloak ng-show="{{ '{{' }}!user.id{{ '}}' }}">
-            <span>
-              <a href="{{ url_for('auth.login') }}">log in</a>
-              <a href="{{ url_for('auth.signup') }}">signup</a>
-            </span>
+            <ul>
+              <li><a href="{{ url_for('auth.login') }}">log in</a></li>
+              <li><a href="{{ url_for('auth.signup') }}">signup</a></li>
+            </ul>
                 </li>
                 <li class="dropdown" ng-cloak ng-show="user.id">
                     <ul>
@@ -77,6 +81,8 @@
 
 
             </ul>
+        </div>
+
         </div>
         <!-- /.navbar-collapse -->
     </div>

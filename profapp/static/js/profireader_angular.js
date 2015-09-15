@@ -285,13 +285,11 @@ areAllEmpty = function () {
     return are;
 }
 
-function TinyMCE_fileSelected(selectedfiles) {
+function file_choose(selectedfile) {
     var args = top.tinymce.activeEditor.windowManager.getParams();
     var win = (args.window);
     var input = (args.input);
-    $.each(selectedfiles, function (ind, val) {
-        win.document.getElementById(input).value = val['url'];
-    });
+    win.document.getElementById(input).value = selectedfile['url'];
     top.tinymce.activeEditor.windowManager.close();
 }
 
@@ -346,12 +344,13 @@ module.run(function ($rootScope, $ok) {
             skin: 'lightgray',
             theme: 'modern',
             file_browser_callback: function (field_name, url, type, win) {
-                var cmsURL = '/filemanager/?calledby=tinymce_file_browse_' + type;
+                var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
+                    '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
                 tinymce.activeEditor.windowManager.open({
                         file: cmsURL,
                         title: 'Select an Image',
-                        width: 600,  // Your dimensions may differ - toy around with them!
-                        height: 600,
+                        width: 950,  // Your dimensions may differ - toy around with them!
+                        height: 700,
                         resizable: "yes",
                         //inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
                         close_previous: "yes"

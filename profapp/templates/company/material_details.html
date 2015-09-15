@@ -11,63 +11,114 @@
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
             $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
+            $scope.data_resp = '';
+            $scope.statuses = '';
+            $scope.porals_divisions = function(portals){
+                var divisions = {};
+                $.each(portals, function(k, v) {divisions[k]=v;
+                });
+{#    var count = Object.keys(portals).length; #}
+                return divisions;
+            };
+            $scope.change_status = function(status){
+              $scope.statuses = status;
+            };
+            $scope.resp_data = function (resp) {
+                $scope.data_resp = resp;
+            };
+            $scope.myRights = function () {
+                for (var i = 0; i < arguments.length; i++) {
+                    if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
+                        return false;
+                    }
+                }
+                return true;
+            };
             $scope.getData = function () {
                 return $scope.data;
             };
+            $scope.cancel = function () {
+                return false;
+            };
             $scope.afterSave = function (resp) {
                 window.location.href =
-                        $scope.url_article_details({company_id: resp.company.id, article_id: resp.article.id})
+                        $scope.url_article_details({
+                            company_id: resp.company.id,
+                            article_id: resp.article.id
+                        })
             };
         }]);
     </script>
     {% raw %}
     <div ng-init="loadData()" ng-controller="materials_articles">
+
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
             <h3>{{data.article.title}}</h3>
             <h4>Created at {{data.article.cr_tm}}</h4>
             <h4>Last modified at {{data.article.md_tm}}</h4>
             <h4>Short description</h4>
-            <h5><input type="text" disabled="disabled" value="{{ data.article.short }}"></h5>
+            <textarea disabled>{{ data.article.short }}</textarea>
             <br>
-            <h4>Text</h4>
-            <h5><input type="text" disabled="disabled" value="{{ data.article.long }}"></h5>
-            Current status is {{ original_data.article.status }}<br>
 
-            <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
-                Change material status to
-                <select ng-model="data.article.status">
-                    <option ng-repeat="stat in data.status">{{stat}}</option>
-                </select>
-                <input type="submit" value="Submit status">
-            </form>
-            <br/>
+            <div ng-if="myRights('publish', 'unpublish', 'edit')">
+                Current status is <span ng-if="!data_resp.article.status">{{ original_data.article.status }}</span>{{
+                data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(original_data.article.status) }}</span>
+                <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
+                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData"
+                      ng-action="url_update_status">
+                    <div ng-if="!data_resp.status">
+                        Change material status to
+                        <select ng-init="data.article.status = data.status[0]" ng-model="data.article.status" ng-options="stat for stat in data.status">
+                            <option value="" selected hidden />
+                        </select>
+                        <input type="submit" ng-if="data.status" value="Submit status">
+                        <input type="submit" ng-if="!data.status" value="Submit status" disabled>
+                    </div>
+                    <div ng-if="data_resp.status">
+                        Status was successfully changed
+                    </div>
 
-            <form>
-                Introduce user to work on this material
-                <input type="hidden" ng-model="data.company.id">
-            <span ng-repeat="user in data.company.employees">
-                <input type="hidden" ng-model="user.id">
-                <select>
-                    <option>
-                        {{ user.profireader_name }}
-                    </option>
-                </select>
-            </span>
-                <input type="submit" value="Send article">
-            </form>
-            <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_submit_to_portal">
-                Publish this material at portal
-            <span ng-if="original_data.article.status=='accepted'">
+                </form>
+                <br/>
+            </div>
+
+            <div ng-if="myRights('publish', 'unpublish', 'edit')">
+                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData"
+                      ng-action="url_update_status">
+
+
+
+                    Introduce user to work on this material
+                    <input type="hidden" ng-model="data.company.id">
+                    <select>
+                        <option ng-repeat="user in data.company.employees" selected>
+                            {{ user.profireader_name }}
+                        </option>
+                    </select>
+                    <input type="submit" value="Send article">
+                </form>
+            </div>
+            <div ng-if="myRights('publish')">
+                <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData"
+                      ng-action="url_submit_to_portal">
+                    Publish this material at portal
+            <span ng-if="statuses=='accepted'">
                 <select ng-model="data.selected_division">
-                    <optgroup ng-repeat="port in data.portals" label="{{ port.name }}">
-                        <option ng-repeat="division in port.divisions" value="{{ division.id }}" }>{{ division.name }}
+                    <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
+                        <option ng-repeat="division in port.divisions" value="{{ division.id }}">
+                            {{ division.name }}
                         </option>
                     </optgroup>
                 </select>
+                <span ng-if="data.selected_division[0]">
                 <input type="submit" value="Publish">
+                    </span>
+                <span ng-if="!data.selected_division[0]">
+                <input type="submit" disabled value="Publish">
+                    </span>
             </span>
-            <span ng-if="original_data.article.status!='accepted'">
+            <span ng-if="statuses!='accepted'">
                 <select disabled>
                     <optgroup label="Change article status to accepted first">
                         <option>Change article status to accepted first</option>
@@ -75,9 +126,8 @@
                 </select>
                 <input type="submit" value="Publish" disabled>
             </span>
-
-
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 

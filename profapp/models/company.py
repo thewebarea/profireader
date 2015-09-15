@@ -1,25 +1,19 @@
 from sqlalchemy import Column, String, ForeignKey, UniqueConstraint  # , update
 from sqlalchemy.orm import relationship, backref
 # from db_init import Base, db_session
-from sqlalchemy import Column, String, ForeignKey, Enum, update
+from sqlalchemy import Column, String, ForeignKey, update
 from sqlalchemy.orm import relationship
-# from db_init import Base, g.db
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from flask import g
 from config import Config
 from ..constants.STATUS import STATUS
-from ..constants.USER_ROLES import COMPANY_OWNER_RIGHTS, RIGHTS
+from ..constants.USER_ROLES import COMPANY_OWNER_RIGHTS
 from utils.db_utils import db
 from .users import User
-from .files import File, FileContent
-from .pr_base import PRBase
 from sqlalchemy import CheckConstraint
 from flask import abort
-# from db_init import db_session
-# from functools import reduce
-from .rights import Right, ALL_AVAILABLE_RIGHTS_FALSE
+from .rights import Right
 from ..controllers.request_wrapers import check_rights
-from flask.ext.login import current_user
 from .files import File
 from .pr_base import PRBase, Base
 from ..controllers import errors
@@ -47,16 +41,16 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    portal = relationship('Portal', secondary='company_portal')
-    own_portal = relationship('Portal', backref='own_company',
+    portal = relationship('Portal', secondary='company_portal', backref=backref('companies',
+                                                                                lazy='dynamic'))
+    own_portal = relationship('Portal',
+                              backref="own_company", uselist=False,
                               foreign_keys='Portal.company_owner_id',
-                              uselist=False)
-
+                              )
+    user_owner = relationship('User', backref='companies')
+    # employees = relationship('User', secondary='user_company',
+    #                          lazy='dynamic')
     # todo: add company time creation
-
-    owner = relationship('User', backref='companies')
-    employees = relationship('User', secondary='user_company',
-                             lazy='dynamic')
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
@@ -65,16 +59,13 @@ class Company(Base, PRBase):
     # get all users in company : company.employees
     # get all users companies : user.employers
 
-    def create_new_company(self, user_id):
+    def create_new_company(self):
 
-    #TODO VK TO VK: CHECK G>USER INSTANSE QUERY
-        user = g.db.query(User).get(user_id)
         user_company = UserCompany(status=STATUS.ACTIVE(),
                                    rights=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
-        user.employer_assoc.append(user_company)  # .all() added
-        user.companies.append(self)
-
+        g.user.employer_assoc.append(user_company)
+        g.user.companies.append(self)
         return self
 
     def suspended_employees(self):
@@ -120,21 +111,6 @@ class Company(Base, PRBase):
         # db_session.flush()
 
     @staticmethod
-    def query_employee(company_id):
-
-        employee = db(UserCompany, company_id=company_id,
-                      user_id=g.user_dict['id']).first()
-        return employee if employee else False
-
-    def query_owner_or_member(self, company_id):
-
-        employee = self.query_employee(company_id)
-        if not employee:
-            return False
-        if employee.status == STATUS.ACTIVE():
-            return True
-
-    @staticmethod
     def search_for_company_to_join(user_id, searchtext):
         return [company.get_client_side_dict() for company in
                 db(Company).filter(~db(UserCompany, user_id=user_id,
@@ -146,7 +122,7 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
-def simple_permissions(rights):  # .p(right_name)
+def simple_permissions(rights):
     set_of_rights = frozenset(rights)
 
     def business_rule(**kwargs):
@@ -200,8 +176,7 @@ class UserCompany(Base, PRBase):
 
     @staticmethod
     def user_in_company(user_id, company_id):
-        ret = db(
-            UserCompany, user_id=user_id, company_id=company_id).one()
+        ret = db(UserCompany, user_id=user_id, company_id=company_id).one()
         return ret
 
     # do we provide any rights to user at subscribing?
@@ -247,7 +222,7 @@ class UserCompany(Base, PRBase):
         emplo = {}
         for user in db(Company, id=company_id).one().employees:
             user_company = user.employer_assoc. \
-                filter_by(company_id=company_id).first()
+                filter_by(company_id=company_id).one()
             emplo[user.id] = {'id': user.id,
                               'name': user.user_name,
                               # TODO (AA): don't pass user object
