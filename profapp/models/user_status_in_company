@@ -61,28 +61,28 @@ rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['
 stat_r = UserStatusInCompanyRights(status,
                                    rights_defined=rights_defined,
                                    rights_undefined=rights_undefined)
-status_rights[stat_r.name] = stat_r
+status_rights[stat_r.status_name] = stat_r
 
 status = 'nonactive'
 stat_r = UserStatusInCompanyRights(status)
-status_rights[stat_r.name] = stat_r
+status_rights[stat_r.status_name] = stat_r
 
 status = 'blocked'
 stat_r = UserStatusInCompanyRights(status)
-status_rights[stat_r.name] = stat_r
+status_rights[stat_r.status_name] = stat_r
 
 status = 'deleted'
 stat_r = UserStatusInCompanyRights(status)
-status_rights[stat_r.name] = stat_r
+status_rights[stat_r.status_name] = stat_r
 
 status = 'banned'
 stat_r = UserStatusInCompanyRights(status)
-status_rights[stat_r.name] = stat_r
+status_rights[stat_r.status_name] = stat_r
 
 status = 'rejected'
 stat_r = UserStatusInCompanyRights(status)
-status_rights[stat_r.name] = stat_r
+status_rights[stat_r.status_name] = stat_r
 
 status = 'suspended'
 stat_r = UserStatusInCompanyRights(status)
-status_rights[stat_r.name] = stat_r
+status_rights[stat_r.status_name] = stat_r
