@@ -104,6 +104,7 @@ def update_article(json):
         **{'status': json['article']['status']})
     return json
 
+
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
 @check_rights(simple_permissions(Right[RIGHTS.SUBSCRIBE_TO_PORTALS()]))
@@ -113,6 +114,7 @@ def submit_to_portal(json):
     article = ArticleCompany.get(json['article']['id'])
     article.clone_for_portal(json['selected_division'])
     return json
+
 
 @company_bp.route('/add/')
 @login_required
@@ -144,6 +146,7 @@ def profile(company_id):
                            image=image,
                            company_id=company_id
                            )
+
 
 @company_bp.route('/employees/<string:company_id>/')
 @login_required
@@ -195,6 +198,7 @@ def edit(company_id):
     company = db(Company, id=company_id).one()
     return render_template('company/company_edit.html',
                            company=company,
+                           company_id=company_id,
                            user_query=current_user
                            )
 
@@ -244,7 +248,6 @@ def join_to_company(json, company_id):
                           for employer in current_user.employers]}
 
 
-
 @company_bp.route('/add_subscriber/', methods=['POST'])
 @login_required
 @check_rights(simple_permissions([Right[RIGHTS.ADD_EMPLOYEE()]]))
@@ -267,6 +270,7 @@ def suspend_employee():
                                  company_id=data['company_id'])
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
+
 
 @company_bp.route('/suspended_employees/<string:company_id>',
                   methods=['GET'])
