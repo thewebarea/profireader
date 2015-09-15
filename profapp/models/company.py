@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, ForeignKey, UniqueConstraint  # , update
 from sqlalchemy.orm import relationship, backref
 # from db_init import Base, db_session
-from sqlalchemy import Column, String, ForeignKey, update
+from sqlalchemy import Column, String, ForeignKey, Enum, update
 from sqlalchemy.orm import relationship
 # from db_init import Base, g.db
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -23,6 +23,8 @@ from flask.ext.login import current_user
 from .files import File
 from .pr_base import PRBase, Base
 from ..controllers import errors
+from ..constants.STATUS import STATUS_NAME
+from ..models.rights import get_my_attributes
 
 
 class Company(Base, PRBase):
@@ -176,14 +178,15 @@ class UserCompany(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
-    status_name = Column(TABLE_TYPES['id_profireader'], ForeignKey('UserStatusInCompanyRights.id'),
-                         nullable=False)
+    status_name = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
+                                         get_my_attributes(STATUS_NAME))),
+                              name='status_name_type'), nullable=False)
+
     md_tm = Column(TABLE_TYPES['timestamp'])
     rights = Column(TABLE_TYPES['bigint'], CheckConstraint('rights >= 0', name='unsigned_rights'))
 
     employer = relationship('Company', backref='employee_assoc')
     employee = relationship('User', backref=backref('employer_assoc', lazy='dynamic'))
-    status = relationship('UserStatusInCompanyRights', uselist=False)
     UniqueConstraint('user_id', 'company_id', name='user_id_company_id')
 
     # todo: check handling md_tm

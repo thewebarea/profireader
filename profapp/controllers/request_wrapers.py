@@ -6,7 +6,7 @@ import datetime
 from time import sleep
 from flask.ext.login import current_user
 from ..models.rights import Right
-
+from ..constants.STATUS import STATUS_RIGHTS
 
 def ok(func):
     @wraps(func)
@@ -42,8 +42,10 @@ def check_user_status_in_company_rights(func):
         if ('company_id' not in kwargs.keys()) or not args:
             return func(*args, **kwargs)
         else:
-            user_status = current_user.employer_assoc.filter_by(
-                company_id=kwargs['company_id']).one().status
+            status_name = current_user.employer_assoc.filter_by(
+                company_id=kwargs['company_id']).one().status_name
+            user_status = STATUS_RIGHTS[status_name]
+
             args_new = ()
             rez = False
             for arg in args:
