@@ -220,7 +220,7 @@ def confirm_edit(company_id):
 def subscribe(company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
                                company_id=company_id,
-                               status=STATUS().NONACTIVE())
+                               status=STATUS.NONACTIVE())
     company_role.subscribe_to_company()
 
     return redirect(url_for('company.profile', company_id=company_id))
@@ -262,11 +262,10 @@ def send_article_to_user(json):
 def join_to_company(json, company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
                                company_id=json['company_id'],
-                               status=STATUS().NONACTIVE())
+                               status=STATUS.NONACTIVE())
     company_role.subscribe_to_company()
     return {'companies': [employer.get_client_side_dict()
                           for employer in current_user.employers]}
-
 
 
 @company_bp.route('/add_subscriber/', methods=['POST'])
