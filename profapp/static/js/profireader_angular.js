@@ -119,7 +119,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
         };
     }])
     .directive('ngOk', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
-        console.log('aaa1');
         return {
             restrict: 'A',
             scope: {
@@ -306,6 +305,30 @@ module.config(function ($provide) {
     });
 });
 
+module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_called_for', 'file_manager_on_action',
+    function ($scope, $modalInstance, file_manager_called_for, file_manager_on_action) {
+
+//TODO: STEPAN fix this pls
+
+        closeFileManager = function () {
+            $scope.$apply(function () {$modalInstance.dismiss('cancel')});
+        }
+
+        $scope.close  = function () {
+            $modalInstance.dismiss('cancel');
+        }
+
+        $scope.src = '/filemanager/';
+        var params = {};
+        if (file_manager_called_for) {
+            params['file_manager_called_for'] = file_manager_called_for;
+        }
+        if (file_manager_on_action) {
+            params['file_manager_on_action'] = angular.toJson(file_manager_on_action);
+        }
+        $scope.src = $scope.src + '?' + $.param(params);
+    }]);
+
 module.run(function ($rootScope, $ok) {
     angular.extend($rootScope, {
         _: function (phrase, dict) {
@@ -328,12 +351,13 @@ module.run(function ($rootScope, $ok) {
                 return phrase
             }
         },
-        loadData: function (url, senddata) {
+        loadData: function (url, senddata, onok) {
             var scope = this;
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
                 scope.data = data;
-                scope.original_data = $.extend(true, {},data);
+                scope.original_data = $.extend(true, {}, data);
+                if (onok) onok();
             }).finally(function () {
                 scope.loading = false;
             });
@@ -367,10 +391,6 @@ module.run(function ($rootScope, $ok) {
     })
 });
 
-module.controller('filemanagerCtrl', ['$scope', '$modal', function ($scope, $modal) {
-    console.log('filemanagerCtrl controller started');
-}]);
-
 
 None = null;
 False = false;
@@ -393,3 +413,19 @@ function highlight($el) {
     }, 500);
 }
 
+function angularControllerFunction(controller_attr, function_name) {
+    var el = $('[ng-controller='+controller_attr+']');
+    if (!el && !el.length) return function () {};
+    var func = angular.element(el[0]).scope()[function_name];
+    var controller = angular.element(el[0]).controller();
+    if (func && controller) {
+        return func
+    }
+    else return function () {};
+
+}
+
+function fileUrl(id) {
+    var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
+    return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
+}
