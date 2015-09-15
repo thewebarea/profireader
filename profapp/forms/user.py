@@ -24,5 +24,4 @@ class EditProfileForm(Form):
                                               TABLE_TYPES['location'].length)])
     about_me = StringField('About me',
                            validators=[Length(0, TABLE_TYPES['text'].length)])
-    #profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
     submit = SubmitField('Submit')

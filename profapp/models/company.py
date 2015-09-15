@@ -25,10 +25,10 @@ class Company(Base, PRBase):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
-    logo_file = Column(String(36), ForeignKey('file.id'))
-    journalist_folder_file_id = Column(String(36),
+    logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'],
                                        ForeignKey('file.id'))
-    corporate_folder_file_id = Column(String(36),
+    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'],
                                       ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
