@@ -223,8 +223,8 @@ def create_app(config='config.ProductionDevelopmentConfig',
     #    sslify = SSLify(app)
 
     @login_manager.user_loader
-    def load_user_manager(id):
-        return g.db.query(User).get(id)
+    def load_user_manager(user_id):
+        return g.db.query(User).get(user_id)
 
     csrf.init_app(app)
 

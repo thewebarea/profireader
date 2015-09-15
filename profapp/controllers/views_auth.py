@@ -1,5 +1,5 @@
 from .blueprints import auth_bp
-from flask import g, request, url_for, render_template, flash
+from flask import g, request, url_for, render_template, flash, current_app
 #from db_init import db_session
 from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS, \
     SOC_NET_FIELDS_SHORT
@@ -80,7 +80,10 @@ def login_signup_general(*soc_network_names):
                     g.db.commit()
 
                 if user.is_banned():
-                    flash('Sorry, you are banned')
+                    flash('Sorry, you cannot login into the Profireader. Contact the profireader'
+                          'administrator, please: ' +
+                          current_app.config['PROFIREADER_MAIL_SENDER'])
+
                     return redirect(url_for('general.index'))
 
                 login_user(user)
@@ -191,7 +194,6 @@ def login():
             filter(User.profireader_email == form.email.data).first()
 
         if user and user.is_banned():
-            flash('Sorry, you are banned')
             return redirect(url_for('general.index'))
         if user and user.verify_password(form.password.data):
             login_user(user)
@@ -258,7 +260,6 @@ def password_reset_request():
         user = g.db.query(User).\
             filter_by(profireader_email=form.email.data).first()
         if user.is_banned():
-            flash('Sorry, you are banned')
             return redirect(url_for('general.index'))
         if user:
             token = user.generate_reset_token()
@@ -283,10 +284,7 @@ def password_reset(token):
     if form.validate_on_submit():
         user = g.db.query(User).\
             filter_by(profireader_email=form.email.data).first()
-        if user.is_banned():
-            flash('Sorry, you are banned')
-            return redirect(url_for('general.index'))
-        if user is None:
+        if (user is None) or user.is_banned():
             return redirect(url_for('general.index'))
         if user.reset_password(token, form.password.data):
             flash('Your password has been updated.')
