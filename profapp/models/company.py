@@ -26,10 +26,8 @@ class Company(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
     logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'],
-                                       ForeignKey('file.id'))
-    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'],
-                                      ForeignKey('file.id'))
+    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
@@ -54,8 +52,7 @@ class Company(Base, PRBase):
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
-                                          foreign_keys='Company.'
-                                                       'logo_file')
+                                          foreign_keys='Company.logo_file')
     # get all users in company : company.employees
     # get all users companies : user.employers
 
