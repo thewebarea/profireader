@@ -7,7 +7,11 @@
         {% include 'company/company_base.html' %}
     {% endblock company_base %}
     <script>
-        module.controller('materials_articles', ['$scope', function ($scope) {
+        module.controller('materials_articles', ['$scope','$ok', function ($scope,$ok) {
+            $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
+            $scope.selectedUser_name = '';
+            $scope.selectedUser = null;
+            $scope.selectedUser_sending = false;
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
             $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
@@ -57,9 +61,53 @@
                             article_id: resp.article.id
                         })
             };
-        }]);
-    </script>
+
+        $scope.onSelect = function ($item, $model, $label) {
+                if (!$item || !$item.id) {
+                    $scope.selectedUser_name = '';
+                    $scope.selectedUser = null;
+                }
+                else {
+                    $scope.selectedUser = $item;
+                }
+            };
+            $scope.searchForUserToJoin = function (val) {
+                return $ok($scope.url_search_for_user({company_id: $scope.data.company.id}), {
+                    company_id: $scope.data.company_id,
+                    search: val
+                }, function (resp) {
+                    return resp.length ? resp : [{id: false, profireader_name: 'No results'}];
+                });
+            };
+            $scope.joinToUser = function () {
+                $ok($scope.url_send_article_to_user(), {company_id: $scope.data.company_id, portal_id: $scope.selectedPortal.id}, function (resp) {
+                    $scope.selectedUser = null;
+                    $scope.selectedUser_name = null;
+                    $scope.data['users'] = resp['users'];
+                    setTimeout(function () {
+                        scrool($('#joined_user_' + resp['users']['id']), {
+                            afterScroll: function () {
+                                highlight($('#joined_user_' + resp['users']['id']));
+                            }
+                        });
+                    }, 500);
+                }).finally(function () {
+                    $scope.selectedUser_sending = false;
+                });
+            };      }]);
+        </script>
     {% raw %}
+    <script type="text/ng-template" id="customTemplate.html">
+        <a href="#">
+            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
+        </a>
+    </script>
+    <style>
+        ul.dropdown-menu li a strong {
+            color: #f00;
+        }
+    </style>
     <div ng-init="loadData()" ng-controller="materials_articles">
 
         <div ng-if="!data">{{ _('Loading...') }}</div>
@@ -107,6 +155,23 @@
                         </select>
                         <input type="submit" value="Send article">
                     </form>
+
+
+                    <h3> {{ _('Search for user') }} </h3>
+        <input typeahead-on-select="onSelect($item, $model, $label)"
+                                               typeahead-template-url="customTemplate.html"
+                                               typeahead-loading="loadingUsers"
+                                               ng-model="selectedUser_name"
+                                               typeahead="user as user.profireader_name for user in searchForUserToJoin($viewValue)"
+                                               name="user_id"/>&nbsp;
+        <button class="btn" ng-click="joinToUser()"
+                ng-class="{'disabled': !selectedUser || selectedUser_sending}"
+                ng-disabled="!selectedUser || selectedUser_sending">{{ _('Send article to this user') }}
+        </button>
+        <i ng-show="loadingUsers" class="glyphicon glyphicon-refresh"></i>
+
+
+
                 </div>
                 <div ng-if="data_resp_user.user">
                     Article "{{ data.article.title }}" was successfully sent to user {{

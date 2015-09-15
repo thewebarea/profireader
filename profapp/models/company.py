@@ -239,6 +239,12 @@ class UserCompany(Base, PRBase):
         return emplo
 
     @staticmethod
+    def search_for_user_to_join(company_id, searchtext):
+        return [user.to_dict('profireader_name|id') for user in
+                db(User).filter(~db(UserCompany, user_id=User.id, company_id=company_id).exists()).
+                filter(User.profireader_name.ilike("%" + searchtext + "%")).all()]
+
+    @staticmethod
     def permissions(needed_rights_iterable, user_object, company_object):
         if not (user_object and company_object):
             return True
