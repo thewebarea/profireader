@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, UniqueConstraint  # , update
+from sqlalchemy import Column, String, ForeignKey, UniqueConstraint, Enum  # , update
 from sqlalchemy.orm import relationship, backref
 # from db_init import Base, db_session
 from sqlalchemy import Column, String, ForeignKey, update
