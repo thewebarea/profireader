@@ -10,8 +10,8 @@ from .pr_base import PRBase, Base
 class File(Base):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    parent_id = Column(String(36), ForeignKey('file.id'))
-    root_folder_id = Column(String(36), ForeignKey('file.id'))
+    parent_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    root_folder_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     name = Column(TABLE_TYPES['name'], default='', nullable=False)
     mime = Column(String(30), default='text/plain', nullable=False)
     description = Column(TABLE_TYPES['text'], default='', nullable=False)
