@@ -35,22 +35,27 @@ def replace_brackets(func):
 
     return wrapper
 
-def check_user_in_Profireader_rights(func)
-    def decorated(*args, **kwargs)
-        args_new = ()
-        Right.transform_rights_into_integer(list(arg.keys())[0])
-        if current_user.rights
+# def check_user_in_Profireader_rights(func)
+#     def decorated(*args, **kwargs)
+#         args_new = ()
+#         Right.transform_rights_into_integer(list(arg.keys())[0])
+#         if current_user.rights
 
 
-@check_user_in_Profireader_rights
+#@check_user_in_Profireader_rights
 def check_user_status_in_company_rights(func):
     def decorated(*args, **kwargs):
         # here args is a tuple
         if ('company_id' not in kwargs.keys()) or not args:
             return func(*args, **kwargs)
         else:
-            status_name = current_user.employer_assoc.filter_by(
-                company_id=kwargs['company_id']).one().status
+            user_company = current_user.employer_assoc.filter_by(
+                company_id=kwargs['company_id']).one()
+
+            if not user_company:
+                return func(*args, **kwargs)
+
+            status_name = user_company.status
             user_status = STATUS_RIGHTS[status_name]
 
             args_new = ()

@@ -257,6 +257,8 @@ class UserCompany(Base, PRBase):
         company = company_object
         if type(user_object) is str:
             user = g.db.query(User).filter_by(id=user_object).first()
+            if not user:
+                return abort(400)
         if type(company_object) is str:
             company = g.db.query(Company).\
                 filter_by(id=company_object).first()
