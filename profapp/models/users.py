@@ -273,7 +273,7 @@ class User(Base, UserMixin, PRBase):
     def ban(self):
         self.banned = True
         g.db.add(self)
-        g.db.commit()  # Todo (AA to AA): we have to logout banned user to
+        g.db.commit()  # Todo (AA to AA): we have to logout banned user too
         return self
 
     def unban(self):
