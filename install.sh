@@ -120,7 +120,7 @@ echo 'deb http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main' >> /e
 echo 'deb-src http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main' >> /etc/apt/sources.list
 apt-get update
 apt-get install haproxy
-mv ./haproxy.cfg /etc/haproxy/
+cp ./haproxy.cfg /etc/haproxy/
 service haproxy restart" sudo secret_data
     }
 
