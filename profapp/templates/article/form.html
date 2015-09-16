@@ -19,16 +19,15 @@
         };
 
 
-        $scope.articleImageSelected = function(item) {
+        $scope.articleImageSelected = function (item) {
             $scope.data.image_file_id = item.id;
             $scope.setImageUrl();
             closeFileManager();
         }
 
-        $scope.setImageUrl = function() {
+        $scope.setImageUrl = function () {
             $scope.image_file_url = fileUrl($scope.data.image_file_id);
         }
-
 
 
         $scope.chooseImage = function () {
@@ -37,9 +36,14 @@
                 controller: 'filemanagerCtrl',
                 size: 'filemanager-halfscreen',
                 resolve: {
-                    file_manager_called_for: function () {return 'file_browse_image'},
-                    file_manager_on_action: function () {return {choose:
-                            "parent.angularControllerFunction('article_edit', 'articleImageSelected')"}}
+                    file_manager_called_for: function () {
+                        return 'file_browse_image'
+                    },
+                    file_manager_on_action: function () {
+                        return {
+                            choose: "parent.angularControllerFunction('article_edit', 'articleImageSelected')"
+                        }
+                    }
                 }
             });
 
@@ -66,11 +70,12 @@
         <!-- TODO: OK by OZ:   this block form shuld share same classes with layout to look MAXIMUM like in portal
                 maybe layout selector is apporpriate here-->
 
-        <form ng-ok
-              ng-onsuccess="afterSave"
-              ng-onsubmit="getData"
-              ng-action="save_article">
-            <div style="width: 400px; display: inline-block">
+        <form
+                ng-ok
+                ng-onsuccess="afterSave"
+                ng-onsubmit="getData"
+                ng-action="save_article">
+            <div style="width: 400px; float: left">
                 <input type="hidden" ng-model="data.id"/>
                 {{ _('Article title') }}
                 <input style="width: 100%" type="text" ng-model="data.title">
@@ -78,18 +83,21 @@
                 <textarea style="width: 100%" placeholder="short"
                           ng-model="data.short"></textarea>
                 {{ _('Full text') }}
-                <textarea class="" ui-tinymce="tinymceImageOptions" placeholder="text"
+                <textarea ui-tinymce="tinymceImageOptions" placeholder="text"
                           ng-model="data.long"></textarea>
             </div>
-            <div style="width: 500px; display: inline-block; margin-left: 50px;">
-                <div ng-click="chooseImage()"
-                     style="width: 300px; height: 240px; border: 1px solid #aaa;
-                        background-size: cover; background-image:url({{ image_file_url }})">
-                    {{ _('Select main article image') }}
-                </div>
+
+            <div ng-click="chooseImage()"
+                 style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
+                        background-size: cover; background-image:url({{ image_file_url }});">
+                {{ _('Select main article image') }}
             </div>
+            
+            <div style="clear: both"></div>
+            <br/>
             <input type="hidden" ng-model="data.image_file_id">
-            <input style="clear: both;" type="submit" value="{{ data.id ? 'save' : 'create' }}"/>
+            <input style="clear: both;" type="submit"
+                   value="{{ data.id ? 'save' : 'create' }}"/>
 
         </form>
     </div>
