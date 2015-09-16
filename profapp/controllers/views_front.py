@@ -67,7 +67,7 @@ def division(division_name, page, search_text):
 def details(article_portal_id):
     article = ArticlePortal.get(article_portal_id).\
         to_dict('id, title,short, cr_tm, md_tm, '
-                'publishing_tm, status, long,'
+                'publishing_tm, status, long, image_file_id,'
                 'division.name, division.portal.id,'
                 'company.name')
     return render_template('front/bird/article_details.html',
