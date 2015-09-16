@@ -68,9 +68,11 @@ def load_user():
     if user_init.is_authenticated():
         from profapp.models.users import User
         id = user_init.get_id()
-        user = g.db.query(User).filter_by(id=id).first()
+        # user = g.db.query(User).filter_by(id=id).first()
+        user = current_user
         logged_via = REGISTERED_WITH[user.logged_in_via()]
         user_dict['logged_via'] = logged_via
+        user_dict['profile_completed'] = user.profile_completed()
 
         for attr in SOC_NET_FIELDS:
             if attr == 'link' or attr == 'phone':
@@ -223,8 +225,8 @@ def create_app(config='config.ProductionDevelopmentConfig',
     #    sslify = SSLify(app)
 
     @login_manager.user_loader
-    def load_user_manager(id):
-        return g.db.query(User).get(id)
+    def load_user_manager(user_id):
+        return g.db.query(User).get(user_id)
 
     csrf.init_app(app)
 

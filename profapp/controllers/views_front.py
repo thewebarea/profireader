@@ -9,12 +9,11 @@ from config import Config
 def index():
 
     page = 1
-    search_text = ''
+    search_text = '%'
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id).first()
     pages = Article.get_pages_count(division.id,
-
                                     search_text=search_text)
     articles = Article.get_articles_for_portal(
         page_size=Config.ITEMS_PER_PAGE,

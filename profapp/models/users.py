@@ -1,4 +1,4 @@
-from flask import request, current_app, g
+from flask import request, current_app, g, flash
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
@@ -27,7 +27,7 @@ class User(Base, UserMixin, PRBase):
 
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    personal_folder_file_id = Column(String(36), ForeignKey('file.id'))
+    personal_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     profireader_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])
@@ -246,7 +246,12 @@ class User(Base, UserMixin, PRBase):
         self._banned = ban
 
     def is_banned(self):
-        return self.banned
+        banned = self.banned
+        if self.banned:
+            flash('Sorry, you cannot login into the Profireader. Contact the profireader'
+                  'administrator, please: ' +
+                  current_app.config['PROFIREADER_MAIL_SENDER'])
+        return banned
 
     def ban(self):
         self.banned = True

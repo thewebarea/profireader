@@ -68,7 +68,7 @@ def can_global(*rights_business_rule, **kwargs):
         return True
     rez = reduce(
         lambda x, y:
-        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())[0]),
+        x or y[list(y.keys())[0]](list(y.keys())[0], **kwargs),
         rights_business_rule, False)
     return rez
 

@@ -1,4 +1,5 @@
 <ul class="pager">
+{% if articles %}
     <li class="previous">
         {% if current_page != 1 %}
         <a href="{{ url_for('front.division', division_name=division.name, page=current_page - 1, search_text=search_text) }}">&larr; Older</a>
@@ -39,4 +40,5 @@
         {% else %} Newer &rarr;
         {% endif %}
     </li>
+{% endif %}
 </ul>

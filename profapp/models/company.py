@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, ForeignKey, UniqueConstraint, Enum  # , update
 from sqlalchemy.orm import relationship, backref
 # from db_init import Base, db_session
+from flask.ext.login import current_user
 from sqlalchemy import Column, String, ForeignKey, update
 from sqlalchemy.orm import relationship
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -25,11 +26,9 @@ class Company(Base, PRBase):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
-    logo_file = Column(String(36), ForeignKey('file.id'))
-    journalist_folder_file_id = Column(String(36),
-                                       ForeignKey('file.id'))
-    corporate_folder_file_id = Column(String(36),
-                                      ForeignKey('file.id'))
+    logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
@@ -54,8 +53,7 @@ class Company(Base, PRBase):
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
-                                          foreign_keys='Company.'
-                                                       'logo_file')
+                                          foreign_keys='Company.logo_file')
     # get all users in company : company.employees
     # get all users companies : user.employers
 
@@ -122,10 +120,22 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
+def forbidden_for_current_user(rights, **kwargs):
+    if 'user_id' in kwargs.keys():
+        user_id = kwargs['user_id']
+    elif 'user' in kwargs.keys():
+        user_id = kwargs['user'].id
+    else:
+        user_id = None
+
+    rez = current_user.id != user_id
+    return rez
+
+
 def simple_permissions(rights):
     set_of_rights = frozenset(rights)
 
-    def business_rule(**kwargs):
+    def business_rule(rights, **kwargs):
         if 'company_id' in kwargs.keys():
             company_object = kwargs['company_id']
         elif 'company' in kwargs.keys():
@@ -139,11 +149,7 @@ def simple_permissions(rights):
         else:
             user_object = None
 
-        def user_company_permissions_rule(rights):
-            return UserCompany.permissions(rights, user_object,
-                                           company_object)
-
-        return user_company_permissions_rule
+        return UserCompany.permissions(rights, user_object, company_object)
 
     return {set_of_rights: business_rule}
 
@@ -206,13 +212,12 @@ class UserCompany(Base, PRBase):
         db(UserCompany, company_id=company_id, user_id=user_id,
            status=STATUS.NONACTIVE()).update({'status': stat})
 
-    ## corrected
     @staticmethod
-    @check_rights(simple_permissions([]))
+    @check_rights(simple_permissions([Right['manage_access_company']]))
+    @check_rights({frozenset(): forbidden_for_current_user})
     def update_rights(user_id, company_id, new_rights):
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
-        user_company = db(UserCompany, user_id=user_id,
-                          company_id=company_id)
+        user_company = db(UserCompany, user_id=user_id, company_id=company_id)
         rights_dict = {'rights': new_rights_binary}
         user_company.update(rights_dict)
 
