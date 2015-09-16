@@ -16,8 +16,7 @@ def ok(func):
         if 'json' in kwargs:
             del kwargs['json']
         ret = func(request.json, *args, **kwargs)
-        return jsonify({'data': ret, 'ok': True,
-                         'error_code': 'ERROR_NO_ERROR'})
+        return jsonify({'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
         # except Exception as e:
         #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
     return function_json
@@ -35,14 +34,16 @@ def replace_brackets(func):
 
     return wrapper
 
-# def check_user_in_Profireader_rights(func)
+# def check_user_in_profireader_rights(func)
 #     def decorated(*args, **kwargs)
 #         args_new = ()
-#         Right.transform_rights_into_integer(list(arg.keys())[0])
+#
+#         for arg in args:
+#             Right.transform_rights_into_integer(list(arg.keys())[0])
 #         if current_user.rights
 
 
-#@check_user_in_Profireader_rights
+# @check_user_in_profireader_rights
 def check_user_status_in_company_rights(func):
     def decorated(*args, **kwargs):
         # here args is a tuple
@@ -50,7 +51,7 @@ def check_user_status_in_company_rights(func):
             return func(*args, **kwargs)
         else:
             user_company = current_user.employer_assoc.filter_by(
-                company_id=kwargs['company_id']).one()
+                company_id=kwargs['company_id']).first()
 
             if not user_company:
                 return func(*args, **kwargs)
