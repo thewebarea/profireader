@@ -237,6 +237,9 @@ class Article(Base, PRBase):
                 status=ARTICLE_STATUS_IN_PORTAL.published)
             if portal_division_id:
                 query = query.filter_by(portal_division_id=portal_division_id)
+            else:
+                query = query.filter(db(PortalDivision).
+                        filter_by(id = ArticlePortal.portal_division_id).exists())
 
         else:
             query = _P().order_by('publishing_tm').filter(text(
@@ -249,6 +252,9 @@ class Article(Base, PRBase):
 
             if portal_division_id:
                 query = query.filter_by(portal_division_id=portal_division_id)
+            else:
+                query = query.filter(db(PortalDivision).
+                        filter_by(id=ArticlePortal.portal_division_id).exists())
 
         if page_size:
             query = query.limit(page_size)
