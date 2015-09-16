@@ -112,7 +112,7 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     return url
 
 def file_url(id):
-    if id == None:
+    if not id:
         return ''
     server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', id)
     return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
