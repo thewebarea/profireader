@@ -18,6 +18,7 @@ def index():
         page_size=Config.ITEMS_PER_PAGE,
         user_id=g.user_dict['id'],
         page=page, pages=[],
+        portal_id = portal.id,
         search_text=search_text)
 
     return render_template('front/bird/index.html',
