@@ -77,14 +77,9 @@ def check_user_status_in_company_rights(func):
 
 
 @check_user_status_in_company_rights
-def can_global(*rights_business_rule, **kwargs):
-    if not rights_business_rule:
-        return True
-    # TODO (AA to AA): transfer code below to the check_rights function...
-    rez = reduce(
-        lambda x, y:
-        x or y[list(y.keys())[0]](list(y.keys())[0], **kwargs),
-        rights_business_rule, False)
+def can_global(right_business_rule, **kwargs):
+    key = list(right_business_rule.keys())[0]
+    rez = right_business_rule[key](key, **kwargs)
     return rez
 
 # if there is need to use check rights inside the controller (view function)
@@ -102,7 +97,9 @@ def check_rights(*rights_business_rule):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            rez = can_global(*rights_business_rule, **kwargs)
+            if not rights_business_rule:
+                return True
+            rez = reduce(lambda x, y: x or can_global(y, **kwargs), rights_business_rule, False)
             if not rez:
                 abort(403)
             return func(*args, **kwargs)
