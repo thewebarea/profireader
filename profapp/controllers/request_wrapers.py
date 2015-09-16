@@ -39,7 +39,7 @@ def replace_brackets(func):
 def check_user_status_in_company_rights(func):
     def decorated(*args, **kwargs):
         # here args is a tuple
-        if ('company_id' not in kwargs.keys()) or not args:
+        if ('company_id' not in kwargs.keys()) or (not args) or not list(args[0].keys())[0]:
             return func(*args, **kwargs)
         else:
             status_name = current_user.employer_assoc.filter_by(
