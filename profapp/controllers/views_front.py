@@ -4,6 +4,7 @@ from ..models.articles import Article, ArticlePortal
 from ..models.portal import CompanyPortal, PortalDivision, Portal
 from config import Config
 # from profapp import
+from .pagination import pagination
 
 @front_bp.route('/', methods=['GET'])
 def index():
@@ -13,13 +14,10 @@ def index():
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id).first()
-    pages = Article.get_pages_count(division.id,
-                                    search_text=search_text)
-    articles = Article.get_articles_for_portal(
-        page_size=Config.ITEMS_PER_PAGE,
-        user_id=g.user_dict['id'],
-        portal_division_id=division.id, page=page, pages=pages,
-        search_text=search_text)
+    sub_query = Article.subquery_articles_at_portal(portal_division_id=division.id,
+                                                    search_text=search_text)
+    articles, pages, page = pagination(query=sub_query, page_size=Config.ITEMS_PER_PAGE,
+                                       page=page)
 
     return render_template('front/bird/index.html',
                            articles={a.id: a.get_client_side_dict() for
@@ -40,16 +38,11 @@ def division(division_name, page, search_text):
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
     search_text = search_text if not request.args.get(
         'search_text') else request.args.get('search_text')
-    division = g.db().query(PortalDivision).filter_by(
-        portal_id=portal.id, name=division_name).one()
-    pages = Article.get_pages_count(division.id,
-                                    search_text=search_text)
-    articles = Article.get_articles_for_portal(
-        page_size=Config.ITEMS_PER_PAGE,
-        user_id=g.user_dict['id'],
-        portal_division_id=division.id, page=page, pages=pages,
-        search_text=search_text)
+    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, name=division_name).one()
 
+    sub_query = Article.subquery_articles_at_portal(portal_division_id=division.id,
+                                                    search_text=search_text)
+    articles, pages, page = pagination(query=sub_query, page_size=Config.ITEMS_PER_PAGE, page=page)
     return render_template('front/bird/index.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},

@@ -14,7 +14,7 @@
         {% endif %}
     {% endfor %}
     <li class="current-page">
-        <a href="{{ url_for('front.division', division_name=division.name, page=current_page, search_text=search_text) }}">{{ current_page }}</a>
+        <a href="{{ url_for('front.division', division_name=division.name, page=current_page, search_text=search_text) }}"><h4>{{ current_page }}</h4></a>
     </li>
     {% for button in range(page_buttons) %}
         {% if current_page + (button + 1)< pages %}
