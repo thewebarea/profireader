@@ -19,6 +19,7 @@ from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase, Base
 from .rights import Right
+from sqlalchemy import CheckConstraint
 from sqlalchemy.ext.associationproxy import association_proxy
 
 
@@ -41,6 +42,8 @@ class User(Base, UserMixin, PRBase):
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+    rights = Column(TABLE_TYPES['bigint'], CheckConstraint('rights >= 0',
+                                                           name='unsigned_profireader_rights'))
 
     registered_tm = Column(TABLE_TYPES['timestamp'],
                            default=datetime.datetime.utcnow)
