@@ -35,7 +35,14 @@ def replace_brackets(func):
 
     return wrapper
 
+def check_user_in_Profireader_rights(func)
+    def decorated(*args, **kwargs)
+        args_new = ()
+        Right.transform_rights_into_integer(list(arg.keys())[0])
+        if current_user.rights
 
+
+@check_user_in_Profireader_rights
 def check_user_status_in_company_rights(func):
     def decorated(*args, **kwargs):
         # here args is a tuple

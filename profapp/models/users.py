@@ -42,8 +42,9 @@ class User(Base, UserMixin, PRBase):
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
-    rights = Column(TABLE_TYPES['bigint'], CheckConstraint('rights >= 0',
-                                                           name='unsigned_profireader_rights'))
+    rights = Column(TABLE_TYPES['bigint'],
+                    CheckConstraint('rights >= 0', name='unsigned_profireader_rights'),
+                    default=0, nullable=False,)
 
     registered_tm = Column(TABLE_TYPES['timestamp'],
                            default=datetime.datetime.utcnow)
