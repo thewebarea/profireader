@@ -107,6 +107,8 @@ class ArticleCompany(Base, PRBase):
                             ForeignKey('file.id'), nullable=False)
     company = relationship(Company)
     editor = relationship(User)
+    article = relationship('Article',
+                        primaryjoin="and_(Article.id==ArticleCompany.article_id)", uselist=False)
     portal_article = relationship('ArticlePortal',
                                   primaryjoin="ArticleCompany.id=="
                                               "ArticlePortal."
@@ -172,8 +174,7 @@ class Article(Base, PRBase):
                         primaryjoin="and_(Article.id==ArticleCompany."
                                     "article_id, ArticleCompany."
                                     "company_id==None)",
-                        uselist=False,
-                        backref='article')
+                        uselist=False)
 
     def get_client_side_dict(self,
                              fields='id, mine|submitted.id|title|short|'
@@ -203,8 +204,8 @@ class Article(Base, PRBase):
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
-        return ArticleCompany.get(article_company_id).attr(
-            kwargs).save().article
+        a = ArticleCompany.get(article_company_id)
+        return a.attr(kwargs).save().article
 
     @staticmethod
     def get_articles_for_user(user_id):
@@ -229,7 +230,7 @@ class Article(Base, PRBase):
         ).count()/Config.ITEMS_PER_PAGE)
 
     def get_articles_for_portal(page_size, user_id,
-                                pages, page=1, search_text=None, portal_division_id = None):
+                                pages, page=1, search_text=None, portal_division_id = None, portal_id = None):
         page -= 1
         if not search_text:
             query = _P().order_by('publishing_tm').filter(text(
@@ -239,7 +240,7 @@ class Article(Base, PRBase):
                 query = query.filter_by(portal_division_id=portal_division_id)
             else:
                 query = query.filter(db(PortalDivision).
-                        filter_by(id = ArticlePortal.portal_division_id).exists())
+                        filter_by(portal_id = portal_id, id = ArticlePortal.portal_division_id).exists())
 
         else:
             query = _P().order_by('publishing_tm').filter(text(
@@ -254,7 +255,7 @@ class Article(Base, PRBase):
                 query = query.filter_by(portal_division_id=portal_division_id)
             else:
                 query = query.filter(db(PortalDivision).
-                        filter_by(id=ArticlePortal.portal_division_id).exists())
+                        filter_by(portal_id = portal_id, id=ArticlePortal.portal_division_id).exists())
 
         if page_size:
             query = query.limit(page_size)
