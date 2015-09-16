@@ -53,7 +53,8 @@ def check_user_status_in_company_rights(func):
             user_company = current_user.employer_assoc.filter_by(
                 company_id=kwargs['company_id']).first()
 
-            if not user_company:
+            if not user_company:  # TODO (AA to AA): if set of rights is empty we should
+                # TODO (AA to AA): return True or raise exception otherwise.
                 return func(*args, **kwargs)
 
             status_name = user_company.status
@@ -79,6 +80,7 @@ def check_user_status_in_company_rights(func):
 def can_global(*rights_business_rule, **kwargs):
     if not rights_business_rule:
         return True
+    # TODO (AA to AA): transfer code below to the check_rights function...
     rez = reduce(
         lambda x, y:
         x or y[list(y.keys())[0]](list(y.keys())[0], **kwargs),
