@@ -1,4 +1,4 @@
-from flask import request, current_app, g
+from flask import request, current_app, g, flash
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
@@ -246,7 +246,12 @@ class User(Base, UserMixin, PRBase):
         self._banned = ban
 
     def is_banned(self):
-        return self.banned
+        banned = self.banned
+        if self.banned:
+            flash('Sorry, you cannot login into the Profireader. Contact the profireader'
+                  'administrator, please: ' +
+                  current_app.config['PROFIREADER_MAIL_SENDER'])
+        return banned
 
     def ban(self):
         self.banned = True
