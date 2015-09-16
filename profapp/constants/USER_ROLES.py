@@ -19,4 +19,4 @@ ROLE = {
 }
 
 COMPANY_OWNER_RIGHTS = 0x7fffffffffffffff  # 2**63-1
-
+GOD_RIGHTS = COMPANY_OWNER_RIGHTS
