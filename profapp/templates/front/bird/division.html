@@ -25,7 +25,7 @@
 
                     <div class="block-item">
 
-                        <div class="item-type article"><a href="/{{ articles[article_id]['division']['name'] }}/">{{ articles[article_id]['division']['name']|safe }}</a></div>
+                        <div class="item-type article">{{ division['name']|safe }}</div>
                         <h2 class="item-title">
                             <a href="{{ url_for('front.details', article_portal_id=articles[article_id]['id']) }}">{{ articles[article_id]['title']|safe }}</a>
                         </h2>
