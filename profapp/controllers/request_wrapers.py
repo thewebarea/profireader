@@ -7,6 +7,8 @@ from time import sleep
 from flask.ext.login import current_user
 from ..models.rights import Right
 from ..constants.STATUS import STATUS_RIGHTS
+from .errors import ImproperRightsDecoratorUse
+
 
 def ok(func):
     @wraps(func)
@@ -45,34 +47,29 @@ def replace_brackets(func):
 
 # @check_user_in_profireader_rights
 def check_user_status_in_company_rights(func):
-    def decorated(*args, **kwargs):
-        # here args is a tuple
-        if ('company_id' not in kwargs.keys()) or (not args) or not list(args[0].keys())[0]:
-            return func(*args, **kwargs)
-        else:
-            user_company = current_user.employer_assoc.filter_by(
-                company_id=kwargs['company_id']).first()
+    def decorated(arg, **kwargs):
+        rights = list(arg.keys())[0]
+        if 'company_id' not in kwargs.keys():
+            # read this: http://stackoverflow.com/questions/1319615/proper-way-to-declare-custom-exceptions-in-modern-python
+            # and this: http://www.pydanny.com/attaching-custom-exceptions-to-functions-and-classes.html
+            raise ImproperRightsDecoratorUse
+        user_company = current_user.employer_assoc.filter_by(
+            company_id=kwargs['company_id']).first()
 
-            if not user_company:  # TODO (AA to AA): if set of rights is empty we should
-                # TODO (AA to AA): return True or raise exception otherwise.
-                return func(*args, **kwargs)
+        if not user_company:
+            return False if rights else True
 
-            status_name = user_company.status
-            user_status = STATUS_RIGHTS[status_name]
+        status_name = user_company.status
+        user_status = STATUS_RIGHTS[status_name]
 
-            args_new = ()
-            rez = False
-            for arg in args:
-                needed_rights_in_int = Right.transform_rights_into_integer(list(arg.keys())[0])
-                needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
-                if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
-                    arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2):
-                                arg[list(arg.keys())[0]]},)
-                    args_new += arg_new
-                    rez = True
-            if not rez:
-                abort(403)
-            return func(*args_new, **kwargs)
+        arg_new = None
+        rez = False
+        needed_rights_in_int = Right.transform_rights_into_integer(rights)
+        needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
+        if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
+            arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2): arg[rights]})
+            rez = True
+        return func(arg_new, **kwargs) if rez else False
     return decorated
 
 

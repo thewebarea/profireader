@@ -11,8 +11,7 @@ from ..forms.user import EditProfileForm
 @user_bp.route('/profile/<user_id>')
 @login_required
 def profile(user_id):
-    user = g.db.query(User).\
-        filter(User.id == user_id).first()
+    user = g.db.query(User).filter(User.id == user_id).first()
     if not user:
         abort(404)
     return render_template('user_profile.html', avatar_size=AVATAR_SIZE)

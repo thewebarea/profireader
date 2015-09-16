@@ -9,6 +9,10 @@ class Error(Exception):
     pass
 
 
+class ImproperRightsDecoratorUse(Exception):
+    pass
+
+
 class BadCoordinates(Error):
     pass
 
