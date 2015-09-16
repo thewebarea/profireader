@@ -462,8 +462,12 @@ class User(Base, UserMixin, PRBase):
     #def is_administrator(self):
     #    return self.can(Permission.ADMINISTER)
     def user_rights_in_company(self, company_id):
-        user_rights_int = self.employer_assoc.filter_by(company_id=company_id).one().rights
-        return list(Right.transform_rights_into_set(user_rights_int))
+
+        user_rights = []
+        if self.employer_assoc.filter_by(company_id=company_id).count():
+            user_rights_int = self.employer_assoc.filter_by(company_id=company_id).one().rights
+            user_rights = list(Right.transform_rights_into_set(user_rights_int))
+        return user_rights
 
 class Group(Base, PRBase):
 

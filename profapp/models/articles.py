@@ -47,6 +47,9 @@ class ArticlePortal(Base, PRBase):
     portal_id = Column(TABLE_TYPES['id_profireader'],
                        ForeignKey('portal.id'))
 
+    image_file_id = Column(TABLE_TYPES['id_profireader'],
+                            ForeignKey('file.id'), nullable=False)
+
     portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                 ForeignKey('portal_division.id'))
 
@@ -60,20 +63,21 @@ class ArticlePortal(Base, PRBase):
                            viewonly=True, uselist=False)
 
     def __init__(self, article_company_id=None, title=None, short=None,
-                 long=None, status=None, portal_division_id=None,
+                 long=None, status=None, portal_division_id=None, image_file_id = None,
                  portal_id=None):
         self.article_company_id = article_company_id
         self.title = title
         self.short = short
+        self.image_file_id = image_file_id
         self.long = long
         self.status = status
         self.portal_division_id = portal_division_id
         self.portal_id = portal_id
 
-    def get_client_side_dict(self, fields='id|title|short|'
+    def get_client_side_dict(self, fields='id|title|short|image_file_id|'
                                           'long|cr_tm|md_tm|'
                                           'status|publishing_tm, '
-                                          'company.id|name'):
+                                          'company.id|name, division.id|name'):
         return self.to_dict(fields)
 
     @staticmethod
@@ -103,6 +107,8 @@ class ArticleCompany(Base, PRBase):
                             ForeignKey('file.id'), nullable=False)
     company = relationship(Company)
     editor = relationship(User)
+    article = relationship('Article',
+                        primaryjoin="and_(Article.id==ArticleCompany.article_id)", uselist=False)
     portal_article = relationship('ArticlePortal',
                                   primaryjoin="ArticleCompany.id=="
                                               "ArticlePortal."
@@ -130,6 +136,7 @@ class ArticleCompany(Base, PRBase):
 
         self.portal_article.append(
             ArticlePortal(title=self.title, short=self.short,
+                          image_file_id = self.image_file_id,
                           long=self.long, portal_division_id=division,
                           article_company_id=self.id).save())
         return self
@@ -167,8 +174,7 @@ class Article(Base, PRBase):
                         primaryjoin="and_(Article.id==ArticleCompany."
                                     "article_id, ArticleCompany."
                                     "company_id==None)",
-                        uselist=False,
-                        backref='article')
+                        uselist=False)
 
     def get_client_side_dict(self,
                              fields='id, mine|submitted.id|title|short|'
@@ -198,8 +204,8 @@ class Article(Base, PRBase):
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
-        return ArticleCompany.get(article_company_id).attr(
-            kwargs).save().article
+        a = ArticleCompany.get(article_company_id)
+        return a.attr(kwargs).save().article
 
     @staticmethod
     def get_articles_for_user(user_id):
@@ -223,23 +229,33 @@ class Article(Base, PRBase):
                     ArticlePortal.long.ilike("%" + search_text + "%"))
         ).count()/Config.ITEMS_PER_PAGE)
 
-    def get_articles_for_portal(page_size, user_id, portal_division_id,
-                                pages, page=1, search_text=None):
+    def get_articles_for_portal(page_size, user_id,
+                                pages, page=1, search_text=None, portal_division_id = None, portal_id = None):
         page -= 1
         if not search_text:
             query = _P().order_by('publishing_tm').filter(text(
                 ' "publishing_tm" < clock_timestamp() ')).filter_by(
-                portal_division_id=portal_division_id,
                 status=ARTICLE_STATUS_IN_PORTAL.published)
+            if portal_division_id:
+                query = query.filter_by(portal_division_id=portal_division_id)
+            else:
+                query = query.filter(db(PortalDivision).
+                        filter_by(portal_id = portal_id, id = ArticlePortal.portal_division_id).exists())
+
         else:
             query = _P().order_by('publishing_tm').filter(text(
                 ' "publishing_tm" < clock_timestamp() ')).filter_by(
-                portal_division_id=portal_division_id,
                 status=ARTICLE_STATUS_IN_PORTAL.published).filter(
                 or_(
                     ArticlePortal.title.ilike("%" + search_text + "%"),
                     ArticlePortal.short.ilike("%" + search_text + "%"),
                     ArticlePortal.long.ilike("%" + search_text + "%")))
+
+            if portal_division_id:
+                query = query.filter_by(portal_division_id=portal_division_id)
+            else:
+                query = query.filter(db(PortalDivision).
+                        filter_by(portal_id = portal_id, id=ArticlePortal.portal_division_id).exists())
 
         if page_size:
             query = query.limit(page_size)

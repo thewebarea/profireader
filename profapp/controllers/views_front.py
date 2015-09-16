@@ -12,22 +12,22 @@ def index():
     search_text = ''
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
-    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id).first()
-    pages = Article.get_pages_count(division.id,
-
-                                    search_text=search_text)
+    # pages = Article.get_pages_count(division.id,
+    #                                 search_text=search_text)
     articles = Article.get_articles_for_portal(
         page_size=Config.ITEMS_PER_PAGE,
         user_id=g.user_dict['id'],
-        portal_division_id=division.id, page=page, pages=pages,
+        page=page, pages=[],
+        portal_id = portal.id,
         search_text=search_text)
 
     return render_template('front/bird/index.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},
-                           division=division.get_client_side_dict(),
+                           division=None,
                            portal=portal,
-                           pages=pages,
+                           page=1,
+                           pages=1,
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
                            search_text=search_text)
@@ -51,7 +51,7 @@ def division(division_name, page, search_text):
         portal_division_id=division.id, page=page, pages=pages,
         search_text=search_text)
 
-    return render_template('front/bird/index.html',
+    return render_template('front/bird/division.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},
                            division=division.get_client_side_dict(),
