@@ -13,7 +13,7 @@ from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
 from ..models.rights import list_of_RightAtomic_attributes
-from ..constants.USER_ROLES import RIGHTS
+from profapp.models.rights import RIGHTS
 from ..models.files import File
 
 # todo (AA to OZ): is @json necessary here?

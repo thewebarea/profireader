@@ -147,7 +147,7 @@ def simple_permissions(rights):
         elif 'user' in kwargs.keys():
             user_object = kwargs['user']
         else:
-            user_object = None
+            user_object = current_user
 
         return UserCompany.permissions(rights, user_object, company_object)
 
@@ -251,28 +251,26 @@ class UserCompany(Base, PRBase):
 
     @staticmethod
     def permissions(needed_rights_iterable, user_object, company_object):
+
+        needed_rights_int = Right.transform_rights_into_integer(needed_rights_iterable)
+
         if not (user_object and company_object):
-            return True
-        user = user_object
-        company = company_object
-        if type(user_object) is str:
-            user = g.db.query(User).filter_by(id=user_object).first()
-        if type(company_object) is str:
-            company = g.db.query(Company).\
-                filter_by(id=company_object).first()
+            available_rights = 0  # earlier it returned True (exception should be raised here?)
+        else:
+            user = user_object
+            company = company_object
+            if type(user_object) is str:
+                user = g.db.query(User).filter_by(id=user_object).first()
+                if not user:
+                    return abort(400)
+            if type(company_object) is str:
+                company = g.db.query(Company).filter_by(id=company_object).first()
+                if not company:
+                    return abort(400)
 
-        needed_rights_int = \
-            Right.transform_rights_into_integer(needed_rights_iterable)
+            user_company = user.employer_assoc.filter_by(company_id=company.id).first()
 
-        # available_rights = \
-        #     [user_company.rights for user_company in user.employers
-        #      if user_company.company == company
-        #      ][0] or 0
-
-        user_company = \
-            user.employer_assoc.filter_by(company_id=company.id).first()
-
-        available_rights = user_company.rights if user_company else 0
+            available_rights = user_company.rights if user_company else 0
 
         if (available_rights & needed_rights_int) != needed_rights_int:
             return abort(403)

@@ -2,6 +2,8 @@ from flask import request, current_app, g, flash
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
+from flask.ext.login import logout_user
+
 # from db_init import Base, g.db
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -19,7 +21,9 @@ from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase, Base
 from .rights import Right
+from sqlalchemy import CheckConstraint
 from sqlalchemy.ext.associationproxy import association_proxy
+from ..constants.USER_ROLES import GOD_RIGHTS
 
 
 class User(Base, UserMixin, PRBase):
@@ -41,6 +45,17 @@ class User(Base, UserMixin, PRBase):
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+
+    # _rights = (0, 0)  # (0, GOD_RIGHTS)
+    # rights_defined_int = \
+    #     Column(TABLE_TYPES['bigint'],
+    #            CheckConstraint('rights >= 0', name='unsigned_profireader_rights_def'),
+    #            default=0, nullable=False)
+    #
+    # rights_undefined_int = \
+    #     Column(TABLE_TYPES['bigint'],
+    #            CheckConstraint('rights >= 0', name='unsigned_profireader_rights_undef'),
+    #            default=0, nullable=False)  # default=GOD_RIGHTS
 
     registered_tm = Column(TABLE_TYPES['timestamp'],
                            default=datetime.datetime.utcnow)
@@ -129,8 +144,10 @@ class User(Base, UserMixin, PRBase):
 # get all users companies : user.employers
 
     def __init__(self,
-                 user_right_in_company=[],
+                 # user_rights_in_profireader_def=[],
+                 # user_rights_in_profireader_undef=[],
                  employers=[],
+
                  PROFIREADER_ALL=SOC_NET_NONE['profireader'],
                  GOOGLE_ALL=SOC_NET_NONE['google'],
                  FACEBOOK_ALL=SOC_NET_NONE['facebook'],
@@ -151,11 +168,11 @@ class User(Base, UserMixin, PRBase):
                  pass_reset_conf_tm=None,
                  ):
 
-        # self.companies = companies
+        # self.user_rights_in_profireader_def = user_rights_in_profireader_def
+        # self.user_rights_in_profireader_undef = user_rights_in_profireader_undef
 
         self.employers = employers
 
-        self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['email']
         self.profireader_first_name = PROFIREADER_ALL['first_name']
         self.profireader_last_name = PROFIREADER_ALL['last_name']
@@ -256,7 +273,7 @@ class User(Base, UserMixin, PRBase):
     def ban(self):
         self.banned = True
         g.db.add(self)
-        g.db.commit()
+        g.db.commit()  # Todo (AA to AA): we have to logout banned user to
         return self
 
     def unban(self):

@@ -9,7 +9,8 @@ from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
 from ..models.company import simple_permissions
 from ..models.rights import Right
-from ..constants.USER_ROLES import RIGHTS
+from profapp.models.rights import RIGHTS
+
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
 @login_required
