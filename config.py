@@ -58,7 +58,7 @@ class Config(object):
                              'XV Thumbnails']
 
 # Pagination
-    ITEMS_PER_PAGE = 5
+    ITEMS_PER_PAGE = 2
     PAGINATION_BUTTONS = 4
 
 # Base rights will added when user is confirmed in company
