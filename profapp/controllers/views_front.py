@@ -7,30 +7,29 @@ from config import Config
 from .pagination import pagination
 
 @front_bp.route('/', methods=['GET'])
-def index():
+@front_bp.route('<int:page>/', methods=['GET'])
+def index(page=1):
 
-    page = 1
-    search_text = '%'
+    search_text = request.args.get('search_text') if request.args.get('search_text') else ''
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
-    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id).first()
-    sub_query = Article.subquery_articles_at_portal(search_text=search_text)
-    articles, pages, page = pagination(query=sub_query, page_size=Config.ITEMS_PER_PAGE,
-                                       page=page)
+    sub_query = Article.subquery_articles_at_portal(search_text=search_text, portal=portal)
+    articles, pages, page = pagination(query=sub_query, page_size=Config.ITEMS_PER_PAGE, page=page)
 
     return render_template('front/bird/index.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},
-                           division=division.get_client_side_dict(),
                            portal=portal,
                            pages=pages,
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
                            search_text=search_text)
 
+@front_bp.route('<string:division_name>/'
+                '<string:search_text>', methods=['GET'])
 @front_bp.route('<string:division_name>/<int:page>/'
                 '<string:search_text>', methods=['GET'])
-def division(division_name, page, search_text):
+def division(division_name, search_text, page=1):
 
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()

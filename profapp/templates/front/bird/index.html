@@ -48,7 +48,7 @@
 
                 {% endfor %}
 
-                {% include 'front/bird/pager.html' %}
+             {% include 'front/bird/pager_index.html' %}
 
 
             </div>
@@ -60,7 +60,7 @@
                 <div class="well">
                     <h4>Search</h4>
                     <div class="input-group">
-                        <form action="{{ url_for('front.division', division_name=division.name, page=1, search_text=search_text) }}">
+                        <form onsubmit="{{ url_for('front.index') }}">
                             {% if search_text!='%' %}
                             <input type="text" name="search_text" value="{{ search_text }}" class="form-control">
                             {% else %}

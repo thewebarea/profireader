@@ -96,7 +96,7 @@ def load_material_details(json, company_id, article_id):
 
 @company_bp.route('/update_article/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.PUBLISH()]))
+@check_rights(simple_permissions([]))
 @ok
 def update_article(json):
 
@@ -108,7 +108,7 @@ def update_article(json):
 
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.SUBSCRIBE_TO_PORTALS()]))
+@check_rights(simple_permissions([]))
 @ok
 def submit_to_portal(json):
 

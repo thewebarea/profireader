@@ -103,12 +103,11 @@ class ArticleCompany(Base, PRBase):
     status = Column(TABLE_TYPES['status'], nullable=False)
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
-    image_file_id = Column(TABLE_TYPES['id_profireader'],
-                            ForeignKey('file.id'), nullable=False)
+    image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
     company = relationship(Company)
     editor = relationship(User)
-    article = relationship('Article',
-                        primaryjoin="and_(Article.id==ArticleCompany.article_id)", uselist=False)
+    article = relationship('Article', primaryjoin="and_(Article.id==ArticleCompany.article_id)",
+                           uselist=False)
     portal_article = relationship('ArticlePortal',
                                   primaryjoin="ArticleCompany.id=="
                                               "ArticlePortal."
@@ -136,9 +135,10 @@ class ArticleCompany(Base, PRBase):
 
         self.portal_article.append(
             ArticlePortal(title=self.title, short=self.short,
-                          image_file_id = self.image_file_id,
+                          image_file_id=self.image_file_id,
                           long=self.long, portal_division_id=division,
-                          article_company_id=self.id).save())
+                          article_company_id=self.id,
+                          portal_id=db(PortalDivision, id=division).one().portal_id).save())
         return self
 
     # def update_article(self, **kwargs):
