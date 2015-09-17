@@ -1250,7 +1250,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#152d00', end
 .login-by span{
   display: none;
   position: absolute;
-  bottom: -37px;
+  bottom: -40px;
   background: #777;
   color: #FFFFFF;
   width: 110px;
