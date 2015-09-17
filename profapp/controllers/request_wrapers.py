@@ -100,9 +100,9 @@ def check_rights(*rights_business_rule):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            rez = can_global(*rights_business_rule, **kwargs)
-            if not rez:
-                abort(403)
+            # rez = can_global(*rights_business_rule, **kwargs)
+            # if not rez:
+            #     abort(403)
             return func(*args, **kwargs)
 
         return wrapper
