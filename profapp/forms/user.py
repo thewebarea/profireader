@@ -7,22 +7,12 @@ from ..constants.TABLE_TYPES import TABLE_TYPES
 
 
 class EditProfileForm(Form):
-    name = StringField('Display name',
-                       validators=[Length(0, TABLE_TYPES['name'].length)])
-    first_name = StringField('First name',
-                             validators=[Length(0,
-                                                TABLE_TYPES['name'].length)])
-    last_name = StringField('Last name',
-                            validators=[Length(0, TABLE_TYPES['name'].length)])
-    gender = StringField('Gender',
-                         validators=[Length(0, TABLE_TYPES['gender'].length)])
+    name = StringField('Display name', validators=[Length(0, TABLE_TYPES['name'].length)])
+    first_name = StringField('First name', validators=[Length(0, TABLE_TYPES['name'].length)])
+    last_name = StringField('Last name', validators=[Length(0, TABLE_TYPES['name'].length)])
+    gender = StringField('Gender', validators=[Length(0, TABLE_TYPES['gender'].length)])
     link = StringField('Gender')
-    phone = StringField('Phone',
-                        validators=[Length(0, TABLE_TYPES['name'].length)])
-    location = StringField('Location',
-                           validators=[Length(0,
-                                              TABLE_TYPES['location'].length)])
-    about_me = StringField('About me',
-                           validators=[Length(0, TABLE_TYPES['text'].length)])
-    #profireader_avatar_file_id = Column(String(36), ForeignKey('file.id'))
+    phone = StringField('Phone', validators=[Length(0, TABLE_TYPES['name'].length)])
+    location = StringField('Location', validators=[Length(0, TABLE_TYPES['location'].length)])
+    about_me = StringField('About me', validators=[Length(0, TABLE_TYPES['text'].length)])
     submit = SubmitField('Submit')

@@ -1,7 +1,6 @@
 <script>
 
-
-    module.controller('article_edit', ['$scope', function ($scope) {
+    module.controller('article_edit', ['$scope', '$modal', function ($scope, $modal) {
 
         $scope.details_article = {{ raw_url_for('article.details')|safe }};
         {% if article_company_id %}
@@ -20,47 +19,85 @@
         };
 
 
+        $scope.articleImageSelected = function (item) {
+            $scope.data.image_file_id = item.id;
+            $scope.setImageUrl();
+            closeFileManager();
+        }
+
+        $scope.setImageUrl = function () {
+            $scope.image_file_url = fileUrl($scope.data.image_file_id);
+        }
+
+
+        $scope.chooseImage = function () {
+            $scope.filemanagerModal = $modal.open({
+                templateUrl: 'filemanager.html',
+                controller: 'filemanagerCtrl',
+                size: 'filemanager-halfscreen',
+                resolve: {
+                    file_manager_called_for: function () {
+                        return 'file_browse_image'
+                    },
+                    file_manager_on_action: function () {
+                        return {
+                            choose: "parent.angularControllerFunction('article_edit', 'articleImageSelected')"
+                        }
+                    }
+                }
+            });
+
+
+        };
+
+
     }]);
 </script>
 
 {% raw %}
-<div ng-init="loadData()" ng-controller="article_edit">
+<div ng-init="loadData(null,{},setImageUrl)" ng-controller="article_edit">
     <div ng-if="!data">Loading...</div>
     <div ng-if="data">
 
         <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
-        <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
+        <h2 ng-show="data.id && company">{{ _('update version of article for company
+            `%(company.name)s`', company)
             }}</h2>
 
         <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
 
-        <form ng-ok
-              ng-onsuccess="afterSave"
-              ng-onsubmit="getData"
-              ng-action="save_article">
-            <input type="hidden" ng-model="data.id">
-            {{ _('Article title') }}<br/>
-            <input type="text" ng-model="data.title"><br/><br/>
+        <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
+                maybe layout selector is apporpriate here-->
 
-
-
-
-            {{ _('Article image id') }}<br/>
-            <input type="text" ng-model="data.image_file_id"><br/><br/>
-
-            {{ _('Short Description') }}<br/>
-            <textarea placeholder="short" ng-model="data.short"></textarea><br/><br/>
-
-
-            <div>
-                <div style="display: block; margin-right: 15px; width: 150px; height: 150px; border: 1px solid #ccc; background: #eee; float: left;">{{ _('Select main article image') }}</div>
-                <div style="width: 75%; float: right;">
-                    {{ _('Full text') }}<br/>
-                    <textarea class="" ui-tinymce="tinymceImageOptions" placeholder="text" ng-model="data.long"></textarea><br/><br/>
-                    </div>
+        <form
+                ng-ok
+                ng-onsuccess="afterSave"
+                ng-onsubmit="getData"
+                ng-action="save_article">
+            <div style="width: 400px; float: left">
+                <input type="hidden" ng-model="data.id"/>
+                {{ _('Article title') }}
+                <input style="width: 100%" type="text" ng-model="data.title">
+                {{ _('Short Description') }}
+                <textarea style="width: 100%" placeholder="short"
+                          ng-model="data.short"></textarea>
+                {{ _('Full text') }}
+                <textarea ui-tinymce="tinymceImageOptions" placeholder="text"
+                          ng-model="data.long"></textarea>
             </div>
-            <input style="clear: both;" type="submit" value="{{ data.id ? 'save' : 'create' }}">
+
+            <div ng-click="chooseImage()"
+                 style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
+                        background-size: cover; background-image:url({{ image_file_url }});">
+                {{ _('Select main article image') }}
+            </div>
+            
+            <div style="clear: both"></div>
+            <br/>
+            <input type="hidden" ng-model="data.image_file_id">
+            <input style="clear: both;" type="submit"
+                   value="{{ data.id ? 'save' : 'create' }}"/>
 
         </form>
     </div>

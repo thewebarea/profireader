@@ -107,7 +107,7 @@ function menu_hosts {
     conf_comm "sed -i '/\(db\|web\|mail\).profi/d' /etc/hosts
 sed -i '/\(companyportal\|aprofi\).d.ntaxa.com/d' /etc/hosts
 echo '' >> /etc/hosts
-echo '127.0.0.1 aprofi.d.ntaxa.com companyportal.d.ntaxa.com' >> /etc/hosts
+echo '127.0.0.1 aprofi.d.ntaxa.com companyportal.d.ntaxa.com file001.profi.ntaxa.com' >> /etc/hosts
 echo '127.0.0.1 db.profi web.profi mail.profi' >> /etc/hosts
 cat /etc/hosts" sudo haproxy
     }
@@ -120,7 +120,7 @@ echo 'deb http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main' >> /e
 echo 'deb-src http://ppa.launchpad.net/vbernat/haproxy-1.5/ubuntu trusty main' >> /etc/apt/sources.list
 apt-get update
 apt-get install haproxy
-mv ./haproxy.cfg /etc/haproxy/
+cp ./haproxy.cfg /etc/haproxy/
 service haproxy restart" sudo secret_data
     }
 

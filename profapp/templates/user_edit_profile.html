@@ -11,8 +11,8 @@
 {% block portal_content %}
 <h1>Your Profile</h1>
 
-{#<img class="img-rounded profile-thumbnail" src="{{ g.user.gravatar(size=256) }}"><br>#}
-<img class="img-rounded profile-thumbnail" src="{{ current_user.profireader_avatar_url }}" style="width:{{ avatar_size }}px;height:{{ avatar_size }}px;border:0"><br>
+{#<img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}"><br>#}
+<img class="img-rounded profile-thumbnail" src="{{ user.profireader_avatar_url }}" style="width:{{ avatar_size }}px;height:{{ avatar_size }}px;border:0"><br>
 <a ng-click="mySwitch = !mySwitch">
     <span ng-hide="mySwitch">[upload picture]</span>
     <span ng-show="mySwitch">[hide]</span>
@@ -30,13 +30,13 @@
 <br/>
 
 
-<form action="{{ url_for('user.edit_profile', user_id=g.user.id) }}" onsubmit="return AjaxPost()" method="post">
-    <p>Your display name: <input type="text" placeholder="name" name="name" value="{{ g.user.profireader_name }}"></p>
-    <p>Your email: {{ g.user.profireader_email }}  <a href="{{ url_for('auth.change_email_request') }}"> [change]</a></p>
-    <p>Your first name: <input type="text" placeholder="first name" name="first_name" value="{{ g.user.profireader_first_name or '' }}"></p>
-    <p>Your last name: <input type="text" placeholder="last name" name="last_name" value="{{ g.user.profireader_last_name or '' }}"></p>
+<form action="{{ url_for('user.edit_profile', user_id=user.id) }}" onsubmit="return AjaxPost()" method="post">
+    <p>Your display name: <input type="text" placeholder="name" name="name" value="{{ user.profireader_name }}"></p>
+    <p>Your email: {{ user.profireader_email }}  <a href="{{ url_for('auth.change_email_request') }}"> [change]</a></p>
+    <p>Your first name: <input type="text" placeholder="first name" name="first_name" value="{{ user.profireader_first_name or '' }}"></p>
+    <p>Your last name: <input type="text" placeholder="last name" name="last_name" value="{{ user.profireader_last_name or '' }}"></p>
     <p>Gender:
-        {% if g.user.profireader_gender=='female' %}
+        {% if user.profireader_gender=='female' %}
             <label for="male">Male</label>
             <input type="radio" name="gender" id="male" value="male">
             <label for="female">Female</label>
@@ -48,10 +48,10 @@
             <input type="radio" name="gender" id="female" value="female">
         {% endif %}
     </p>
-    <p>Your web-page: <input type="text" placeholder="www.your.webpage.com" name="link" value="{{ g.user.profireader_link or '' }}"></p>
-    <p>Phone: <input type="text" placeholder="your phone" name="phone" value="{{ g.user.profireader_phone or '' }}"></p>
-    <p>Location: <input type="text" placeholder="your city" name="location" value="{{ g.user.location or '' }}"></p>
-    <p>About me: <textarea name="about_me" cols="40" rows="8" placeholder="Give us some information about you please">{{ g.user.about_me or '' }}</textarea></p>
+    <p>Your web-page: <input type="text" placeholder="www.your.webpage.com" name="link" value="{{ user.profireader_link or '' }}"></p>
+    <p>Phone: <input type="text" placeholder="your phone" name="phone" value="{{ user.profireader_phone or '' }}"></p>
+    <p>Location: <input type="text" placeholder="your city" name="location" value="{{ user.location or '' }}"></p>
+    <p>About me: <textarea name="about_me" cols="40" rows="8" placeholder="Give us some information about you please">{{ user.about_me or '' }}</textarea></p>
     <input type="submit" value="Update Profile" name="submit">
 </form>
 
@@ -68,10 +68,6 @@
 {#</form>#}
 
 {% endblock portal_content %}
-
-{% block portal_footer %}
-    {% include 'partials/portal_footer_Profireader.html' %}
-{% endblock portal_footer %}
 
 {% block scripts %}
     {{ super() }}

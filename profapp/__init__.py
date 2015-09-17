@@ -3,6 +3,7 @@ from authomatic.providers import oauth2
 from authomatic import Authomatic
 from profapp.controllers.blueprints import register as register_blueprints
 from profapp.controllers.blueprints import register_front as register_blueprints_front
+from profapp.controllers.blueprints import register_file as register_blueprints_file
 
 from flask import url_for
 from profapp.controllers.errors import csrf
@@ -21,6 +22,7 @@ import re
 from flask.ext.babel import Babel, gettext
 import jinja2
 from .models.users import User
+
 
 
 def load_database():
@@ -67,9 +69,11 @@ def load_user():
     if user_init.is_authenticated():
         from profapp.models.users import User
         id = user_init.get_id()
-        user = g.db.query(User).filter_by(id=id).first()
+        # user = g.db.query(User).filter_by(id=id).first()
+        user = current_user
         logged_via = REGISTERED_WITH[user.logged_in_via()]
         user_dict['logged_via'] = logged_via
+        user_dict['profile_completed'] = user.profile_completed()
 
         for attr in SOC_NET_FIELDS:
             if attr == 'link' or attr == 'phone':
@@ -106,6 +110,12 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = urllib.parse.unquote(url)
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
+
+def file_url(id):
+    if not id:
+        return ''
+    server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', id)
+    return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
 
 #TODO: OZ by OZ: add kwargs just like in url_for
 def raw_url_for(endpoint):
@@ -184,7 +194,7 @@ login_manager.anonymous_user = AnonymousUser
 
 
 def create_app(config='config.ProductionDevelopmentConfig',
-               front=False,
+               front='n',
                host='localhost'):
     app = Flask(__name__)
 
@@ -200,13 +210,15 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.before_request(setup_authomatic(app))
 
 
-    if front:
+    if front == 'y':
         register_blueprints_front(app)
         my_loader = jinja2.ChoiceLoader([
             app.jinja_loader,
             jinja2.FileSystemLoader('templates_front'),
             ])
         app.jinja_loader = my_loader
+    if front == 'f':
+        register_blueprints_file(app)
     else:
         register_blueprints(app)
 
@@ -220,8 +232,8 @@ def create_app(config='config.ProductionDevelopmentConfig',
     #    sslify = SSLify(app)
 
     @login_manager.user_loader
-    def load_user_manager(id):
-        return g.db.query(User).get(id)
+    def load_user_manager(user_id):
+        return g.db.query(User).get(user_id)
 
     csrf.init_app(app)
 
@@ -229,6 +241,8 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
     app.jinja_env.globals.update(raw_url_for=raw_url_for)
     app.jinja_env.globals.update(pre=pre)
+    app.jinja_env.globals.update(file_url=file_url)
+
 
 
 

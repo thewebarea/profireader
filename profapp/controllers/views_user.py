@@ -8,14 +8,14 @@ from utils.db_utils import db
 from ..constants.UNCATEGORIZED import AVATAR_SIZE
 from ..forms.user import EditProfileForm
 
+
 @user_bp.route('/profile/<user_id>')
 @login_required
 def profile(user_id):
-    user = g.db.query(User).\
-        filter(User.id == user_id).first()
+    user = g.db.query(User).filter(User.id == user_id).first()
     if not user:
         abort(404)
-    return render_template('user_profile.html', avatar_size=AVATAR_SIZE)
+    return render_template('user_profile.html', user=user, avatar_size=AVATAR_SIZE)
 
 
 @user_bp.route('/edit-profile/<user_id>', methods=['GET', 'POST'])
@@ -31,8 +31,8 @@ def edit_profile(user_id):
     #    pass
 
     if request.method == 'GET':
-        return render_template('user_edit_profile.html',
-                               avatar_size=AVATAR_SIZE)
+        user = user_query.first()
+        return render_template('user_edit_profile.html',  user=user, avatar_size=AVATAR_SIZE)
 
     if request.form['submit'] == 'Upload Image':
         user = user_query.first()
@@ -54,4 +54,4 @@ def edit_profile(user_id):
         user_query.update(user_fields)
         flash('You have successfully updated you profile.')
 
-    return redirect(url_for('user.profile', user_id=user_id))
+    return redirect(url_for('user.profile', user_id=user_id, avatar_size=AVATAR_SIZE))

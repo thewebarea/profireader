@@ -9,7 +9,8 @@ from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
 from ..models.company import simple_permissions
 from ..models.rights import Right
-from ..constants.USER_ROLES import RIGHTS
+from profapp.models.rights import RIGHTS
+
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
 @login_required
@@ -49,17 +50,15 @@ def confirm_create(json, company_id):
 
 @portal_bp.route('/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_COMPANIES_PARTNERS()]]))
+@check_rights(simple_permissions([]))
 @ok
 def apply_company(json):
-    print(json['company_id'])
-    print(json['portal_id'])
+
     CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
                                           portal_id=json['portal_id'])
     return {'portals_partners': [portal.portal.to_dict(
-        'name, company_owner_id,id') for portal in CompanyPortal.
-                                     get_portals(json['company_id'])],
-            'company_id': json['company_id']}
+        'name, company_owner_id,id') for portal in CompanyPortal.get_portals(json['company_id'])],
+        'company_id': json['company_id']}
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
@@ -93,7 +92,7 @@ def partners_load(json, company_id):
 
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([RIGHTS.SUBSCRIBE_TO_PORTALS()]))
+@check_rights(simple_permissions([]))
 @ok
 def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(
@@ -135,7 +134,7 @@ def publications_load(json, company_id):
 
 @portal_bp.route('/update_article_portal/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.PUBLISH()]))
+@check_rights(simple_permissions([]))
 @ok
 def update_article_portal(json):
     update = json['new_status'].split('/')

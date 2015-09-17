@@ -119,7 +119,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
         };
     }])
     .directive('ngOk', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
-        console.log('aaa1');
         return {
             restrict: 'A',
             scope: {
@@ -285,13 +284,11 @@ areAllEmpty = function () {
     return are;
 }
 
-function TinyMCE_fileSelected(selectedfiles) {
+function file_choose(selectedfile) {
     var args = top.tinymce.activeEditor.windowManager.getParams();
     var win = (args.window);
     var input = (args.input);
-    $.each(selectedfiles, function (ind, val) {
-        win.document.getElementById(input).value = val['url'];
-    });
+    win.document.getElementById(input).value = selectedfile['url'];
     top.tinymce.activeEditor.windowManager.close();
 }
 
@@ -307,6 +304,30 @@ module.config(function ($provide) {
         };
     });
 });
+
+module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_called_for', 'file_manager_on_action',
+    function ($scope, $modalInstance, file_manager_called_for, file_manager_on_action) {
+
+//TODO: STEPAN fix this pls
+
+        closeFileManager = function () {
+            $scope.$apply(function () {$modalInstance.dismiss('cancel')});
+        }
+
+        $scope.close  = function () {
+            $modalInstance.dismiss('cancel');
+        }
+
+        $scope.src = '/filemanager/';
+        var params = {};
+        if (file_manager_called_for) {
+            params['file_manager_called_for'] = file_manager_called_for;
+        }
+        if (file_manager_on_action) {
+            params['file_manager_on_action'] = angular.toJson(file_manager_on_action);
+        }
+        $scope.src = $scope.src + '?' + $.param(params);
+    }]);
 
 module.run(function ($rootScope, $ok) {
     angular.extend($rootScope, {
@@ -330,12 +351,13 @@ module.run(function ($rootScope, $ok) {
                 return phrase
             }
         },
-        loadData: function (url, senddata) {
+        loadData: function (url, senddata, onok) {
             var scope = this;
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
                 scope.data = data;
-                scope.original_data = $.extend(true, {},data);
+                scope.original_data = $.extend(true, {}, data);
+                if (onok) onok();
             }).finally(function () {
                 scope.loading = false;
             });
@@ -346,12 +368,13 @@ module.run(function ($rootScope, $ok) {
             skin: 'lightgray',
             theme: 'modern',
             file_browser_callback: function (field_name, url, type, win) {
-                var cmsURL = '/filemanager/?calledby=tinymce_file_browse_' + type;
+                var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
+                    '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
                 tinymce.activeEditor.windowManager.open({
                         file: cmsURL,
                         title: 'Select an Image',
-                        width: 600,  // Your dimensions may differ - toy around with them!
-                        height: 600,
+                        width: 950,  // Your dimensions may differ - toy around with them!
+                        height: 700,
                         resizable: "yes",
                         //inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
                         close_previous: "yes"
@@ -367,10 +390,6 @@ module.run(function ($rootScope, $ok) {
         }
     })
 });
-
-module.controller('filemanagerCtrl', ['$scope', '$modal', function ($scope, $modal) {
-    console.log('filemanagerCtrl controller started');
-}]);
 
 
 None = null;
@@ -394,3 +413,19 @@ function highlight($el) {
     }, 500);
 }
 
+function angularControllerFunction(controller_attr, function_name) {
+    var el = $('[ng-controller='+controller_attr+']');
+    if (!el && !el.length) return function () {};
+    var func = angular.element(el[0]).scope()[function_name];
+    var controller = angular.element(el[0]).controller();
+    if (func && controller) {
+        return func
+    }
+    else return function () {};
+
+}
+
+function fileUrl(id) {
+    var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
+    return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
+}
