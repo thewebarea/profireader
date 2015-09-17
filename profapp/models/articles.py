@@ -177,8 +177,8 @@ class Article(Base, PRBase):
                         uselist=False)
 
     def get_client_side_dict(self,
-                             fields='id, image_file_id, mine|submitted.id|title|short|'
-                                    'cr_tm|md_tm|company_id|status, '
+                             fields='id, mine|submitted.id|title|short|'
+                                    'cr_tm|md_tm|company_id|status|image_file_id, '
                                     'submitted.editor.id|'
                                     'profireader_name, '
                                     'submitted.company.name'):
