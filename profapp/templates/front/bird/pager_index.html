@@ -6,7 +6,7 @@
         {% else %} &larr; Older
         {% endif %}
     </li>
-    {% for button in range(page_buttons) %}
+    {% for button in range(page_buttons)|reverse %}
         {% if current_page - (button + 1)> 0 %}
     <li>
         <a href="{{ url_for('front.index', page=current_page - (button + 1))}}">{{ current_page - (button + 1) }}</a>
