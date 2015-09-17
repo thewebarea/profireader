@@ -27,7 +27,7 @@
         Your location: {{ user.location or ''}} <br>
         About: {{ user.about_me or ''}} <br>
 {#        <p>Member since {{ '{{' }} user.registered_tm {{ '}}' }}.</p>#}
-        <p>Member since {{ moment(g.user.registered_tm).format('L') }}.</p>
+        <p>Member since {{ moment(user.registered_tm).format('L') }}.</p>
     </div>
 </div>
 
