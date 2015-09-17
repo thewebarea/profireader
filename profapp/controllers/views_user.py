@@ -54,5 +54,4 @@ def edit_profile(user_id):
         user_query.update(user_fields)
         flash('You have successfully updated you profile.')
 
-    # return redirect(url_for('user.profile', user_id=user_id))
-    return redirect(url_for('user.profile', user=user, avatar_size=AVATAR_SIZE))
+    return redirect(url_for('user.profile', user_id=user_id, avatar_size=AVATAR_SIZE))
