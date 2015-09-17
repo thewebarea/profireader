@@ -1,4 +1,4 @@
-from flask import request, current_app, g, flash
+from flask import request, current_app, g
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
@@ -466,6 +466,7 @@ class User(Base, UserMixin, PRBase):
         if self.employer_assoc.filter_by(company_id=company_id).count():
             user_rights_int = self.employer_assoc.filter_by(company_id=company_id).one().rights
             user_rights = list(Right.transform_rights_into_set(user_rights_int))
+
         return user_rights
 
 class Group(Base, PRBase):

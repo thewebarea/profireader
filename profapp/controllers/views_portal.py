@@ -50,7 +50,7 @@ def confirm_create(json, company_id):
 
 @portal_bp.route('/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_COMPANIES_PARTNERS()]]))
+@check_rights(simple_permissions([]))
 @ok
 def apply_company(json):
 
@@ -92,7 +92,7 @@ def partners_load(json, company_id):
 
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([RIGHTS.SUBSCRIBE_TO_PORTALS()]))
+@check_rights(simple_permissions([]))
 @ok
 def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(
@@ -134,7 +134,7 @@ def publications_load(json, company_id):
 
 @portal_bp.route('/update_article_portal/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.PUBLISH()]))
+@check_rights(simple_permissions([]))
 @ok
 def update_article_portal(json):
     update = json['new_status'].split('/')

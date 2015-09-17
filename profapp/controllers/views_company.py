@@ -16,11 +16,9 @@ from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
 
-# todo (AA to OZ): is @json necessary here?
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
 @check_rights(simple_permissions(Right[RIGHTS.SEND_PUBLICATIONS()]))
-# @json
 def search_to_submit_article(json):
     companies = Company().search_for_company(g.user_dict['id'],
                                              json['search'])
@@ -98,7 +96,7 @@ def load_material_details(json, company_id, article_id):
 
 @company_bp.route('/update_article/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.PUBLISH()]))
+@check_rights(simple_permissions([]))
 @ok
 def update_article(json):
 
@@ -110,7 +108,7 @@ def update_article(json):
 
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.SUBSCRIBE_TO_PORTALS()]))
+@check_rights(simple_permissions([]))
 @ok
 def submit_to_portal(json):
 
