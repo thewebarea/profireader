@@ -74,7 +74,7 @@ class ArticlePortal(Base, PRBase):
         self.portal_division_id = portal_division_id
         self.portal_id = portal_id
 
-    def get_client_side_dict(self, fields='id|title|short|image_file_id|'
+    def get_client_side_dict(self, fields='id|image_file_id|title|short|image_file_id|'
                                           'long|cr_tm|md_tm|'
                                           'status|publishing_tm, '
                                           'company.id|name, division.id|name'):
@@ -178,7 +178,7 @@ class Article(Base, PRBase):
 
     def get_client_side_dict(self,
                              fields='id, mine|submitted.id|title|short|'
-                                    'cr_tm|md_tm|company_id|status, '
+                                    'cr_tm|md_tm|company_id|status|image_file_id, '
                                     'submitted.editor.id|'
                                     'profireader_name, '
                                     'submitted.company.name'):
