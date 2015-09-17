@@ -1,4 +1,4 @@
-from .USER_ROLES import RIGHTS
+from profapp.models.rights import RIGHTS
 
 
 class ARTICLE_STATUS_IN_COMPANY:

@@ -67,8 +67,11 @@ def load_form_update(json, article_company_id):
 @ok
 def save(json, article_company_id):
     json.pop('company')
+    ret = Article.save_edited_version(g.user.id, article_company_id, **json)
+    ret1 = ret.get_client_side_dict()
+    return ret1
     return Article.save_edited_version(g.user.id, article_company_id,
-                                       **json).get_client_side_dict()
+                                       **json)
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])
