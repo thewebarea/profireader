@@ -5,7 +5,7 @@ from flask import url_for, render_template, abort, request, flash, redirect, \
 from ..models.users import User
 from flask.ext.login import current_user, login_required
 from utils.db_utils import db
-from ..constants.UNCATEGORIZED import AVATAR_SIZE
+from ..constants.UNCATEGORIZED import AVATAR_SIZE, AVATAR_SMALL_SIZE
 from ..forms.user import EditProfileForm
 
 
@@ -18,6 +18,7 @@ def profile(user_id):
     return render_template('user_profile.html', user=user, avatar_size=AVATAR_SIZE)
 
 
+# TODO (AA to AA): Here admin must have the possibility to change user profile
 @user_bp.route('/edit-profile/<user_id>', methods=['GET', 'POST'])
 @login_required
 def edit_profile(user_id):
@@ -41,11 +42,11 @@ def edit_profile(user_id):
         g.db.add(user)
         g.db.commit()
     elif request.form['avatar'] == 'Use Gravatar':
-        user_avatar = dict()
-        # TODO (AA to AA): check it
-        # user.profireader_avatar_url = user.gravatar(size=AVATAR_SIZE)
-        # user.profireader_small_avatar_url = user.gravatar(size=AVATAR_SMALL_SIZE)
-        # user_query.update(user_avatar)
+        user = user_query.first()
+        user.profireader_avatar_url = user.gravatar(size=AVATAR_SIZE)
+        user.profireader_small_avatar_url = user.gravatar(size=AVATAR_SMALL_SIZE)
+        g.db.add(user)
+        g.db.commit()
     else:
         user_fields = dict()
         user_fields['profireader_name'] = request.form['name']
