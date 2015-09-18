@@ -443,15 +443,14 @@ class User(Base, UserMixin, PRBase):
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)
-        self.profireader_avatar_url = \
-            file.upload(content=content).get_url()
+        self.profireader_avatar_url = file.upload(content=content).url()
 
+        # TODO: this image should be cropped
         file = File(
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)
-        self.profireader_small_avatar_url = \
-            file.upload(content=content).get_url()
+        self.profireader_small_avatar_url = file.upload(content=content).url()
 
         return self
 
@@ -461,13 +460,11 @@ class User(Base, UserMixin, PRBase):
 
     #def is_administrator(self):
     #    return self.can(Permission.ADMINISTER)
-    def user_rights_in_company(self, company_id):
 
-        user_rights = []
-        if self.employer_assoc.filter_by(company_id=company_id).count():
-            user_rights_int = self.employer_assoc.filter_by(company_id=company_id).one().rights
-            user_rights = list(Right.transform_rights_into_set(user_rights_int))
-        return user_rights
+    def user_rights_in_company(self, company_id):
+        user_company = self.employer_assoc.filter_by(company_id=company_id).first()
+        return list(Right.transform_rights_into_set(user_company.rights)) if user_company else []
+
 
 class Group(Base, PRBase):
 

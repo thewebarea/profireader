@@ -27,8 +27,7 @@ def show_mine():
 @ok
 def load_mine(json):
     return {'articles': [a.get_client_side_dict()
-                         for a in Article.get_articles_for_user(
-            g.user.id)]}
+                         for a in Article.get_articles_for_user(g.user.id)]}
 
 
 @article_bp.route('/create/', methods=['GET'])

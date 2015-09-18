@@ -58,7 +58,12 @@ class Company(Base, PRBase):
     # get all users companies : user.employers
 
     def create_new_company(self):
-
+        """Add new company to company table and make all necessary relationships,
+        if company with this name already exist raise DublicateName"""
+        if db(Company, name=self.name).count():
+            raise errors.DublicateName({
+                'message': 'Company name %(name)s already exist. Please choose another name',
+                'data': self.get_client_side_dict()})
         user_company = UserCompany(status=STATUS.ACTIVE(),
                                    rights=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
@@ -67,6 +72,8 @@ class Company(Base, PRBase):
         return self
 
     def suspended_employees(self):
+        """Show all suspended employees from company. Before define method you should have
+        query with one company"""
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc
@@ -75,11 +82,13 @@ class Company(Base, PRBase):
 
     @staticmethod
     def query_company(company_id):
+        """Method return one company"""
         ret = db(Company, id=company_id).one()
         return ret
 
     @staticmethod
     def search_for_company(user_id, searchtext):
+        """Return all companies which are not current user employers yet"""
         query_companies = db(Company).filter(
             Company.name.like("%" + searchtext + "%")).filter.all()
         ret = []
@@ -91,7 +100,7 @@ class Company(Base, PRBase):
 
     @staticmethod
     def update_comp(company_id, data, passed_file):
-
+        """Edit company. Pass to data parameters which will be edited"""
         company = db(Company, id=company_id)
         upd = {x: y for x, y in zip(data.keys(), data.values())}
         company.update(upd)
@@ -110,6 +119,7 @@ class Company(Base, PRBase):
 
     @staticmethod
     def search_for_company_to_join(user_id, searchtext):
+        """Return all companies which are not current user employers yet"""
         return [company.get_client_side_dict() for company in
                 db(Company).filter(~db(UserCompany, user_id=user_id,
                                        company_id=Company.id).exists()).
@@ -117,6 +127,7 @@ class Company(Base, PRBase):
                        ).all()]
 
     def get_client_side_dict(self, fields='id|name'):
+        """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 
 
@@ -180,28 +191,38 @@ class UserCompany(Base, PRBase):
         self.status = status
         self.rights = rights
 
-    @staticmethod
-    def user_in_company(user_id, company_id):
-        ret = db(UserCompany, user_id=user_id, company_id=company_id).one()
-        return ret
+    # @staticmethod
+    # def user_in_company(user_id, company_id):
+    #     """Return user (status, rights) in some company"""
+    #     ret = db(UserCompany, user_id=user_id, company_id=company_id).one()
+    #     return ret
 
-    # do we provide any rights to user at subscribing?
+    # do we provide any rights to user at subscribing? Not yet
     def subscribe_to_company(self):
+        """Add user to company with non-active status. After that Employer can accept request,
+        and add necessary rights, or reject this user. Method need instance of class with
+        parameters : user_id, company_id, status"""
         if db(UserCompany, user_id=self.user_id,
               company_id=self.company_id).count():
-            raise errors.AlreadyJoined({'message': 'UserAlreadyJoined'})
+            raise errors.AlreadyJoined({
+                'message': 'user already joined to company %(name)s',
+                'data': self.get_client_side_dict()})
         self.employee = User.user_query(self.user_id)
         self.employer = db(Company, id=self.company_id).one()
         self.save()
 
     @staticmethod
     def suspend_employee(company_id, user_id):
+        """This method make status employee in this company suspended"""
         db(UserCompany, company_id=company_id, user_id=user_id). \
             update({'status': STATUS.SUSPENDED()})
         # db_session.flush()
 
     @staticmethod
     def apply_request(company_id, user_id, bool):
+        """Method which define when employer apply or reject request from some user to
+        subscribe to this company. If bool == True(Apply) - update rights to basic rights in company
+        and status to active, If bool == False(Reject) - just update status to rejected."""
         if bool == 'True':
             stat = STATUS.ACTIVE()
             UserCompany.update_rights(user_id,
@@ -216,6 +237,7 @@ class UserCompany(Base, PRBase):
     @check_rights(simple_permissions([Right['manage_access_company']]))
     @check_rights({frozenset(): forbidden_for_current_user})
     def update_rights(user_id, company_id, new_rights):
+        """This method defines for update user-rights in company. Apply list of rights"""
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id, company_id=company_id)
         rights_dict = {'rights': new_rights_binary}
@@ -224,6 +246,7 @@ class UserCompany(Base, PRBase):
     #  corrected
     @staticmethod
     def show_rights(company_id):
+        """Show all rights all users in current company with all statuses"""
         emplo = {}
         for user in db(Company, id=company_id).one().employees:
             user_company = user.employer_assoc. \
@@ -245,6 +268,8 @@ class UserCompany(Base, PRBase):
 
     @staticmethod
     def search_for_user_to_join(company_id, searchtext):
+        """Return all users in current company which have characters
+        in their name like searchtext"""
         return [user.to_dict('profireader_name|id') for user in
                 db(User).filter(~db(UserCompany, user_id=User.id, company_id=company_id).exists()).
                 filter(User.profireader_name.ilike("%" + searchtext + "%")).all()]
