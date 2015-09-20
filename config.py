@@ -26,6 +26,8 @@ class Config(object):
     #SERVER_NAME = 'profireader.a:8080'
     #SERVER_NAME = 'profireader.net:8080'
 
+    SITE_TITLE = 'Profireader'
+
     # Statement for enabling the development environment
     DEBUG = False
     TESTING = False
@@ -118,7 +120,7 @@ class ProductionDevelopmentConfig(Config):
     # Secret key for signing cookies
     SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)
 
-    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', 'Profireader')
+    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', Config.SITE_TITLE)
 
     # Facebook settings
 #    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
@@ -152,7 +154,7 @@ class FrontConfig(Config):
     # Secret key for signing cookies
     SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)
 
-    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', 'Profireader')
+    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', Config.SITE_TITLE)
 
     # Facebook settings
 #    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
@@ -165,6 +167,7 @@ class FrontConfig(Config):
         # Statement for enabling the development environment
         DEBUG = True
 
+
 class TestingConfig(Config):
     # Statement for enabling the development environment
     DEBUG = True
@@ -174,7 +177,7 @@ class TestingConfig(Config):
     CSRF_ENABLED = False
     WTF_CSRF_ENABLED = False
 
-    #Define database connection parameters
+    # Define database connection parameters
     db_name = 'profireader_test'
 
     # Define the database - we are working with
