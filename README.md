@@ -35,6 +35,9 @@ $ pyvenv env && source env/bin/activate && pip3 install -r requirements.txt
 (if you want to create a virtual environment on Python 2 run the following:
 $ virtualenv env2 && . env2/bin/activate && pip install -r requirements.txt )
 
+to work with our DB you should install VPN. see instructions:
+http://jira.ntaxa.com/browse/NTAXA-6
+
 also you need to install file manager from bower package
 $sudo apt-get install nodejs
 $sudo apt-get install npm

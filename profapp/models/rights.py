@@ -81,6 +81,7 @@ class RIGHTS:
     def SUBSCRIBE_TO_PORTALS():
         return 'subscribe_to_portals'
 
+
 # read this:
 # http://stackoverflow.com/questions/9058305/getting-attributes-of-a-class
 def get_my_attributes(my_class, with_values=False):
