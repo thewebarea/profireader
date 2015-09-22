@@ -57,10 +57,9 @@
 
 {#                Blog Search Well#}
                 <div class="well">
-                    <h4>Search</h4>
-
+		    <h4>Search</h4>
                     <div class="input-group">
-                        <form onsubmit="{{ url_for('front.division', division_name=division.name, page=1, search_text=search_text) }}">
+                        <form onsubmit="{{ url_for('front.index') }}">
                             {% if search_text!='%' %}
                             <input type="text" name="search_text" value="{{ search_text }}" class="form-control">
                             {% else %}
@@ -78,50 +77,14 @@
 
                 {#                 Blog Categories Well #}
                 <div class="well">
-                    <h4>Categories</h4>
-
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <ul class="list-unstyled">
-                                <li><a href="#">Category Name1</a>
-                                </li>
-                                <li><a href="#">Category Name2</a>
-                                </li>
-                                <li><a href="#">Category Name3</a>
-                                </li>
-                                <li><a href="#">Category Name4</a>
-                                </li>
-                            </ul>
-                        </div>
-                        {#                 /.col-lg-6 #}
-                        <div class="col-lg-6">
-                            <ul class="list-unstyled">
-                                <li><a href="#">Category Name1</a>
-                                </li>
-                                <li><a href="#">Category Name2</a>
-                                </li>
-                                <li><a href="#">Category Name3</a>
-                                </li>
-                                <li><a href="#">Category Name4</a>
-                                </li>
-                            </ul>
-                        </div>
-                        {#                 /.col-lg-6 #}
-                    </div>
-                    {#                 /.row #}
+		{% include 'front/bird/tags.html' %}
                 </div>
 
 
                 <?php for ($i = 0; $i < 5; $i++) { ?>
                 <!-- Side Widget Well -->
                 <div class="well">
-                    <h4>Side Widget Well</h4>
-
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore, perspiciatis adipisci
-                        accusamus
-                        laudantium odit aliquam repellat tempore quos aspernatur vero. Inventore, perspiciatis adipisci
-                        accusamus
-                        laudantium odit aliquam.</p>
+		    {% include 'front/bird/shortabout.html' %}
                 </div>
                 <?php } ?>
 

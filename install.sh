@@ -106,9 +106,11 @@ apt-get install libpq-dev python-dev libapache2-mod-wsgi" sudo hosts
 function menu_hosts {
     conf_comm "sed -i '/\(db\|web\|mail\).profi/d' /etc/hosts
 sed -i '/\(companyportal\|aprofi\).d.ntaxa.com/d' /etc/hosts
+sed -i '/profi.ntaxa.com/d' /etc/hosts
 echo '' >> /etc/hosts
 echo '127.0.0.1 aprofi.d.ntaxa.com companyportal.d.ntaxa.com file001.profi.ntaxa.com' >> /etc/hosts
 echo '127.0.0.1 db.profi web.profi mail.profi' >> /etc/hosts
+echo '127.0.0.1 profi.ntaxa.com oles.profi.ntaxa.com rodynnifirmy.profi.ntaxa.com derevoobrobka.profi.ntaxa.com viktor.profi.ntaxa.com aa.profi.ntaxa.com md.profi.ntaxa.com oleh.profi.ntaxa.com file001.profi.ntaxa.com' >> /etc/hosts
 cat /etc/hosts" sudo haproxy
     }
 
