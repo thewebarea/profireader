@@ -50,6 +50,36 @@ function conf {
     fi
 }
 
+function down {
+    filetoget=$1
+    if [[ "$2" == "" ]]; then
+	filetoput=${1##*/}
+    else
+	filetoput=$2
+	
+    fi
+
+    filetobak="$3"
+
+    ntaxauser=$(rr 'Enter ntaxa username:')
+    ntaxapass=$(rr "Enter ntaxa password:")
+    if [[ "$3" != '' ]]; then
+	echo "  mv $filetoget $filetobak"
+    fi
+    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://x.d.ntaxa.com/profireader/$filetoget
+if [[ \"\$?\" == \"0\" ]]; then"
+    if [[ "$3" != '' ]]; then
+	command="$command
+    mv $filetoput $filetobak"
+    fi
+    command="$command
+    mv /tmp/tmpfile $filetoput
+else
+    echo 'wget failed!'
+fi"
+    conf_comm "$command" nosudo $4
+    }
+
 conf_comm() {
 rd=`tput setaf 1`
     rst=`tput sgr0`
@@ -127,19 +157,7 @@ service haproxy restart" sudo secret_data
     }
 
 function menu_secret_data {
-    echo "Going to run commands:"
-    echo "  wget --user='ntaxauser' --password='ntaxapassword' -O secret_data.txt http://x.d.ntaxa.com/profireader/secret_data.txt"
-    echo "  mv secret_data.txt secret_data.py"
-    echo "If exists, secret_data.py will be copied to secret_data.py.bak"
-    ntaxauser=$(rr 'Enter ntaxa user:')
-    ntaxapass=$(rr "Enter ntaxa password:")
-    conf_comm "wget --user='$ntaxauser' --password='$ntaxapass' http://x.d.ntaxa.com/profireader/secret_data.txt
-if [[ \"\$?\" == \"0\" ]]; then
-  mv ./secret_data.py ./secret_data."`$gitv`"_"`$datev`".py.bak
-  mv secret_data.txt secret_data.py
-else
-  echo 'wget failed!'
-fi" nosudo  python_3
+    down secret_data.txt secret_data.py secret_data.`$gitv`_`$datev`.bak python_3
     }
 
 function menu_python_3 {
@@ -163,8 +181,6 @@ cd /tmp
 rm -rf 'Python-$pversion'" sudo venv
     fi
     }
-
-
 
 function menu_venv {
     destdir=$(rr 'destination dir for virtual directory' .venv)
@@ -212,10 +228,15 @@ function menu_db_create {
     psqldb=$(rr 'Enter postgresql database name' $profidb)
     
     profiuser=`cat secret_data.py | grep 'DB_USER' | sed -e 's/^\s*DB_USER\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
-    runsql "CREATE DATABASE $psqldb WITH ENCODING 'UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8'  OWNER = $profiuser TEMPLATE=template0" db_load
+    runsql "CREATE DATABASE $psqldb WITH ENCODING 'UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8'  OWNER = $profiuser TEMPLATE=template0" db_download_minimal
     }
 
-function menu_db_load {
+
+function menu_db_download_minimal {
+    down database.structure database.structure database.structure.`$gitv`_`$datev`.bak db_load_minimal
+    }
+
+function menu_db_load_minimal {
     runsql_dump 'Enter sql structure filename' database.structure db_save_minimal
     }
 
@@ -225,8 +246,17 @@ function menu_db_save_minimal {
 su postgres -c 'pg_dump -s $profidb' > database.structure
 tables=\$(su postgres -c \"echo 'SELECT RelName FROM pg_Description JOIN pg_Class ON pg_Description.ObjOID = pg_Class.OID WHERE ObjSubID = 0 AND Description LIKE '\\\"'\\\"%persistent%\\\"'\\\" | psql -t $profidb\" | sed '/^\\s*\$/d' | sed -e 's/^/-t /g' | tr \"\\n\" \" \" )
 su postgres -c \"pg_dump --inserts -a \$tables $profidb\" >> database.structure
-git diff database.structure" sudo 'db_save_full'
+git diff database.structure" sudo 'db_download_full'
     }
+
+function menu_db_download_full {
+    down database_full.sql database_full.sql database_full.sql.`$gitv`_`$datev`.bak db_load_full
+    }
+
+function menu_db_load_full {
+    runsql_dump 'Enter sql full dump filename' database_full.sql db_save_full
+    }
+
 
 function menu_db_save_full {
     profidb=$(get_profidb)
@@ -262,9 +292,12 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "db_user_pass" "create postgres user/password" \
 "db_rename" "rename database (create backup)" \
 "db_create" "create empty database" \
-"db_load" "load database from file" \
 "db_save_minimal" "save initial database to file" \
+"db_download_minimal" "get minimal database from x.d.ntaxa.com" \
+"db_load_minimal" "load full database from file" \
 "db_save_full" "save full database to file" \
+"db_download_full" "get full database from x.d.ntaxa.com" \
+"db_load_full" "load initial database from file" \
 "exit" "Exit" 2> /tmp/selected_menu_
 reset
 datev="date +%y_%m_%d___%H_%M_%S"
