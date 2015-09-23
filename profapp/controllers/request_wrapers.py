@@ -46,7 +46,68 @@ def replace_brackets(func):
 
 
 # @check_user_in_profireader_rights
-def check_user_status_in_company_rights(func):
+# def check_user_in_company_rights(func):
+#     def decorated(arg, **kwargs):
+#         rights = list(arg.keys())[0]
+#         if 'company_id' not in kwargs.keys():
+#             read this: http://stackoverflow.com/questions/1319615/proper-way-to-declare-custom-exceptions-in-modern-python
+#             and this: http://www.pydanny.com/attaching-custom-exceptions-to-functions-and-classes.html
+#             raise ImproperRightsDecoratorUse
+#         user_company = current_user.employer_assoc.filter_by(
+#             company_id=kwargs['company_id']).first()
+#
+#         if not user_company:
+#             return False if rights else True
+#
+#         status_name = user_company.status
+#         user_status = STATUS_RIGHTS[status_name]
+#
+#         arg_new = None
+#         rez = False
+#         needed_rights_in_int = Right.transform_rights_into_integer(rights)
+#         needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
+#         if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
+#             arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2): arg[rights]})
+#             rez = True
+#         return func(arg_new, **kwargs) if rez else False
+#     return decorated
+
+
+# @check_user_in_profireader_rights
+# def check_user_role_in_company_rights(func):
+#     def decorated(arg, **kwargs):
+#         rights = list(arg.keys())[0]
+#         if 'company_id' not in kwargs.keys():
+#             read this: http://stackoverflow.com/questions/1319615/proper-way-to-declare-custom-exceptions-in-modern-python
+#             and this: http://www.pydanny.com/attaching-custom-exceptions-to-functions-and-classes.html
+            # raise ImproperRightsDecoratorUse
+        # user_company = current_user.employer_assoc.filter_by(
+        #     company_id=kwargs['company_id']).first()
+        #
+        # if not user_company:
+        #     return False if rights else True
+        #
+        # if user_company.banned or not user_company.confirmed:
+        #     return False
+        #
+        #  TODO: here data from table have to be used.
+        # role = user_company.role  # relationship will be used here.
+        # user_role = ROLE_RIGHTS[role_name]
+
+
+        # arg_new = None
+        # rez = False
+        # needed_rights_in_int = Right.transform_rights_into_integer(rights)
+        # needed_rights_in_int_2 = needed_rights_in_int & ~user_company.rights_defined
+        # if needed_rights_in_int_2 & user_company.rights_undefined == needed_rights_in_int_2:
+        #     arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2): arg[rights]})
+        #     rez = True
+        # return func(arg_new, **kwargs) if rez else False
+    # return decorated
+
+
+# @check_user_role_in_company_rights
+def check_user_in_company_rights(func):
     def decorated(arg, **kwargs):
         rights = list(arg.keys())[0]
         if 'company_id' not in kwargs.keys():
@@ -59,21 +120,26 @@ def check_user_status_in_company_rights(func):
         if not user_company:
             return False if rights else True
 
-        status_name = user_company.status
-        user_status = STATUS_RIGHTS[status_name]
+        if user_company.banned or not user_company.confirmed:
+            return False
 
         arg_new = None
         rez = False
         needed_rights_in_int = Right.transform_rights_into_integer(rights)
-        needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
-        if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
-            arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2): arg[rights]})
-            rez = True
-        return func(arg_new, **kwargs) if rez else False
+        needed_rights_in_int_2 = needed_rights_in_int & ~user_company.rights_defined
+        if needed_rights_in_int_2 == 0:
+            return True
+
+        # TODO (AA to AA): Here we need the some basic right that every user will belong.
+        # Having this right we will require it within decorator that uses ONLY business rule
+        # without any rights.
+        arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2): arg[rights]})
+
+        return func(arg_new, **kwargs)
     return decorated
 
 
-@check_user_status_in_company_rights
+@check_user_in_company_rights
 def can_global(right_business_rule, **kwargs):
     key = list(right_business_rule.keys())[0]
     rez = right_business_rule[key](key, **kwargs)
@@ -89,6 +155,7 @@ def can_global(right_business_rule, **kwargs):
 #     abort(403)
 
 
+# TODO (AA to AA): may be change it to check_user_company_rights(*rights_business_rule):
 def check_rights(*rights_business_rule):
     # (rights, lambda_func) = rights_lambda_rule.items()[0]
     def decorator(func):

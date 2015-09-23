@@ -171,11 +171,17 @@ class UserCompany(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
+
+    # TODO (AA to AA): create a correspondent column with the enum type in DB
     status = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
                                 get_my_attributes(STATUS_NAME))),
                          name='status_name_type'), nullable=False)
 
     md_tm = Column(TABLE_TYPES['timestamp'])
+
+    confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+    _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+
     rights = Column(TABLE_TYPES['bigint'], CheckConstraint('rights >= 0', name='unsigned_rights'))
 
     employer = relationship('Company', backref='employee_assoc')
@@ -301,3 +307,102 @@ class UserCompany(Base, PRBase):
             return abort(403)
         else:
             return True
+
+
+class CompanyRoleRights(Base, PRBase):
+    __tablename__ = 'company_role_rights'
+
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    role = Column(TABLE_TYPES['string_30'])
+
+    _rights_def = \
+        Column(TABLE_TYPES['bigint'],
+               CheckConstraint('rights >= 0', name='unsigned_profireader_rights_def'),
+               default=0, nullable=False)
+
+    _rights_undef = \
+        Column(TABLE_TYPES['bigint'],
+               CheckConstraint('rights >= 0', name='unsigned_profireader_rights_undef'),
+               default=0, nullable=False)  # or default=COMPANY_OWNER_RIGHTS?
+
+    CheckConstraint('rights_def & rights_undef = 0', name='ck_company_role_rights')
+
+    # employers = relationship('Company', secondary='user_company',
+    #                          backref=backref("employees", lazy='dynamic'))  # Correct
+
+    @property
+    def rights_int(self):
+        return self._rights_def, self._rights_undef
+
+    @rights_int.setter
+    def rights_int(self, rights_def_undef_int=(0, 0)):
+        # Some explanation is needed.
+        # if rights_defined is 1 on some bit then this right (permission) is available.
+        # if 0 then we should check the value of rights_undefined column
+        # if it is really 0 then right (permission) is not available.
+        # if it is 1 then this right (permission) should be taken from user_company table.
+        # such construction of rights defines the CheckConstraint presented below.
+        if rights_def_undef_int[0] & rights_def_undef_int[1]:
+            raise Exception
+
+        self._rights_def = rights_def_undef_int[0]
+        self._rights_undef = rights_def_undef_int[1]
+
+    @property
+    def rights_set(self):
+        return tuple(map(Right.transform_rights_into_set, self.rights_int))
+
+    @rights_set.setter
+    #  rights_def_undef_iterable may be a tuple of sets or lists
+    def rights_set(self, rights_def_undef_iterable=([], [])):
+        # Some explanation is needed.
+        # if rights_defined is 1 on some bit then this right (permission) is available.
+        # if 0 then we should check the value of rights_undefined column
+        # if it is really 0 then right (permission) is not available.
+        # if it is 1 then this right (permission) should be taken from user_company table.
+        # such construction of rights defines the CheckConstraint presented below.
+        if set(rights_def_undef_iterable[0]) & set(rights_def_undef_iterable[1]):
+            raise Exception
+        rights_def_undef_int = tuple(
+            map(Right.transform_rights_into_integer, rights_def_undef_iterable)
+        )
+
+        (self._rights_def, self._rights_undef) = rights_def_undef_int
+
+    @property
+    def rights_defined_int(self):
+        return self.rights_int[0]
+
+    @rights_defined_int.setter
+    def rights_defined_int(self, rights_def_int):
+        self.rights_int = (rights_def_int, self.rights_int[1])
+
+    @property
+    def rights_undefined_int(self):
+        return self.rights_int[1]
+
+    @rights_undefined_int.setter
+    def rights_undefined_int(self, rights_undef_int):
+        self.rights_int = (self.rights_int[0], rights_undef_int)
+
+    @property
+    def rights_defined_set(self):
+        return self.rights_set[0]
+
+    @rights_defined_set.setter
+    def rights_defined_set(self, rights_def_set):
+        self.rights_set = (rights_def_set, self.rights_set[1])
+
+    @property
+    def rights_undefined_set(self):
+        return self.rights_set[1]
+
+    @rights_undefined_set.setter
+    def rights_undefined_set(self, rights_undef_set):
+        self.rights_set = (self.rights_set[0], rights_undef_set)
+
+    def __init__(self, rights_set=([], [])):
+        super(CompanyRoleRights, self).__init__()
+        self.rights_set = rights_set
+

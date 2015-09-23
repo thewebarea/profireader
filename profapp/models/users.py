@@ -43,7 +43,7 @@ class User(Base, UserMixin, PRBase):
     location = Column(TABLE_TYPES['location'])
 
     password_hash = Column(TABLE_TYPES['password_hash'])
-    confirmed = Column(TABLE_TYPES['boolean'], default=False)
+    confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
     # _rights = (0, 0)  # (0, GOD_RIGHTS)

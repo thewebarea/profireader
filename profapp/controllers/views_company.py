@@ -16,12 +16,12 @@ from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
 
+
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
 @check_rights(simple_permissions(Right[RIGHTS.SEND_PUBLICATIONS()]))
 def search_to_submit_article(json):
-    companies = Company().search_for_company(g.user_dict['id'],
-                                             json['search'])
+    companies = Company().search_for_company(g.user_dict['id'], json['search'])
     return companies
 
 
@@ -106,6 +106,7 @@ def update_article(json):
         **{'status': json['article']['status']})
     return {'article': json['article'], 'status': 'ok'}
 
+
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
 @check_rights(simple_permissions([]))
@@ -116,6 +117,7 @@ def submit_to_portal(json):
     article_portal = article.clone_for_portal(json['selected_division'])
     portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
     return {'portal': portal.name}
+
 
 @company_bp.route('/add/')
 @login_required
@@ -180,7 +182,7 @@ def employees(company_id):
 
 @company_bp.route('/update_rights', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+@check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
 def update_rights():
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
@@ -194,7 +196,7 @@ def update_rights():
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+@check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
 def edit(company_id):
     company = db(Company, id=company_id).one()
     return render_template('company/company_edit.html',
@@ -206,7 +208,7 @@ def edit(company_id):
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+@check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
                           passed_file=request.files['logo_file'])
@@ -268,7 +270,7 @@ def join_to_company(json, company_id):
 
 @company_bp.route('/add_subscriber/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.ADD_EMPLOYEE()]]))
+@check_rights(simple_permissions([RIGHTS.ADD_EMPLOYEE()]))
 def confirm_subscriber():
     company_role = UserCompany()
     data = request.form
@@ -281,7 +283,7 @@ def confirm_subscriber():
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.SUSPEND_EMPLOYEE()]]))
+@check_rights(simple_permissions([RIGHTS.SUSPEND_EMPLOYEE()]))
 def suspend_employee():
     data = request.form
     UserCompany.suspend_employee(user_id=data['user_id'],
