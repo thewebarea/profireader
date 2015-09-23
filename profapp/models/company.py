@@ -344,7 +344,7 @@ class CompanyRoleRights(Base, PRBase):
         # if it is 1 then this right (permission) should be taken from user_company table.
         # such construction of rights defines the CheckConstraint presented below.
         if rights_def_undef_int[0] & rights_def_undef_int[1]:
-            raise Exception
+            raise errors.RightsDefUndefInconsistencyError
 
         self._rights_def = rights_def_undef_int[0]
         self._rights_undef = rights_def_undef_int[1]
@@ -363,7 +363,7 @@ class CompanyRoleRights(Base, PRBase):
         # if it is 1 then this right (permission) should be taken from user_company table.
         # such construction of rights defines the CheckConstraint presented below.
         if set(rights_def_undef_iterable[0]) & set(rights_def_undef_iterable[1]):
-            raise Exception
+            raise errors.RightsDefUndefInconsistencyError
         rights_def_undef_int = tuple(
             map(Right.transform_rights_into_integer, rights_def_undef_iterable)
         )
