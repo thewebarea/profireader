@@ -3,6 +3,7 @@
 --
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -257,7 +258,7 @@ CREATE TABLE article (
 );
 
 
-ALTER TABLE public.article OWNER TO pfuser;
+ALTER TABLE article OWNER TO pfuser;
 
 --
 -- Name: article_company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -273,11 +274,12 @@ CREATE TABLE article_company (
     article_id character varying(36) NOT NULL,
     cr_tm timestamp without time zone NOT NULL,
     md_tm timestamp without time zone NOT NULL,
-    status character varying(36) DEFAULT 'submitted'::character varying
+    status character varying(36) DEFAULT 'submitted'::character varying,
+    image_file_id character varying(36)
 );
 
 
-ALTER TABLE public.article_company OWNER TO pfuser;
+ALTER TABLE article_company OWNER TO pfuser;
 
 --
 -- Name: article_company_history_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
@@ -291,7 +293,7 @@ CREATE SEQUENCE article_company_history_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.article_company_history_id_seq OWNER TO pfuser;
+ALTER TABLE article_company_history_id_seq OWNER TO pfuser;
 
 --
 -- Name: article_company_history; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -309,7 +311,7 @@ CREATE TABLE article_company_history (
 );
 
 
-ALTER TABLE public.article_company_history OWNER TO pfuser;
+ALTER TABLE article_company_history OWNER TO pfuser;
 
 --
 -- Name: article_portal; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -325,12 +327,13 @@ CREATE TABLE article_portal (
     md_tm timestamp without time zone NOT NULL,
     status character varying(36) DEFAULT 'not_published'::character varying NOT NULL,
     portal_division_id character varying(36),
-    publishing_tm timestamp without time zone DEFAULT clock_timestamp() NOT NULL,
-    portal_id character varying(36)
+    publishing_tm timestamp without time zone NOT NULL,
+    portal_id character varying(36),
+    image_file_id character varying(36)
 );
 
 
-ALTER TABLE public.article_portal OWNER TO pfuser;
+ALTER TABLE article_portal OWNER TO pfuser;
 
 --
 -- Name: company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -355,7 +358,7 @@ CREATE TABLE company (
 );
 
 
-ALTER TABLE public.company OWNER TO pfuser;
+ALTER TABLE company OWNER TO pfuser;
 
 --
 -- Name: company_portal; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -369,7 +372,7 @@ CREATE TABLE company_portal (
 );
 
 
-ALTER TABLE public.company_portal OWNER TO pfuser;
+ALTER TABLE company_portal OWNER TO pfuser;
 
 --
 -- Name: company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -380,7 +383,7 @@ CREATE TABLE company_right (
 );
 
 
-ALTER TABLE public.company_right OWNER TO pfuser;
+ALTER TABLE company_right OWNER TO pfuser;
 
 --
 -- Name: TABLE company_right; Type: COMMENT; Schema: public; Owner: pfuser
@@ -399,7 +402,7 @@ CREATE TABLE department (
 );
 
 
-ALTER TABLE public.department OWNER TO pfuser;
+ALTER TABLE department OWNER TO pfuser;
 
 --
 -- Name: department_employee_link; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -412,7 +415,7 @@ CREATE TABLE department_employee_link (
 );
 
 
-ALTER TABLE public.department_employee_link OWNER TO pfuser;
+ALTER TABLE department_employee_link OWNER TO pfuser;
 
 --
 -- Name: department_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
@@ -426,7 +429,7 @@ CREATE SEQUENCE department_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.department_id_seq OWNER TO pfuser;
+ALTER TABLE department_id_seq OWNER TO pfuser;
 
 --
 -- Name: department_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pfuser
@@ -446,7 +449,7 @@ CREATE TABLE employee (
 );
 
 
-ALTER TABLE public.employee OWNER TO pfuser;
+ALTER TABLE employee OWNER TO pfuser;
 
 --
 -- Name: employee_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
@@ -460,7 +463,7 @@ CREATE SEQUENCE employee_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.employee_id_seq OWNER TO pfuser;
+ALTER TABLE employee_id_seq OWNER TO pfuser;
 
 --
 -- Name: employee_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pfuser
@@ -487,11 +490,12 @@ CREATE TABLE file (
     cr_tm timestamp without time zone NOT NULL,
     md_tm timestamp without time zone NOT NULL,
     ac_tm timestamp without time zone NOT NULL,
-    copyright_author_name character varying(100) DEFAULT ''::character varying NOT NULL
+    copyright_author_name character varying(100) DEFAULT ''::character varying NOT NULL,
+    root_folder_id character varying(36)
 );
 
 
-ALTER TABLE public.file OWNER TO pfuser;
+ALTER TABLE file OWNER TO pfuser;
 
 --
 -- Name: file_content; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -503,7 +507,7 @@ CREATE TABLE file_content (
 );
 
 
-ALTER TABLE public.file_content OWNER TO pfuser;
+ALTER TABLE file_content OWNER TO pfuser;
 
 --
 -- Name: group; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -514,7 +518,7 @@ CREATE TABLE "group" (
 );
 
 
-ALTER TABLE public."group" OWNER TO pfuser;
+ALTER TABLE "group" OWNER TO pfuser;
 
 --
 -- Name: TABLE "group"; Type: COMMENT; Schema: public; Owner: pfuser
@@ -532,12 +536,12 @@ CREATE TABLE portal (
     name character varying(100) NOT NULL,
     portal_plan_id character varying(36) NOT NULL,
     company_owner_id character varying(36) NOT NULL,
-    portal_layout_id character varying(36) DEFAULT '55e99785-bda1-4001-922f-ab974923999a'::character varying NOT NULL,
+    portal_layout_id character varying(36) DEFAULT '55e9aa8f-7034-4001-9752-d92356558e36'::character varying NOT NULL,
     host character varying(50)
 );
 
 
-ALTER TABLE public.portal OWNER TO pfuser;
+ALTER TABLE portal OWNER TO pfuser;
 
 --
 -- Name: portal_division; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -553,7 +557,7 @@ CREATE TABLE portal_division (
 );
 
 
-ALTER TABLE public.portal_division OWNER TO pfuser;
+ALTER TABLE portal_division OWNER TO pfuser;
 
 --
 -- Name: portal_division_type; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -564,7 +568,7 @@ CREATE TABLE portal_division_type (
 );
 
 
-ALTER TABLE public.portal_division_type OWNER TO pfuser;
+ALTER TABLE portal_division_type OWNER TO pfuser;
 
 --
 -- Name: TABLE portal_division_type; Type: COMMENT; Schema: public; Owner: pfuser
@@ -572,6 +576,43 @@ ALTER TABLE public.portal_division_type OWNER TO pfuser;
 
 COMMENT ON TABLE portal_division_type IS 'persistent';
 
+
+--
+-- Name: portal_file; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE portal_file (
+    id character varying(36),
+    parent_id character varying(36),
+    name character varying(100),
+    mime character varying(30),
+    description character varying(666),
+    copyright character varying(666),
+    company_id character varying(36),
+    ac_count integer,
+    size integer,
+    author_user_id character varying(36),
+    cr_tm timestamp without time zone,
+    md_tm timestamp without time zone,
+    ac_tm timestamp without time zone,
+    copyright_author_name character varying(100),
+    root_folder_id character varying(36)
+);
+
+
+ALTER TABLE portal_file OWNER TO pfuser;
+
+--
+-- Name: portal_file_content; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
+--
+
+CREATE TABLE portal_file_content (
+    id character varying(36),
+    content bytea
+);
+
+
+ALTER TABLE portal_file_content OWNER TO pfuser;
 
 --
 -- Name: portal_layout; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -584,7 +625,7 @@ CREATE TABLE portal_layout (
 );
 
 
-ALTER TABLE public.portal_layout OWNER TO pfuser;
+ALTER TABLE portal_layout OWNER TO pfuser;
 
 --
 -- Name: TABLE portal_layout; Type: COMMENT; Schema: public; Owner: pfuser
@@ -603,7 +644,7 @@ CREATE TABLE portal_plan (
 );
 
 
-ALTER TABLE public.portal_plan OWNER TO pfuser;
+ALTER TABLE portal_plan OWNER TO pfuser;
 
 --
 -- Name: TABLE portal_plan; Type: COMMENT; Schema: public; Owner: pfuser
@@ -688,11 +729,20 @@ CREATE TABLE "user" (
     group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL,
     _banned boolean DEFAULT false NOT NULL,
     profireader_small_avatar_url text DEFAULT '/static/no_avatar_small.png'::text NOT NULL,
-    avatar_hash character varying(32)
+    avatar_hash character varying(32),
+    rights bigint DEFAULT 0 NOT NULL,
+    CONSTRAINT unsigned_profireader_rights CHECK ((rights >= 0))
 );
 
 
-ALTER TABLE public."user" OWNER TO pfuser;
+ALTER TABLE "user" OWNER TO pfuser;
+
+--
+-- Name: COLUMN "user".rights; Type: COMMENT; Schema: public; Owner: pfuser
+--
+
+COMMENT ON COLUMN "user".rights IS 'User rights in Profireader. These rights concerns all companies/portals/articles';
+
 
 --
 -- Name: user_company; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -705,45 +755,12 @@ CREATE TABLE user_company (
     status character varying(36) NOT NULL,
     md_tm timestamp without time zone,
     rights bigint DEFAULT 0 NOT NULL,
-    CONSTRAINT positive_rights_values CHECK ((rights >= 0))
+    CONSTRAINT status_name_type CHECK (((status)::text = ANY (ARRAY[('active'::character varying)::text, ('nonactive'::character varying)::text, ('blocked'::character varying)::text, ('deleted'::character varying)::text, ('banned'::character varying)::text, ('rejected'::character varying)::text, ('suspended'::character varying)::text]))),
+    CONSTRAINT unsigned_rights CHECK ((rights >= 0))
 );
 
 
-ALTER TABLE public.user_company OWNER TO pfuser;
-
---
--- Name: user_company_right; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
---
-
-CREATE TABLE user_company_right (
-    id bigint NOT NULL,
-    user_company_id character(36) NOT NULL,
-    company_right_id character varying(40) NOT NULL
-);
-
-
-ALTER TABLE public.user_company_right OWNER TO pfuser;
-
---
--- Name: user_company_right_id_seq; Type: SEQUENCE; Schema: public; Owner: pfuser
---
-
-CREATE SEQUENCE user_company_right_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE public.user_company_right_id_seq OWNER TO pfuser;
-
---
--- Name: user_company_right_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pfuser
---
-
-ALTER SEQUENCE user_company_right_id_seq OWNED BY user_company_right.id;
-
+ALTER TABLE user_company OWNER TO pfuser;
 
 --
 -- Name: user_portal_reader; Type: TABLE; Schema: public; Owner: pfuser; Tablespace: 
@@ -758,7 +775,7 @@ CREATE TABLE user_portal_reader (
 );
 
 
-ALTER TABLE public.user_portal_reader OWNER TO pfuser;
+ALTER TABLE user_portal_reader OWNER TO pfuser;
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: pfuser
@@ -772,13 +789,6 @@ ALTER TABLE ONLY department ALTER COLUMN id SET DEFAULT nextval('department_id_s
 --
 
 ALTER TABLE ONLY employee ALTER COLUMN id SET DEFAULT nextval('employee_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY user_company_right ALTER COLUMN id SET DEFAULT nextval('user_company_right_id_seq'::regclass);
 
 
 --
@@ -947,14 +957,6 @@ ALTER TABLE ONLY portal_plan
 
 ALTER TABLE ONLY user_company
     ADD CONSTRAINT user_company_pk_id PRIMARY KEY (id);
-
-
---
--- Name: user_company_right_pkey; Type: CONSTRAINT; Schema: public; Owner: pfuser; Tablespace: 
---
-
-ALTER TABLE ONLY user_company_right
-    ADD CONSTRAINT user_company_right_pkey PRIMARY KEY (id);
 
 
 --
@@ -1171,6 +1173,13 @@ CREATE TRIGGER md_tm BEFORE UPDATE ON article_portal FOR EACH ROW EXECUTE PROCED
 
 
 --
+-- Name: publishing_tm; Type: TRIGGER; Schema: public; Owner: pfuser
+--
+
+CREATE TRIGGER publishing_tm BEFORE INSERT OR UPDATE ON article_portal FOR EACH ROW EXECUTE PROCEDURE row_publishing_tm_if_null();
+
+
+--
 -- Name: uid; Type: TRIGGER; Schema: public; Owner: pfuser
 --
 
@@ -1314,6 +1323,22 @@ ALTER TABLE ONLY "user"
 
 
 --
+-- Name: image_file_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY article_company
+    ADD CONSTRAINT image_file_id FOREIGN KEY (image_file_id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
+-- Name: image_file_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY article_portal
+    ADD CONSTRAINT image_file_id FOREIGN KEY (image_file_id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
 -- Name: portal_company_owner_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
@@ -1354,27 +1379,19 @@ ALTER TABLE ONLY portal
 
 
 --
+-- Name: root_folder_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY file
+    ADD CONSTRAINT root_folder_id FOREIGN KEY (root_folder_id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+--
 -- Name: user_company_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY user_company
     ADD CONSTRAINT user_company_company_id_fkey FOREIGN KEY (company_id) REFERENCES company(id);
-
-
---
--- Name: user_company_right_company_right_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY user_company_right
-    ADD CONSTRAINT user_company_right_company_right_id_fkey FOREIGN KEY (company_right_id) REFERENCES company_right(id) ON UPDATE CASCADE;
-
-
---
--- Name: user_company_right_user_company_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY user_company_right
-    ADD CONSTRAINT user_company_right_user_company_id_fkey FOREIGN KEY (user_company_id) REFERENCES user_company(id) ON UPDATE CASCADE;
 
 
 --
@@ -1437,6 +1454,7 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 --
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
@@ -1491,14 +1509,15 @@ INSERT INTO portal_division_type VALUES ('events');
 -- Data for Name: portal_layout; Type: TABLE DATA; Schema: public; Owner: pfuser
 --
 
-INSERT INTO portal_layout VALUES ('55e99785-bda1-4001-922f-ab974923999a', 'bird', 'bird/');
+INSERT INTO portal_layout VALUES ('55e9aa8f-7034-4001-9752-d92356558e36', 'bird', 'bird/');
+INSERT INTO portal_layout VALUES ('55f14b9f-02c0-4001-bc23-31c41c9ab0a8', 'another layout', 'bird/');
 
 
 --
 -- Data for Name: portal_plan; Type: TABLE DATA; Schema: public; Owner: pfuser
 --
 
-INSERT INTO portal_plan VALUES ('55dcb92a-6708-4001-acca-b94c96260506', 'free');
+INSERT INTO portal_plan VALUES ('55e9aa8f-a149-4001-a011-109b63190398', 'free');
 
 
 --
