@@ -326,7 +326,7 @@ class CompanyRoleRights(Base, PRBase):
                CheckConstraint('rights >= 0', name='unsigned_profireader_rights_undef'),
                default=0, nullable=False)  # or default=COMPANY_OWNER_RIGHTS?
 
-    CheckConstraint('rights_def & rights_undef = 0', name='ck_company_role_rights')
+    CheckConstraint('_rights_def & _rights_undef = 0', name='ck_company_role_rights')
 
     # employers = relationship('Company', secondary='user_company',
     #                          backref=backref("employees", lazy='dynamic'))  # Correct
