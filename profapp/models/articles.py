@@ -14,6 +14,7 @@ from utils.html_utils import clean_html_tags
 from flask import g
 from sqlalchemy.sql import or_
 
+
 def _Q(cls):
     return g.db.query(cls)
 
@@ -83,6 +84,7 @@ class ArticlePortal(Base, PRBase):
     @staticmethod
     def update_article_portal(article_portal_id, **kwargs):
         db(ArticlePortal, id=article_portal_id).update(kwargs)
+
 
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'

@@ -6,6 +6,7 @@ from ..models.articles import Article, ArticlePortal
 from ..models.portal import CompanyPortal, PortalDivision, Portal
 from config import Config
 
+
 @file_bp.route('<string:file_id>/')
 def get(file_id):
     image_query = file_query(file_id, File)
@@ -17,6 +18,7 @@ def get(file_id):
                                               image_query.name
     return send_file(BytesIO(image_query_content.content),
                      mimetype=image_query.mime, as_attachment=False)
+
 
 def file_query(file_id, table):
     query = g.db.query(table).filter_by(id=file_id).first()
