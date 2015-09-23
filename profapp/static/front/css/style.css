@@ -213,3 +213,7 @@ footer .row{
 .pager{
     background: #fff;
 }
+
+.well .input-group .form-control {
+    width: 1em;
+}

@@ -92,8 +92,8 @@ def partners_load(json, company_id):
 
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
 @ok
+@check_rights(simple_permissions([]))
 def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(
         json['company_id'], json['search'])

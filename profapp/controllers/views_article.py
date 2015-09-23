@@ -10,14 +10,6 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STAT
 # import os
 
 
-def _A():
-    return g.db.query(Article)
-
-
-def _C():
-    return g.db.query(ArticleCompany)
-
-
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
     return render_template('article/list.html')
@@ -67,10 +59,7 @@ def load_form_update(json, article_company_id):
 def save(json, article_company_id):
     json.pop('company')
     ret = Article.save_edited_version(g.user.id, article_company_id, **json)
-    ret1 = ret.get_client_side_dict()
-    return ret1
-    return Article.save_edited_version(g.user.id, article_company_id,
-                                       **json)
+    return ret.get_client_side_dict()
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])
