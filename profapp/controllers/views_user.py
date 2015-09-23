@@ -35,18 +35,19 @@ def edit_profile(user_id):
         user = user_query.first()
         return render_template('user_edit_profile.html',  user=user, avatar_size=AVATAR_SIZE)
 
-    if request.form['avatar'] == 'Upload Image':
-        user = user_query.first()
-        image = request.files['avatar']
-        user.avatar_update(image)
-        g.db.add(user)
-        g.db.commit()
-    elif request.form['avatar'] == 'Use Gravatar':
-        user = user_query.first()
-        user.profireader_avatar_url = user.gravatar(size=AVATAR_SIZE)
-        user.profireader_small_avatar_url = user.gravatar(size=AVATAR_SMALL_SIZE)
-        g.db.add(user)
-        g.db.commit()
+    if 'avatar' in request.form.keys():
+        if request.form['avatar'] == 'Upload Image':
+            user = user_query.first()
+            image = request.files['avatar']
+            user.avatar_update(image)
+            g.db.add(user)
+            g.db.commit()
+        else:  # request.form['avatar'] == 'Use Gravatar':
+            user = user_query.first()
+            user.profireader_avatar_url = user.gravatar(size=AVATAR_SIZE)
+            user.profireader_small_avatar_url = user.gravatar(size=AVATAR_SMALL_SIZE)
+            g.db.add(user)
+            g.db.commit()
     else:
         user_fields = dict()
         user_fields['profireader_name'] = request.form['name']
