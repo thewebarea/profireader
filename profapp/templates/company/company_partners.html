@@ -15,7 +15,8 @@
     <script>
         module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
-            $scope.url_search_for_portal = {{ raw_url_for('portal.search_for_portal_to_join')|safe }};
+            $scope.url_search_for_portal = function () { return( '/portal/search_for_portal_to_join/uuuu/' ); };
+{#            {{ raw_url_for('portal.search_for_portal_to_join')|safe }};#}
             $scope.url_join = {{ raw_url_for('portal.apply_company')|safe }};
             $scope.partners = {{ raw_url_for('portal.partners')|safe }};
             $scope.selectedPortal_name = '';

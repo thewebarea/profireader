@@ -69,6 +69,8 @@ target/
 # secret data
 secret_data.*
 database.*.bak
+*.sql
+*.bak
 .venv/
 
 tmp*
