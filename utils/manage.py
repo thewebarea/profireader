@@ -24,6 +24,7 @@ from profapp import create_app
 app = create_app()
 manager = Manager(app)
 
+
 @manager.command
 def list_routes():
     """ the solution was found here:

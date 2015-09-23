@@ -14,7 +14,7 @@ def index(page=1):
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
     sub_query = Article.subquery_articles_at_portal(search_text=search_text, portal=portal)
-    articles, pages, page = pagination(query=sub_query, page_size=Config.ITEMS_PER_PAGE, page=page)
+    articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/index.html',
                            articles={a.id: a.get_client_side_dict() for
@@ -39,7 +39,7 @@ def division(division_name, search_text, page=1):
 
     sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                     portal_division_id=division.id)
-    articles, pages, page = pagination(query=sub_query, page_size=Config.ITEMS_PER_PAGE, page=page)
+    articles, pages, page = pagination(query=sub_query, page=page)
     return render_template('front/bird/division.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},

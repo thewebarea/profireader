@@ -48,6 +48,9 @@ class Portal(Base, PRBase):
             else db(PortalLayout).first().id
 
     def create_portal(self):
+        """This method create portal in db. Before define this method you have to create
+        instance of class with parameters: name, host, portal_layout_id, company_owner_id,
+        divisions. Return portal)"""
 
         if db(Portal, company_owner_id=self.company_owner_id).count():
             raise errors.PortalAlreadyExist({
@@ -64,22 +67,18 @@ class Portal(Base, PRBase):
         return self
 
     def get_client_side_dict(self, fields='id|name, divisions.*, layout.*'):
+        """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 
     @staticmethod
     def search_for_portal_to_join(company_id, searchtext):
+        """This method return all portals which are not partners current company"""
         return [port.get_client_side_dict() for port in
                 db(Portal).filter(~db(CompanyPortal,
                                       company_id=company_id,
                                       portal_id=Portal.id).exists()
                                   ).filter(
                     Portal.name.ilike("%" + searchtext + "%")).all()]
-
-    @staticmethod
-    def query_portal(portal_id):
-        ret = db(Portal, id=portal_id).one()
-        return ret
-
 
 class PortalPlan(Base, PRBase):
     __tablename__ = 'portal_plan'
@@ -126,29 +125,23 @@ class CompanyPortal(Base, PRBase):
         self.company_portal_plan_id = company_portal_plan_id
 
     @staticmethod
-    def add_portal_to_company_portal(portal_plan_id,
-                                     company_id,
-                                     portal_id):
-        return CompanyPortal(company_portal_plan_id=portal_plan_id,
-                             company_id=company_id,
-                             portal_id=portal_id)
-
-    @staticmethod
     def apply_company_to_portal(company_id, portal_id):
+        """Add company to CompanyPortal table. Company will be partner of this portal"""
         g.db.add(CompanyPortal(company=db(Company, id=company_id).one(),
                                portal=db(Portal, id=portal_id).one(),
-                               company_portal_plan_id=Portal().
-                               query_portal(portal_id).
+                               company_portal_plan_id=db(Portal, id=portal_id).
                                portal_plan_id))
         g.db.flush()
 
-    @staticmethod
-    def show_companies_on_my_portal(company_id):
-        portal = Portal().own_portal(company_id).companies
-        return portal
+    # @staticmethod
+    # def show_companies_on_my_portal(company_id):
+    #     """Return all companies partners at portal"""
+    #     portal = Portal().own_portal(company_id).companies
+    #     return portal
 
     @staticmethod
     def get_portals(company_id):
+        """This method return all portals-partners current company"""
         return db(CompanyPortal, company_id=company_id).all()
 
 
@@ -171,13 +164,15 @@ class PortalDivision(Base, PRBase):
         self.portal_id = portal_id
 
     def get_client_side_dict(self, fields='id|name'):
+        """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 
-    @staticmethod
-    def add_new_division(portal_id, name, division_type):
-        return PortalDivision(portal_id=portal_id,
-                              name=name,
-                              portal_division_type_id=division_type)
+    # @staticmethod
+    # def add_new_division(portal_id, name, division_type):
+    #     """Add new division to current portal"""
+    #     return PortalDivision(portal_id=portal_id,
+    #                           name=name,
+    #                           portal_division_type_id=division_type)
 
 
 class PortalDivisionType(Base, PRBase):
@@ -186,6 +181,7 @@ class PortalDivisionType(Base, PRBase):
 
     @staticmethod
     def get_division_types():
+        """Return all divisions on profireader"""
         return db(PortalDivisionType).all()
 
 
