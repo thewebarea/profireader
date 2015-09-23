@@ -90,11 +90,11 @@ def partners_load(json, company_id):
             'user_rights': user_rights}
 
 
-@portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
-@login_required
-@check_rights(simple_permissions([]))
+@portal_bp.route('/search_for_portal_to_join/<string:delme>/', methods=['POST'])
+# @login_required
 @ok
-def search_for_portal_to_join(json):
+@check_rights(simple_permissions([]))
+def search_for_portal_to_join(json, delme):
     portals_partners = Portal.search_for_portal_to_join(
         json['company_id'], json['search'])
     return portals_partners

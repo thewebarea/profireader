@@ -1449,6 +1449,7 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
+<<<<<<< HEAD:database.sql
 --
 -- PostgreSQL database dump
 --
@@ -1524,3 +1525,5 @@ INSERT INTO portal_plan VALUES ('55e9aa8f-a149-4001-a011-109b63190398', 'free');
 -- PostgreSQL database dump complete
 --
 
+=======
+>>>>>>> origin/master:database.structure

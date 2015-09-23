@@ -14,22 +14,6 @@ from utils.html_utils import clean_html_tags
 from flask import g
 from sqlalchemy.sql import or_
 
-def _Q(cls):
-    return g.db.query(cls)
-
-
-def _A():
-    return g.db.query(Article)
-
-
-def _C():
-    return g.db.query(ArticleCompany)
-
-
-def _P():
-    return g.db.query(ArticlePortal)
-
-
 class ArticlePortal(Base, PRBase):
     __tablename__ = 'article_portal'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True,
@@ -209,7 +193,7 @@ class Article(Base, PRBase):
 
     @staticmethod
     def get_articles_for_user(user_id):
-        return _A().filter_by(author_user_id=user_id).all()
+        return g.db.query(Article).filter_by(author_user_id=user_id).all()
 
     # @staticmethod
     # def subquery_articles_at_portal(portal_division_id=None, search_text=None):
@@ -250,12 +234,12 @@ class Article(Base, PRBase):
     #                             pages, page=1, search_text=None):
     #     page -= 1
     #     if not search_text:
-    #         query = _P().order_by('publishing_tm').filter(text(
+    #         query = g.db.query(ArticlePortal).order_by('publishing_tm').filter(text(
     #             ' "publishing_tm" < clock_timestamp() ')).filter_by(
     #             portal_division_id=portal_division_id,
     #             status=ARTICLE_STATUS_IN_PORTAL.published)
     #     else:
-    #         query = _P().order_by('publishing_tm').filter(text(
+    #         query = g.db.query(ArticlePortal).order_by('publishing_tm').filter(text(
     #             ' "publishing_tm" < clock_timestamp() ')).filter_by(
     #             portal_division_id=portal_division_id,
     #             status=ARTICLE_STATUS_IN_PORTAL.published).filter(
@@ -274,12 +258,12 @@ class Article(Base, PRBase):
 
     @staticmethod
     def get_one_article(article_id):
-        article = _C().filter_by(id=article_id).one()
+        article = g.db.query(ArticleCompany).filter_by(id=article_id).one()
         return article
 
     @staticmethod
     def get_articles_submitted_to_company(company_id):
-        articles = _C().filter_by(company_id=company_id).all()
+        articles = g.db.query(ArticleCompany).filter_by(company_id=company_id).all()
         return articles if articles else []
 
      # for article in articles:
