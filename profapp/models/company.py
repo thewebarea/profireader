@@ -18,6 +18,7 @@ from ..controllers.request_wrapers import check_rights
 from .files import File
 from .pr_base import PRBase, Base
 from ..controllers import errors
+import collections
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
 
@@ -208,6 +209,12 @@ class UserCompany(Base, PRBase):
 
     def __init__(self, user_id=None, company_id=None, status=None,
                  rights_iterable=([], [])):
+        if type(rights_iterable) != tuple or \
+                len(rights_iterable) != 2 or \
+                not isinstance(rights_iterable[0], collections.Iterable) or \
+                not isinstance(rights_iterable[1], collections.Iterable):
+            raise errors.RightsTypeIterableError
+
         super(UserCompany, self).__init__()
         self.user_id = user_id
         self.company_id = company_id
@@ -221,18 +228,24 @@ class UserCompany(Base, PRBase):
     # TODO (AA to AA): raise exception if type(rights_def_undef_int) is not tuple
     # TODO: here and in all similar cases
     @rights_int.setter
-    def rights_int(self, rights_def_undef_int=(0, 0)):
+    def rights_int(self, rights_int=(0, 0)):
+        if (type(rights_int) != tuple) or \
+                len(rights_int) != 2 or \
+                type(rights_int[0]) != int or \
+                type(rights_int[1]) != int:
+            raise errors.RightsTypeIntError
+
         # Some explanation is needed.
         # if rights_defined is 1 on some bit then this right (permission) is available.
         # if 0 then we should check the value of rights_undefined column
         # if it is really 0 then right (permission) is not available.
         # if it is 1 then this right (permission) should be taken from user_company table.
         # such construction of rights defines the CheckConstraint presented below.
-        if rights_def_undef_int[0] & rights_def_undef_int[1]:
+        if rights_int[0] & rights_int[1]:
             raise errors.RightsDefUndefInconsistencyError
 
-        self._add_rights_def = rights_def_undef_int[0]
-        self._add_rights_undef = rights_def_undef_int[1]
+        self._add_rights_def = rights_int[0]
+        self._add_rights_undef = rights_int[1]
 
     @property
     def rights_set(self):
@@ -241,6 +254,12 @@ class UserCompany(Base, PRBase):
     @rights_set.setter
     #  rights_def_undef_iterable may be a tuple of sets or lists
     def rights_set(self, rights_iterable=([], [])):
+        if type(rights_iterable) != tuple or \
+                len(rights_iterable) != 2 or \
+                not isinstance(rights_iterable[0], collections.Iterable) or \
+                not isinstance(rights_iterable[1], collections.Iterable):
+            raise errors.RightsTypeIterableError
+
         # Some explanation is needed.
         # if rights_defined is 1 on some bit then this right (permission) is available.
         # if 0 then we should check the value of rights_undefined column
@@ -424,6 +443,12 @@ class CompanyRoleRights(Base, PRBase):
     #                          backref=backref("employees", lazy='dynamic'))  # Correct
 
     def __init__(self, rights_iterable=([], [])):
+        if type(rights_iterable) != tuple or \
+                len(rights_iterable) != 2 or \
+                not isinstance(rights_iterable[0], collections.Iterable) or \
+                not isinstance(rights_iterable[1], collections.Iterable):
+            raise errors.RightsTypeIterableError
+
         super(CompanyRoleRights, self).__init__()
         self.rights_set = rights_iterable
 
@@ -433,6 +458,12 @@ class CompanyRoleRights(Base, PRBase):
 
     @rights_int.setter
     def rights_int(self, rights_int=(0, 0)):
+        if (type(rights_int) != tuple) or \
+                len(rights_int) != 2 or \
+                type(rights_int[0]) != int or \
+                type(rights_int[1]) != int:
+            raise errors.RightsTypeIntError
+
         # Some explanation is needed.
         # if rights_defined is 1 on some bit then this right (permission) is available.
         # if 0 then we should check the value of rights_undefined column
@@ -452,6 +483,13 @@ class CompanyRoleRights(Base, PRBase):
     @rights_set.setter
     #  rights_def_undef_iterable may be a tuple of sets or lists
     def rights_set(self, rights_iterable=([], [])):
+        if type(rights_iterable) != tuple or \
+                len(rights_iterable) != 2 or \
+                not isinstance(rights_iterable[0], collections.Iterable) or \
+                not isinstance(rights_iterable[1], collections.Iterable):
+            raise errors.RightsTypeIterableError
+
+
         # Some explanation is needed.
         # if rights_defined is 1 on some bit then this right (permission) is available.
         # if 0 then we should check the value of rights_undefined column

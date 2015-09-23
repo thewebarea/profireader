@@ -9,6 +9,14 @@ class Error(Exception):
     pass
 
 
+class RightsTypeIntError(Error):
+    pass
+
+
+class RightsTypeIterableError(Error):
+    pass
+
+
 class RightsDefUndefInconsistencyError(Error):
     pass
 
