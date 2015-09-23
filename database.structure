@@ -1449,3 +1449,81 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 -- PostgreSQL database dump complete
 --
 
+<<<<<<< HEAD:database.sql
+--
+-- PostgreSQL database dump
+--
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+SET search_path = public, pg_catalog;
+
+--
+-- Data for Name: company_right; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO company_right VALUES ('edit');
+INSERT INTO company_right VALUES ('publish');
+INSERT INTO company_right VALUES ('upload_files');
+INSERT INTO company_right VALUES ('delete_files');
+INSERT INTO company_right VALUES ('add_employee');
+INSERT INTO company_right VALUES ('suspend_employee');
+INSERT INTO company_right VALUES ('send_publications');
+INSERT INTO company_right VALUES ('manage_access_company');
+INSERT INTO company_right VALUES ('manage_access_portal');
+INSERT INTO company_right VALUES ('article_priority');
+INSERT INTO company_right VALUES ('manage_readers');
+INSERT INTO company_right VALUES ('manage_companies_partners');
+INSERT INTO company_right VALUES ('manage_comments');
+INSERT INTO company_right VALUES ('comment');
+INSERT INTO company_right VALUES ('subscribe_to_portals');
+INSERT INTO company_right VALUES ('company_owner');
+INSERT INTO company_right VALUES ('manage_articles');
+INSERT INTO company_right VALUES ('un_publish');
+
+
+--
+-- Data for Name: group; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO "group" VALUES ('anonymous');
+INSERT INTO "group" VALUES ('unconfirmed');
+INSERT INTO "group" VALUES ('member');
+INSERT INTO "group" VALUES ('god');
+INSERT INTO "group" VALUES ('banned');
+
+
+--
+-- Data for Name: portal_division_type; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_division_type VALUES ('news');
+INSERT INTO portal_division_type VALUES ('events');
+
+
+--
+-- Data for Name: portal_layout; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_layout VALUES ('55e9aa8f-7034-4001-9752-d92356558e36', 'bird', 'bird/');
+INSERT INTO portal_layout VALUES ('55f14b9f-02c0-4001-bc23-31c41c9ab0a8', 'another layout', 'bird/');
+
+
+--
+-- Data for Name: portal_plan; Type: TABLE DATA; Schema: public; Owner: pfuser
+--
+
+INSERT INTO portal_plan VALUES ('55e9aa8f-a149-4001-a011-109b63190398', 'free');
+
+
+--
+-- PostgreSQL database dump complete
+--
+
+=======
+>>>>>>> origin/master:database.structure
