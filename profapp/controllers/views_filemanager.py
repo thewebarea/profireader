@@ -133,7 +133,6 @@ def uploader():
 
 @filemanager_bp.route('/send/', methods=['POST'])
 def send():
-    print(request.form)
     return jsonify({'result': {'size': 0}})
 
 @filemanager_bp.route('/resumeopload/', methods=['GET'])

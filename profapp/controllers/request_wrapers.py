@@ -7,6 +7,8 @@ from time import sleep
 from flask.ext.login import current_user
 from ..models.rights import Right
 from ..constants.STATUS import STATUS_RIGHTS
+from .errors import ImproperRightsDecoratorUse
+
 
 def ok(func):
     @wraps(func)
@@ -15,7 +17,9 @@ def ok(func):
         # sleep(0.5)
         if 'json' in kwargs:
             del kwargs['json']
-        ret = func(request.json, *args, **kwargs)
+        a = request.json
+        ret = func(a, *args, **kwargs)
+
         return jsonify({'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
         # except Exception as e:
         #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
@@ -45,44 +49,36 @@ def replace_brackets(func):
 
 # @check_user_in_profireader_rights
 def check_user_status_in_company_rights(func):
-    def decorated(*args, **kwargs):
-        # here args is a tuple
-        if ('company_id' not in kwargs.keys()) or (not args) or not list(args[0].keys())[0]:
-            return func(*args, **kwargs)
-        else:
-            user_company = current_user.employer_assoc.filter_by(
-                company_id=kwargs['company_id']).first()
+    def decorated(arg, **kwargs):
+        rights = list(arg.keys())[0]
+        if 'company_id' not in kwargs.keys():
+            # read this: http://stackoverflow.com/questions/1319615/proper-way-to-declare-custom-exceptions-in-modern-python
+            # and this: http://www.pydanny.com/attaching-custom-exceptions-to-functions-and-classes.html
+            raise ImproperRightsDecoratorUse
+        user_company = current_user.employer_assoc.filter_by(
+            company_id=kwargs['company_id']).first()
 
-            if not user_company:
-                return func(*args, **kwargs)
+        if not user_company:
+            return False if rights else True
 
-            status_name = user_company.status
-            user_status = STATUS_RIGHTS[status_name]
+        status_name = user_company.status
+        user_status = STATUS_RIGHTS[status_name]
 
-            args_new = ()
-            rez = False
-            for arg in args:
-                needed_rights_in_int = Right.transform_rights_into_integer(list(arg.keys())[0])
-                needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
-                if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
-                    arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2):
-                                arg[list(arg.keys())[0]]},)
-                    args_new += arg_new
-                    rez = True
-            if not rez:
-                abort(403)
-            return func(*args_new, **kwargs)
+        arg_new = None
+        rez = False
+        needed_rights_in_int = Right.transform_rights_into_integer(rights)
+        needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
+        if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
+            arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2): arg[rights]})
+            rez = True
+        return func(arg_new, **kwargs) if rez else False
     return decorated
 
 
 @check_user_status_in_company_rights
-def can_global(*rights_business_rule, **kwargs):
-    if not rights_business_rule:
-        return True
-    rez = reduce(
-        lambda x, y:
-        x or y[list(y.keys())[0]](list(y.keys())[0], **kwargs),
-        rights_business_rule, False)
+def can_global(right_business_rule, **kwargs):
+    key = list(right_business_rule.keys())[0]
+    rez = right_business_rule[key](key, **kwargs)
     return rez
 
 # if there is need to use check rights inside the controller (view function)
@@ -100,7 +96,9 @@ def check_rights(*rights_business_rule):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # rez = can_global(*rights_business_rule, **kwargs)
+            # if not rights_business_rule:
+            #     return True
+            # rez = reduce(lambda x, y: x or can_global(y, **kwargs), rights_business_rule, False)
             # if not rez:
             #     abort(403)
             return func(*args, **kwargs)

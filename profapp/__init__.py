@@ -24,7 +24,6 @@ import jinja2
 from .models.users import User
 
 
-
 def load_database():
     from sqlalchemy import create_engine
     from sqlalchemy.orm import scoped_session, sessionmaker
@@ -111,13 +110,15 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
+
 def file_url(id):
     if not id:
         return ''
     server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', id)
     return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
 
-#TODO: OZ by OZ: add kwargs just like in url_for
+
+# TODO: OZ by OZ: add kwargs just like in url_for
 def raw_url_for(endpoint):
     appctx = globals._app_ctx_stack.top
     reqctx = globals._request_ctx_stack.top
@@ -134,7 +135,7 @@ def raw_url_for(endpoint):
     ret = re.compile('<[^:]*:').sub('<', url_adapter.map._rules_by_endpoint.get(endpoint, ())[0].rule)
 
     return "function (dict) { var ret = '" + ret + "'; " \
-                           " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
+           " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
 
 
 def pre(value):
