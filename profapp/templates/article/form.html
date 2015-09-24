@@ -80,8 +80,9 @@
                 {{ _('Article title') }}
                 <input style="width: 100%" type="text" ng-model="data.title">
                 {{ _('Short Description') }}
-                <textarea style="width: 100%" placeholder="short"
-                          ng-model="data.short"></textarea>
+                <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>
+                {{ _('KeyWords') }}
+                <input style="width: 100%" ng-model="data.keywords"/>
                 {{ _('Full text') }}
                 <textarea ui-tinymce="tinymceImageOptions" placeholder="text"
                           ng-model="data.long"></textarea>

@@ -77,10 +77,8 @@ class ArticleCompany(Base, PRBase):
     editor_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'), nullable=False,
                             info={'visible': True})
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'))
-    article_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('article.id'))
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    article_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article.id'))
     # created_from_version_id = Column(TABLE_TYPES['id_profireader'],
     # ForeignKey('article_version.id'))
     title = Column(TABLE_TYPES['title'], nullable=False)
@@ -90,6 +88,8 @@ class ArticleCompany(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    keywords = Column(TABLE_TYPES['keywords'])
+
     company = relationship(Company)
     editor = relationship(User)
     article = relationship('Article', primaryjoin="and_(Article.id==ArticleCompany.article_id)",
