@@ -31,3 +31,6 @@ class TagPortalDivision(Base, PRBase):
         super(TagPortalDivision, self).__init__()
         self.tag_id = tag_id
         self.portal_division_id = portal_division_id
+
+# class KeyWords(Base, PRBase):
+

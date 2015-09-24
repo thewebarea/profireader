@@ -167,15 +167,12 @@ class Article(Base, PRBase):
                             info={'visible': True})
 
     submitted = relationship(ArticleCompany,
-                             primaryjoin="and_(Article.id=="
-                                         "ArticleCompany.article_id, "
-                                         "ArticleCompany.company_id!="
-                                         "None)",
+                             primaryjoin="and_(Article.id==ArticleCompany.article_id, "
+                                         "ArticleCompany.company_id!=None)",
                              info={'visible': True})
     mine = relationship(ArticleCompany,
-                        primaryjoin="and_(Article.id==ArticleCompany."
-                                    "article_id, ArticleCompany."
-                                    "company_id==None)",
+                        primaryjoin="and_(Article.id==ArticleCompany.article_id, "
+                                    "ArticleCompany.company_id==None)",
                         uselist=False)
 
     def get_client_side_dict(self,
@@ -189,9 +186,9 @@ class Article(Base, PRBase):
     @staticmethod
     def save_new_article(user_id, **kwargs):
         return Article(mine=ArticleCompany(editor_user_id=user_id,
-                                              company_id=None,
-                                              **kwargs),
-                                              author_user_id=user_id).save()
+                                           company_id=None,
+                                           **kwargs),
+                                           author_user_id=user_id).save()
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
