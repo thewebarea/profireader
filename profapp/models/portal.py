@@ -24,9 +24,9 @@ class Portal(Base, PRBase):
                               ForeignKey('portal_layout.id'))
 
     layout = relationship('PortalLayout')
-    divisions = relationship('PortalDivision', backref='portal',
-                             primaryjoin='Portal.id=='
-                                         'PortalDivision.portal_id')
+    divisions = relationship('PortalDivision',
+                             backref='portal',
+                             primaryjoin='Portal.id==PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
     # companies = relationship('Company', secondary='company_portal')
@@ -79,6 +79,7 @@ class Portal(Base, PRBase):
                                       portal_id=Portal.id).exists()
                                   ).filter(
                     Portal.name.ilike("%" + searchtext + "%")).all()]
+
 
 class PortalPlan(Base, PRBase):
     __tablename__ = 'portal_plan'
@@ -153,8 +154,7 @@ class PortalDivision(Base, PRBase):
     portal_division_type_id = Column(
         TABLE_TYPES['id_profireader'],
         ForeignKey('portal_division_type.id'))
-    portal_id = Column(TABLE_TYPES['id_profireader'],
-                       ForeignKey('portal.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
     def __init__(self, portal_division_type_id=None,

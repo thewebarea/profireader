@@ -14,6 +14,7 @@ from utils.html_utils import clean_html_tags
 from flask import g
 from sqlalchemy.sql import or_
 
+
 class ArticlePortal(Base, PRBase):
     __tablename__ = 'article_portal'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True,
@@ -68,6 +69,7 @@ class ArticlePortal(Base, PRBase):
     def update_article_portal(article_portal_id, **kwargs):
         db(ArticlePortal, id=article_portal_id).update(kwargs)
 
+
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -75,10 +77,8 @@ class ArticleCompany(Base, PRBase):
     editor_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'), nullable=False,
                             info={'visible': True})
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'))
-    article_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('article.id'))
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    article_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article.id'))
     # created_from_version_id = Column(TABLE_TYPES['id_profireader'],
     # ForeignKey('article_version.id'))
     title = Column(TABLE_TYPES['title'], nullable=False)
@@ -88,6 +88,8 @@ class ArticleCompany(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    keywords = Column(TABLE_TYPES['keywords'])
+
     company = relationship(Company)
     editor = relationship(User)
     article = relationship('Article', primaryjoin="and_(Article.id==ArticleCompany.article_id)",
@@ -149,15 +151,12 @@ class Article(Base, PRBase):
                             info={'visible': True})
 
     submitted = relationship(ArticleCompany,
-                             primaryjoin="and_(Article.id=="
-                                         "ArticleCompany.article_id, "
-                                         "ArticleCompany.company_id!="
-                                         "None)",
+                             primaryjoin="and_(Article.id==ArticleCompany.article_id, "
+                                         "ArticleCompany.company_id!=None)",
                              info={'visible': True})
     mine = relationship(ArticleCompany,
-                        primaryjoin="and_(Article.id==ArticleCompany."
-                                    "article_id, ArticleCompany."
-                                    "company_id==None)",
+                        primaryjoin="and_(Article.id==ArticleCompany.article_id, "
+                                    "ArticleCompany.company_id==None)",
                         uselist=False)
 
     def get_client_side_dict(self,
@@ -171,9 +170,9 @@ class Article(Base, PRBase):
     @staticmethod
     def save_new_article(user_id, **kwargs):
         return Article(mine=ArticleCompany(editor_user_id=user_id,
-                                              company_id=None,
-                                              **kwargs),
-                                              author_user_id=user_id).save()
+                                           company_id=None,
+                                           **kwargs),
+                                           author_user_id=user_id).save()
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
