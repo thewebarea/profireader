@@ -23,4 +23,3 @@ def get(file_id):
 def file_query(file_id, table):
     query = g.db.query(table).filter_by(id=file_id).first()
     return query
-
