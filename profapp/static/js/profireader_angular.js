@@ -308,7 +308,7 @@ module.config(function ($provide) {
 module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_called_for', 'file_manager_on_action',
     function ($scope, $modalInstance, file_manager_called_for, file_manager_on_action) {
 
-//TODO: STEPAN fix this pls
+//TODO: SW fix this pls
 
         closeFileManager = function () {
             $scope.$apply(function () {$modalInstance.dismiss('cancel')});
