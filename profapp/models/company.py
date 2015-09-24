@@ -18,7 +18,6 @@ from ..controllers.request_wrapers import check_rights
 from .files import File
 from .pr_base import PRBase, Base
 from ..controllers import errors
-import collections
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
 
@@ -209,10 +208,7 @@ class UserCompany(Base, PRBase):
 
     def __init__(self, user_id=None, company_id=None, status=None,
                  rights_iterable=([], [])):
-        if type(rights_iterable) != tuple or \
-                len(rights_iterable) != 2 or \
-                not isinstance(rights_iterable[0], collections.Iterable) or \
-                not isinstance(rights_iterable[1], collections.Iterable):
+        if not Right.check_type_rights_iterable(rights_iterable):
             raise errors.RightsTypeIterableError
 
         super(UserCompany, self).__init__()
@@ -229,10 +225,7 @@ class UserCompany(Base, PRBase):
     # TODO: here and in all similar cases
     @rights_int.setter
     def rights_int(self, rights_int=(0, 0)):
-        if (type(rights_int) != tuple) or \
-                len(rights_int) != 2 or \
-                type(rights_int[0]) != int or \
-                type(rights_int[1]) != int:
+        if not Right.check_type_rights_int(rights_int):
             raise errors.RightsTypeIntError
 
         # Some explanation is needed.
@@ -254,10 +247,7 @@ class UserCompany(Base, PRBase):
     @rights_set.setter
     #  rights_def_undef_iterable may be a tuple of sets or lists
     def rights_set(self, rights_iterable=([], [])):
-        if type(rights_iterable) != tuple or \
-                len(rights_iterable) != 2 or \
-                not isinstance(rights_iterable[0], collections.Iterable) or \
-                not isinstance(rights_iterable[1], collections.Iterable):
+        if not Right.check_type_rights_iterable(rights_iterable):
             raise errors.RightsTypeIterableError
 
         # Some explanation is needed.
@@ -443,10 +433,7 @@ class CompanyRoleRights(Base, PRBase):
     #                          backref=backref("employees", lazy='dynamic'))  # Correct
 
     def __init__(self, rights_iterable=([], [])):
-        if type(rights_iterable) != tuple or \
-                len(rights_iterable) != 2 or \
-                not isinstance(rights_iterable[0], collections.Iterable) or \
-                not isinstance(rights_iterable[1], collections.Iterable):
+        if not Right.check_type_rights_iterable(rights_iterable):
             raise errors.RightsTypeIterableError
 
         super(CompanyRoleRights, self).__init__()
@@ -458,10 +445,7 @@ class CompanyRoleRights(Base, PRBase):
 
     @rights_int.setter
     def rights_int(self, rights_int=(0, 0)):
-        if (type(rights_int) != tuple) or \
-                len(rights_int) != 2 or \
-                type(rights_int[0]) != int or \
-                type(rights_int[1]) != int:
+        if not Right.check_type_rights_int(rights_int):
             raise errors.RightsTypeIntError
 
         # Some explanation is needed.
@@ -483,12 +467,8 @@ class CompanyRoleRights(Base, PRBase):
     @rights_set.setter
     #  rights_def_undef_iterable may be a tuple of sets or lists
     def rights_set(self, rights_iterable=([], [])):
-        if type(rights_iterable) != tuple or \
-                len(rights_iterable) != 2 or \
-                not isinstance(rights_iterable[0], collections.Iterable) or \
-                not isinstance(rights_iterable[1], collections.Iterable):
+        if not Right.check_type_rights_iterable(rights_iterable):
             raise errors.RightsTypeIterableError
-
 
         # Some explanation is needed.
         # if rights_defined is 1 on some bit then this right (permission) is available.
