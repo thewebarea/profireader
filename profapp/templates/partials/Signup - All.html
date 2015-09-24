@@ -1,6 +1,12 @@
-<a class="btn" href="{{ url_for('auth.login') }}" title="Log in to Profireader">Log in</a>
-<a class="btn" href="{{ url_for('auth.signup') }}" title="Sign up to Profireader">Sign up</a>
+<div class="tabs" style="border-bottom: 1px #ccc solid;">
+    <a class="tab" href="{{ url_for('auth.login') }}" title="Log in to Profireader">Log in</a>
+    <a class="tab actual" style="border: 1px #ccc solid; border-bottom: 1px #fff solid;" href="{{ url_for('auth.signup') }}" title="Sign up to Profireader">Sign up</a>
+    <a class="tab" href="{{ url_for('auth.signup') }}" title="Sign up to Profireader">Help</a>
+</div>
 
-<h2>Sign up using any of the following services:</h2>
-<div class="by-socials-block">{% include 'partials/Signup - Soc Networks.html' %}</div>
-<div class="by-profireader-block">{% include 'partials/Signup - Profireader.html' %}</div>
+
+
+
+
+<div class="by-socials-block"><h2>Sign up using any of the following services:</h2>{% include 'partials/Signup - Soc Networks.html' %}</div>
+<div class="by-profireader-block"><h2>Simple registration</h2>{% include 'partials/Signup - Profireader.html' %}</div>

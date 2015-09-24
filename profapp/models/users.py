@@ -359,7 +359,6 @@ class User(Base, UserMixin, PRBase):
     def password(self):
         raise AttributeError('password is not a readable attribute')
 
-
     # we use SHA256.
     # https://crackstation.net/hashing-security.htm
     # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."

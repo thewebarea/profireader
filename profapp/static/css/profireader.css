@@ -1260,7 +1260,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#152d00', end
 .login-by span{
   display: none;
   position: absolute;
-  bottom: -37px;
+  bottom: -40px;
   background: #777;
   color: #FFFFFF;
   width: 110px;
@@ -1312,4 +1312,39 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#152d00', end
 
 .by-profireader-block{
   float: right;
+}
+
+
+
+
+.tab{
+  display: inline-block;
+  padding: 10px 15px;
+  font-size: 16px;
+  margin-bottom: -1px;
+}
+
+.tab.actual{
+  border: 1px #ccc solid; border-bottom: 1px #fff solid;
+}
+
+a{
+  color: #72a300;
+}
+
+a:hover{
+  color: #5fd400;
+}
+
+input{
+  width: 300px;
+  margin: 3px;
+  padding: 3px 5px;
+}
+
+form{
+  margin-bottom: 20px;
+  border: 1px rgba(95, 212, 0, 0.35) solid;
+  background: rgba(95, 212, 0, 0.05);
+  padding: 10px;
 }

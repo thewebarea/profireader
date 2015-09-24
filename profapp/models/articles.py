@@ -10,7 +10,6 @@ from .pr_base import PRBase, Base
 # from db_init import Base
 from utils.db_utils import db
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
-from utils.html_utils import clean_html_tags
 from flask import g
 from sqlalchemy.sql import or_
 

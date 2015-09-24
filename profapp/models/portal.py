@@ -129,7 +129,7 @@ class CompanyPortal(Base, PRBase):
         """Add company to CompanyPortal table. Company will be partner of this portal"""
         g.db.add(CompanyPortal(company=db(Company, id=company_id).one(),
                                portal=db(Portal, id=portal_id).one(),
-                               company_portal_plan_id=db(Portal, id=portal_id).
+                               company_portal_plan_id=db(Portal, id=portal_id).one().
                                portal_plan_id))
         g.db.flush()
 
