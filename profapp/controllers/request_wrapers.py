@@ -141,8 +141,9 @@ def check_user_in_company_rights(func):
 
 @check_user_in_company_rights
 def can_global(right_business_rule, **kwargs):
-    key = list(right_business_rule.keys())[0]
-    rez = right_business_rule[key](key, **kwargs)
+    # key = list(right_business_rule.keys())[0]
+    # rez = right_business_rule[key](key, **kwargs)
+    rez = right_business_rule(**kwargs)
     return rez
 
 # if there is need to use check rights inside the controller (view function)
@@ -163,7 +164,8 @@ def check_rights(*rights_business_rule):
         def wrapper(*args, **kwargs):
             if not rights_business_rule:
                 return True
-            rez = reduce(lambda x, y: x or can_global(y, **kwargs), rights_business_rule, False)
+            # rez = reduce(lambda x, y: x or can_global(y, **kwargs), rights_business_rule, False)
+            rez = reduce(lambda x, y: x or y(**kwargs), rights_business_rule, False)
             if not rez:
                 abort(403)
             return func(*args, **kwargs)

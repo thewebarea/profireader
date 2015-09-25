@@ -143,10 +143,11 @@ def forbidden_for_current_user(rights, **kwargs):
     return rez
 
 
-def simple_permissions(rights):
-    set_of_rights = frozenset(rights)
+def simple_permissions(rights, allow_if_rights_undefined):
+    # set_of_rights = frozenset(rights)
 
-    def business_rule(rights, **kwargs):
+    # def business_rule(rights, **kwargs):
+    def business_rule(**kwargs):
         if 'company_id' in kwargs.keys():
             company_object = kwargs['company_id']
         elif 'company' in kwargs.keys():
@@ -160,9 +161,13 @@ def simple_permissions(rights):
         else:
             user_object = current_user
 
-        return UserCompany.permissions(rights, user_object, company_object)
+        return UserCompany.permissions(rights,
+                                       allow_if_rights_undefined,
+                                       user_object,
+                                       company_object)
 
-    return {set_of_rights: business_rule}
+    # return {set_of_rights: business_rule}
+    return business_rule
 
 
 class UserCompany(Base, PRBase):
@@ -172,11 +177,12 @@ class UserCompany(Base, PRBase):
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
 
-    # TODO (AA to AA): create a correspondent column with the enum type in DB
+    # TODO (AA to AA): delete a correspondent column with the enum type in DB
     # status = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
     #                             get_my_attributes(STATUS_NAME))),
     #                      name='status_name_type'), nullable=False)
 
+    # TODO (AA to AA): after DB cleaning add nullable=False to DB
     company_role_rights_id = Column(TABLE_TYPES['id_profireader'],
                                     ForeignKey('company_role_rights.id'),
                                     nullable=False)
@@ -186,23 +192,20 @@ class UserCompany(Base, PRBase):
     confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
-    # TODO (AA to AA): create a correspondent column with the enum type in DB
-    # TODO (AA to AA): delete column rights and constraint (unsigned rights) from DB
     _add_rights_def = Column(TABLE_TYPES['bigint'],
-                             CheckConstraint('rights >= 0',
-                                             name='ck_unsigned_add_rights_def'),
+                             CheckConstraint('_add_rights_def >= 0',
+                                             name='cc_unsigned_add_rights_def'),
                              default=0, nullable=False)
     _add_rights_undef = Column(TABLE_TYPES['bigint'],
-                               CheckConstraint('rights >= 0',
-                                               name='ck_unsigned_add_rights_def'),
+                               CheckConstraint('_add_rights_undef >= 0',
+                                               name='cc_unsigned_add_rights_undef'),
                                default=0, nullable=False)
 
     employer = relationship('Company', backref='employee_assoc')
     employee = relationship('User', backref=backref('employer_assoc', lazy='dynamic'))
 
-    # TODO (AA to AA): check name of the constraint user_id_company_id to uc_user_id_company_id
-    UniqueConstraint('user_id', 'company_id', name='user_id_company_id')
-    CheckConstraint('_add_rights_def & _add_rights_undef = 0', name='ck_add_user_company_rights')
+    UniqueConstraint('user_id', 'company_id', name='uc_user_id_company_id')
+    CheckConstraint('_add_rights_def & _add_rights_undef = 0', name='cc_add_user_company_rights')
 
     # todo (AA to AA): check handling md_tm
 
@@ -339,8 +342,8 @@ class UserCompany(Base, PRBase):
            status=STATUS.NONACTIVE()).update({'status': stat})
 
     @staticmethod
-    @check_rights(simple_permissions([Right['manage_access_company']]))
-    @check_rights({frozenset(): forbidden_for_current_user})
+    # @check_rights(simple_permissions([Right['manage_access_company']]))
+    # @check_rights({frozenset(): forbidden_for_current_user})
     def update_rights(user_id, company_id, new_rights):
         """This method defines for update user-rights in company. Apply list of rights"""
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
@@ -380,32 +383,42 @@ class UserCompany(Base, PRBase):
                 filter(User.profireader_name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
-    def permissions(needed_rights_iterable, user_object, company_object):
+    def permissions(needed_rights_iterable, allow_if_rights_undefined, user_object, company_object):
 
         needed_rights_int = Right.transform_rights_into_integer(needed_rights_iterable)
-
+        # TODO: implement Anonimous User handling
         if not (user_object and company_object):
-            available_rights = 0  # earlier it returned True (exception should be raised here?)
+            raise errors.ImproperRightsDecoratorUse
+
+        user = user_object
+        company = company_object
+        if type(user_object) is str:
+            user = g.db.query(User).filter_by(id=user_object).first()
+            if not user:
+                return abort(400)
+        if type(company_object) is str:
+            company = g.db.query(Company).filter_by(id=company_object).first()
+            if not company:
+                return abort(400)
+
+        user_company = user.employer_assoc.filter_by(company_id=company.id).first()
+
+        if user_company:
+            available_rights_def, available_rights_undef = \
+                user_company.rights_defined_int, user_company.rights_undefined_int
         else:
-            user = user_object
-            company = company_object
-            if type(user_object) is str:
-                user = g.db.query(User).filter_by(id=user_object).first()
-                if not user:
-                    return abort(400)
-            if type(company_object) is str:
-                company = g.db.query(Company).filter_by(id=company_object).first()
-                if not company:
-                    return abort(400)
-
-            user_company = user.employer_assoc.filter_by(company_id=company.id).first()
-
-            available_rights = user_company.rights if user_company else 0
-
-        if (available_rights & needed_rights_int) != needed_rights_int:
             return abort(403)
-        else:
+            # available_rights_def, available_rights_undef = 0, 0
+
+        if (available_rights_def & needed_rights_int) == needed_rights_int:
             return True
+        else:
+            needed_rights_int_2 = needed_rights_int & ~available_rights_def
+            residual_rights_undef = needed_rights_int_2 & ~available_rights_undef
+            if residual_rights_undef != 0:
+                return abort(403)
+            else:
+                return bool(allow_if_rights_undefined)
 
 
 #  TODO (AA to AA): create this table in DB
@@ -413,21 +426,21 @@ class CompanyRoleRights(Base, PRBase):
     __tablename__ = 'company_role_rights'
 
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
     role = Column(TABLE_TYPES['string_30'])
 
     _rights_def = \
         Column(TABLE_TYPES['bigint'],
-               CheckConstraint('rights >= 0', name='unsigned_profireader_rights_def'),
+               CheckConstraint('_rights_def >= 0', name='cc_unsigned_profireader_rights_def'),
                default=0, nullable=False)
 
     _rights_undef = \
         Column(TABLE_TYPES['bigint'],
-               CheckConstraint('rights >= 0', name='unsigned_profireader_rights_undef'),
+               CheckConstraint('_rights_undef >= 0', name='cc_unsigned_profireader_rights_undef'),
                default=0, nullable=False)  # or default=COMPANY_OWNER_RIGHTS?
 
     UniqueConstraint('company_id', 'role', name='uc_company_id_role')
-    CheckConstraint('_rights_def & _rights_undef = 0', name='ck_company_role_rights')
+    CheckConstraint('_rights_def & _rights_undef = 0', name='cc_company_role_rights')
 
     # employers = relationship('Company', secondary='user_company',
     #                          backref=backref("employees", lazy='dynamic'))  # Correct
