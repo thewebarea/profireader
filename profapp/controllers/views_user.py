@@ -22,17 +22,21 @@ def profile(user_id):
 @user_bp.route('/edit-profile/<user_id>', methods=['GET', 'POST'])
 @login_required
 def edit_profile(user_id):
+
+    # from .. import raw_url_for
+    # x = raw_url_for('user.edit_profile')
+    # y = url_for('user.edit_profile', user_id=user_id, avatar_size=2*AVATAR_SIZE)
     if current_user.get_id() != user_id:
         abort(403)
 
     user_query = db(User, id=user_id)
-
     #form = EditProfileForm()
     #if form.validate_on_submit():
     #    pass
 
+    user = user_query.first()
+
     if request.method == 'GET':
-        user = user_query.first()
         return render_template('user_edit_profile.html',  user=user, avatar_size=AVATAR_SIZE)
 
     if 'avatar' in request.form.keys():
@@ -43,7 +47,6 @@ def edit_profile(user_id):
             g.db.add(user)
             g.db.commit()
         else:  # request.form['avatar'] == 'Use Gravatar':
-            user = user_query.first()
             user.profireader_avatar_url = user.gravatar(size=AVATAR_SIZE)
             user.profireader_small_avatar_url = user.gravatar(size=AVATAR_SMALL_SIZE)
             g.db.add(user)
@@ -62,4 +65,5 @@ def edit_profile(user_id):
         user_query.update(user_fields)
         flash('You have successfully updated you profile.')
 
-    return redirect(url_for('user.profile', user_id=user_id, avatar_size=AVATAR_SIZE))
+    #return redirect(url_for('user.profile', user_id=user_id, avatar_size=2*AVATAR_SIZE))
+    return render_template('user_edit_profile.html',  user=user, avatar_size=AVATAR_SIZE)
