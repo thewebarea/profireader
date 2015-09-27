@@ -386,7 +386,7 @@ class UserCompany(Base, PRBase):
     def permissions(needed_rights_iterable, allow_if_rights_undefined, user_object, company_object):
 
         needed_rights_int = Right.transform_rights_into_integer(needed_rights_iterable)
-        # TODO: implement Anonimous User handling
+        # TODO: implement Anonymous User handling
         if not (user_object and company_object):
             raise errors.ImproperRightsDecoratorUse
 
@@ -415,13 +415,9 @@ class UserCompany(Base, PRBase):
         else:
             needed_rights_int_2 = needed_rights_int & ~available_rights_def
             residual_rights_undef = needed_rights_int_2 & ~available_rights_undef
-            if residual_rights_undef != 0:
-                return abort(403)
-            else:
-                return bool(allow_if_rights_undefined)
+            return bool(allow_if_rights_undefined) if residual_rights_undef == 0 else abort(403)
 
 
-#  TODO (AA to AA): create this table in DB
 class CompanyRoleRights(Base, PRBase):
     __tablename__ = 'company_role_rights'
 
