@@ -18,6 +18,15 @@ class Tag(Base, PRBase):
         super(Tag, self).__init__()
         self.name = name
 
+    def attach(self):
+        pass
+
+    def remove(self):
+        pass
+
+    def delete(self):
+        pass
+
 
 class TagPortalDivision(Base, PRBase):
     __tablename__ = 'tag_portal_division'
