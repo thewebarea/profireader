@@ -135,6 +135,7 @@ from config import Config
 from apiclient.http import MediaFileUpload
 import os
 
+
 class YoutubeApi:
     def __init__(self):
         self.credentials = gce.AppAssertionCredentials(

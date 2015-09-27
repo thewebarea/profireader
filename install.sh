@@ -197,7 +197,7 @@ function menu_modules {
     conf_comm "
 cd `pwd`
 source $destdir/bin/activate
-pip install -r $req" nosudo port
+pip3 install -r $req" nosudo port
     }
 
 function menu_port {
