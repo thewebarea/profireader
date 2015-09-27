@@ -136,7 +136,7 @@ def confirm_add(json):
 
 @company_bp.route('/profile/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions(['manage_access_company'], allow_if_rights_undefined=True))
+#@check_rights(simple_permissions(['manage_access_company'], allow_if_rights_undefined=True))
 # @check_rights(UserCompany.permissions(needed_rights_iterable=['manage_access_company'],
 #                                       allow_if_rights_undefined=True))
 def profile(company_id):
