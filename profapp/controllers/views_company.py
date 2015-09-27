@@ -83,13 +83,16 @@ def load_material_details(json, company_id, article_id):
 
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
         article['status'])
-    user_rights = g.user.user_rights_in_company(company_id)
+    user_rights = list(g.user.user_rights_in_company(company_id))
 
-    return {'article': article, 'status': status, 'portals':
-            portals, 'company': Company.get(company_id).
-            to_dict('id, employees.id|profireader_name'),
-            'selected_portal': {}, 'selected_division': {},
-            'user_rights': user_rights, 'send_to_user': {},
+    return {'article': article,
+            'status': status,
+            'portals': portals,
+            'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
+            'selected_portal': {},
+            'selected_division': {},
+            'user_rights': user_rights,
+            'send_to_user': {},
             'joined_portals': joined_portals}
 
 
@@ -141,7 +144,7 @@ def confirm_add(json):
 #                                       allow_if_rights_undefined=True))
 def profile(company_id):
     company = db(Company, id=company_id).one()
-    user_rights = g.user.user_rights_in_company(company_id)
+    user_rights = list(g.user.user_rights_in_company(company_id))
     # image = File.get(company.logo_file).url() \
     #     if company.logo_file else '/static/img/company_no_logo.png'
     image = company.logo_file_relationship.url() \
