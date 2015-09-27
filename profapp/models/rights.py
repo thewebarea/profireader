@@ -1,5 +1,7 @@
 from functools import reduce
 import inspect
+from ..controllers import errors
+import collections
 
 #COMPANY_OWNER = ['edit', 'publish', 'unpublish', 'upload_files', 'delete_files', 'add_employee',
 #                 'suspend_employee', 'send_publications', 'manage_access_company', 'manage_access_portal',
@@ -146,6 +148,20 @@ class Right(RightAtomic):
         rez = reduce(lambda x, y: x |
                      cls.RIGHT_REVERSED[y], rights_iterable, 0)
         return rez
+
+    @staticmethod
+    def check_type_rights_int(rights):
+        return type(rights) == tuple and \
+            len(rights) == 2 and \
+            type(rights[0]) == int and \
+            type(rights[1]) == int
+
+    @staticmethod
+    def check_type_rights_iterable(rights):
+        return type(rights) == tuple and \
+            len(rights) == 2 and \
+            isinstance(rights[0], collections.Iterable) and \
+            isinstance(rights[1], collections.Iterable)
 
 #  we really need RightAtomic to be inherited from dict.
 Right = Right()

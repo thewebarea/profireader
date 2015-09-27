@@ -43,7 +43,7 @@ class User(Base, UserMixin, PRBase):
     location = Column(TABLE_TYPES['location'])
 
     password_hash = Column(TABLE_TYPES['password_hash'])
-    confirmed = Column(TABLE_TYPES['boolean'], default=False)
+    confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
     # _rights = (0, 0)  # (0, GOD_RIGHTS)
@@ -460,9 +460,10 @@ class User(Base, UserMixin, PRBase):
     #def is_administrator(self):
     #    return self.can(Permission.ADMINISTER)
 
+    # TODO (AA to AA): it should be corrected
     def user_rights_in_company(self, company_id):
         user_company = self.employer_assoc.filter_by(company_id=company_id).first()
-        return list(Right.transform_rights_into_set(user_company.rights)) if user_company else []
+        return user_company.rights_set[0] if user_company else []
 
 
 class Group(Base, PRBase):

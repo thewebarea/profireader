@@ -22,14 +22,11 @@ def profile(user_id):
 @user_bp.route('/edit-profile/<user_id>', methods=['GET', 'POST'])
 @login_required
 def edit_profile(user_id):
-
-    # from .. import raw_url_for
-    # x = raw_url_for('user.edit_profile')
-    # y = url_for('user.edit_profile', user_id=user_id, avatar_size=2*AVATAR_SIZE)
     if current_user.get_id() != user_id:
         abort(403)
 
     user_query = db(User, id=user_id)
+
     #form = EditProfileForm()
     #if form.validate_on_submit():
     #    pass

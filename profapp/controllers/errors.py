@@ -9,7 +9,19 @@ class Error(Exception):
     pass
 
 
-class ImproperRightsDecoratorUse(Exception):
+class RightsTypeIntError(Error):
+    pass
+
+
+class RightsTypeIterableError(Error):
+    pass
+
+
+class RightsDefUndefInconsistencyError(Error):
+    pass
+
+
+class ImproperRightsDecoratorUse(Error):
     pass
 
 
@@ -51,8 +63,10 @@ class PortalAlreadyExist(Error):
             #     print(details['message'])
     pass
 
+
 class AlreadyJoined(Error):
     pass
+
 
 @csrf.error_handler
 def csrf_error(reason):

@@ -10,8 +10,7 @@ from config import Config
 @file_bp.route('<string:file_id>/')
 def get(file_id):
     image_query = file_query(file_id, File)
-    image_query_content = g.db.query(FileContent).filter_by(
-        id=file_id).first()
+    image_query_content = g.db.query(FileContent).filter_by(id=file_id).first()
     response = make_response()
     response.headers['Content-Type'] = image_query.mime
     response.headers['Content-Disposition'] = 'filename=%s' % \

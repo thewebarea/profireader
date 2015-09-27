@@ -16,25 +16,25 @@ from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
 
+
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.SEND_PUBLICATIONS()]))
+# @check_rights(simple_permissions(Right[RIGHTS.SEND_PUBLICATIONS()]))
 def search_to_submit_article(json):
-    companies = Company().search_for_company(g.user_dict['id'],
-                                             json['search'])
+    companies = Company().search_for_company(g.user_dict['id'], json['search'])
     return companies
 
 
 @company_bp.route('/', methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def show():
     return render_template('company/companies.html')
 
 
 @company_bp.route('/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def load_companies(json):
 
@@ -44,7 +44,7 @@ def load_companies(json):
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def materials(company_id):
     return render_template('company/materials.html',
                            company_id=company_id,
@@ -56,7 +56,7 @@ def materials(company_id):
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def material_details(company_id, article_id):
     return render_template('company/material_details.html',
                            company_id=company_id,
@@ -95,7 +95,7 @@ def load_material_details(json, company_id, article_id):
 
 @company_bp.route('/update_article/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def update_article(json):
 
@@ -105,9 +105,10 @@ def update_article(json):
         **{'status': json['article']['status']})
     return {'article': json['article'], 'status': 'ok'}
 
+
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def submit_to_portal(json):
 
@@ -116,16 +117,17 @@ def submit_to_portal(json):
     portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
     return {'portal': portal.name}
 
+
 @company_bp.route('/add/')
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def add():
     return render_template('company/company_add.html', user=g.user_dict)
 
 
 @company_bp.route('/confirm_add/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def confirm_add(json):
     return Company(**json).create_new_company().\
@@ -134,7 +136,9 @@ def confirm_add(json):
 
 @company_bp.route('/profile/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([]))
+#@check_rights(simple_permissions(['manage_access_company'], allow_if_rights_undefined=True))
+# @check_rights(UserCompany.permissions(needed_rights_iterable=['manage_access_company'],
+#                                       allow_if_rights_undefined=True))
 def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = g.user.user_rights_in_company(company_id)
@@ -152,7 +156,7 @@ def profile(company_id):
 
 @company_bp.route('/employees/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def employees(company_id):
 
     company_user_rights = UserCompany.show_rights(company_id)
@@ -179,7 +183,7 @@ def employees(company_id):
 
 @company_bp.route('/update_rights', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
 def update_rights():
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
@@ -193,7 +197,7 @@ def update_rights():
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
 def edit(company_id):
     company = db(Company, id=company_id).one()
     return render_template('company/company_edit.html',
@@ -205,7 +209,7 @@ def edit(company_id):
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
                           passed_file=request.files['logo_file'])
@@ -214,7 +218,7 @@ def confirm_edit(company_id):
 
 @company_bp.route('/subscribe/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def subscribe(company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
                                company_id=company_id,
@@ -226,7 +230,7 @@ def subscribe(company_id):
 
 @company_bp.route('/search_for_company_to_join/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def search_for_company_to_join(json):
     companies = Company().search_for_company_to_join(g.user_dict['id'], json['search'])
@@ -235,7 +239,7 @@ def search_for_company_to_join(json):
 
 @company_bp.route('/search_for_user/<string:company_id>', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def search_for_user(json, company_id):
 
@@ -245,7 +249,7 @@ def search_for_user(json, company_id):
 
 @company_bp.route('/send_article_to_user/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def send_article_to_user(json):
 
@@ -254,7 +258,7 @@ def send_article_to_user(json):
 
 @company_bp.route('/join_to_company/<string:company_id>/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def join_to_company(json, company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
@@ -267,7 +271,7 @@ def join_to_company(json, company_id):
 
 @company_bp.route('/add_subscriber/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.ADD_EMPLOYEE()]]))
+# @check_rights(simple_permissions([RIGHTS.ADD_EMPLOYEE()]))
 def confirm_subscriber():
     company_role = UserCompany()
     data = request.form
@@ -280,7 +284,7 @@ def confirm_subscriber():
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.SUSPEND_EMPLOYEE()]]))
+# @check_rights(simple_permissions([RIGHTS.SUSPEND_EMPLOYEE()]))
 def suspend_employee():
     data = request.form
     UserCompany.suspend_employee(user_id=data['user_id'],
@@ -292,14 +296,14 @@ def suspend_employee():
 @company_bp.route('/suspended_employees/<string:company_id>',
                   methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def suspended_employees(company_id):
     return render_template('company/company_suspended.html', company_id=company_id)
 
 
 @company_bp.route('/suspended_employees/<string:company_id>', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def load_suspended_employees(json, company_id):
 
