@@ -24,9 +24,9 @@ class Portal(Base, PRBase):
                               ForeignKey('portal_layout.id'))
 
     layout = relationship('PortalLayout')
-    divisions = relationship('PortalDivision', backref='portal',
-                             primaryjoin='Portal.id=='
-                                         'PortalDivision.portal_id')
+    divisions = relationship('PortalDivision',
+                             backref='portal',
+                             primaryjoin='Portal.id==PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
     # companies = relationship('Company', secondary='company_portal')
@@ -80,6 +80,7 @@ class Portal(Base, PRBase):
                                   ).filter(
                     Portal.name.ilike("%" + searchtext + "%")).all()]
 
+
 class PortalPlan(Base, PRBase):
     __tablename__ = 'portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
@@ -129,7 +130,7 @@ class CompanyPortal(Base, PRBase):
         """Add company to CompanyPortal table. Company will be partner of this portal"""
         g.db.add(CompanyPortal(company=db(Company, id=company_id).one(),
                                portal=db(Portal, id=portal_id).one(),
-                               company_portal_plan_id=db(Portal, id=portal_id).
+                               company_portal_plan_id=db(Portal, id=portal_id).one().
                                portal_plan_id))
         g.db.flush()
 
@@ -153,8 +154,7 @@ class PortalDivision(Base, PRBase):
     portal_division_type_id = Column(
         TABLE_TYPES['id_profireader'],
         ForeignKey('portal_division_type.id'))
-    portal_id = Column(TABLE_TYPES['id_profireader'],
-                       ForeignKey('portal.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
     def __init__(self, portal_division_type_id=None,

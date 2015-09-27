@@ -10,24 +10,8 @@ from .pr_base import PRBase, Base
 # from db_init import Base
 from utils.db_utils import db
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
-from utils.html_utils import clean_html_tags
 from flask import g
 from sqlalchemy.sql import or_
-
-def _Q(cls):
-    return g.db.query(cls)
-
-
-def _A():
-    return g.db.query(Article)
-
-
-def _C():
-    return g.db.query(ArticleCompany)
-
-
-def _P():
-    return g.db.query(ArticlePortal)
 
 
 class ArticlePortal(Base, PRBase):
@@ -84,6 +68,7 @@ class ArticlePortal(Base, PRBase):
     def update_article_portal(article_portal_id, **kwargs):
         db(ArticlePortal, id=article_portal_id).update(kwargs)
 
+
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -91,10 +76,8 @@ class ArticleCompany(Base, PRBase):
     editor_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'), nullable=False,
                             info={'visible': True})
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'))
-    article_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('article.id'))
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    article_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article.id'))
     # created_from_version_id = Column(TABLE_TYPES['id_profireader'],
     # ForeignKey('article_version.id'))
     title = Column(TABLE_TYPES['title'], nullable=False)
@@ -104,6 +87,8 @@ class ArticleCompany(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    keywords = Column(TABLE_TYPES['keywords'])
+
     company = relationship(Company)
     editor = relationship(User)
     article = relationship('Article', primaryjoin="and_(Article.id==ArticleCompany.article_id)",
@@ -165,15 +150,12 @@ class Article(Base, PRBase):
                             info={'visible': True})
 
     submitted = relationship(ArticleCompany,
-                             primaryjoin="and_(Article.id=="
-                                         "ArticleCompany.article_id, "
-                                         "ArticleCompany.company_id!="
-                                         "None)",
+                             primaryjoin="and_(Article.id==ArticleCompany.article_id, "
+                                         "ArticleCompany.company_id!=None)",
                              info={'visible': True})
     mine = relationship(ArticleCompany,
-                        primaryjoin="and_(Article.id==ArticleCompany."
-                                    "article_id, ArticleCompany."
-                                    "company_id==None)",
+                        primaryjoin="and_(Article.id==ArticleCompany.article_id, "
+                                    "ArticleCompany.company_id==None)",
                         uselist=False)
 
     def get_client_side_dict(self,
@@ -187,9 +169,9 @@ class Article(Base, PRBase):
     @staticmethod
     def save_new_article(user_id, **kwargs):
         return Article(mine=ArticleCompany(editor_user_id=user_id,
-                                              company_id=None,
-                                              **kwargs),
-                                              author_user_id=user_id).save()
+                                           company_id=None,
+                                           **kwargs),
+                                           author_user_id=user_id).save()
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
@@ -209,7 +191,7 @@ class Article(Base, PRBase):
 
     @staticmethod
     def get_articles_for_user(user_id):
-        return _A().filter_by(author_user_id=user_id).all()
+        return g.db.query(Article).filter_by(author_user_id=user_id).all()
 
     # @staticmethod
     # def subquery_articles_at_portal(portal_division_id=None, search_text=None):
@@ -250,12 +232,12 @@ class Article(Base, PRBase):
     #                             pages, page=1, search_text=None):
     #     page -= 1
     #     if not search_text:
-    #         query = _P().order_by('publishing_tm').filter(text(
+    #         query = g.db.query(ArticlePortal).order_by('publishing_tm').filter(text(
     #             ' "publishing_tm" < clock_timestamp() ')).filter_by(
     #             portal_division_id=portal_division_id,
     #             status=ARTICLE_STATUS_IN_PORTAL.published)
     #     else:
-    #         query = _P().order_by('publishing_tm').filter(text(
+    #         query = g.db.query(ArticlePortal).order_by('publishing_tm').filter(text(
     #             ' "publishing_tm" < clock_timestamp() ')).filter_by(
     #             portal_division_id=portal_division_id,
     #             status=ARTICLE_STATUS_IN_PORTAL.published).filter(
@@ -274,12 +256,12 @@ class Article(Base, PRBase):
 
     @staticmethod
     def get_one_article(article_id):
-        article = _C().filter_by(id=article_id).one()
+        article = g.db.query(ArticleCompany).filter_by(id=article_id).one()
         return article
 
     @staticmethod
     def get_articles_submitted_to_company(company_id):
-        articles = _C().filter_by(company_id=company_id).all()
+        articles = g.db.query(ArticleCompany).filter_by(company_id=company_id).all()
         return articles if articles else []
 
      # for article in articles:

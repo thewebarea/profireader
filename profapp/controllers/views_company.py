@@ -54,17 +54,16 @@ def materials(company_id):
                                    company_id)])
 
 
-@company_bp.route('/material_details/<string:company_id>/'
-                  '<string:article_id>/', methods=['GET'])
+@company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
 # @check_rights(simple_permissions([]))
 def material_details(company_id, article_id):
     return render_template('company/material_details.html',
-                           company_id=company_id, article_id=article_id)
+                           company_id=company_id,
+                           article_id=article_id)
 
 
-@company_bp.route('/material_details/<string:company_id>/'
-                  '<string:article_id>/', methods=['POST'])
+@company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
 @login_required
 @ok
 def load_material_details(json, company_id, article_id):

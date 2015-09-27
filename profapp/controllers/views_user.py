@@ -31,8 +31,9 @@ def edit_profile(user_id):
     #if form.validate_on_submit():
     #    pass
 
+    user = user_query.first()
+
     if request.method == 'GET':
-        user = user_query.first()
         return render_template('user_edit_profile.html',  user=user, avatar_size=AVATAR_SIZE)
 
     if 'avatar' in request.form.keys():
@@ -43,7 +44,6 @@ def edit_profile(user_id):
             g.db.add(user)
             g.db.commit()
         else:  # request.form['avatar'] == 'Use Gravatar':
-            user = user_query.first()
             user.profireader_avatar_url = user.gravatar(size=AVATAR_SIZE)
             user.profireader_small_avatar_url = user.gravatar(size=AVATAR_SMALL_SIZE)
             g.db.add(user)
@@ -62,4 +62,5 @@ def edit_profile(user_id):
         user_query.update(user_fields)
         flash('You have successfully updated you profile.')
 
-    return redirect(url_for('user.profile', user_id=user_id, avatar_size=AVATAR_SIZE))
+    #return redirect(url_for('user.profile', user_id=user_id, avatar_size=2*AVATAR_SIZE))
+    return render_template('user_edit_profile.html',  user=user, avatar_size=AVATAR_SIZE)
