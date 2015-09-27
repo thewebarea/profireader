@@ -20,6 +20,7 @@ from .pr_base import PRBase, Base
 from ..controllers import errors
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
+from functools import wraps
 
 
 class Company(Base, PRBase):
@@ -143,21 +144,23 @@ def forbidden_for_current_user(rights, **kwargs):
     return rez
 
 
+# TODO (AA to AA): Create a decorator that does this work!
+# TODO: see the function params_for_user_company_business_rules.
 def simple_permissions(rights, allow_if_rights_undefined):
-    # set_of_rights = frozenset(rights)
-
-    # def business_rule(rights, **kwargs):
     def business_rule(**kwargs):
-        if 'company_id' in kwargs.keys():
-            company_object = kwargs['company_id']
-        elif 'company' in kwargs.keys():
-            company_object = kwargs['company']
+        params = kwargs['json'] if 'json' in kwargs.keys() else kwargs
+
+        keys = params.keys()
+        if 'company_id' in keys:
+            company_object = params['company_id']
+        elif 'company' in keys:
+            company_object = params['company']
         else:
             company_object = None
-        if 'user_id' in kwargs.keys():
-            user_object = kwargs['user_id']
-        elif 'user' in kwargs.keys():
-            user_object = kwargs['user']
+        if 'user_id' in keys:
+            user_object = params['user_id']
+        elif 'user' in keys:
+            user_object = params['user']
         else:
             user_object = current_user
 
@@ -165,9 +168,62 @@ def simple_permissions(rights, allow_if_rights_undefined):
                                        allow_if_rights_undefined,
                                        user_object,
                                        company_object)
-
-    # return {set_of_rights: business_rule}
     return business_rule
+
+
+# @params_for_user_company_business_rules
+# UserCompany.permissions(rights,
+#                         allow_if_rights_undefined,
+#                         user_object,
+#                         company_object)
+
+
+# def params_for_user_company_business_rules(func):
+#     @wraps(func)
+#     def wrapper(**kwargs):
+#         params = kwargs['json'] if 'json' in kwargs.keys() else kwargs
+#
+#         keys = params.keys()
+#         if 'company_id' in keys:
+#             company_object = params['company_id']
+#         elif 'company' in keys:
+#             company_object = params['company']
+#         else:
+#             company_object = None
+#         if 'user_id' in keys:
+#             user_object = params['user_id']
+#         elif 'user' in keys:
+#             user_object = params['user']
+#         else:
+#             user_object = current_user
+#
+#         return func(user_object=user_object, company_object=company_object, **kwargs)
+#     return wrapper
+
+
+# def params_for_business_rules(func):
+#     params = kwargs['json'] if 'json' in kwargs.keys() else params = kwargs
+#     keys = params.keys()
+#     if 'company_id' in keys:
+#         company_object = params['company_id']
+#     elif 'company' in keys:
+#         company_object = params['company']
+#     else:
+#         company_object = None
+#     if 'user_id' in keys:
+#         user_object = params['user_id']
+#     elif 'user' in keys:
+#         user_object = params['user']
+#     else:
+#         user_object = current_user
+#     pass
+#
+# @params_for_business_rules
+# def simple_permissions2(rights, allow_if_rights_undefined):
+#     return UserCompany.permissions(rights,
+#                                    allow_if_rights_undefined,
+#                                    user_object,
+#                                    company_object)
 
 
 class UserCompany(Base, PRBase):
@@ -383,6 +439,8 @@ class UserCompany(Base, PRBase):
                 filter(User.profireader_name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
+    #@params_for_user_company_business_rules
+    #def permissions(needed_rights_iterable, user_object, company_object, allow_if_rights_undefined):
     def permissions(needed_rights_iterable, allow_if_rights_undefined, user_object, company_object):
 
         needed_rights_int = Right.transform_rights_into_integer(needed_rights_iterable)
