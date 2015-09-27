@@ -9,7 +9,8 @@ from functools import wraps
 from time import sleep
 from flask import jsonify
 import json as jsonmodule
-from ..models.youtube import YoutubeApi
+# from ..models.youtube import YoutubeApi
+
 
 def parent_folder(func):
     @wraps(func)
@@ -131,12 +132,14 @@ def upload(json):
 def uploader():
     return render_template('file_uploader.html')
 
-@filemanager_bp.route('/send/', methods=['POST'])
-def send():
-    # print(request.headers)
-    youtube = YoutubeApi()
-    youtube.p(request)
-    return jsonify({'result': {'size': 0}})
+
+# @filemanager_bp.route('/send/', methods=['POST'])
+# def send():
+#     print(request.headers)
+    # youtube = YoutubeApi()
+    # youtube.p(request)
+    # return jsonify({'result': {'size': 0}})
+
 
 @filemanager_bp.route('/resumeopload/', methods=['GET'])
 def resumeopload():
