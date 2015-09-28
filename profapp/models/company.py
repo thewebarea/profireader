@@ -29,6 +29,7 @@ class Company(Base, PRBase):
     logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
@@ -46,7 +47,7 @@ class Company(Base, PRBase):
                               backref="own_company", uselist=False,
                               foreign_keys='Portal.company_owner_id',
                               )
-    user_owner = relationship('User', backref='companies')
+    user_owner = relationship('User')
     # employees = relationship('User', secondary='user_company',
     #                          lazy='dynamic')
     # todo: add company time creation

@@ -194,8 +194,8 @@
                 <select ng-model="data.selected_division">
                     <optgroup ng-repeat="port in porals_divisions(data.portals)"
                               label="{{ port.name }}">
-                        <option ng-repeat="division in port.divisions" value="{{ division.id }}">
-                            {{ division.name }}
+                        <option ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}" ng-repeat="division in port.divisions" value="{{ division.id }}">
+                            {{ division.name }} {{ division.portal_division_type_id }}
                         </option>
                     </optgroup>
                     <option disabled>---Below materials sent---</option>
