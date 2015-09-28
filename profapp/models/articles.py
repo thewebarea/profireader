@@ -15,6 +15,23 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STAT
 from flask import g
 from sqlalchemy.sql import or_
 import re
+from sqlalchemy import event
+from html.parser import HTMLParser
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs= True
+        self.fed = []
+    def handle_data(self, d):
+        self.fed.append(d)
+    def get_data(self):
+        return ''.join(self.fed)
+    def strip_tags(self, html):
+        self.feed(html)
+        return self.get_data()
 
 
 class ArticlePortal(Base, PRBase):
@@ -27,6 +44,7 @@ class ArticlePortal(Base, PRBase):
     title = Column(TABLE_TYPES['name'], default='')
     short = Column(TABLE_TYPES['text'], default='')
     long = Column(TABLE_TYPES['text'], default='')
+    long_stripped = Column(TABLE_TYPES['text'], nullable=False)
     md_tm = Column(TABLE_TYPES['timestamp'])
     publishing_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'],
@@ -61,6 +79,7 @@ class ArticlePortal(Base, PRBase):
         self.portal_division_id = portal_division_id
         self.portal_id = portal_id
 
+
     def get_client_side_dict(self, fields='id|image_file_id|title|short|image_file_id|'
                                           'long|cr_tm|md_tm|'
                                           'status|publishing_tm, '
@@ -85,6 +104,7 @@ class ArticleCompany(Base, PRBase):
     title = Column(TABLE_TYPES['title'], nullable=False)
     short = Column(TABLE_TYPES['text'], nullable=False)
     long = Column(TABLE_TYPES['text'], nullable=False)
+    long_stripped = Column(TABLE_TYPES['text'], nullable=False)
     status = Column(TABLE_TYPES['status'], nullable=False)
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
@@ -110,7 +130,7 @@ class ArticleCompany(Base, PRBase):
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
                                    'status': ARTICLE_STATUS_IN_COMPANY.
-                                  submitted}).save()
+                                  submitted})
 
         # self.portal_devision_id = portal_devision_id
         # self.article_company_id = article_company_id
@@ -130,27 +150,12 @@ class ArticleCompany(Base, PRBase):
         filesintext = {found[1]:True for found in re.findall('(http://file001.profi.ntaxa.com/([^/]*)/)', self.long)}
         if self.image_file_id:
             filesintext[self.image_file_id] = True
-        division = db(PortalDivision, id=division_id).one()
-        portal = division.portal
-        company = portal.own_company
+        company = db(PortalDivision, id=division_id).one().portal.own_company
 
         for file_id in filesintext:
             filesintext[file_id] = \
                 File.get(file_id).copy_file(company.id, company.system_folder_file_id).save().id
 
-            # FileContent.get(file_id).detach().attr({'id': filesintext[file_id].id}).save()
-
-        # db(PortalDivision, id=division_id).one().portal.company_owner_id
-
-        # PortalDivision.(division_id)
-        # company = db(Company, id=portal.company_owner_id).one()
-        # for file_id in filesintext:
-        #     File.get(file_id).detach().attr({'parent_id': company_id,
-        #                            'status': ARTICLE_STATUS_IN_COMPANY.
-        #                           submitted}).save()
-        #     File(parent_id = db(Company, id=portal.company_id))
-
-        # [File().save(parent_id = db(Company, id=division_id)) for file in self.find_files_used()]
         article_portal = ArticlePortal(title=self.title, short=self.short,
                            portal_division_id=division_id,
                            article_company_id=self.id,
@@ -179,6 +184,13 @@ class ArticleCompany(Base, PRBase):
         db(ArticleCompany, company_id=company_id, id=article_id).update(
             kwargs)
 
+
+@event.listens_for(ArticlePortal, 'before_insert')
+@event.listens_for(ArticlePortal, 'before_update')
+@event.listens_for(ArticleCompany, 'before_insert')
+@event.listens_for(ArticleCompany, 'before_update')
+def set_long_striped(mapper, connection, target):
+        target.long_stripped = MLStripper().strip_tags(target.long)
 
 class Article(Base, PRBase):
     __tablename__ = 'article'
@@ -209,7 +221,7 @@ class Article(Base, PRBase):
         return Article(mine_version=ArticleCompany(editor_user_id=user_id,
                                            company_id=None,
                                            **kwargs),
-                                           author_user_id=user_id).save()
+                                           author_user_id=user_id)
 
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
@@ -225,7 +237,7 @@ class Article(Base, PRBase):
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
         a = ArticleCompany.get(article_company_id)
-        return a.attr(kwargs).save().article
+        return a.attr(kwargs)
 
     @staticmethod
     def get_articles_for_user(user_id):
