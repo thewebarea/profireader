@@ -206,6 +206,14 @@ class UserCompany(Base, PRBase):
         self.rights_int = rights_int
 
     @property
+    def banned(self):
+        return self._banned
+
+    @banned.setter
+    def banned(self, banned):
+        self._banned = banned
+
+    @property
     def rights_int(self):
         return self._rights
 
@@ -330,7 +338,7 @@ class UserCompany(Base, PRBase):
         if not user_company:
             return False if needed_rights_iterable else True
 
-        if user_company._banned or user_company.status != STATUS.ACTIVE():
+        if user_company.banned or user_company.status != STATUS.ACTIVE():
             return False
 
         if user_company:
