@@ -90,10 +90,10 @@ def load_material_details(json, company_id, article_id):
             'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
             'selected_portal': {},
             'selected_division': {},
-            'user_rights': ['publish', 'unpublish', 'edit'],
+            # 'user_rights': ['publish', 'unpublish', 'edit'],
             # TODO: uncomment the string below and delete above
             # TODO: when all works with rights are finished
-            # 'user_rights': user_rights,
+            'user_rights': user_rights,
             'send_to_user': {},
             'joined_portals': joined_portals}
 
