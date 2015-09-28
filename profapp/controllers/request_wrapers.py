@@ -8,21 +8,23 @@ from flask.ext.login import current_user
 from ..models.rights import Right
 from ..constants.STATUS import STATUS_RIGHTS
 from .errors import ImproperRightsDecoratorUse
-
+from ..controllers import errors
 
 def ok(func):
     @wraps(func)
     def function_json(*args, **kwargs):
-        # try:
+        try:
         # sleep(0.5)
-        if 'json' in kwargs:
-            del kwargs['json']
-        a = request.json
-        ret = func(a, *args, **kwargs)
-
-        return jsonify({'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
+            if 'json' in kwargs:
+                del kwargs['json']
+            a = request.json
+            ret = func(a, *args, **kwargs)
+            return jsonify({'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
         # except Exception as e:
-        #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
+        except errors.ValidationException as e:
+            db = getattr(g, 'db', None)
+            db.rollback()
+            return jsonify({'ok': False, 'error_code': -1, 'result': e.result})
     return function_json
 
 

@@ -66,9 +66,9 @@ class Company(Base, PRBase):
             raise errors.DublicateName({
                 'message': 'Company name %(name)s already exist. Please choose another name',
                 'data': self.get_client_side_dict()})
+
         user_company = UserCompany(status=STATUS.ACTIVE(),
-                                   rights_iterable=
-                                   Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS))
+        rights_iterable = Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS))
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
@@ -242,8 +242,9 @@ class UserCompany(Base, PRBase):
 
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+    status = Column(TABLE_TYPES['string_30'], default=STATUS.NONACTIVE(), nullable=False)
 
     _rights = Column(TABLE_TYPES['bigint'],
                      CheckConstraint('_rights >= 0',
@@ -257,14 +258,14 @@ class UserCompany(Base, PRBase):
 
     # todo (AA to AA): check handling md_tm
 
-    def __init__(self, user_id=None, company_id=None, status=None,
-                 rights_iterable=[]):
 
+    def __init__(self, user_id=None, company_id=None, status=STATUS.NONACTIVE(), rights_iterable=[]):
         super(UserCompany, self).__init__()
         self.user_id = user_id
         self.company_id = company_id
         self.status = status
         self.rights_set = rights_iterable
+        self.status = status
 
     @property
     def rights_int(self):
@@ -302,7 +303,7 @@ class UserCompany(Base, PRBase):
                 'data': self.get_client_side_dict()})
         self.employee = User.user_query(self.user_id)
         self.employer = db(Company, id=self.company_id).one()
-        self.save()
+        return self
 
     @staticmethod
     def suspend_employee(company_id, user_id):

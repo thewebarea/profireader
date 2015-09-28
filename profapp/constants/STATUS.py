@@ -36,10 +36,6 @@ class STATUS:
         return 'deleted'
 
     @staticmethod
-    def BANNED():
-        return 'banned'
-
-    @staticmethod
     def REJECTED():
         return 'rejected'
 
