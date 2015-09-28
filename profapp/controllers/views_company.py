@@ -64,8 +64,8 @@ def material_details(company_id, article_id):
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
-@login_required
 @ok
+@login_required
 def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
     portals = {port.portal_id: port.portal.to_dict('id, name, divisions.name, divisions.id')
