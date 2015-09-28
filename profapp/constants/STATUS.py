@@ -6,7 +6,6 @@ class STATUS_NAME(dict):
     NONACTIVE = 'nonactive'
     BLOCKED = 'blocked'
     DELETED = 'deleted'
-    BANNED = 'banned'
     REJECTED = 'rejected'
     SUSPENDED = 'suspended'
 
@@ -34,10 +33,6 @@ class STATUS:
     @staticmethod
     def DELETED():
         return 'deleted'
-
-    @staticmethod
-    def BANNED():
-        return 'banned'
 
     @staticmethod
     def REJECTED():
@@ -114,9 +109,6 @@ stat_r = UserStatusInCompanyRights('blocked')
 STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('deleted')
-STATUS_RIGHTS[stat_r.status] = stat_r
-
-stat_r = UserStatusInCompanyRights('banned')
 STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('rejected')
