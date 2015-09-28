@@ -464,7 +464,7 @@ class User(Base, UserMixin, PRBase):
     # TODO (AA to AA): it should be corrected
     def user_rights_in_company(self, company_id):
         user_company = self.employer_assoc.filter_by(company_id=company_id).first()
-        return user_company.rights_set[0] if user_company else []
+        return user_company.rights_set if user_company else []
 
 
 class Group(Base, PRBase):

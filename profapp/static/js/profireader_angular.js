@@ -158,19 +158,14 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                         function () {
                             scope.$apply(function () {
                                 $('input, button, textarea, select', $(iElement)).prop('disabled', true);
-                                //$('button', $(iElement)).prop('disabled', true);
-
                                 var dataToSend = scope['ngOnsubmit']()();
                                 if (dataToSend) {
                                     $ok(scope['ngAction'], dataToSend, function (resp) {
-                                        //console.log(resp);
                                         if (scope.ngOnsuccess) {
                                             scope.ngOnsuccess()(resp)
                                         }
                                     }).finally(function () {
                                         $('input, button, textarea, select', $(iElement)).prop('disabled', false);
-                                        //$('input[type=submit]', $(iElement)).prop('disabled', false);
-                                        //$('button[type=submit]', $(iElement)).prop('disabled', false);
                                     });
                                 }
                             });
