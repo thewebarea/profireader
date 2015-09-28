@@ -63,6 +63,21 @@ class Config(object):
     ITEMS_PER_PAGE = 5
     PAGINATION_BUTTONS = 4
 
+# YOUTUBE API
+    CLIENT_SECRETS_FILE = "client_secrets.json"
+    YOUTUBE_UPLOAD = "https://www.googleapis.com/auth/youtube.upload"
+    YOUTUBE_API_SERVICE_NAME = "youtube"
+    YOUTUBE_API_VERSION = "v3"
+    MISSING_CLIENT_SECRETS_MESSAGE = """
+    WARNING: Please configure OAuth 2.0
+    To make this sample run you will need to populate the client_secrets.json file
+    found at:%swith information from the Developers Console
+    https://console.developers.google.com/
+    For more information about the client_secrets.json file format, please visit:
+    https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
+    """ % os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                       CLIENT_SECRETS_FILE))
+
 # Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']
     # Define the application directory
@@ -86,7 +101,7 @@ class Config(object):
     database = secret_data.DB_NAME
 
     # Secret key for signing cookies
-    SECRET_KEY = secret_data.SECRET_KEY
+    SECRET_KEY = secret_data.OAUTH_CONFIG['google']['consumer_secret']
 
     OAUTH_CONFIG = secret_data.OAUTH_CONFIG
 
