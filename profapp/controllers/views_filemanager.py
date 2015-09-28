@@ -127,18 +127,20 @@ def upload(json):
 #         g.db.rollback#(# )
 #
 #     return result
+from ..models.youtube import YoutubeApi
 
 @filemanager_bp.route('/uploader/', methods=['GET'])
 def uploader():
+    youtube = YoutubeApi()
+    youtube.p()
     return render_template('file_uploader.html')
 
 
-# @filemanager_bp.route('/send/', methods=['POST'])
-# def send():
-#     print(request.headers)
-    # youtube = YoutubeApi()
-    # youtube.p(request)
-    # return jsonify({'result': {'size': 0}})
+@filemanager_bp.route('/send/', methods=['POST'])
+def send():
+    print(request.headers)
+
+    return jsonify({'result': {'size': 0}})
 
 
 @filemanager_bp.route('/resumeopload/', methods=['GET'])
