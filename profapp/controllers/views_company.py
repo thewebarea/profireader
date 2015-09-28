@@ -68,8 +68,8 @@ def material_details(company_id, article_id):
 @ok
 def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
-    portals = {port.portal_id: port.portal.to_dict('id, name, divisions.name, divisions.id')
-               for port in CompanyPortal.get_portals(company_id)}
+    portals = {port.portal_id: port.portal.get_client_side_dict() for port in
+               CompanyPortal.get_portals(company_id)}
     joined_portals = {}
     if article.portal_article:
         joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
@@ -119,6 +119,7 @@ def submit_to_portal(json):
 
     article = ArticleCompany.get(json['article']['id'])
     article_portal = article.clone_for_portal(json['selected_division'])
+    article.save()
     portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
     return {'portal': portal.name}
 

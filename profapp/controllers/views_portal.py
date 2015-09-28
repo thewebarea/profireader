@@ -33,7 +33,12 @@ def create_load(json, company_id):
             'portal': {'company_id': company_id, 'name': '', 'host': '',
                        'portal_layout_id': layouts[0]['id'],
                        'divisions': [
-                           {'name': 'some news', 'portal_division_type_id': 'news'}]},
+                           {'name': 'index page', 'portal_division_type_id': 'index'},
+                           {'name': 'news', 'portal_division_type_id': 'news'},
+                           {'name': 'events', 'portal_division_type_id': 'events'},
+                           {'name': 'catalog', 'portal_division_type_id': 'catalog'},
+                           {'name': 'about', 'portal_division_type_id': 'about'},
+                       ]},
             'layouts': layouts, 'division_types': types}
 
 

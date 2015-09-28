@@ -30,6 +30,7 @@ class Company(Base, PRBase):
     logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
