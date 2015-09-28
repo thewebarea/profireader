@@ -67,8 +67,8 @@ class Company(Base, PRBase):
                 'message': 'Company name %(name)s already exist. Please choose another name',
                 'data': self.get_client_side_dict()})
         user_company = UserCompany(status=STATUS.ACTIVE(),
-                                   rights_iterable=(Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS[0]),
-                                                    Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS[1])))
+                                   rights_iterable=
+                                   Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS))
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
