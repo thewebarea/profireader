@@ -48,7 +48,7 @@ class Company(Base, PRBase):
                               backref="own_company", uselist=False,
                               foreign_keys='Portal.company_owner_id',
                               )
-    user_owner = relationship('User')
+    user_owner = relationship('User', backref='companies')
     # employees = relationship('User', secondary='user_company',
     #                          lazy='dynamic')
     # todo: add company time creation
