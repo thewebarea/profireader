@@ -7,7 +7,9 @@ from .blueprints import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
+from flask import jsonify
 import json as jsonmodule
+# from ..models.youtube import YoutubeApi
 
 
 def parent_folder(func):
@@ -125,5 +127,23 @@ def upload(json):
 #         g.db.rollback#(# )
 #
 #     return result
+# from ..models.youtube import YoutubeApi
+
+@filemanager_bp.route('/uploader/', methods=['GET'])
+def uploader():
+    # youtube = YoutubeApi()
+    # youtube.p()
+    return render_template('file_uploader.html')
 
 
+@filemanager_bp.route('/send/', methods=['POST'])
+def send():
+    print(request.headers)
+
+    return jsonify({'result': {'size': 0}})
+
+
+@filemanager_bp.route('/resumeopload/', methods=['GET'])
+def resumeopload():
+
+    return jsonify({'size': 0})

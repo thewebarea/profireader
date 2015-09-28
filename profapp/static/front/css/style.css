@@ -120,6 +120,15 @@ footer .btn-social-icon{
     color: #555;
 }
 
+.block-item .item-short-content {
+    overflow: hidden;
+    height: 125px;
+}
+
+.block-item {
+    overflow: hidden;
+}
+
 .block-item .item-additional-info{
     display: block;
     position: absolute;
@@ -212,4 +221,8 @@ footer .row{
 
 .pager{
     background: #fff;
+}
+
+.well .input-group .form-control {
+    width: 10em;
 }
