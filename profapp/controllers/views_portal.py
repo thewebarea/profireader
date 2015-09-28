@@ -10,6 +10,8 @@ from ..models.articles import ArticlePortal
 from ..models.company import simple_permissions
 from ..models.rights import Right
 from profapp.models.rights import RIGHTS
+from ..controllers import errors
+
 
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
@@ -47,10 +49,23 @@ def create_load(json, company_id):
 # @check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
 @ok
 def confirm_create(json, company_id):
-    Portal(name=json['name'], host=json['host'], portal_layout_id=json['portal_layout_id'],
+    portal = Portal(name=json['name'], host=json['host'], portal_layout_id=json['portal_layout_id'],
            company_owner_id=company_id, divisions=[PortalDivision(**division)
            for division in json['divisions']]).create_portal()
-    return {'company_id': company_id}
+    validation_result = portal.validate()
+
+    if '__validation' in json:
+        db = getattr(g, 'db', None)
+        db.rollback()
+        return validation_result
+    elif len(validation_result['errors'].keys()):
+        raise errors.ValidationException(validation_result)
+    else:
+        return {'company_id': company_id}
+
+
+
+
 
 
 @portal_bp.route('/', methods=['POST'])

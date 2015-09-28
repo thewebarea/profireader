@@ -125,10 +125,46 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 ngOnsubmit: '&',
                 ngOnsuccess: '&',
                 ngOnfail: '&',
-                ngAction: '='
+                ngAction: '=',
+                ngWatch: '@'
             },
-            link: function (scope, iElement, iAttrs, ctrl) {
-                //console.log(scope, iElement, iAttrs, ctrl);
+            link: function (scope, iElement, iAttrs, ngModelCtrl) {
+
+
+                var enableSubmit = function (enablesubmit, enableinput) {
+                    if (enablesubmit) {
+                        $('*[ng-model]', $(iElement)).prop('disabled', false);
+                    }
+                    else {
+                        $('*[ng-model]', $(iElement)).prop('disabled', true);
+                    }
+                }
+
+                scope.$parent.$parent.__validation = false;
+                scope.$parent.$parent.__validated = false;
+
+                var sendValidation = _.debounce(function () {
+                    if (scope.$parent.$parent.__validation) {
+                        return false;
+                    }
+                    var dataToSend = scope['ngOnsubmit']()();
+                    if (dataToSend) {
+                        scope.$parent.$parent.__validation = dataToSend;
+                        $ok(scope['ngAction'], $.extend({__validation: true}, dataToSend), function (resp) {
+                            scope.$parent.$parent.__validated = resp;
+                        }, function (resp) {
+                            scope.$parent.$parent.__validated = false;
+                        }).finally(function () {
+                            scope.$parent.$parent.__validation = false;
+                        });
+                    }
+                }, 500);
+
+                if (scope['ngWatch']) {
+                    scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
+                }
+
+
                 //if (iAttrs['ngValidationResult']) {
                 //    scope[iAttrs['ngValidationResult']] = {};
                 //    var s = scope[iAttrs['ngValidationResult']];
@@ -156,16 +192,20 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 if (scope['ngOnsubmit']) {
                     $(iElement).on('submit',
                         function () {
+                            if (scope.$parent.$parent.__validation) {
+                                return false;
+                            }
+                            enableSubmit(false);
                             scope.$apply(function () {
-                                $('input, button, textarea, select', $(iElement)).prop('disabled', true);
                                 var dataToSend = scope['ngOnsubmit']()();
+                                console.log(dataToSend);
                                 if (dataToSend) {
                                     $ok(scope['ngAction'], dataToSend, function (resp) {
                                         if (scope.ngOnsuccess) {
                                             scope.ngOnsuccess()(resp)
                                         }
                                     }).finally(function () {
-                                        $('input, button, textarea, select', $(iElement)).prop('disabled', false);
+                                        enableSubmit(true);
                                     });
                                 }
                             });
@@ -306,10 +346,12 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
 //TODO: SW fix this pls
 
         closeFileManager = function () {
-            $scope.$apply(function () {$modalInstance.dismiss('cancel')});
+            $scope.$apply(function () {
+                $modalInstance.dismiss('cancel')
+            });
         }
 
-        $scope.close  = function () {
+        $scope.close = function () {
             $modalInstance.dismiss('cancel');
         }
 
@@ -357,6 +399,7 @@ module.run(function ($rootScope, $ok) {
                 scope.loading = false;
             });
         },
+        areAllEmpty: areAllEmpty,
         tinymceImageOptions: {
             inline: false,
             plugins: 'advlist autolink link image lists charmap print preview',
@@ -409,14 +452,16 @@ function highlight($el) {
 }
 
 function angularControllerFunction(controller_attr, function_name) {
-    var el = $('[ng-controller='+controller_attr+']');
-    if (!el && !el.length) return function () {};
+    var el = $('[ng-controller=' + controller_attr + ']');
+    if (!el && !el.length) return function () {
+    };
     var func = angular.element(el[0]).scope()[function_name];
     var controller = angular.element(el[0]).controller();
     if (func && controller) {
         return func
     }
-    else return function () {};
+    else return function () {
+    };
 
 }
 

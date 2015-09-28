@@ -242,7 +242,7 @@ class UserCompany(Base, PRBase):
 
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     status = Column(TABLE_TYPES['string_30'], default=STATUS.NONACTIVE(), nullable=False)
 
