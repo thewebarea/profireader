@@ -67,8 +67,8 @@ class Company(Base, PRBase):
                 'message': 'Company name %(name)s already exist. Please choose another name',
                 'data': self.get_client_side_dict()})
         user_company = UserCompany(status=STATUS.ACTIVE(),
-                                   rights_iterable=(Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS[0]),
-                                                    Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS[1])))
+                                   rights_iterable=
+                                   Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS))
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
@@ -240,38 +240,25 @@ class UserCompany(Base, PRBase):
     #                             get_my_attributes(STATUS_NAME))),
     #                      name='status_name_type'), nullable=False)
 
-    # TODO (AA to AA): after DB cleaning add nullable=False to DB
-    company_role_rights_id = Column(TABLE_TYPES['id_profireader'],
-                                    ForeignKey('company_role_rights.id'),
-                                    nullable=False
-                                    )
-
     md_tm = Column(TABLE_TYPES['timestamp'])
 
     confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
-    _add_rights_def = Column(TABLE_TYPES['bigint'],
-                             CheckConstraint('_add_rights_def >= 0',
-                                             name='cc_unsigned_add_rights_def'),
-                             default=0, nullable=False)
-    _add_rights_undef = Column(TABLE_TYPES['bigint'],
-                               CheckConstraint('_add_rights_undef >= 0',
-                                               name='cc_unsigned_add_rights_undef'),
-                               default=0, nullable=False)
+    _rights = Column(TABLE_TYPES['bigint'],
+                     CheckConstraint('_rights >= 0',
+                                     name='cc_unsigned_rights'),
+                     default=0, nullable=False)
 
     employer = relationship('Company', backref='employee_assoc')
     employee = relationship('User', backref=backref('employer_assoc', lazy='dynamic'))
 
     UniqueConstraint('user_id', 'company_id', name='uc_user_id_company_id')
-    CheckConstraint('_add_rights_def & _add_rights_undef = 0', name='cc_add_user_company_rights')
 
     # todo (AA to AA): check handling md_tm
 
     def __init__(self, user_id=None, company_id=None, status=None,
-                 rights_iterable=([], [])):
-        if not Right.check_type_rights_iterable(rights_iterable):
-            raise errors.RightsTypeIterableError
+                 rights_iterable=[]):
 
         super(UserCompany, self).__init__()
         self.user_id = user_id
@@ -281,82 +268,21 @@ class UserCompany(Base, PRBase):
 
     @property
     def rights_int(self):
-        return self._add_rights_def, self._add_rights_undef
+        return self._rights
 
-    # TODO (AA to AA): raise exception if type(rights_def_undef_int) is not tuple
-    # TODO: here and in all similar cases
     @rights_int.setter
-    def rights_int(self, rights_int=(0, 0)):
-        if not Right.check_type_rights_int(rights_int):
-            raise errors.RightsTypeIntError
-
-        # Some explanation is needed.
-        # if rights_defined is 1 on some bit then this right (permission) is available.
-        # if 0 then we should check the value of rights_undefined column
-        # if it is really 0 then right (permission) is not available.
-        # if it is 1 then this right (permission) should be taken from user_company table.
-        # such construction of rights defines the CheckConstraint presented below.
-        if rights_int[0] & rights_int[1]:
-            raise errors.RightsDefUndefInconsistencyError
-
-        self._add_rights_def = rights_int[0]
-        self._add_rights_undef = rights_int[1]
+    def rights_int(self, rights_int=0):
+        self._rights = rights_int
 
     @property
     def rights_set(self):
-        return tuple(map(Right.transform_rights_into_set, self.rights_int))
+        return Right.transform_rights_into_set(self.rights_int)
 
     @rights_set.setter
-    #  rights_def_undef_iterable may be a tuple of sets or lists
-    def rights_set(self, rights_iterable=([], [])):
-        if not Right.check_type_rights_iterable(rights_iterable):
-            raise errors.RightsTypeIterableError
-
-        # Some explanation is needed.
-        # if rights_defined is 1 on some bit then this right (permission) is available.
-        # if 0 then we should check the value of rights_undefined column
-        # if it is really 0 then right (permission) is not available.
-        # if it is 1 then this right (permission) should be taken from user_company table.
-        # such construction of rights defines the CheckConstraint presented below.
-        if set(rights_iterable[0]) & set(rights_iterable[1]):
-            raise errors.RightsDefUndefInconsistencyError
-        rights_int = tuple(
-            map(Right.transform_rights_into_integer, rights_iterable)
-        )
-
-        (self._add_rights_def, self._add_rights_undef) = rights_int
-
-    @property
-    def rights_defined_int(self):
-        return self.rights_int[0]
-
-    @rights_defined_int.setter
-    def rights_defined_int(self, rights_def_int):
-        self.rights_int = (rights_def_int, self.rights_int[1])
-
-    @property
-    def rights_undefined_int(self):
-        return self.rights_int[1]
-
-    @rights_undefined_int.setter
-    def rights_undefined_int(self, rights_undef_int):
-        self.rights_int = (self.rights_int[0], rights_undef_int)
-
-    @property
-    def rights_defined_set(self):
-        return self.rights_set[0]
-
-    @rights_defined_set.setter
-    def rights_defined_set(self, rights_def_iterable):
-        self.rights_set = (rights_def_iterable, self.rights_set[1])
-
-    @property
-    def rights_undefined_set(self):
-        return self.rights_set[1]
-
-    @rights_undefined_set.setter
-    def rights_undefined_set(self, rights_undef_iterable):
-        self.rights_set = (self.rights_set[0], rights_undef_iterable)
+    #  rights_iterable may be a set or list
+    def rights_set(self, rights_iterable=[]):
+        rights_int = Right.transform_rights_into_integer(rights_iterable)
+        self.rights_int = rights_int
 
     # @staticmethod
     # def user_in_company(user_id, company_id):
@@ -477,111 +403,3 @@ class UserCompany(Base, PRBase):
             needed_rights_int_2 = needed_rights_int & ~available_rights_def
             residual_rights_undef = needed_rights_int_2 & ~available_rights_undef
             return bool(allow_if_rights_undefined) if residual_rights_undef == 0 else abort(403)
-
-
-class CompanyRoleRights(Base, PRBase):
-    __tablename__ = 'company_role_rights'
-
-    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
-    role = Column(TABLE_TYPES['string_30'])
-
-    _rights_def = \
-        Column(TABLE_TYPES['bigint'],
-               CheckConstraint('_rights_def >= 0', name='cc_unsigned_profireader_rights_def'),
-               default=0, nullable=False)
-
-    _rights_undef = \
-        Column(TABLE_TYPES['bigint'],
-               CheckConstraint('_rights_undef >= 0', name='cc_unsigned_profireader_rights_undef'),
-               default=0, nullable=False)  # or default=COMPANY_OWNER_RIGHTS?
-
-    UniqueConstraint('company_id', 'role', name='uc_company_id_role')
-    CheckConstraint('_rights_def & _rights_undef = 0', name='cc_company_role_rights')
-
-    # employers = relationship('Company', secondary='user_company',
-    #                          backref=backref("employees", lazy='dynamic'))  # Correct
-
-    def __init__(self, rights_iterable=([], [])):
-        if not Right.check_type_rights_iterable(rights_iterable):
-            raise errors.RightsTypeIterableError
-
-        super(CompanyRoleRights, self).__init__()
-        self.rights_set = rights_iterable
-
-    @property
-    def rights_int(self):
-        return self._rights_def, self._rights_undef
-
-    @rights_int.setter
-    def rights_int(self, rights_int=(0, 0)):
-        if not Right.check_type_rights_int(rights_int):
-            raise errors.RightsTypeIntError
-
-        # Some explanation is needed.
-        # if rights_defined is 1 on some bit then this right (permission) is available.
-        # if 0 then we should check the value of rights_undefined column
-        # if it is really 0 then right (permission) is not available.
-        # if it is 1 then this right (permission) should be taken from user_company table.
-        # such construction of rights defines the CheckConstraint presented below.
-        if rights_int[0] & rights_int[1]:
-            raise errors.RightsDefUndefInconsistencyError
-
-        self._rights_def = rights_int[0]
-        self._rights_undef = rights_int[1]
-
-    @property
-    def rights_set(self):
-        return tuple(map(Right.transform_rights_into_set, self.rights_int))
-
-    @rights_set.setter
-    #  rights_def_undef_iterable may be a tuple of sets or lists
-    def rights_set(self, rights_iterable=([], [])):
-        if not Right.check_type_rights_iterable(rights_iterable):
-            raise errors.RightsTypeIterableError
-
-        # Some explanation is needed.
-        # if rights_defined is 1 on some bit then this right (permission) is available.
-        # if 0 then we should check the value of rights_undefined column
-        # if it is really 0 then right (permission) is not available.
-        # if it is 1 then this right (permission) should be taken from user_company table.
-        # such construction of rights defines the CheckConstraint presented below.
-        if set(rights_iterable[0]) & set(rights_iterable[1]):
-            raise errors.RightsDefUndefInconsistencyError
-        rights_int = tuple(
-            map(Right.transform_rights_into_integer, rights_iterable)
-        )
-
-        (self._rights_def, self._rights_undef) = rights_int
-
-    @property
-    def rights_defined_int(self):
-        return self.rights_int[0]
-
-    @rights_defined_int.setter
-    def rights_defined_int(self, rights_def_int):
-        self.rights_int = (rights_def_int, self.rights_int[1])
-
-    @property
-    def rights_undefined_int(self):
-        return self.rights_int[1]
-
-    @rights_undefined_int.setter
-    def rights_undefined_int(self, rights_undef_int):
-        self.rights_int = (self.rights_int[0], rights_undef_int)
-
-    @property
-    def rights_defined_set(self):
-        return self.rights_set[0]
-
-    @rights_defined_set.setter
-    def rights_defined_set(self, rights_def_iterable):
-        self.rights_set = (rights_def_iterable, self.rights_set[1])
-
-    @property
-    def rights_undefined_set(self):
-        return self.rights_set[1]
-
-    @rights_undefined_set.setter
-    def rights_undefined_set(self, rights_undef_iterable):
-        self.rights_set = (self.rights_set[0], rights_undef_iterable)
