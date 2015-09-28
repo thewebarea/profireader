@@ -129,33 +129,81 @@ import urllib.request
 #
 #         self.initialize_upload(youtube, args)#
 import httplib2
-from oauth2client import gce
 from apiclient.discovery import build
 from config import Config
-from apiclient.http import MediaFileUpload
 import os
-
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.file import Storage
+from oauth2client.tools import argparser, run_flow
+import sys
+import urllib.request as r
 
 class YoutubeApi:
     def __init__(self):
-        self.credentials = gce.AppAssertionCredentials(
-            scope='https://www.googleapis.com/auth/devstorage.read_write')
-        self.http = self.credentials.authorize(httplib2.Http())
-        self.youtube = build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION,
-                             developerKey=Config.SECRET_KEY)
 
-    def p(self, request):
+        self.client_email = '664683051441-2hdt6etj4v6k2hqr11lj1u5p09gds617@developer.gserviceaccount.com'
+        # self.youtube = build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION,
+        #                      developerKey=Config.SECRET_KEY)
+        # with open("/home/viktor/profireader/service_key.json") as f:
+        #     self.private_key = f.read()
+        # self.credentials = AppAssertionCredentials(Config.YOUTUBE_UPLOAD)
 
-        print(os.getcwd())
-        self.youtube.videos().insert(
-            part='id',
-            body=dict(snippet=dict(title='yyy',
-                                   description='new file',
-                                   tags=["cool", "video", "more keywords"],
-                                   categoryId='22'),
-                      status=dict(
-                      privacyStatus='public')),
-            media_body=MediaFileUpload('/home/viktor/Downloads/avro.mp4',
-                                       chunksize=-1, resumable=True)).execute(self.http)
+    @staticmethod
+    def get_authenticated_service(args):
+
+        response = urllib.request.urlopen('https://accounts.google.com/o/oauth2/token')
+        # flow = flow_from_clientsecrets(Config.CLIENT_SECRETS_FILE,
+        # scope=Config.YOUTUBE_UPLOAD,
+        # message=Config.MISSING_CLIENT_SECRETS_MESSAGE)
+        # storage = Storage("%s-oauth2.json" % sys.argv[0])
+        # credentials = storage.get()
+        #
+        # if credentials is None or credentials.invalid:
+        #     credentials = run_flow(flow, storage, args)
+        #     return build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION,
+        #                  http=credentials.authorize(httplib2.Http()))
+
+    def p(self):
+
+        url = "https://accounts.google.com/o/oauth2/token"
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+        data = {'code': '4/ux5gNj-_mIu4DOD_gNZdjX9EtOFf',
+                'client_id': '664683051441-ur16e99ckrinb667sqetm9cnm09ku3c0.apps.googleusercontent.com',
+                'client_secret': 'sGbR8eaMPMsLSlXAu5u-NgG9',
+                'redirect_uri': 'http://aprofi.d.ntaxa.com/filemanager/send/',
+                'grant_type': 'authorization_code'}
+        req = urllib.request.Request(url, headers=headers, data=data)
+        f = urllib.request.urlopen(req)
+        print(f.read())
+        # argparser.add_argument("--auth_host_name", default='http://aprofi.d.ntaxa.com')
+        # argparser.add_argument("--file", default=('{0}/avro.pm4', os.getcwd()), help=False)
+        # argparser.add_argument("--title", help="Video title", default="Test Title")
+        # argparser.add_argument("--description", help="Video description",
+        # default="Test Description")
+        # argparser.add_argument("--category", default="22",
+        # help="Numeric video category. " +
+        # "See https://developers.google.com/youtube/v3/docs/videoCategories/list")
+        # argparser.add_argument("--keywords", help="Video keywords, comma separated",
+        # default="")
+        # argparser.add_argument("--privacyStatus", choices=['private'],
+        # default='public', help="Video privacy status.")
+        # args = argparser.parse_args()
+        # self.get_authenticated_service(args)
+    #     http_auth = self.credentials.authorize(Http())
+    #     youtube = build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION, http=http_auth)
+    #     response = youtube.videos().list(id='QC46Zc1ijtI').execute()
+    #     print(response)
+    #     print(os.getcwd())
+        # self.youtube.videos().insert(
+        #     part='id',
+        #     body=dict(snippet=dict(title='yyy',
+        #                            description='new file',
+        #                            tags=["cool", "video", "more keywords"],
+        #                            categoryId='22'),
+        #               status=dict(
+        #               privacyStatus='public')),
+        #     media_body=MediaFileUpload('/home/viktor/Downloads/avro.mp4',
+        #                                chunksize=-1, resumable=True)).execute(self.http)
         # video = self.youtube.videos().list(id='cHBAj2SIg9E', part='id').execute(self.http)
         # print(video)

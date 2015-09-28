@@ -18,7 +18,5 @@ ROLE = {
     READER: 'reader'
 }
 
-# COMPANY_OWNER_RIGHTS = 0x7fffffffffffffff  # 2**63-1
-COMPANY_OWNER_RIGHTS = 0x1fffffffffff  # 2**45-1
-# god may has specific rights. these rights starts from 2**45.
-GOD_RIGHTS = 0x7fffffffffffffff  # 2**63-1
+COMPANY_OWNER_RIGHTS = (0x7fffffffffffffff, 0)  # 2**63-1
+GOD_RIGHTS = COMPANY_OWNER_RIGHTS  # the same as above but it is applied globally

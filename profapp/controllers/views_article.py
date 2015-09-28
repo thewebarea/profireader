@@ -87,7 +87,7 @@ def search_for_company_to_submit(json):
 @ok
 def submit_to_company(json, article_id):
     a = Article.get(article_id)
-    a.mine.clone_for_company(json['company_id'])
+    a.mine_version.clone_for_company(json['company_id'])
     return {'article': a.get(article_id).get_client_side_dict(),
             'company_id': json['company_id']}
 

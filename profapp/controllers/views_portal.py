@@ -33,7 +33,12 @@ def create_load(json, company_id):
             'portal': {'company_id': company_id, 'name': '', 'host': '',
                        'portal_layout_id': layouts[0]['id'],
                        'divisions': [
-                           {'name': 'some news', 'portal_division_type_id': 'news'}]},
+                           {'name': 'index page', 'portal_division_type_id': 'index'},
+                           {'name': 'news', 'portal_division_type_id': 'news'},
+                           {'name': 'events', 'portal_division_type_id': 'events'},
+                           {'name': 'catalog', 'portal_division_type_id': 'catalog'},
+                           {'name': 'about', 'portal_division_type_id': 'about'},
+                       ]},
             'layouts': layouts, 'division_types': types}
 
 
@@ -82,7 +87,7 @@ def partners_load(json, company_id):
     portals_partners = [port.portal.to_dict('name, company_owner_id, id')
                         for port in CompanyPortal.get_portals(
                         company_id) if port]
-    user_rights = g.user.user_rights_in_company(company_id)
+    user_rights = list(g.user.user_rights_in_company(company_id))
     return {'portal': portal.to_dict('name') if portal else [],
             'companies_partners': companies_partners,
             'portals_partners': portals_partners,
@@ -126,7 +131,7 @@ def publications_load(json, company_id):
                                'name|short_description|email|phone') for
                   port in portal.divisions if port.article_portal]
 
-    user_rights = g.user.user_rights_in_company(company_id)
+    user_rights = list(g.user.user_rights_in_company(company_id))
 
     return {'portal': portal, 'new_status': '',
             'company_id': company_id, 'user_rights': user_rights}

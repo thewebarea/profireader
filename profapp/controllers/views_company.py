@@ -68,8 +68,8 @@ def material_details(company_id, article_id):
 @ok
 def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
-    portals = {port.portal_id: port.portal.to_dict('id, name, divisions.name, divisions.id')
-               for port in CompanyPortal.get_portals(company_id)}
+    portals = {port.portal_id: port.portal.get_client_side_dict() for port in
+               CompanyPortal.get_portals(company_id)}
     joined_portals = {}
     if article.portal_article:
         joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
@@ -81,15 +81,20 @@ def load_material_details(json, company_id, article_id):
                               'editor_user_id, company.name|id,'
                               'portal_article.division.portal.id')
 
-    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
-        article['status'])
-    user_rights = g.user.user_rights_in_company(company_id)
+    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
+    user_rights = list(g.user.user_rights_in_company(company_id))
 
-    return {'article': article, 'status': status, 'portals':
-            portals, 'company': Company.get(company_id).
-            to_dict('id, employees.id|profireader_name'),
-            'selected_portal': {}, 'selected_division': {},
-            'user_rights': user_rights, 'send_to_user': {},
+    return {'article': article,
+            'status': status,
+            'portals': portals,
+            'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
+            'selected_portal': {},
+            'selected_division': {},
+            # 'user_rights': ['publish', 'unpublish', 'edit'],
+            # TODO: uncomment the string below and delete above
+            # TODO: when all works with rights are finished
+            'user_rights': user_rights,
+            'send_to_user': {},
             'joined_portals': joined_portals}
 
 
@@ -114,6 +119,7 @@ def submit_to_portal(json):
 
     article = ArticleCompany.get(json['article']['id'])
     article_portal = article.clone_for_portal(json['selected_division'])
+    article.save()
     portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
     return {'portal': portal.name}
 
@@ -141,7 +147,7 @@ def confirm_add(json):
 #                                       allow_if_rights_undefined=True))
 def profile(company_id):
     company = db(Company, id=company_id).one()
-    user_rights = g.user.user_rights_in_company(company_id)
+    user_rights = list(g.user.user_rights_in_company(company_id))
     # image = File.get(company.logo_file).url() \
     #     if company.logo_file else '/static/img/company_no_logo.png'
     image = company.logo_file_relationship.url() \

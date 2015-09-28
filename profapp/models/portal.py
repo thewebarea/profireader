@@ -29,6 +29,7 @@ class Portal(Base, PRBase):
                              primaryjoin='Portal.id==PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal',
                            uselist=False)
+
     # companies = relationship('Company', secondary='company_portal')
 
     def __init__(self, name=None,
@@ -203,3 +204,5 @@ class UserPortalReader(Base, PRBase):
         self.company_id = company_id
         self.status = status
         self.portal_plan_id = portal_plan_id
+
+
