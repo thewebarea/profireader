@@ -28,8 +28,8 @@ def create(company_id):
 @ok
 def create_load(json, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
-    types = [x.get_client_side_dict() for x in
-             PortalDivisionType.get_division_types()]
+    types = {x.id:x.get_client_side_dict() for x in
+             PortalDivisionType.get_division_types()}
 
     return {'company_id': company_id,
             'portal': {'company_id': company_id, 'name': '', 'host': '',
