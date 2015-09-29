@@ -22,7 +22,7 @@ var app = angular.module('fileUpload', ['ngFileUpload']);
 
 app.controller('MyCtrl', ['$scope', 'Upload', '$timeout', function ($scope, Upload, $timeout) {
 
-      $scope.chunkSize = '1024KB';
+      $scope.chunkSize = '10000MB';
   $scope.uploadUsingUpload=function(file) {
       $scope.f = file;
       console.log(file);

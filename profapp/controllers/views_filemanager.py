@@ -82,10 +82,11 @@ def upload(json):
         file = File(parent_id=parent_id,
                     root_folder_id=root_id,
                     name=uploaded_file.filename,
-                mime=uploaded_file.content_type)
+                    mime=uploaded_file.content_type)
         uploaded = file.upload(content=uploaded_file.stream.read(-1))
         ret[uploaded.id] = True
     return ret
+
 
 
 # # # #
@@ -128,18 +129,60 @@ def upload(json):
 #
 #     return result
 from ..models.youtube import YoutubeApi
+import json
+# from flask import url_for, request, redirect, session
+# import httplib2
+from apiclient import discovery
 
-@filemanager_bp.route('/uploader/', methods=['GET'])
+from oauth2client import client
+from config import Config
+#
+# @filemanager_bp.route('/uploader/', methods=['GET'])
+# def uploader():
+#     print(session)
+#     if 'credentials' not in session:
+#         return redirect(url_for('filemanager.send'))
+#     credentials = client.OAuth2Credentials.from_json(session['credentials'])
+#     if credentials.access_token_expired:
+#         return redirect(url_for('oauth2callback'))
+#     else:
+#         http_auth = credentials.authorize(httplib2.Http())
+#         youtube = discovery.build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION, http_auth)
+#         files = youtube.videos().list(id='SiOBAhUiNCc', part='id').execute()
+#         return render_template('file_uploader.html')
+from flask import session, redirect
+import os
+from urllib import request as r
+from ..models.youtube import GoogleAuthorize
+@filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
 def uploader():
-    youtube = YoutubeApi()
-    youtube.p()
+
+    google = GoogleAuthorize()
+    if 'code' not in request.args:
+        return redirect(google.get_auth_code())
+    session['auth_code'] = request.args['code']
+
+    # google.authorize()
+
     return render_template('file_uploader.html')
 
-
-@filemanager_bp.route('/send/', methods=['POST'])
+@filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
 def send():
-    print(request.headers)
 
+    # youtube = GoogleAuthorize()
+    # print(session)
+
+    # body = {'title': 'test',
+    #         'description': 'test description',
+    #         'status': 'public'}
+    # youtube = YoutubeApi(parts='snippet')#, body_dict=body,
+                         # video_file=request.files.get('file').read())
+    # auth = request.args.get('code')
+    # return redirect('vk.ru')
+
+    # youtube = YoutubeApi(parts='snippet')
+    # if request.method == 'POST':
+    # r.urlopen(redirect(youtube.upload()['need_auth']))
     return jsonify({'result': {'size': 0}})
 
 
@@ -147,3 +190,19 @@ def send():
 def resumeopload():
 
     return jsonify({'size': 0})
+
+# @filemanager_bp.route('/send/')
+# def send():
+#     flow = client.flow_from_clientsecrets(
+#         Config.CLIENT_SECRETS_FILE,
+#         scope=Config.YOUTUBE_UPLOAD,
+#         redirect_uri=url_for('filemanager.send', _external=True),
+#         )
+#     if 'code' not in request.args:
+#       auth_uri = flow.step1_get_authorize_url()
+#       return redirect(auth_uri)
+#     else:
+#       auth_code = request.args.get('code')
+#       credentials = flow.step2_exchange(auth_code)
+#       session['credentials'] = credentials.to_json()
+#       return redirect(url_for('filemanager.uploader'))

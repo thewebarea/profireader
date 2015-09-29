@@ -63,20 +63,21 @@ class Config(object):
     ITEMS_PER_PAGE = 5
     PAGINATION_BUTTONS = 4
 
-# YOUTUBE API
-    CLIENT_SECRETS_FILE = "client_secrets.json"
-    YOUTUBE_UPLOAD = "https://www.googleapis.com/auth/youtube.upload"
+# GOOGLE API
+    GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY
+    GOOGLE_API_SECRET_JSON = secret_data.GOOGLE_API_SECRET_JSON
+    YOUTUBE_SCOPES = {'UPLOAD': "https://www.googleapis.com/auth/youtube.upload"}
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
-    MISSING_CLIENT_SECRETS_MESSAGE = """
-    WARNING: Please configure OAuth 2.0
-    To make this sample run you will need to populate the client_secrets.json file
-    found at:%swith information from the Developers Console
-    https://console.developers.google.com/
-    For more information about the client_secrets.json file format, please visit:
-    https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-    """ % os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                       CLIENT_SECRETS_FILE))
+    YOUTUBE_REDIRECT_URL = 'http://aprofi.d.ntaxa.com/filemanager/uploader/'
+    # MISSING_CLIENT_SECRETS_MESSAGE = """
+    # WARNING: Please configure OAuth 2.0
+    # To make this sample run you will need to populate the client_secrets.json file
+    # found at:%swith information from the Developers Console
+    # https://console.developers.google.com/
+    # For more information about the client_secrets.json file format, please visit:
+    # https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
+    # """ % os.path.abspath()
 
 # Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']
