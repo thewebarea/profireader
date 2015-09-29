@@ -77,8 +77,8 @@
                         <select ng-model="division.portal_division_type_id">
                             <option ng-selected="division_type.id == division.portal_division_type_id"
                                     ng-if="division_type.id != 'index'"
-                                    ng-repeat="division_type in data.division_types"
-                                    value="division_type.id">{{ division_type.id }}
+                                    ng-repeat="(division_type_id, division_type) in data.division_types"
+                                    value="{{ division_type_id }}">{{ division_type.id }}
                             </option>
                         </select>
                         <button type="button" ng-click="removeDivision($index)">remove division</button>{{ __validated.errors['division_max_' + division_type.id] }}
