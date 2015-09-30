@@ -27,8 +27,7 @@ class Portal(Base, PRBase):
     divisions = relationship('PortalDivision',
                              backref='portal',
                              primaryjoin='Portal.id==PortalDivision.portal_id')
-    article = relationship('ArticlePortal', backref='portal',
-                           uselist=False)
+    article = relationship('ArticlePortal', backref='portal', uselist=False)
 
     # companies = relationship('Company', secondary='company_portal')
 
@@ -108,13 +107,11 @@ class PortalLayout(Base, PRBase):
 
 class CompanyPortal(Base, PRBase):
     __tablename__ = 'company_portal'
-    id = Column(TABLE_TYPES['id_profireader'], nullable=False,
-                primary_key=True)
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'))
-    portal_id = Column(TABLE_TYPES['id_profireader'],
-                       ForeignKey('portal.id'))
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     company_portal_plan_id = Column(TABLE_TYPES['id_profireader'])
+
     portal = relationship(Portal, backref='company_assoc')
     company = relationship(Company, backref='portal_assoc')
 
@@ -152,14 +149,12 @@ class PortalDivision(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
-    portal_division_type_id = Column(
-        TABLE_TYPES['id_profireader'],
-        ForeignKey('portal_division_type.id'))
+    portal_division_type_id = Column(TABLE_TYPES['id_profireader'],
+                                     ForeignKey('portal_division_type.id'))
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
-    def __init__(self, portal_division_type_id=None,
-                 name=None, portal_id=None):
+    def __init__(self, portal_division_type_id=None, name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id
         self.name = name
         self.portal_id = portal_id
@@ -186,7 +181,6 @@ class PortalDivisionType(Base, PRBase):
         return db(PortalDivisionType).all()
 
 
-
 class UserPortalReader(Base, PRBase):
     __tablename__ = 'user_portal_reader'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -204,5 +198,3 @@ class UserPortalReader(Base, PRBase):
         self.company_id = company_id
         self.status = status
         self.portal_plan_id = portal_plan_id
-
-
