@@ -68,7 +68,8 @@ class Company(Base, PRBase):
                 'data': self.get_client_side_dict()})
 
         user_company = UserCompany(status=STATUS.ACTIVE(),
-        rights_iterable = Right.transform_rights_into_set(COMPANY_OWNER_RIGHTS))
+                                   rights_int=COMPANY_OWNER_RIGHTS
+                                   )
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
@@ -148,7 +149,7 @@ def forbidden_for_current_user(rights, **kwargs):
 
 # TODO (AA to AA): Create a decorator that does this work!
 # TODO: see the function params_for_user_company_business_rules.
-def simple_permissions(rights, allow_if_rights_undefined):
+def simple_permissions(rights):
     def business_rule(**kwargs):
         params = kwargs['json'] if 'json' in kwargs.keys() else kwargs
 
@@ -166,66 +167,8 @@ def simple_permissions(rights, allow_if_rights_undefined):
         else:
             user_object = current_user
 
-        return UserCompany.permissions(rights,
-                                       allow_if_rights_undefined,
-                                       user_object,
-                                       company_object)
+        return UserCompany.permissions(rights, user_object, company_object)
     return business_rule
-
-
-# @params_for_user_company_business_rules
-# UserCompany.permissions(rights,
-#                         allow_if_rights_undefined,
-#                         user_object,
-#                         company_object)
-
-
-# def params_for_user_company_business_rules(func):
-#     @wraps(func)
-#     def wrapper(**kwargs):
-#         params = kwargs['json'] if 'json' in kwargs.keys() else kwargs
-#
-#         keys = params.keys()
-#         if 'company_id' in keys:
-#             company_object = params['company_id']
-#         elif 'company' in keys:
-#             company_object = params['company']
-#         else:
-#             company_object = None
-#         if 'user_id' in keys:
-#             user_object = params['user_id']
-#         elif 'user' in keys:
-#             user_object = params['user']
-#         else:
-#             user_object = current_user
-#
-#         return func(user_object=user_object, company_object=company_object, **kwargs)
-#     return wrapper
-
-
-# def params_for_business_rules(func):
-#     params = kwargs['json'] if 'json' in kwargs.keys() else params = kwargs
-#     keys = params.keys()
-#     if 'company_id' in keys:
-#         company_object = params['company_id']
-#     elif 'company' in keys:
-#         company_object = params['company']
-#     else:
-#         company_object = None
-#     if 'user_id' in keys:
-#         user_object = params['user_id']
-#     elif 'user' in keys:
-#         user_object = params['user']
-#     else:
-#         user_object = current_user
-#     pass
-#
-# @params_for_business_rules
-# def simple_permissions2(rights, allow_if_rights_undefined):
-#     return UserCompany.permissions(rights,
-#                                    allow_if_rights_undefined,
-#                                    user_object,
-#                                    company_object)
 
 
 class UserCompany(Base, PRBase):
@@ -235,16 +178,14 @@ class UserCompany(Base, PRBase):
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'), nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), nullable=False)
 
-    # TODO (AA to AA): delete a correspondent column with the enum type in DB
-    # status = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
-    #                             get_my_attributes(STATUS_NAME))),
-    #                      name='status_name_type'), nullable=False)
+    status = Column(Enum(*tuple(map(lambda l: getattr(l, 'lower')(),
+                                get_my_attributes(STATUS_NAME))),
+                         name='status_name_type'), nullable=False)
 
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-
+    # confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
-    status = Column(TABLE_TYPES['string_30'], default=STATUS.NONACTIVE(), nullable=False)
 
     _rights = Column(TABLE_TYPES['bigint'],
                      CheckConstraint('_rights >= 0',
@@ -258,14 +199,21 @@ class UserCompany(Base, PRBase):
 
     # todo (AA to AA): check handling md_tm
 
+    def __init__(self, user_id=None, company_id=None, status=STATUS.NONACTIVE(), rights_int=0):
 
-    def __init__(self, user_id=None, company_id=None, status=STATUS.NONACTIVE(), rights_iterable=[]):
         super(UserCompany, self).__init__()
         self.user_id = user_id
         self.company_id = company_id
         self.status = status
-        self.rights_set = rights_iterable
-        self.status = status
+        self.rights_int = rights_int
+
+    @property
+    def banned(self):
+        return self._banned
+
+    @banned.setter
+    def banned(self, banned):
+        self._banned = banned
 
     @property
     def rights_int(self):
@@ -334,7 +282,7 @@ class UserCompany(Base, PRBase):
         """This method defines for update user-rights in company. Apply list of rights"""
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id, company_id=company_id)
-        rights_dict = {'rights': new_rights_binary}
+        rights_dict = {'_rights': new_rights_binary}
         user_company.update(rights_dict)
 
     #  corrected
@@ -354,8 +302,10 @@ class UserCompany(Base, PRBase):
                               'status': user_company.status,
                               'date': user_company.md_tm}
 
-            emplo[user.id]['rights'] = \
-                Right.transform_rights_into_set(user_company.rights)
+            # emplo[user.id]['rights'] = \
+            #     Right.transform_rights_into_set(user_company.rights_set)
+
+            emplo[user.id]['rights'] = user_company.rights_set
             # earlier it was a dictionary:
             # {'right_1': True, 'right_2': False, ...}
         return emplo
@@ -369,9 +319,7 @@ class UserCompany(Base, PRBase):
                 filter(User.profireader_name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
-    #@params_for_user_company_business_rules
-    #def permissions(needed_rights_iterable, user_object, company_object, allow_if_rights_undefined):
-    def permissions(needed_rights_iterable, allow_if_rights_undefined, user_object, company_object):
+    def permissions(needed_rights_iterable, user_object, company_object):
 
         needed_rights_int = Right.transform_rights_into_integer(needed_rights_iterable)
         # TODO: implement Anonymous User handling
@@ -391,16 +339,16 @@ class UserCompany(Base, PRBase):
 
         user_company = user.employer_assoc.filter_by(company_id=company.id).first()
 
-        if user_company:
-            available_rights_def, available_rights_undef = \
-                user_company.rights_defined_int, user_company.rights_undefined_int
-        else:
-            return abort(403)
-            # available_rights_def, available_rights_undef = 0, 0
+        if not user_company:
+            return False if needed_rights_iterable else True
 
-        if (available_rights_def & needed_rights_int) == needed_rights_int:
-            return True
+        if user_company.banned:  # or user_company.status != STATUS.ACTIVE():
+            return False
+
+        if user_company:
+            available_rights = user_company.rights_int
         else:
-            needed_rights_int_2 = needed_rights_int & ~available_rights_def
-            residual_rights_undef = needed_rights_int_2 & ~available_rights_undef
-            return bool(allow_if_rights_undefined) if residual_rights_undef == 0 else abort(403)
+            return False
+            # available_rights = 0
+
+        return True if available_rights & needed_rights_int == needed_rights_int else False
