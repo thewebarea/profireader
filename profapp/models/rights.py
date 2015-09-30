@@ -4,7 +4,7 @@ from ..controllers import errors
 import collections
 
 #COMPANY_OWNER = ['edit', 'publish', 'unpublish', 'upload_files', 'delete_files', 'add_employee',
-#                 'suspend_employee', 'send_publications', 'manage_access_company', 'manage_access_portal',
+#                 'suspend_employee', 'submit_publications', 'manage_rights_company', 'manage_rights_portal',
 #                 'article_priority', 'manage_readers', 'manage_companies_partners', 'manage_comments',
 #                 'subscribe_to_portals']
 
@@ -52,36 +52,40 @@ class RIGHTS:
         return 'suspend_employee'
 
     @staticmethod
-    def SEND_PUBLICATIONS():
-        return 'send_publications'
+    def SUBMIT_PUBLICATIONS():
+        return 'submit_publications'
 
     @staticmethod
-    def MANAGE_ACCESS_COMPANY():
-        return 'manage_access_company'
+    def MANAGE_RIGHTS_COMPANY():
+        return 'manage_rights_company'
 
     @staticmethod
-    def MANAGE_ACCESS_PORTAL():
-        return 'manage_access_portal'
+    def MANAGE_RIGHTS_PORTAL():
+        return 'manage_rights_portal'
 
     @staticmethod
     def ARTICLE_PRIORITY():
         return 'article_priority'
 
-    @staticmethod
-    def MANAGE_READERS():
-        return 'manage_readers'
+    # @staticmethod
+    # def MANAGE_READERS():
+    #     return 'manage_readers'
 
     @staticmethod
     def MANAGE_COMPANIES_PARTNERS():
         return 'manage_companies_partners'
 
-    @staticmethod
-    def MANAGE_COMMENTS():
-        return 'manage_comments'
+    # @staticmethod
+    # def MANAGE_COMMENTS():
+    #     return 'manage_comments'
 
     @staticmethod
     def SUBSCRIBE_TO_PORTALS():
         return 'subscribe_to_portals'
+
+    @staticmethod
+    def ACCEPT_REFUSE_PUBLICATION():
+        return 'accept_refuse_publication'
 
 
 # read this:
@@ -98,21 +102,23 @@ def get_my_attributes(my_class, with_values=False):
 
 
 class RightAtomic(dict):
-    EDIT = ('edit', 0x0001)
-    PUBLISH = ('publish', 0x0002)
-    UNPUBLISH = ('unpublish', 0x0004)
-    UPLOAD_FILES = ('upload_files', 0x0008)
-    DELETE_FILES = ('delete_files', 0x0010)
-    ADD_EMPLOYEE = ('add_employee', 0x0020)
-    SUSPEND_EMPLOYEE = ('suspend_employee', 0x0040)
-    SEND_PUBLICATIONS = ('send_publications', 0x0080)
-    MANAGE_ACCESS_COMPANY = ('manage_access_company', 0x0100)
-    MANAGE_ACCESS_PORTAL = ('manage_access_portal', 0x0200)
-    ARTICLE_PRIORITY = ('article_priority', 0x0400)
-    MANAGE_READERS = ('manage_readers', 0x0800)
-    MANAGE_COMPANIES_PARTNERS = ('manage_companies_partners', 0x1000)
-    MANAGE_COMMENTS = ('manage_comments', 0x2000)
-    SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x4000)
+    EDIT = ('edit', 0x0001, 'Can edit company profile and manage files in company corporate folder')
+    PUBLISH = ('publish', 0x0002, 'Can publish submited materials to portal')
+    UNPUBLISH = ('unpublish', 0x0004, 'Can unpublish publication from portal')
+    UPLOAD_FILES = ('upload_files', 0x0008, 'Can upload files to journalist materials folder')
+    DELETE_FILES = ('delete_files', 0x0010, 'Can remove files from journalist materials folder')
+    ADD_EMPLOYEE = ('add_employee', 0x0020, 'Can approve new employee')
+    SUSPEND_EMPLOYEE = ('suspend_employee', 0x0040, 'Can suspend employee')
+    SUBMIT_PUBLICATIONS = ('submit_publications', 0x0080, 'Can submit publication to employer company')
+    MANAGE_RIGHTS_COMPANY = ('manage_rights_company', 0x0100, 'Can change rights for employee (red rights)')
+    MANAGE_RIGHTS_PORTAL = ('manage_rights_portal', 0x0200, 'Can change rights for partner company in portal (blue rights)')
+    ARTICLE_PRIORITY = ('article_priority', 0x0400, 'Can set article priority')
+    # MANAGE_READERS = ('manage_readers', 0x0800, 'Manage readers')
+    MANAGE_COMPANIES_PARTNERS = ('manage_companies_partners', 0x1000, 'Accept or refuse partnership request')
+    # MANAGE_COMMENTS = ('manage_comments', 0x2000)
+    SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x4000, 'Apply request for company partnership')
+    ACCEPT_REFUSE_PUBLICATION = ('accept_refuse_publication', 0x8000, 'Accept or refuse submitted publication')
+
 
     @classmethod
     def __getitem__(cls, attr):
@@ -172,7 +178,7 @@ Right = Right()
 # BASE_RIGHTS_IN_COMPANY = 136
 BASE_RIGHTS_IN_COMPANY = \
     Right.UPLOAD_FILES[1] | \
-    Right.SEND_PUBLICATIONS[1]
+    Right.SUBMIT_PUBLICATIONS[1]
 
 # ALL_AVAILABLE_RIGHTS_TRUE = 32767
 ALL_AVAILABLE_RIGHTS_TRUE = \

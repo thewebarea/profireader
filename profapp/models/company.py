@@ -328,7 +328,7 @@ class UserCompany(Base, PRBase):
            status=STATUS.NONACTIVE()).update({'status': stat})
 
     @staticmethod
-    # @check_rights(simple_permissions([Right['manage_access_company']]))
+    # @check_rights(simple_permissions([Right['manage_rights_company']]))
     # @check_rights({frozenset(): forbidden_for_current_user})
     def update_rights(user_id, company_id, new_rights):
         """This method defines for update user-rights in company. Apply list of rights"""

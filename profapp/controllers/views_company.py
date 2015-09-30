@@ -19,7 +19,7 @@ from ..models.files import File
 
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions(Right[RIGHTS.SEND_PUBLICATIONS()]))
+# @check_rights(simple_permissions(Right[RIGHTS.SUBMIT_PUBLICATIONS()]))
 def search_to_submit_article(json):
     companies = Company().search_for_company(g.user_dict['id'], json['search'])
     return companies
@@ -142,8 +142,8 @@ def confirm_add(json):
 
 @company_bp.route('/profile/<string:company_id>/')
 @login_required
-#@check_rights(simple_permissions(['manage_access_company'], allow_if_rights_undefined=True))
-# @check_rights(UserCompany.permissions(needed_rights_iterable=['manage_access_company'],
+#@check_rights(simple_permissions(['manage_rights_company'], allow_if_rights_undefined=True))
+# @check_rights(UserCompany.permissions(needed_rights_iterable=['manage_rights_company'],
 #                                       allow_if_rights_undefined=True))
 def profile(company_id):
     company = db(Company, id=company_id).one()
@@ -189,7 +189,7 @@ def employees(company_id):
 
 @company_bp.route('/update_rights', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def update_rights():
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
@@ -203,7 +203,7 @@ def update_rights():
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
 @login_required
-# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def edit(company_id):
     company = db(Company, id=company_id).one()
     return render_template('company/company_edit.html',
@@ -215,7 +215,7 @@ def edit(company_id):
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
                           passed_file=request.files['logo_file'])

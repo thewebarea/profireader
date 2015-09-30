@@ -79,7 +79,7 @@ class Config(object):
                                        CLIENT_SECRETS_FILE))
 
 # Base rights will added when user is confirmed in company
-    BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']
+    BASE_RIGHT_IN_COMPANY = ['upload_files', 'submit_publications']
     # Define the application directory
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     # UPLOAD_FOLDER = os.path.join(BASE_DIR, 'media')

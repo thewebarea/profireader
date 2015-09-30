@@ -91,12 +91,12 @@ class UserStatusInCompanyRights:
 STATUS_RIGHTS = dict()
 
 status = 'active'
-rights_defined = [Right['upload_files'], Right['send_publications']]
+rights_defined = [Right['upload_files'], Right['submit_publications']]
 rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['delete_files'],
                     Right['add_employee'], Right['suspend_employee'],
-                    Right['manage_access_company'], Right['manage_access_portal'],
-                    Right['article_priority'], Right['manage_readers'],
-                    Right['manage_companies_partners'], Right['manage_comments'],
+                    Right['manage_rights_company'], Right['manage_rights_portal'],
+                    Right['article_priority'],
+                    Right['manage_companies_partners'],
                     Right['subscribe_to_portals']]
 stat_r = UserStatusInCompanyRights(status,
                                    rights_defined=rights_defined,
