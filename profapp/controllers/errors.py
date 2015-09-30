@@ -67,6 +67,15 @@ class PortalAlreadyExist(Error):
 class AlreadyJoined(Error):
     pass
 
+class ValidationException(Error):
+    """ Inappropriate argument value (of correct type). """
+
+    def __init__(self, validation_result): # real signature unknown
+        self.result = validation_result
+        pass
+
+
+
 
 @csrf.error_handler
 def csrf_error(reason):

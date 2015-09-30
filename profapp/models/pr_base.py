@@ -49,6 +49,10 @@ class PRBase:
         self.id = None
         return self
 
+    def expunge(self):
+        g.db.expunge(self)
+        return self
+
     def get_client_side_dict(self, fields='id'):
         return self.to_dict(fields)
 

@@ -66,6 +66,7 @@ class Company(Base, PRBase):
             raise errors.DublicateName({
                 'message': 'Company name %(name)s already exist. Please choose another name',
                 'data': self.get_client_side_dict()})
+
         user_company = UserCompany(status=STATUS.ACTIVE(),
                                    rights_int=COMPANY_OWNER_RIGHTS
                                    )
@@ -183,6 +184,7 @@ class UserCompany(Base, PRBase):
 
     md_tm = Column(TABLE_TYPES['timestamp'])
 
+    # confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
     _rights = Column(TABLE_TYPES['bigint'],
@@ -249,7 +251,7 @@ class UserCompany(Base, PRBase):
                 'data': self.get_client_side_dict()})
         self.employee = User.user_query(self.user_id)
         self.employer = db(Company, id=self.company_id).one()
-        self.save()
+        return self
 
     @staticmethod
     def suspend_employee(company_id, user_id):
