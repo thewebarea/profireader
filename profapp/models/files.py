@@ -19,6 +19,7 @@ class File(Base, PRBase):
     company_id = Column(TABLE_TYPES['id_profireader'],
                         ForeignKey('company.id'),
                         nullable=False)
+    article_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_portal.id'))
     copyright_author_name = Column(TABLE_TYPES['name'],
                                    default='',
                                    nullable=False)
@@ -139,9 +140,9 @@ class File(Base, PRBase):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
         return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
 
-    def copy_file(self, new_company_id, new_parent_id):
+    def copy_file(self, company_id, parent_folder_id, article_portal_id):
         file_content = FileContent.get(self.id).detach()
-        new_file = self.detach().attr({'company_id': new_company_id,'parent_id': new_parent_id})
+        new_file = self.detach().attr({'company_id': company_id, 'parent_id': parent_folder_id, 'root_folder_id': parent_folder_id, 'article_portal_id': article_portal_id})
         new_file.save()
         file_content.id = new_file.id
         new_file.file_content = [file_content]

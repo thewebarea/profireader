@@ -152,14 +152,16 @@ class ArticleCompany(Base, PRBase):
             filesintext[self.image_file_id] = True
         company = db(PortalDivision, id=division_id).one().portal.own_company
 
-        for file_id in filesintext:
-            filesintext[file_id] = \
-                File.get(file_id).copy_file(company.id, company.system_folder_file_id).save().id
 
-        article_portal = ArticlePortal(title=self.title, short=self.short,
+
+        article_portal = ArticlePortal(title=self.title, short=self.short, long=self.long,
                            portal_division_id=division_id,
                            article_company_id=self.id,
-                           portal_id=db(PortalDivision, id=division_id).one().portal_id)
+                           portal_id=db(PortalDivision, id=division_id).one().portal_id).save()
+
+        for file_id in filesintext:
+            filesintext[file_id] = \
+                File.get(file_id).copy_file(company_id=company.id, parent_folder_id=company.system_folder_file_id, article_portal_id=article_portal.id).save().id
 
         if self.image_file_id:
             article_portal.image_file_id = filesintext[self.image_file_id]
