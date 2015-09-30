@@ -5,7 +5,7 @@ import collections
 
 #COMPANY_OWNER = ['edit', 'publish', 'unpublish', 'upload_files', 'delete_files', 'add_employee',
 #                 'suspend_employee', 'submit_publications', 'manage_rights_company', 'manage_rights_portal',
-#                 'article_priority', 'manage_readers', 'manage_companies_partners', 'manage_comments',
+#                 'article_priority', 'manage_readers', 'manage_companies_members', 'manage_comments',
 #                 'subscribe_to_portals']
 
 
@@ -72,8 +72,8 @@ class RIGHTS:
     #     return 'manage_readers'
 
     @staticmethod
-    def MANAGE_COMPANIES_PARTNERS():
-        return 'manage_companies_partners'
+    def MANAGE_COMPANIES_MEMBERS():
+        return 'manage_companies_members'
 
     # @staticmethod
     # def MANAGE_COMMENTS():
@@ -102,22 +102,22 @@ def get_my_attributes(my_class, with_values=False):
 
 
 class RightAtomic(dict):
-    EDIT = ('edit', 0x0001, 'Can edit company profile and manage files in company corporate folder')
-    PUBLISH = ('publish', 0x0002, 'Can publish submited materials to portal')
+    EDIT = ('edit', 0x0001, 'Can edit company profile')
+    PUBLISH = ('publish', 0x0002, "Can publish company's materials to portal")
     UNPUBLISH = ('unpublish', 0x0004, 'Can unpublish publication from portal')
-    UPLOAD_FILES = ('upload_files', 0x0008, 'Can upload files to journalist materials folder')
-    DELETE_FILES = ('delete_files', 0x0010, 'Can remove files from journalist materials folder')
+    UPLOAD_FILES = ('upload_files', 0x0008, "Can upload files to company's folder")
+    DELETE_FILES = ('delete_files', 0x0010, "Can remove files from company's folder")
     ADD_EMPLOYEE = ('add_employee', 0x0020, 'Can approve new employee')
-    SUSPEND_EMPLOYEE = ('suspend_employee', 0x0040, 'Can suspend employee')
-    SUBMIT_PUBLICATIONS = ('submit_publications', 0x0080, 'Can submit publication to employer company')
+    SUSPEND_EMPLOYEE = ('suspend_employee', 0x0040, 'Can suspend and unsuspend employee')
+    SUBMIT_PUBLICATIONS = ('submit_publications', 0x0080, 'Can submit materials to company')
     MANAGE_RIGHTS_COMPANY = ('manage_rights_company', 0x0100, 'Can change rights for employee (red rights)')
     MANAGE_RIGHTS_PORTAL = ('manage_rights_portal', 0x0200, 'Can change rights for partner company in portal (blue rights)')
     ARTICLE_PRIORITY = ('article_priority', 0x0400, 'Can set article priority')
     # MANAGE_READERS = ('manage_readers', 0x0800, 'Manage readers')
-    MANAGE_COMPANIES_PARTNERS = ('manage_companies_partners', 0x1000, 'Accept or refuse partnership request')
+    MANAGE_COMPANIES_MEMBERS = ('manage_companies_members', 0x1000, 'Accept or refuse company membership')
     # MANAGE_COMMENTS = ('manage_comments', 0x2000)
-    SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x4000, 'Apply request for company partnership')
-    ACCEPT_REFUSE_PUBLICATION = ('accept_refuse_publication', 0x8000, 'Accept or refuse submitted publication')
+    SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x4000, 'Request company for portal membership')
+    ACCEPT_REFUSE_PUBLICATION = ('accept_refuse_publication', 0x8000, 'Accept or refuse submitted materials')
 
 
     @classmethod

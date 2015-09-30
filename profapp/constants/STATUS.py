@@ -95,7 +95,7 @@ rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['
                     Right['add_employee'], Right['suspend_employee'],
                     Right['manage_rights_company'], Right['manage_rights_portal'],
                     Right['article_priority'],
-                    Right['manage_companies_partners'],
+                    Right['manage_companies_members'],
                     Right['subscribe_to_portals']]
 stat_r = UserStatusInCompanyRights(status,
                                    rights_defined=rights_defined,
