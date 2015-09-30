@@ -135,7 +135,7 @@ class Company(Base, PRBase):
         return self.to_dict(fields)
 
 
-def forbidden_for_current_user(rights, **kwargs):
+def forbidden_for_current_user(**kwargs):
     if 'user_id' in kwargs.keys():
         user_id = kwargs['user_id']
     elif 'user' in kwargs.keys():
@@ -277,7 +277,7 @@ class UserCompany(Base, PRBase):
 
     @staticmethod
     # @check_rights(simple_permissions([Right['manage_access_company']]))
-    # @check_rights({frozenset(): forbidden_for_current_user})
+    @check_rights(forbidden_for_current_user)
     def update_rights(user_id, company_id, new_rights):
         """This method defines for update user-rights in company. Apply list of rights"""
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
