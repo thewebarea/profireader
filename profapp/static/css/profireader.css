@@ -1710,7 +1710,8 @@ input[type=radio   ]:not(old){
   width   : 28px;
   margin  : 0;
   padding : 0;
-  opacity : 0;
+/* TODO OK BY OZ: i have removed this code. why u need it?
+  opacity : 0; */
 }
 
 input[type=checkbox]:not(old) + label,
