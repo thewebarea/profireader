@@ -302,8 +302,10 @@ class UserCompany(Base, PRBase):
                               'status': user_company.status,
                               'date': user_company.md_tm}
 
-            emplo[user.id]['rights'] = \
-                Right.transform_rights_into_set(user_company.rights)
+            # emplo[user.id]['rights'] = \
+            #     Right.transform_rights_into_set(user_company.rights_set)
+
+            emplo[user.id]['rights'] = user_company.rights_set
             # earlier it was a dictionary:
             # {'right_1': True, 'right_2': False, ...}
         return emplo
