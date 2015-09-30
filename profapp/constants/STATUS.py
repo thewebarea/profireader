@@ -93,7 +93,7 @@ status = 'active'
 rights_defined = [Right['upload_files'], Right['submit_publications']]
 rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['delete_files'],
                     Right['add_employee'], Right['suspend_employee'],
-                    Right['manage_rights_company'], Right['manage_rights_portal'],
+                    Right['manage_rights_company'], Right['manage_portal'],
                     Right['article_priority'],
                     Right['manage_companies_members'],
                     Right['subscribe_to_portals']]
