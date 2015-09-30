@@ -11,12 +11,13 @@
             $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};
             $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};
 
-            $scope.getData = function () {
-                return $scope.data.portal;
+            $scope.getData = function (validation) {
+                ret = $.extend({__validation: validation});
             };
             $scope.afterSave = function (resp) {
                 window.location.href = $scope.url_after_save({company_id: resp.company_id})
             };
+
             $scope.addDivision = function () {
                 $scope.data.portal.divisions.push({
                     name: '',
@@ -47,10 +48,20 @@
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
+{#            var enableEdit = function (enablesubmit, enableinput) {#}
+{#                    if (enablesubmit) {#}
+{#                        $('*[ng-model]', $(iElement)).prop('disabled', false);#}
+{#                    }#}
+{#                    else {#}
+{#                        $('*[ng-model]', $(iElement)).prop('disabled', true);#}
+{#                    }#}
+{#                }#}
 
-            <form ng-ok ng-watch="data.portal" ng-onsuccess="afterSave"
-                  ng-onsubmit="getData"
-                  ng-action="url_confirm_create({company_id: data.company_id})">
+            <form
+                    ng-ok="url_confirm_create({company_id: data.company_id})"
+                    ng-watch="data.portal"
+                    ng-before="getData"
+                    ng-after="afterSave" >
 
                 portal name <input type="text" placeholder="Portal name"
                                    ng-model-options="{updateOn : 'change keypress'}"
@@ -86,7 +97,7 @@
                     <button type="button" ng-click="addDivision()">add division</button> {{ __validated.errors.add_division }}
                 </div>
                 <br/><br/>
-                <input ng-disabled="!areAllEmpty(__validated.errors) || __validation" type="submit" value="Create portal">{{ __validated.errors.ok }}
+                <input ng-disabled="!areAllEmpty(__validated.errors) || __validation || __sending" type="submit" value="Create portal">{{ __validated.errors.ok }}
             </form>
         </div>
     </div>

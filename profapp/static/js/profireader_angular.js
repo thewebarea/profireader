@@ -52,7 +52,7 @@ function getObjectsDifference(a, b, setval, notstrict) {
 
 angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
     .factory('$ok', ['$http', function ($http) {
-        return function (url, data, ifok, iferror) {
+        return function (url, data, ifok, iferror, config) {
             function error(result, error_code) {
                 if (iferror) {
                     iferror(result, error_code)
@@ -62,25 +62,26 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 }
             };
 
-            return $http.post(url, data).then(
-                function (resp) {
-                    if (!resp || !resp['data'] || typeof resp['data'] !== 'object' || resp === null) {
-                        return error('wrong response', -1);
+
+            return $http.post(url, data, config ? config : {}).then(
+                function (response) {
+                    if (!response || !response['data'] || typeof response['data'] !== 'object' || response === null) {
+                        return error('wrong response', -1, response);
                     }
 
-                    resp = resp ['data'];
+                    var resp = response['data'];
 
                     if (!resp['ok']) {
-                        return error(resp['data'], resp['error_code']);
+                        return error(resp['data'], resp['error_code'], response);
                     }
 
                     if (ifok) {
-                        return ifok(resp['data']);
+                        return ifok(resp['data'], 0, response);
                     }
 
                 },
-                function () {
-                    return error('wrong response', -1);
+                function (response) {
+                    return error('wrong response', -1, response);
                 }
             );
         }
@@ -122,177 +123,90 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
         return {
             restrict: 'A',
             scope: {
-                ngOnsubmit: '&',
-                ngOnsuccess: '&',
-                ngOnfail: '&',
-                ngAction: '=',
-                ngWatch: '@'
+                ngAfter: '&',
+                ngBefore: '&',
+                ngData: '@',
+                ngState: '@'
             },
             link: function (scope, iElement, iAttrs, ngModelCtrl) {
 
+                var parentscope = scope.$parent.$parent;
 
-                var enableSubmit = function (enablesubmit, enableinput) {
-                    if (enablesubmit) {
-                        $('*[ng-model]', $(iElement)).prop('disabled', false);
-                    }
-                    else {
-                        $('*[ng-model]', $(iElement)).prop('disabled', true);
-                    }
-                }
+                var defaultparameters = {
 
-                scope.$parent.$parent.__validation = false;
-                scope.$parent.$parent.__validated = false;
+                    ngData: 'data',
 
-                var sendValidation = _.debounce(function () {
-                    if (scope.$parent.$parent.__validation) {
-                        return false;
-                    }
-                    var dataToSend = scope['ngOnsubmit']()();
-                    if (dataToSend) {
-                        scope.$parent.$parent.__validation = dataToSend;
-                        $ok(scope['ngAction'], $.extend({__validation: true}, dataToSend), function (resp) {
-                            scope.$parent.$parent.__validated = resp;
-                        }, function (resp) {
-                            scope.$parent.$parent.__validated = false;
-                        }).finally(function () {
-                            scope.$parent.$parent.__validation = false;
-                        });
-                    }
-                }, 500);
-
-                if (scope['ngWatch']) {
-                    scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
-                }
+                    ngState: 'state',
 
 
-                //if (iAttrs['ngValidationResult']) {
-                //    scope[iAttrs['ngValidationResult']] = {};
-                //    var s = scope[iAttrs['ngValidationResult']];
-                //
-                //    s.checking = {};
-                //    s.checked = {};
-                //
-                //    s.errors = {};
-                //    s.warnings = {};
-                //    s.dirty = true;
-                //
-                //    s.submitting = false;
-                //    s.url = null;
-                //    s.on_success_url = null;
-                //}
-
-                //iAttrs.$observe('ngAjaxAction', function(value) {
-                //    s.url = value;
-                //    });
-
-                //iAttrs.$observe('ngOnSuccess', function(value) {
-                //    s.on_success_url = value;
-                //    });
-
-                if (scope['ngOnsubmit']) {
-                    $(iElement).on('submit',
-                        function () {
-                            if (scope.$parent.$parent.__validation) {
+                    ngBefore: function (data, validation, httpconfig, defaultfunc) {
+                        //httpconfig['url'] = http://someurl
+                        if (data) {
+                            if (typeof parentscope[parameters['ngState']] === 'string') {
                                 return false;
                             }
-                            enableSubmit(false);
-                            scope.$apply(function () {
-                                var dataToSend = scope['ngOnsubmit']()();
-                                console.log(dataToSend);
-                                if (dataToSend) {
-                                    $ok(scope['ngAction'], dataToSend, function (resp) {
-                                        if (scope.ngOnsuccess) {
-                                            scope.ngOnsuccess()(resp)
-                                        }
-                                    }).finally(function () {
-                                        enableSubmit(true);
-                                    });
-                                }
-                            });
+                            parentscope[parameters['ngState']] = validation ? 'validating' : 'sending';
+                        }
+                        else {
                             return false;
+                        }
+                    },
+
+                    ngAfter: function (response, validation, httpresp, defaultfunc) {
+                        if (!response) {
+                            return false;
+                        }
+                        if (!validation && response && httpresp && httpresp['headers']('Location')) {
+                            window.location.href = httpresp['headers']('Location');
+                        }
+                        return response;
+                    },
+
+                };
+
+                var parameters = $.extend(defaultparameters, {
+                    ngData: scope['ngData'],
+                    ngBefore: scope['ngBefore'],
+                    ngAfter: scope['ngAfter'],
+                    ngState: scope['ngState']
+                });
+
+                var sendfunction = function (validate) {
+                    var old_state = parentscope[parameters['ngState']];
+                    var default_data = parentscope[parameters['ngData']];
+                    var default_config = {url: iAttrs['action'] ? iAttrs['action'] : window.location.href};
+                    if (validate) {
+                        default_config['headers'] = {validation: 'true'};
+                    }
+                    var dataToSend = parameters['ngBefore']()(default_data, validate, default_config, defaultparameters['ngBefore']);
+
+                    if (!dataToSend) {
+                        return false;
+                    }
+                    var url = default_config['url'](dataToSend, true, defaultparameters['ngUrl']);
+                    $ok(url, dataToSend,
+                        function (resp, errorcode, httpresp) {
+                            var ret = parameters['ngAfter']()(resp, true, defaultparameters['ngAfter'], errorcode, httpresp);
+                            parentscope[parameters['ngState']] = ret ? ret : old_state;
+                        },
+                        function (resp, errorcode, httpresp) {
+                            var ret = parameters['ngAfter']()(null, true, defaultparameters['ngAfter'], errorcode, httpresp);
+                            parentscope[parameters['ngState']] = ret ? ret : old_state;
                         });
                 }
 
 
-                //$.each($('[name]', $(iElement)), function (ind, el) {
-                //$newel = $(el).clone();
-                //scope.data[$(el).attr('name')] = $(el).val();
-                //$newel.attr('ng-model', 'data.' + $newel.attr('name'));
-                //$(el).replaceWith($compile($newel)(scope))
-                //});
+                if (parameters['ngData']) {
+                    parentscope.$watch(parameters['ngData'], _.debounce(function () {
+                        sendfunction(true);
+                    }, 500), true);
+                }
 
-
-                //s.getSignificantClass = function (index, one, onw, onn) {
-                //
-                //    if (s.errors && !areAllEmpty(s.errors[index])) {
-                //        return one;
-                //    }
-                //    if (s.warnings && !areAllEmpty(s.warnings[index])) {
-                //        return onw;
-                //    }
-                //    if (s.notices && !areAllEmpty(s.notices[index])) {
-                //        return onn;
-                //    }
-                //    return '';
-                //};
-                //
-                //s.getSignificantMessage = function (index) {
-                //
-                //    if (s.errors && !areAllEmpty(s.errors[index])) {
-                //        return s.errors[index][0];
-                //    }
-                //    if (s.warnings && !areAllEmpty(s.warnings[index])) {
-                //        return s.warnings[index][0];
-                //    }
-                //    if (s.notices && !areAllEmpty(s.notices[index])) {
-                //        return s.notices[index][0]
-                //    }
-                //    return '';
-                //};
-                //
-                //
-                //s.refresh = function () {
-                //    s.changed = getObjectsDifference(s.checked, s['data']);
-                //    s.check();
-                //};
-                //
-                //s.check = _.debounce(function (d) {
-                //    if (areAllEmpty(s.checking)) {
-                //        console.log('s.changed', s.changed);
-                //        s.changed = getObjectsDifference(s.checked, scope['data']);
-                //        if (!areAllEmpty(s.changed)) {
-                //            s.checking = scope['data'];
-                //
-                //            $http.post($(iElement).attr('njAjaxAction'), s.checking)
-                //                .then(function (fromserver) {
-                //                    var resp = fromserver['data'];
-                //                    if (areAllEmpty(getObjectsDifference(s.checking, scope['data']))) {
-                //                        s.errors = $.extend(true, {}, resp['errors']);
-                //                        s.warnings = $.extend(true, {}, resp['warnings']);
-                //                        s.checked = $.extend(true, {}, s.checking);
-                //                        s.changed = {};
-                //                        s.checking = {};
-                //                    }
-                //                    else {
-                //                        s.checking = {};
-                //                        s.refresh();
-                //                    }
-                //                }, function () {
-                //                    s.checking = {};
-                //                    s.refresh();
-                //                });
-                //        }
-                //    }
-                //    else {
-                //        s.refresh();
-                //    }
-                //}, 500);
-                //console.log(iAttrs);
-                //if (iAttrs['ngAjaxFormValidate'] !== undefined) {
-                //    s.$watch('data', s.refresh, true);
-                //    s.refresh();
-                //}
-                //            s.getTemp(iAttrs.ngCity);
+                $(iElement).on('submit',
+                    function () {
+                        sendfunction(false);
+                        return false;
+                    });
             }
         }
 

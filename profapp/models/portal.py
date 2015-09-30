@@ -91,13 +91,13 @@ class Portal(Base, PRBase):
             if check_division.min > grouped[check_division.id]:
                 ret['errors'][
                     'division_%s' % (check_division.id,)] = 'you need at least %s `%s`' % (
-                check_division.min, check_division.id)
-                if grouped[check_division.id] ==  0:
+                    check_division.min, check_division.id)
+                if grouped[check_division.id] == 0:
                     ret['errors']['add_division'] = 'add at least one `%s`' % (check_division.id,)
             if check_division.max < grouped[check_division.id]:
                 ret['errors'][
                     'division_%s' % (check_division.id,)] = 'you you can have only %s `%s`' % (
-                check_division.max, check_division.id)
+                    check_division.max, check_division.id)
 
         return ret
 
