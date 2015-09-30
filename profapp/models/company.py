@@ -282,7 +282,7 @@ class UserCompany(Base, PRBase):
         """This method defines for update user-rights in company. Apply list of rights"""
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id, company_id=company_id)
-        rights_dict = {'rights': new_rights_binary}
+        rights_dict = {'_rights': new_rights_binary}
         user_company.update(rights_dict)
 
     #  corrected
