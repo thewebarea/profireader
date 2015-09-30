@@ -99,7 +99,7 @@ def partners_load(json, company_id):
 @ok
 @login_required
 #@check_rights(simple_permissions([]))
-def search_for_portal_to_join(json, delme):
+def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(
         json['company_id'], json['search'])
     return portals_partners
