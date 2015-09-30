@@ -126,6 +126,10 @@ class RightAtomic(dict):
 
 list_of_RightAtomic_attributes = get_my_attributes(RightAtomic)
 
+class RightHumnReadible(RightAtomic):
+    @classmethod
+    def __getitem__(cls, attr):
+        return getattr(cls, attr.upper())[2]
 
 class Right(RightAtomic):
     # renamed from RIGHTS
@@ -171,6 +175,7 @@ class Right(RightAtomic):
 
 #  we really need RightAtomic to be inherited from dict.
 Right = Right()
+RightHumnReadible = RightHumnReadible()
 # Now Right['edit'] returns 'edit'
 
 

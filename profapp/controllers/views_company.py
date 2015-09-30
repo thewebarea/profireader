@@ -2,7 +2,7 @@ from .blueprints import company_bp
 from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, UserCompany, Right
+from ..models.company import Company, UserCompany, Right, RightHumnReadible
 from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
@@ -142,9 +142,8 @@ def confirm_add(json):
 
 @company_bp.route('/profile/<string:company_id>/')
 @login_required
-#@check_rights(simple_permissions(['manage_rights_company'], allow_if_rights_undefined=True))
-# @check_rights(UserCompany.permissions(needed_rights_iterable=['manage_rights_company'],
-#                                       allow_if_rights_undefined=True))
+@check_rights(simple_permissions(['manage_rights_company']))
+
 def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = list(g.user.user_rights_in_company(company_id))
@@ -183,7 +182,8 @@ def employees(company_id):
                            company_id=company_id,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
-                           Right=Right
+                           Right=Right,
+                           RightHumnReadible = RightHumnReadible
                            )
 
 
