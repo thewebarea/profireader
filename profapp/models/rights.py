@@ -112,13 +112,14 @@ class RightAtomic(dict):
     SUBMIT_PUBLICATIONS = ('submit_publications', 0x00080, 'Submit materials to company')
     MANAGE_RIGHTS_COMPANY = ('manage_rights_company', 0x00100, 'Change rights for company employees')
     MANAGE_PORTAL = ('manage_portal', 0x00200, 'Create portal and manage portal divisions')
-    ARTICLE_PRIORITY = ('article_priority', 0x00400, 'Set article priority')
-    # MANAGE_READERS = ('manage_readers', 0x0800, 'Manage readers')
-    MANAGE_COMPANIES_MEMBERS = ('manage_companies_members', 0x01000, 'Accept or refuse company membership')
-    # MANAGE_COMMENTS = ('manage_comments', 0x2000)
+    ARTICLE_PRIORITY = ('article_priority', 0x00400, 'Set publication priority on portal')
+    MANAGE_READERS = ('manage_readers', 0x0800, 'Manage readers subscribtion')
+    MANAGE_COMPANIES_MEMBERS = ('manage_companies_members', 0x01000, 'Accept or refuse company membership on portal')
+    MANAGE_COMMENTS = ('manage_comments', 0x2000, 'Manage comments')
     SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x04000, 'Apply company request for portal membership')
     ACCEPT_REFUSE_PUBLICATION = ('accept_refuse_publication', 0x08000, 'Accept or refuse submitted materials')
     REMOVE_PUBLICATION = ('remove_publication', 0x10000, 'Remove any publication from owned portal')
+
 
 
     @classmethod
