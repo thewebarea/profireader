@@ -24,7 +24,7 @@ def create(company_id):
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
+# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
 @ok
 def create_load(json, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
@@ -46,7 +46,7 @@ def create_load(json, company_id):
 
 @portal_bp.route('/confirm_create/<string:company_id>/', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
+# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
 @ok
 def confirm_create(json, company_id):
     portal = Portal(name=json['name'], host=json['host'], portal_layout_id=json['portal_layout_id'],
