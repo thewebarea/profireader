@@ -229,9 +229,49 @@ from apiclient import discovery
 from config import Config
 import httplib2
 from flask import session, jsonify, url_for, redirect, request
-from apiclient.http import MediaFileUpload
+from apiclient.http import MediaFileUpload, MediaInMemoryUpload, MediaUpload, MediaIoBaseUpload
 from oauth2client import client
+from oauth2client.client import Credentials
 from urllib import request as req
+from ..constants.TABLE_TYPES import TABLE_TYPES
+from sqlalchemy import Column
+from .pr_base import Base, PRBase
+from flask import g
+from utils.db_utils import db
+import io
+from apiclient.errors import HttpError
+
+class GoogleToken(Base, PRBase):
+    __tablename__ = 'google_token'
+    id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
+    credentials = Column(TABLE_TYPES['credentials'], nullable=False)
+
+    def __init__(self, credentials=None):
+        super(GoogleToken, self).__init__()
+        self.credentials = credentials
+
+    def update_credentials(self):
+        db(GoogleToken).update(credentials=self.credentials)
+        return self.credentials
+
+    @staticmethod
+    def check_credentials_exist():
+        return db(GoogleToken).count()
+
+    def save_credentials(self):
+
+        google = GoogleAuthorize()
+        flow = google.get_auth_code(ret_flow=True)
+        credentials = flow.step2_exchange(session['auth_code'])
+        self.credentials = credentials.to_json()
+        self.save()
+        return self.credentials
+
+    @staticmethod
+    def get_credentials_from_db():
+        json = db(GoogleToken).first().credentials
+        credentials = Credentials()
+        return credentials.new_from_json(json)
 
 class GoogleAuthorize(object):
     """ This class can apply api_service name and api_version to build service which you want.
@@ -248,26 +288,21 @@ class GoogleAuthorize(object):
         self.google_service_version = google_service_version
         self.scope = scope
 
-    def get_auth_code(self):
+    def get_auth_code(self, ret_flow=False):
 
         flow = client.flow_from_clientsecrets(self.__project_secret, self.scope,
                                               redirect_uri=Config.YOUTUBE_REDIRECT_URL)
+        flow.params['access_type'] = 'offline'
+        flow.params['approval_prompt'] = 'force'
         auth_uri = flow.step1_get_authorize_url()
         request_for_token = req.urlopen(auth_uri)
         url = request_for_token.geturl()
-        return url
-
-    def authorize(self):
-
-        flow = client.flow_from_clientsecrets(self.__project_secret, self.scope,
-                                              redirect_uri=Config.YOUTUBE_REDIRECT_URL)
-        credentials = flow.step2_exchange(session['auth_code'])
-        http = httplib2.Http()
-        http = credentials.authorize(http)
-        return http
+        return url if not ret_flow else flow
 
     def service_build(self):
-        http = self.authorize()
+        credentials = GoogleToken.get_credentials_from_db()
+        http = httplib2.Http()
+        http = credentials.authorize(http)
         service = discovery.build(self.google_service_name, self.google_service_version,
                                   http=http)
         return service
@@ -290,7 +325,7 @@ class YoutubeApi(GoogleAuthorize):
 
     def __init__(self, parts, video_file=None, body_dict=None, chunk_info=None):
         super(YoutubeApi, self).__init__()
-        self.video_file = video_file
+        self.video_file = str(video_file, encoding='latin-1')
         self.body_dict = body_dict
         self.chunk_info = chunk_info
         self.resumable = True if self.chunk_info else False
@@ -300,21 +335,41 @@ class YoutubeApi(GoogleAuthorize):
     def make_body(self):
         """ make body to create request. category_id default 22, status default 'public'. """
 
-        body = {"snippet": {"title": self.body_dict.get('title') or '',
-                            "description": self.body_dict.get('description') or '',
-                            "tags": self.body_dict.get('tags'),
-                            "categoryId": self.body_dict.get('category_id') or 22
-                            },
-                "status": {"privacyStatus": self.body_dict.get('status') or 'public',
-                           "embeddable": True,
-                           "license": "youtube"
-                           }
-                }
+        body = dict(snippet=dict(
+                    title=self.body_dict.get('title') or '',
+                    description=self.body_dict.get('description') or '',
+                    tags=self.body_dict.get('tags'),
+                    categoryId=self.body_dict.get('category_id') or 22),
+                    status=dict(
+                    privacyStatus=self.body_dict.get('status') or 'private',
+                    embeddable=True))
         return body
 
     def upload(self):
 
-        upload_video = self.youtube.videos().insert(part=self.parts,
-                                                    body=self.make_body(),
-                                                    media_body=self.video_file).execute()
+        body = self.make_body()
+        request = self.youtube.videos().insert(part=",".join(body.keys()), body=body,
+                                               media_body=MediaInMemoryUpload(self.video_file,
+                                                                              chunksize=-1,
+                                                                              resumable=True))
+        self.resumable_upload(request)
 
+    @staticmethod
+    def resumable_upload(insert_request):
+        response = None
+        error = None
+        retry = 0
+        while response is None:
+            try:
+                print("Uploading file...")
+                status, response = insert_request.next_chunk()
+                print(status)
+                print(response)
+                if 'id' in response:
+                    print("Video id '%s' was successfully uploaded." % response['id'])
+                else:
+                    exit("The upload failed with an unexpected response: %s" % response)
+            except HttpError as e:
+                error = "A retriable HTTP error %d occurred:\n%s" % (e.resp.status,
+                                                             e.content)
+                print(error)
