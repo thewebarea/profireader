@@ -289,13 +289,14 @@ def confirm_subscriber():
                             company_id=data['company_id']))
 
 
-@company_bp.route('/suspend_employee/', methods=['POST'])
+@company_bp.route('/suspend_or_fire_employee/', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([RIGHTS.SUSPEND_EMPLOYEE()]))
-def suspend_employee():
+def suspend_or_fire_employee():
     data = request.form
-    UserCompany.suspend_employee(user_id=data['user_id'],
-                                 company_id=data['company_id'])
+    UserCompany.suspend_or_fire_employee(user_id=data['user_id'],
+                                         company_id=data['company_id'],
+                                         status=data['status'])
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
 
@@ -305,7 +306,7 @@ def suspend_employee():
 @login_required
 # @check_rights(simple_permissions([]))
 def suspended_employees(company_id):
-    return render_template('company/company_suspended.html', company_id=company_id)
+    return render_template('company/company_fired.html', company_id=company_id)
 
 
 @company_bp.route('/suspended_employees/<string:company_id>', methods=['POST'])

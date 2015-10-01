@@ -12,7 +12,7 @@
         {% include 'company/company_base_angular.html' %}
     {% endblock company_base %}
     <script>
-        module.controller('suspended', ['$scope', function ($scope) {
+        module.controller('fired', ['$scope', function ($scope) {
             $scope.url_after_seve = {{ raw_url_for('company.profile')|safe }};
             $scope.getData = function () {
                 return $scope.data;
@@ -20,8 +20,8 @@
         }]);
     </script>
     {% raw %}
-    <div ng-init="loadData()" ng-controller="suspended">
-        <div ng-if="data==''"><h2>There are not suspended employees in this company</h2></div>
+    <div ng-init="loadData()" ng-controller="fired">
+        <div ng-if="data==''"><h2>There are not fired employees in this company</h2></div>
         <div ng-repeat="emplo in data">
             <dt><img src="{{ emplo.employee.profireader_small_avatar_url }}">
                 {{ emplo.employee.profireader_name }}<br>
