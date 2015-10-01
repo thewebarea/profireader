@@ -38,6 +38,10 @@ class PRBase:
         g.db.flush()
         return self
 
+    def update(self, **kwargs):
+        self.update(**kwargs)
+        return self
+
     def attr(self, dictionary):
         for k in dictionary:
             setattr(self, k, dictionary[k])

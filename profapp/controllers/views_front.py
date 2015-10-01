@@ -15,11 +15,14 @@ def index(page=1):
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
     sub_query = Article.subquery_articles_at_portal(search_text=search_text, portal=portal)
     articles, pages, page = pagination(query=sub_query, page=page)
+    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, portal_division_type_id='index').one()
 
     return render_template('front/bird/index.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},
-                           portal=portal,
+                           portal=portal.get_client_side_dict(),
+                           current_division=division.get_client_side_dict(),
+                           selected_division_id='index',
                            pages=pages,
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
@@ -43,8 +46,8 @@ def division(division_name, search_text, page=1):
     return render_template('front/bird/division.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},
-                           division=division.get_client_side_dict(),
-                           portal=portal,
+                           current_division=division.get_client_side_dict(),
+                           portal=portal.get_client_side_dict(),
                            pages=pages,
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
@@ -54,10 +57,15 @@ def division(division_name, search_text, page=1):
 
 @front_bp.route('details/<string:article_portal_id>')
 def details(article_portal_id):
-    article = ArticlePortal.get(article_portal_id).\
-        to_dict('id, title,short, cr_tm, md_tm, '
+    app = current_app._get_current_object()
+    portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
+    article = ArticlePortal.get(article_portal_id)
+    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, id=article.division.id).one()
+
+    return render_template('front/bird/article_details.html',
+                           portal=portal.get_client_side_dict(),
+                           current_division=division.get_client_side_dict(),
+                           article=article.to_dict('id, title,short, cr_tm, md_tm, '
                 'publishing_tm, status, long, image_file_id,'
                 'division.name, division.portal.id,'
-                'company.name')
-    return render_template('front/bird/article_details.html',
-                           article=article, portal=article['division']['portal'])
+                'company.name'))
