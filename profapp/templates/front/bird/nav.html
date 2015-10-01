@@ -16,15 +16,18 @@
             <div class="centred">
                 <a class="navbar-brand logo" href="/"></a>
             </div>
+
+
             <ul class="nav navbar-nav">
                 {% for division in portal.divisions %}
                 <li>
                     <a href="{{ url_for('front.division', division_name=division.name, page=1, search_text='%') }}">{{ division.name }}</a>
                 </li>
                 {% endfor %}
-                <li>
-                    <a href="/?about">{{ _('About us') }}</a>
-                </li>
+{#                <li>#}
+{#                    <a href="/?about">{{ _('About us') }}</a>#}
+{#                </li>#}
+{#            <li><div class="test-content">!! -- MENU = '{{ division }}' -- !!</div></li>#}
             </ul>
         </div>
         <!-- /.navbar-collapse -->
