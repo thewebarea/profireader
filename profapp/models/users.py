@@ -1,7 +1,9 @@
-from flask import request, current_app, g
+from flask import request, current_app, g, flash
 #from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
+from flask.ext.login import logout_user
+
 # from db_init import Base, g.db
 
 from ..constants.TABLE_TYPES import TABLE_TYPES
@@ -19,7 +21,9 @@ from flask.ext.login import UserMixin, AnonymousUserMixin
 from .files import File
 from .pr_base import PRBase, Base
 from .rights import Right
+from sqlalchemy import CheckConstraint
 from sqlalchemy.ext.associationproxy import association_proxy
+from ..constants.USER_ROLES import GOD_RIGHTS
 
 
 class User(Base, UserMixin, PRBase):
@@ -27,7 +31,8 @@ class User(Base, UserMixin, PRBase):
 
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    personal_folder_file_id = Column(String(36), ForeignKey('file.id'))
+    personal_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     profireader_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])
@@ -39,8 +44,19 @@ class User(Base, UserMixin, PRBase):
     location = Column(TABLE_TYPES['location'])
 
     password_hash = Column(TABLE_TYPES['password_hash'])
-    confirmed = Column(TABLE_TYPES['boolean'], default=False)
+    confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
+
+    # _rights = (0, 0)  # (0, GOD_RIGHTS)
+    # rights_defined_int = \
+    #     Column(TABLE_TYPES['bigint'],
+    #            CheckConstraint('rights >= 0', name='unsigned_profireader_rights_def'),
+    #            default=0, nullable=False)
+    #
+    # rights_undefined_int = \
+    #     Column(TABLE_TYPES['bigint'],
+    #            CheckConstraint('rights >= 0', name='unsigned_profireader_rights_undef'),
+    #            default=0, nullable=False)  # default=GOD_RIGHTS
 
     registered_tm = Column(TABLE_TYPES['timestamp'],
                            default=datetime.datetime.utcnow)
@@ -129,8 +145,10 @@ class User(Base, UserMixin, PRBase):
 # get all users companies : user.employers
 
     def __init__(self,
-                 user_right_in_company=[],
+                 # user_rights_in_profireader_def=[],
+                 # user_rights_in_profireader_undef=[],
                  employers=[],
+
                  PROFIREADER_ALL=SOC_NET_NONE['profireader'],
                  GOOGLE_ALL=SOC_NET_NONE['google'],
                  FACEBOOK_ALL=SOC_NET_NONE['facebook'],
@@ -151,11 +169,11 @@ class User(Base, UserMixin, PRBase):
                  pass_reset_conf_tm=None,
                  ):
 
-        # self.companies = companies
+        # self.user_rights_in_profireader_def = user_rights_in_profireader_def
+        # self.user_rights_in_profireader_undef = user_rights_in_profireader_undef
 
         self.employers = employers
 
-        self.user_right_in_company = user_right_in_company
         self.profireader_email = PROFIREADER_ALL['email']
         self.profireader_first_name = PROFIREADER_ALL['first_name']
         self.profireader_last_name = PROFIREADER_ALL['last_name']
@@ -246,12 +264,17 @@ class User(Base, UserMixin, PRBase):
         self._banned = ban
 
     def is_banned(self):
-        return self.banned
+        banned = self.banned
+        if self.banned:
+            flash('Sorry, you cannot login into the Profireader. Contact the profireader'
+                  'administrator, please: ' +
+                  current_app.config['PROFIREADER_MAIL_SENDER'])
+        return banned
 
     def ban(self):
         self.banned = True
         g.db.add(self)
-        g.db.commit()
+        g.db.commit()  # Todo (AA to AA): we have to logout banned user too
         return self
 
     def unban(self):
@@ -337,7 +360,6 @@ class User(Base, UserMixin, PRBase):
     def password(self):
         raise AttributeError('password is not a readable attribute')
 
-
     # we use SHA256.
     # https://crackstation.net/hashing-security.htm
     # "the output of SHA256 is 256 bits (32 bytes), so the salt should be at least 32 random bytes."
@@ -421,15 +443,14 @@ class User(Base, UserMixin, PRBase):
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)
-        self.profireader_avatar_url = \
-            file.upload(content=content).get_url()
+        self.profireader_avatar_url = file.upload(content=content).url()
 
+        # TODO: this image should be cropped
         file = File(
             author_user_id=self.id,
             name=passed_file.filename,
             mime=passed_file.content_type)
-        self.profireader_small_avatar_url = \
-            file.upload(content=content).get_url()
+        self.profireader_small_avatar_url = file.upload(content=content).url()
 
         return self
 
@@ -439,9 +460,12 @@ class User(Base, UserMixin, PRBase):
 
     #def is_administrator(self):
     #    return self.can(Permission.ADMINISTER)
+
+    # TODO (AA to AA): it should be corrected
     def user_rights_in_company(self, company_id):
-        user_rights_int = self.employer_assoc.filter_by(company_id=company_id).one().rights
-        return list(Right.transform_rights_into_set(user_rights_int))
+        user_company = self.employer_assoc.filter_by(company_id=company_id).first()
+        return user_company.rights_set if user_company else []
+
 
 class Group(Base, PRBase):
 

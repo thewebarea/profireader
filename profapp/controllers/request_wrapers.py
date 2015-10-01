@@ -7,19 +7,24 @@ from time import sleep
 from flask.ext.login import current_user
 from ..models.rights import Right
 from ..constants.STATUS import STATUS_RIGHTS
+from .errors import ImproperRightsDecoratorUse
+from ..controllers import errors
 
 def ok(func):
     @wraps(func)
     def function_json(*args, **kwargs):
-        # try:
+        try:
         # sleep(0.5)
-        if 'json' in kwargs:
-            del kwargs['json']
-        ret = func(request.json, *args, **kwargs)
-        return jsonify({'data': ret, 'ok': True,
-                         'error_code': 'ERROR_NO_ERROR'})
+            if 'json' in kwargs:
+                del kwargs['json']
+            a = request.json
+            ret = func(a, *args, **kwargs)
+            return jsonify({'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
         # except Exception as e:
-        #     return jsonify({'ok': False, 'error_code': -1, 'result': str(e)})
+        except errors.ValidationException as e:
+            db = getattr(g, 'db', None)
+            db.rollback()
+            return jsonify({'ok': False, 'error_code': -1, 'result': e.result})
     return function_json
 
 
@@ -36,58 +41,15 @@ def replace_brackets(func):
     return wrapper
 
 
-def check_user_status_in_company_rights(func):
-    def decorated(*args, **kwargs):
-        # here args is a tuple
-        if ('company_id' not in kwargs.keys()) or not args:
-            return func(*args, **kwargs)
-        else:
-            status_name = current_user.employer_assoc.filter_by(
-                company_id=kwargs['company_id']).one().status
-            user_status = STATUS_RIGHTS[status_name]
-
-            args_new = ()
-            rez = False
-            for arg in args:
-                needed_rights_in_int = Right.transform_rights_into_integer(list(arg.keys())[0])
-                needed_rights_in_int_2 = needed_rights_in_int & ~user_status.rights_defined
-                if needed_rights_in_int_2 & user_status.rights_undefined == needed_rights_in_int_2:
-                    arg_new = ({Right.transform_rights_into_set(needed_rights_in_int_2):
-                                arg[list(arg.keys())[0]]},)
-                    args_new += arg_new
-                    rez = True
-            if not rez:
-                abort(403)
-            return func(*args_new, **kwargs)
-    return decorated
-
-
-@check_user_status_in_company_rights
-def can_global(*rights_business_rule, **kwargs):
-    if not rights_business_rule:
-        return True
-    rez = reduce(
-        lambda x, y:
-        x or y[list(y.keys())[0]](**kwargs)(list(y.keys())[0]),
-        rights_business_rule, False)
-    return rez
-
-# if there is need to use check rights inside the controller (view function)
-# you can do it in the following way:
-#
-# business_rule = simple_permissions([Right['edit']])
-# if not can_global(business_rule,
-#                   user=current_user,
-#                   company_id=company_id):
-#     abort(403)
-
-
+# TODO (AA to AA): may be change it to check_user_company_rights(*rights_business_rule):
 def check_rights(*rights_business_rule):
     # (rights, lambda_func) = rights_lambda_rule.items()[0]
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            rez = can_global(*rights_business_rule, **kwargs)
+            if not rights_business_rule:
+                return True
+            rez = reduce(lambda x, y: x or y(**kwargs), rights_business_rule, False)
             if not rez:
                 abort(403)
             return func(*args, **kwargs)

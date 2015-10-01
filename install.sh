@@ -50,6 +50,36 @@ function conf {
     fi
 }
 
+function down {
+    filetoget=$1
+    if [[ "$2" == "" ]]; then
+	filetoput=${1##*/}
+    else
+	filetoput=$2
+	
+    fi
+
+    filetobak="$3"
+
+    ntaxauser=$(rr 'Enter ntaxa username:')
+    ntaxapass=$(rr "Enter ntaxa password:")
+    if [[ "$3" != '' ]]; then
+	echo "  mv $filetoget $filetobak"
+    fi
+    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://x.d.ntaxa.com/profireader/$filetoget
+if [[ \"\$?\" == \"0\" ]]; then"
+    if [[ "$3" != '' ]]; then
+	command="$command
+    mv $filetoput $filetobak"
+    fi
+    command="$command
+    mv /tmp/tmpfile $filetoput
+else
+    echo 'wget failed!'
+fi"
+    conf_comm "$command" nosudo $4
+    }
+
 conf_comm() {
 rd=`tput setaf 1`
     rst=`tput sgr0`
@@ -84,6 +114,18 @@ rd=`tput setaf 1`
     fi
 }
 
+function warn_about_rm {
+    if [[ -e $1 ]]; then
+    	    echo "warning: $1 exists and will be removed"
+    fi
+    }
+
+function error_if_exists {
+    if [[ -e $1 ]]; then
+    	    echo "warning: $1 exists and will be removed"
+    fi
+    }
+
 function get_profidb {
     echo `cat secret_data.py | grep 'DB_NAME' | sed -e 's/^\s*DB_NAME\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
     }
@@ -98,6 +140,20 @@ function runsql_dump {
     conf_comm "su postgres -c 'cat $filenam | psql $profidb'" sudo "$3"
     }
 
+function menu_origin {
+    destination=`git remote -v | grep 'fetch' | sed -e 's/^.*github.com:\([^\/]*\)\/.*$/\1/g'`
+    conf_comm "git remote rename origin $destination
+git remote add origin git@github.com:kakabomba/profireader.git" nosudo postgres_9_4
+    }
+
+function menu_postgres_9_4 {
+    conf_comm "echo 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' >> /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+sudo apt-key add -
+sudo apt-get update
+apt-get install postgresql-9.4" sudo deb
+    }
+
 function menu_deb {
     conf_comm "apt-get update
 apt-get install libpq-dev python-dev libapache2-mod-wsgi" sudo hosts
@@ -106,9 +162,11 @@ apt-get install libpq-dev python-dev libapache2-mod-wsgi" sudo hosts
 function menu_hosts {
     conf_comm "sed -i '/\(db\|web\|mail\).profi/d' /etc/hosts
 sed -i '/\(companyportal\|aprofi\).d.ntaxa.com/d' /etc/hosts
+sed -i '/profi.ntaxa.com/d' /etc/hosts
 echo '' >> /etc/hosts
 echo '127.0.0.1 aprofi.d.ntaxa.com companyportal.d.ntaxa.com file001.profi.ntaxa.com' >> /etc/hosts
 echo '127.0.0.1 db.profi web.profi mail.profi' >> /etc/hosts
+echo '127.0.0.1 profi.ntaxa.com oles.profi.ntaxa.com rodynnifirmy.profi.ntaxa.com derevoobrobka.profi.ntaxa.com viktor.profi.ntaxa.com aa.profi.ntaxa.com md.profi.ntaxa.com oleh.profi.ntaxa.com file001.profi.ntaxa.com' >> /etc/hosts
 cat /etc/hosts" sudo haproxy
     }
 
@@ -125,19 +183,7 @@ service haproxy restart" sudo secret_data
     }
 
 function menu_secret_data {
-    echo "Going to run commands:"
-    echo "  wget --user='ntaxauser' --password='ntaxapassword' -O secret_data.txt http://x.d.ntaxa.com/profireader/secret_data.txt"
-    echo "  mv secret_data.txt secret_data.py"
-    echo "If exists, secret_data.py will be copied to secret_data.bak.py"
-    ntaxauser=$(rr 'Enter ntaxa user:')
-    ntaxapass=$(rr "Enter ntaxa password:")
-    conf_comm "wget --user='$ntaxauser' --password='$ntaxapass' http://x.d.ntaxa.com/profireader/secret_data.txt
-if [[ \"\$?\" == \"0\" ]]; then
-  mv ./secret_data.py ./secret_data.bak.py
-  mv secret_data.txt secret_data.py
-else
-  echo 'wget failed!'
-fi" nosudo  python_3
+    down secret_data.txt secret_data.py secret_data.`$gitv`_`$datev`.bak python_3
     }
 
 function menu_python_3 {
@@ -146,6 +192,8 @@ function menu_python_3 {
     if [[ -e $destdir ]]; then
 	echo "error: $destdir exists"
     else
+	warn_about_rm '/usr/bin/python3'
+	warn_about_rm '/usr/bin/pyvenv'
 	conf_comm "cd /tmp/
 rm -rf 'Python-$pversion/*'
 rm 'Python-$pversion.tgz'
@@ -155,14 +203,14 @@ cd 'Python-$pversion'
 ./configure --prefix='$destdir'
 make
 make install
-ln -s $destdir/bin/python3 /usr/bin/python3
+rm /usr/bin/python3
+rm /usr/bin/pyvenv
+ln -s $destdir/binpython3 /usr/bin/python3
 ln -s $destdir/bin/pyvenv /usr/bin/pyvenv
 cd /tmp
 rm -rf 'Python-$pversion'" sudo venv
     fi
     }
-
-
 
 function menu_venv {
     destdir=$(rr 'destination dir for virtual directory' .venv)
@@ -179,7 +227,7 @@ function menu_modules {
     conf_comm "
 cd `pwd`
 source $destdir/bin/activate
-pip install -r $req" nosudo port
+pip3 install -r $req" nosudo port
     }
 
 function menu_port {
@@ -202,7 +250,7 @@ ALTER USER $psqluser WITH PASSWORD '$psqlpass';" db_create
 
 function menu_db_rename {
     profidb=$(get_profidb)
-    runsql "ALTER DATABASE $profidb RENAME TO bak_$profidb""_$date" 'db_create'
+    runsql "ALTER DATABASE $profidb RENAME TO bak_$profidb""_"`$gitv`"_"`$datev` 'db_create'
     }
 
 function menu_db_create {
@@ -210,21 +258,43 @@ function menu_db_create {
     psqldb=$(rr 'Enter postgresql database name' $profidb)
     
     profiuser=`cat secret_data.py | grep 'DB_USER' | sed -e 's/^\s*DB_USER\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
-    runsql "CREATE DATABASE $psqldb WITH ENCODING 'UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8'  OWNER = $profiuser TEMPLATE=template0" db_load
+    runsql "CREATE DATABASE $psqldb WITH ENCODING 'UTF8' LC_COLLATE='C.UTF-8' LC_CTYPE='C.UTF-8'  OWNER = $profiuser TEMPLATE=template0" db_download_minimal
     }
 
-function menu_db_load {
-    runsql_dump 'Enter sql structure filename' database.sql db_save
+
+function menu_db_download_minimal {
+    down database.structure database.structure database.structure.`$gitv`_`$datev`.bak db_load_minimal
     }
 
-function menu_db_save {
+function menu_db_load_minimal {
+    runsql_dump 'Enter sql structure filename' database.structure db_save_minimal
+    }
+
+function menu_db_save_minimal {
     profidb=$(get_profidb)
     conf_comm "
-mv database.sql database.sql.bak
-su postgres -c 'pg_dump -s $profidb' > database.sql
+su postgres -c 'pg_dump -s $profidb' > database.structure
 tables=\$(su postgres -c \"echo 'SELECT RelName FROM pg_Description JOIN pg_Class ON pg_Description.ObjOID = pg_Class.OID WHERE ObjSubID = 0 AND Description LIKE '\\\"'\\\"%persistent%\\\"'\\\" | psql -t $profidb\" | sed '/^\\s*\$/d' | sed -e 's/^/-t /g' | tr \"\\n\" \" \" )
-su postgres -c \"pg_dump --inserts -a \$tables $profidb\" >> database.sql
-git diff database.sql" sudo 'exit'
+su postgres -c \"pg_dump --inserts -a \$tables $profidb\" >> database.structure
+git diff database.structure" sudo 'db_download_full'
+    }
+
+function menu_db_download_full {
+    down database_full.sql database_full.sql database_full.sql.`$gitv`_`$datev`.bak db_load_full
+    }
+
+function menu_db_load_full {
+    runsql_dump 'Enter sql full dump filename' database_full.sql db_save_full
+    }
+
+
+function menu_db_save_full {
+    profidb=$(get_profidb)
+    conf_comm "
+mv database_full.sql database_full.sql."`$gitv`"_"`$datev`".bak
+su postgres -c 'pg_dump $profidb' > database_full.sql
+ls -l1sh database_full.*
+" sudo 'exit'
     }
 
 
@@ -241,6 +311,8 @@ while :
 do
 #next='exit'
 dialog --title "profireader" --nocancel --default-item $next --menu "Choose an option" 22 78 17 \
+"origin" "change git origin and add new remote repo" \
+"postgres_9_4" "install postgres 9.4" \
 "deb" "install deb packages" \
 "hosts" "create virtual domain zone in /etc/hosts" \
 "haproxy" "install haproxy" \
@@ -252,11 +324,16 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "db_user_pass" "create postgres user/password" \
 "db_rename" "rename database (create backup)" \
 "db_create" "create empty database" \
-"db_load" "load database from file" \
-"db_save" "save database to file" \
+"db_save_minimal" "save initial database to file" \
+"db_download_minimal" "get minimal database from x.d.ntaxa.com" \
+"db_load_minimal" "load full database from file" \
+"db_save_full" "save full database to file" \
+"db_download_full" "get full database from x.d.ntaxa.com" \
+"db_load_full" "load initial database from file" \
 "exit" "Exit" 2> /tmp/selected_menu_
 reset
-date=`date +"%y_%m_%d___%H_%M"`
+datev="date +%y_%m_%d___%H_%M_%S"
+gitv='git rev-parse --short HEAD'
 menu_`cat /tmp/selected_menu_`
 
 done

@@ -53,7 +53,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 {%- endblock head %}
 
-{% block body_attribs %} ng-app="Profireader"{% endblock body_attribs %}
+{% block body_attribs %} ng-app="Profireader" ng-model-options="{{ "{" }}updateOn: 'default change blur', debounce: {{ "{" }} 'default': 250, 'change': 250, 'blur': 0 {{ "}" }} {{ "}" }}" {% endblock body_attribs %}
 
 {% block navbar %}
     {% include 'partials/base_profireader.html' %}
@@ -78,4 +78,3 @@
 
 {% block scripts %}
 {%- endblock scripts %}
-

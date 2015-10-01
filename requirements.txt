@@ -20,3 +20,5 @@ Flask-Mail==0.9.1
 Flask-Moment==0.5.1
 Flask-Bootstrap==3.3.5.6
 Flask-Babel
+google-api-python-client-py3
+apiclient==1.0.2

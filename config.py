@@ -26,6 +26,8 @@ class Config(object):
     #SERVER_NAME = 'profireader.a:8080'
     #SERVER_NAME = 'profireader.net:8080'
 
+    SITE_TITLE = 'Profireader'
+
     # Statement for enabling the development environment
     DEBUG = False
     TESTING = False
@@ -58,11 +60,26 @@ class Config(object):
                              'XV Thumbnails']
 
 # Pagination
-    ITEMS_PER_PAGE = 3
+    ITEMS_PER_PAGE = 5
     PAGINATION_BUTTONS = 4
 
+# YOUTUBE API
+    CLIENT_SECRETS_FILE = "client_secrets.json"
+    YOUTUBE_UPLOAD = "https://www.googleapis.com/auth/youtube.upload"
+    YOUTUBE_API_SERVICE_NAME = "youtube"
+    YOUTUBE_API_VERSION = "v3"
+    MISSING_CLIENT_SECRETS_MESSAGE = """
+    WARNING: Please configure OAuth 2.0
+    To make this sample run you will need to populate the client_secrets.json file
+    found at:%swith information from the Developers Console
+    https://console.developers.google.com/
+    For more information about the client_secrets.json file format, please visit:
+    https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
+    """ % os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                       CLIENT_SECRETS_FILE))
+
 # Base rights will added when user is confirmed in company
-    BASE_RIGHT_IN_COMPANY = ['upload_files', 'send_publications']
+    BASE_RIGHT_IN_COMPANY = ['upload_files', 'submit_publications']
     # Define the application directory
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     # UPLOAD_FOLDER = os.path.join(BASE_DIR, 'media')
@@ -84,7 +101,7 @@ class Config(object):
     database = secret_data.DB_NAME
 
     # Secret key for signing cookies
-    SECRET_KEY = secret_data.SECRET_KEY
+    SECRET_KEY = secret_data.OAUTH_CONFIG['google']['consumer_secret']
 
     OAUTH_CONFIG = secret_data.OAUTH_CONFIG
 
@@ -118,7 +135,7 @@ class ProductionDevelopmentConfig(Config):
     # Secret key for signing cookies
     SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)
 
-    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', 'Profireader')
+    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', Config.SITE_TITLE)
 
     # Facebook settings
 #    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
@@ -152,7 +169,7 @@ class FrontConfig(Config):
     # Secret key for signing cookies
     SECRET_KEY = os.getenv('PRODUCTION_SERVER_SECRET_KEY', Config.SECRET_KEY)
 
-    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', 'Profireader')
+    SITE_TITLE = os.getenv('PRODUCTION_SERVER_SITE_TITLE', Config.SITE_TITLE)
 
     # Facebook settings
 #    CONSUMER_KEY_FB = os.getenv('PRODUCTION_SERVER_CONSUMER_KEY',
@@ -165,6 +182,7 @@ class FrontConfig(Config):
         # Statement for enabling the development environment
         DEBUG = True
 
+
 class TestingConfig(Config):
     # Statement for enabling the development environment
     DEBUG = True
@@ -174,7 +192,7 @@ class TestingConfig(Config):
     CSRF_ENABLED = False
     WTF_CSRF_ENABLED = False
 
-    #Define database connection parameters
+    # Define database connection parameters
     db_name = 'profireader_test'
 
     # Define the database - we are working with

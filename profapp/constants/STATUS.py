@@ -6,7 +6,6 @@ class STATUS_NAME(dict):
     NONACTIVE = 'nonactive'
     BLOCKED = 'blocked'
     DELETED = 'deleted'
-    BANNED = 'banned'
     REJECTED = 'rejected'
     SUSPENDED = 'suspended'
 
@@ -34,10 +33,6 @@ class STATUS:
     @staticmethod
     def DELETED():
         return 'deleted'
-
-    @staticmethod
-    def BANNED():
-        return 'banned'
 
     @staticmethod
     def REJECTED():
@@ -95,12 +90,12 @@ class UserStatusInCompanyRights:
 STATUS_RIGHTS = dict()
 
 status = 'active'
-rights_defined = [Right['upload_files'], Right['send_publications']]
+rights_defined = [Right['upload_files'], Right['submit_publications']]
 rights_undefined = [Right['edit'], Right['publish'], Right['unpublish'], Right['delete_files'],
                     Right['add_employee'], Right['suspend_employee'],
-                    Right['manage_access_company'], Right['manage_access_portal'],
-                    Right['article_priority'], Right['manage_readers'],
-                    Right['manage_companies_partners'], Right['manage_comments'],
+                    Right['manage_rights_company'], Right['manage_portal'],
+                    Right['article_priority'],
+                    Right['manage_companies_members'],
                     Right['subscribe_to_portals']]
 stat_r = UserStatusInCompanyRights(status,
                                    rights_defined=rights_defined,
@@ -114,9 +109,6 @@ stat_r = UserStatusInCompanyRights('blocked')
 STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('deleted')
-STATUS_RIGHTS[stat_r.status] = stat_r
-
-stat_r = UserStatusInCompanyRights('banned')
 STATUS_RIGHTS[stat_r.status] = stat_r
 
 stat_r = UserStatusInCompanyRights('rejected')

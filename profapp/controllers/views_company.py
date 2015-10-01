@@ -2,8 +2,8 @@ from .blueprints import company_bp
 from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, UserCompany, Right
-from ..models.rights import list_of_RightAtomic_attributes
+from ..models.company import Company, UserCompany, Right, RightHumnReadible
+# from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
@@ -12,31 +12,29 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
-from ..models.rights import list_of_RightAtomic_attributes
-from ..constants.USER_ROLES import RIGHTS
+# from ..models.rights import list_of_RightAtomic_attributes
+from profapp.models.rights import RIGHTS
 from ..models.files import File
 
-# todo (AA to OZ): is @json necessary here?
+
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.SEND_PUBLICATIONS()]))
-# @json
+# @check_rights(simple_permissions(Right[RIGHTS.SUBMIT_PUBLICATIONS()]))
 def search_to_submit_article(json):
-    companies = Company().search_for_company(g.user_dict['id'],
-                                             json['search'])
+    companies = Company().search_for_company(g.user_dict['id'], json['search'])
     return companies
 
 
 @company_bp.route('/', methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def show():
     return render_template('company/companies.html')
 
 
 @company_bp.route('/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def load_companies(json):
 
@@ -46,7 +44,7 @@ def load_companies(json):
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def materials(company_id):
     return render_template('company/materials.html',
                            company_id=company_id,
@@ -56,23 +54,22 @@ def materials(company_id):
                                    company_id)])
 
 
-@company_bp.route('/material_details/<string:company_id>/'
-                  '<string:article_id>/', methods=['GET'])
+@company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def material_details(company_id, article_id):
     return render_template('company/material_details.html',
-                           company_id=company_id, article_id=article_id)
+                           company_id=company_id,
+                           article_id=article_id)
 
 
-@company_bp.route('/material_details/<string:company_id>/'
-                  '<string:article_id>/', methods=['POST'])
+@company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
 @login_required
 @ok
 def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
-    portals = {port.portal_id: port.portal.to_dict('id, name, divisions.name, divisions.id')
-               for port in CompanyPortal.get_portals(company_id)}
+    portals = {port.portal_id: port.portal.get_client_side_dict() for port in
+               CompanyPortal.get_portals(company_id)}
     joined_portals = {}
     if article.portal_article:
         joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
@@ -84,21 +81,26 @@ def load_material_details(json, company_id, article_id):
                               'editor_user_id, company.name|id,'
                               'portal_article.division.portal.id')
 
-    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(
-        article['status'])
-    user_rights = g.user.user_rights_in_company(company_id)
+    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
+    user_rights = list(g.user.user_rights_in_company(company_id))
 
-    return {'article': article, 'status': status, 'portals':
-            portals, 'company': Company.get(company_id).
-            to_dict('id, employees.id|profireader_name'),
-            'selected_portal': {}, 'selected_division': {},
-            'user_rights': user_rights, 'send_to_user': {},
+    return {'article': article,
+            'status': status,
+            'portals': portals,
+            'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
+            'selected_portal': {},
+            'selected_division': {},
+            # 'user_rights': ['publish', 'unpublish', 'edit'],
+            # TODO: uncomment the string below and delete above
+            # TODO: when all works with rights are finished
+            'user_rights': user_rights,
+            'send_to_user': {},
             'joined_portals': joined_portals}
 
 
 @company_bp.route('/update_article/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.PUBLISH()]))
+# @check_rights(simple_permissions([]))
 @ok
 def update_article(json):
 
@@ -108,27 +110,30 @@ def update_article(json):
         **{'status': json['article']['status']})
     return {'article': json['article'], 'status': 'ok'}
 
+
 @company_bp.route('/submit_to_portal/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions(Right[RIGHTS.SUBSCRIBE_TO_PORTALS()]))
+# @check_rights(simple_permissions([]))
 @ok
 def submit_to_portal(json):
 
     article = ArticleCompany.get(json['article']['id'])
     article_portal = article.clone_for_portal(json['selected_division'])
+    article.save()
     portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
     return {'portal': portal.name}
 
+
 @company_bp.route('/add/')
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def add():
     return render_template('company/company_add.html', user=g.user_dict)
 
 
 @company_bp.route('/confirm_add/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def confirm_add(json):
     return Company(**json).create_new_company().\
@@ -137,11 +142,14 @@ def confirm_add(json):
 
 @company_bp.route('/profile/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([]))
+@check_rights(simple_permissions(['manage_rights_company']))
+
 def profile(company_id):
     company = db(Company, id=company_id).one()
-    user_rights = g.user.user_rights_in_company(company_id)
-    image = File.get(company.logo_file).url() \
+    user_rights = list(g.user.user_rights_in_company(company_id))
+    # image = File.get(company.logo_file).url() \
+    #     if company.logo_file else '/static/img/company_no_logo.png'
+    image = company.logo_file_relationship.url() \
         if company.logo_file else '/static/img/company_no_logo.png'
     return render_template('company/company_profile.html',
                            company=company.to_dict('*, own_portal.*'),
@@ -150,16 +158,18 @@ def profile(company_id):
                            company_id=company_id
                            )
 
+
 @company_bp.route('/employees/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def employees(company_id):
 
     company_user_rights = UserCompany.show_rights(company_id)
     for user_id in company_user_rights.keys():
         rights = company_user_rights[user_id]['rights']
         rez = {}
-        for elem in list_of_RightAtomic_attributes:
+        # for elem in list_of_RightAtomic_attributes:
+        for elem in Right.keys():
             rez[elem.lower()] = True if elem.lower(
             ) in rights else False
         company_user_rights[user_id]['rights'] = rez
@@ -173,15 +183,15 @@ def employees(company_id):
                            company_id=company_id,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
-                           Right=Right
+                           Right=Right,
+                           RightHumnReadible=RightHumnReadible
                            )
 
 
 @company_bp.route('/update_rights', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def update_rights():
-
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
                               company_id=data['company_id'],
@@ -194,9 +204,8 @@ def update_rights():
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def edit(company_id):
-
     company = db(Company, id=company_id).one()
     return render_template('company/company_edit.html',
                            company=company,
@@ -207,7 +216,7 @@ def edit(company_id):
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_COMPANY()]]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
                           passed_file=request.files['logo_file'])
@@ -216,61 +225,60 @@ def confirm_edit(company_id):
 
 @company_bp.route('/subscribe/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def subscribe(company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
                                company_id=company_id,
                                status=STATUS.NONACTIVE())
-    company_role.subscribe_to_company()
+    company_role.subscribe_to_company().save()
 
     return redirect(url_for('company.profile', company_id=company_id))
 
 
 @company_bp.route('/search_for_company_to_join/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def search_for_company_to_join(json):
-    companies = Company().search_for_company_to_join(g.user_dict['id'],
-                                                     json['search'])
+    companies = Company().search_for_company_to_join(g.user_dict['id'], json['search'])
     return companies
-
 
 
 @company_bp.route('/search_for_user/<string:company_id>', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def search_for_user(json, company_id):
 
     users = UserCompany().search_for_user_to_join(company_id, json['search'])
     return users
 
+
 @company_bp.route('/send_article_to_user/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def send_article_to_user(json):
 
     return {'user': json['send_to_user']}
 
-@company_bp.route('/join_to_company/<string:company_id>/',
-                  methods=['POST'])
+
+@company_bp.route('/join_to_company/<string:company_id>/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def join_to_company(json, company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
                                company_id=json['company_id'],
                                status=STATUS.NONACTIVE())
-    company_role.subscribe_to_company()
+    company_role.subscribe_to_company().save()
     return {'companies': [employer.get_client_side_dict()
                           for employer in current_user.employers]}
 
 
 @company_bp.route('/add_subscriber/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.ADD_EMPLOYEE()]]))
+# @check_rights(simple_permissions([RIGHTS.ADD_EMPLOYEE()]))
 def confirm_subscriber():
     company_role = UserCompany()
     data = request.form
@@ -283,7 +291,7 @@ def confirm_subscriber():
 
 @company_bp.route('/suspend_employee/', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([Right[RIGHTS.SUSPEND_EMPLOYEE()]]))
+# @check_rights(simple_permissions([RIGHTS.SUSPEND_EMPLOYEE()]))
 def suspend_employee():
     data = request.form
     UserCompany.suspend_employee(user_id=data['user_id'],
@@ -291,20 +299,18 @@ def suspend_employee():
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
 
+
 @company_bp.route('/suspended_employees/<string:company_id>',
                   methods=['GET'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def suspended_employees(company_id):
-    return render_template('company/company_suspended.html',
-                           company_id=company_id
-                           )
+    return render_template('company/company_suspended.html', company_id=company_id)
 
 
-@company_bp.route('/suspended_employees/<string:company_id>',
-                  methods=['POST'])
+@company_bp.route('/suspended_employees/<string:company_id>', methods=['POST'])
 @login_required
-@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 @ok
 def load_suspended_employees(json, company_id):
 
