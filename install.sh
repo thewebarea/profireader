@@ -114,6 +114,18 @@ rd=`tput setaf 1`
     fi
 }
 
+function warn_about_rm {
+    if [[ -e $1 ]]; then
+    	    echo "warning: $1 exists and will be removed"
+    fi
+    }
+
+function error_if_exists {
+    if [[ -e $1 ]]; then
+    	    echo "warning: $1 exists and will be removed"
+    fi
+    }
+
 function get_profidb {
     echo `cat secret_data.py | grep 'DB_NAME' | sed -e 's/^\s*DB_NAME\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
     }
@@ -126,6 +138,20 @@ function runsql_dump {
     profidb=$(get_profidb)
     filenam=$(rr "$1" "$2")
     conf_comm "su postgres -c 'cat $filenam | psql $profidb'" sudo "$3"
+    }
+
+function menu_origin {
+    destination=`git remote -v | grep 'fetch' | sed -e 's/^.*github.com:\([^\/]*\)\/.*$/\1/g'`
+    conf_comm "git remote rename origin $destination
+git remote add origin git@github.com:kakabomba/profireader.git" nosudo postgres_9_4
+    }
+
+function menu_postgres_9_4 {
+    conf_comm "echo 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main' >> /etc/apt/sources.list.d/pgdg.list
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+sudo apt-key add -
+sudo apt-get update
+apt-get install postgresql-9.4" sudo deb
     }
 
 function menu_deb {
@@ -166,6 +192,8 @@ function menu_python_3 {
     if [[ -e $destdir ]]; then
 	echo "error: $destdir exists"
     else
+	warn_about_rm '/usr/bin/python3'
+	warn_about_rm '/usr/bin/pyvenv'
 	conf_comm "cd /tmp/
 rm -rf 'Python-$pversion/*'
 rm 'Python-$pversion.tgz'
@@ -175,7 +203,9 @@ cd 'Python-$pversion'
 ./configure --prefix='$destdir'
 make
 make install
-ln -s $destdir/bin/python3 /usr/bin/python3
+rm /usr/bin/python3
+rm /usr/bin/pyvenv
+ln -s $destdir/binpython3 /usr/bin/python3
 ln -s $destdir/bin/pyvenv /usr/bin/pyvenv
 cd /tmp
 rm -rf 'Python-$pversion'" sudo venv
@@ -281,6 +311,8 @@ while :
 do
 #next='exit'
 dialog --title "profireader" --nocancel --default-item $next --menu "Choose an option" 22 78 17 \
+"origin" "change git origin and add new remote repo" \
+"postgres_9_4" "install postgres 9.4" \
 "deb" "install deb packages" \
 "hosts" "create virtual domain zone in /etc/hosts" \
 "haproxy" "install haproxy" \
