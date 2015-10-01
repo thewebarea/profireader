@@ -150,36 +150,36 @@ from config import Config
 #         youtube = discovery.build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION, http_auth)
 #         files = youtube.videos().list(id='SiOBAhUiNCc', part='id').execute()
 #         return render_template('file_uploader.html')
-from flask import session, redirect
-import os
-from urllib import request as r
-import io
-from ..models.google import GoogleAuthorize, GoogleToken
-@filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
-def uploader():
-
-    google = GoogleToken()
-    credentials_exist = google.check_credentials_exist()
-    if 'code' in request.args and not credentials_exist:
-        session['auth_code'] = request.args['code']
-        google.save_credentials()
-    google = GoogleAuthorize()
-    return render_template('file_uploader.html') if credentials_exist else \
-        redirect(google.get_auth_code())
-
-@filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
-def send():
-    body = {'title': 'test',
-            'description': 'test description',
-            'status': 'public'}
-    youtube = YoutubeApi(parts='id', body_dict=body,
-                         video_file=request.files['file'].stream.read(-1))
-    youtube.upload()
-
-    return jsonify({'result': {'size': 0}})
-
-
-@filemanager_bp.route('/resumeopload/', methods=['GET'])
-def resumeopload():
-
-    return jsonify({'size': 0})
+# from flask import session, redirect
+# import os
+# from urllib import request as r
+# import io
+# from ..models.google import GoogleAuthorize, GoogleToken
+# @filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
+# def uploader():
+#
+#     google = GoogleToken()
+#     credentials_exist = google.check_credentials_exist()
+#     if 'code' in request.args and not credentials_exist:
+#         session['auth_code'] = request.args['code']
+#         google.save_credentials()
+#     google = GoogleAuthorize()
+#     return render_template('file_uploader.html') if credentials_exist else \
+#         redirect(google.get_auth_code())
+#
+# @filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
+# def send():
+#     body = {'title': 'test',
+#             'description': 'test description',
+#             'status': 'public'}
+#     youtube = YoutubeApi(parts='id', body_dict=body,
+#                          video_file=request.files['file'].stream.read(-1))
+#     youtube.upload()
+#
+#     return jsonify({'result': {'size': 0}})
+#
+#
+# @filemanager_bp.route('/resumeopload/', methods=['GET'])
+# def resumeopload():
+#
+#     return jsonify({'size': 0})
