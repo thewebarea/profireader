@@ -209,7 +209,7 @@ make
 make install
 rm /usr/bin/python3
 rm /usr/bin/pyvenv
-ln -s $destdir/binpython3 /usr/bin/python3
+ln -s $destdir/bin/python3 /usr/bin/python3
 ln -s $destdir/bin/pyvenv /usr/bin/pyvenv
 cd /tmp
 rm -rf 'Python-$pversion'" sudo venv
