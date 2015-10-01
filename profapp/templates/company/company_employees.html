@@ -24,13 +24,13 @@
 
 
     {% for key in company_user_rights %}
-        {% if company_user_rights[key]['status']=='active' %}
+        {% if company_user_rights[key]['status']=='active' or company_user_rights[key]['status']=='suspended' %}
         <form class="add_rights" action="{{ url_for('company.update_rights') }}" method="post">
         <input type="hidden" name="user_id" id="user_id" value="{{ key }}">
         <input type="hidden" name="company_id" id="company_id" value="{{ company.id }}">
               <dt>
                 <img src="{{ company_user_rights[key]['user'].profireader_small_avatar_url }}" style="width:100px;height:100px;border:0">
-                {{ company_user_rights[key]['name'] }} {% if g.user_dict['id']==key %} YOU!!! {% endif %}<br>
+                {{ company_user_rights[key]['name'] }} {% if g.user_dict['id']==key %} YOU!!! {% endif %}{% if company_user_rights[key]['status']=='suspended' %} - Suspended<br>{% for c_user in curr_user %}{% if curr_user[c_user]['rights'][Right['suspend_employee']] %}<a href="{{ url_for('company.unsuspend', user_id=key, company_id=company_id) }}">Unsuspend</a>{% endif %}{% endfor %}{% endif %}<br>
                 Phone number : {{ company_user_rights[key]['user'].phone_number }}<br>
                 Email : {{ company_user_rights[key]['user'].show_email }}
                 Subscribed : {{ company_user_rights[key]['date'] }}
@@ -42,20 +42,20 @@
                     {% endfor %}</dt><br>
                   {% if curr_user %}
                         {% for c_user in curr_user %}
-                            {% if curr_user[c_user]['status']=='active' and company_user_rights[key]['status']=='active' %}
+                            {% if curr_user[c_user]['status']=='active' and (company_user_rights[key]['status']=='active' or company_user_rights[key]['status']=='suspended') %}
                             <dt> Rights in this company: </dt>
                                 {% if curr_user[c_user]['rights'][Right['manage_rights_company']]==true %}
 
                                         {% for right in company_user_rights[key]['rights'] %}
-                                        {% if company_user_rights[key]['rights'][right]==true and g.user_dict['id']!=key %}
+                                        {% if company_user_rights[key]['rights'][right]==true and g.user_dict['id']!=key and company_user_rights[key]['status']=='active' %}
                                             <input type="checkbox" id="right" name="right" value="{{ right }}" checked="checked">{{ RightHumnReadible[right] }}<br>
-                                        {% elif g.user_dict['id']==key%}
+                                        {% elif company_user_rights[key]['rights'][right]==true and (g.user_dict['id']==key or company_user_rights[key]['status']=='suspended') %}
                                             <input type="checkbox" id="right" name="right" value="{{ right }}" disabled="disabled" checked="checked">{{ RightHumnReadible[right] }}<br>
                                         {% else %}
                                             <input type="checkbox" id="right" name="right" value="{{ right }}">{{ RightHumnReadible[right] }}<br>
                                         {% endif %}
                                         {% endfor %}
-                                    {% if g.user_dict['id']!=key%}
+                                    {% if g.user_dict['id']!=key and company_user_rights[key]['status']!='suspended' %}
                                         <input type="submit" id="apply" value="Apply rights">
                                     {% endif %}
                                 {% else %}
@@ -70,7 +70,7 @@
                  {% endif %}
               {% endfor %}</form>
     {% for c_user in curr_user %}
-        {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[key]['status']=='active' and c_user != key%}
+        {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[key]['status']=='active' and c_user != key and curr_user[c_user]['status']=='active' %}
         <form class="suspend_employee" action="{{ url_for('company.suspend_or_fire_employee') }}" onsubmit="return AjaxPost()" method="post">
         <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
         <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
@@ -81,7 +81,7 @@
     {% endfor %}
 
             {% for c_user in curr_user %}
-        {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[key]['status']=='active' and c_user != key%}
+        {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[key]['status']=='active' and c_user != key and curr_user[c_user]['status']=='active' %}
         <form class="suspend_employee" action="{{ url_for('company.suspend_or_fire_employee') }}" onsubmit="return AjaxPost()" method="post">
         <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
         <input type="hidden" id="user_id" name="user_id" value="{{ key }}">

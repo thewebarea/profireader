@@ -294,11 +294,21 @@ def confirm_subscriber():
 # @check_rights(simple_permissions([RIGHTS.SUSPEND_EMPLOYEE()]))
 def suspend_or_fire_employee():
     data = request.form
-    UserCompany.suspend_or_fire_employee(user_id=data['user_id'],
-                                         company_id=data['company_id'],
-                                         status=data['status'])
+    UserCompany.change_status_employee(user_id=data['user_id'],
+                                       company_id=data['company_id'],
+                                       status=data['status'])
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
+
+@company_bp.route('/unsuspend/<string:user_id>,<string:company_id>')
+@login_required
+def unsuspend(user_id, company_id):
+
+    UserCompany.change_status_employee(user_id=user_id,
+                                       company_id=company_id,
+                                       status=STATUS.ACTIVE())
+    return redirect(url_for('company.employees', company_id=company_id))
+
 
 
 @company_bp.route('/suspended_employees/<string:company_id>',

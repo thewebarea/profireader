@@ -254,7 +254,7 @@ class UserCompany(Base, PRBase):
         return self
 
     @staticmethod
-    def suspend_or_fire_employee(company_id, user_id, status=STATUS.SUSPENDED()):
+    def change_status_employee(company_id, user_id, status=STATUS.SUSPENDED()):
         """This method make status employee in this company suspended"""
         db(UserCompany, company_id=company_id, user_id=user_id). \
             update({'status': status})
