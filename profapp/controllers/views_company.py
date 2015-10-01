@@ -3,7 +3,7 @@ from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompany, Right, RightHumnReadible
-from ..models.rights import list_of_RightAtomic_attributes
+# from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
@@ -12,7 +12,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
-from ..models.rights import list_of_RightAtomic_attributes
+# from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
 
@@ -168,7 +168,8 @@ def employees(company_id):
     for user_id in company_user_rights.keys():
         rights = company_user_rights[user_id]['rights']
         rez = {}
-        for elem in list_of_RightAtomic_attributes:
+        # for elem in list_of_RightAtomic_attributes:
+        for elem in Right.keys():
             rez[elem.lower()] = True if elem.lower(
             ) in rights else False
         company_user_rights[user_id]['rights'] = rez
@@ -183,7 +184,7 @@ def employees(company_id):
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
                            Right=Right,
-                           RightHumnReadible = RightHumnReadible
+                           RightHumnReadible=RightHumnReadible
                            )
 
 
