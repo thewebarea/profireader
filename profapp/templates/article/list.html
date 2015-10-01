@@ -32,7 +32,7 @@
             <h2><a href="{{ url_create_article() }}">Create article</a></h2>
 
             <div ng-repeat="article in data.articles">
-                <a href="{{ url_details({article_id: article.id}) }}">{{ article.mine.title }}</a><br/>
+                <a href="{{ url_details({article_id: article.id}) }}">{{ article.mine_version.title }}</a><br/>
             </div>
 
         </div>

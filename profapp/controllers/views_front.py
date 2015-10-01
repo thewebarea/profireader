@@ -60,6 +60,4 @@ def details(article_portal_id):
                 'division.name, division.portal.id,'
                 'company.name')
     return render_template('front/bird/article_details.html',
-                           article=article,
-                           portal=article['division']['portal']
-                           )
+                           article=article, portal=article['division']['portal'])

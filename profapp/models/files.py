@@ -7,7 +7,7 @@ from flask import url_for, g
 from .pr_base import PRBase, Base
 
 
-class File(Base):
+class File(Base, PRBase):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     parent_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
@@ -19,6 +19,7 @@ class File(Base):
     company_id = Column(TABLE_TYPES['id_profireader'],
                         ForeignKey('company.id'),
                         nullable=False)
+    article_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_portal.id'))
     copyright_author_name = Column(TABLE_TYPES['name'],
                                    default='',
                                    nullable=False)
@@ -130,7 +131,7 @@ class File(Base):
             return x.id
 
     def upload(self, content):
-        file_cont = FileContent(file_content=self, content=content)
+        file_cont = FileContent(file=self, content=content)
         g.db.add(self, file_cont)
         g.db.commit()
         return self
@@ -139,18 +140,26 @@ class File(Base):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
         return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
 
+    def copy_file(self, company_id, parent_folder_id, article_portal_id):
+        file_content = FileContent.get(self.id).detach()
+        new_file = self.detach().attr({'company_id': company_id, 'parent_id': parent_folder_id, 'root_folder_id': parent_folder_id, 'article_portal_id': article_portal_id})
+        new_file.save()
+        file_content.id = new_file.id
+        new_file.file_content = [file_content]
+        return new_file
 
-class FileContent(Base):
+
+class FileContent(Base, PRBase):
     __tablename__ = 'file_content'
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file_content = relationship('File',
+    file = relationship('File',
                                 uselist=False,
-                                backref='file_all_content')
+                                backref='file_content')
 
-    def __init__(self, file_content=None, content=None):
-        self.file_content = file_content
+    def __init__(self, file=None, content=None):
+        self.file = file
         self.content = content
 
         # file.save(os.path.join(root, filename))

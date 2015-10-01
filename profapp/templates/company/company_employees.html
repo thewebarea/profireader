@@ -22,6 +22,7 @@
 
 
 
+
     {% for key in company_user_rights %}
         {% if company_user_rights[key]['status']=='active' %}
         <form class="add_rights" action="{{ url_for('company.update_rights') }}" method="post">
@@ -43,20 +44,22 @@
                         {% for c_user in curr_user %}
                             {% if curr_user[c_user]['status']=='active' and company_user_rights[key]['status']=='active' %}
                             <dt> Rights in this company: </dt>
-                                {% if curr_user[c_user]['rights'][Right['manage_access_company']]==true %}
+                                {% if curr_user[c_user]['rights'][Right['manage_rights_company']]==true %}
 
                                         {% for right in company_user_rights[key]['rights'] %}
-                                        {% if company_user_rights[key]['rights'][right]==true %}
-                                            <input type="checkbox" id="right" name="right" value="{{ right }}" checked="checked">{{ right }}<br>
+                                        {% if company_user_rights[key]['rights'][right]==true and g.user_dict['id']!=key %}
+                                            <input type="checkbox" id="right" name="right" value="{{ right }}" checked="checked">{{ RightHumnReadible[right] }}<br>
+                                        {% elif  g.user_dict['id']==key%}
+                                            <input type="checkbox" id="right" name="right" value="{{ right }}" disabled="disabled" checked="checked">{{ RightHumnReadible[right] }}<br>
                                         {% else %}
-                                            <input type="checkbox" id="right" name="right" value="{{ right }}">{{ right }}<br>
+                                            <input type="checkbox" id="right" name="right" value="{{ right }}">{{ RightHumnReadible[right] }}<br>
                                         {% endif %}
                                         {% endfor %}
                                         <input type="submit" id="apply" value="Apply rights">
                                 {% else %}
                                     {% for right in company_user_rights[key]['rights'] %}
                                         {% if company_user_rights[key]['rights'][right]==true %}
-                                        <input type="checkbox" id="right" name="right" value="{{ right }}" disabled="disabled" checked="checked">{{ right }}<br>
+                                        <input type="checkbox" id="right" name="right" value="{{ right }}" disabled="disabled" checked="checked">{{ RightHumnReadible[right] }}<br>
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}
@@ -92,7 +95,7 @@
 {% for key in company_user_rights %}
     {% if curr_user %}
         {% for c_user in curr_user %}
-            {% if curr_user[c_user]['rights'][Right['manage_access_company']]==true or company.author_user_id==g.user_dict['id'] %}
+            {% if curr_user[c_user]['rights'][Right['manage_rights_company']]==true or company.author_user_id==g.user_dict['id'] %}
                 {% if company_user_rights[key]['status'] == 'nonactive' %}
                     User {{ company_user_rights[key]['name'] }} send query to your company<br>
                     <form class="add_subscriber" action="{{ url_for('company.confirm_subscriber') }}" onsubmit="return AjaxPost2()" id="subscribe" method="post">

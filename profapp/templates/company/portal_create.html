@@ -28,41 +28,65 @@
             $scope.removeDivision = function (index) {
                 $scope.data.portal.divisions.splice(index, 1);
             }
+
         }]);
     </script>
     {% raw %}
     {{ data.portal.divisions }}
+
+
+    <style>
+
+        .ng-dirty {
+            border-color: #00468c;
+        }
+    </style>
+
     <div ng-init="loadData()" ng-controller="create">
         <h2>Cteate portal</h2>
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
 
-            <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData"
+            <form ng-ok ng-watch="data.portal" ng-onsuccess="afterSave"
+                  ng-onsubmit="getData"
                   ng-action="url_confirm_create({company_id: data.company_id})">
 
                 portal name <input type="text" placeholder="Portal name"
-                                   ng-model="data.portal.name"><br/>
+                                   ng-model-options="{updateOn : 'change keypress'}"
+                                   ng-model="data.portal.name">{{ __validated.errors.name }}<br/>
                 portal host http://<input type="text" placeholder="Host name"
-                                          ng-model="data.portal.host"><br/>
+                                          ng-model="data.portal.host">{{ __validated.errors.host }}<br/>
                 portal layout <select ng-model="data.portal.portal_layout_id"
                                       ng-options="layout.id as layout.name for layout in data.layouts"></select>
 
                 <div>
                     <h4>Portal divisions</h4>
 
-                    <div ng-repeat="division in data.portal.divisions">
-                        <input type="text" placeholder="Division name"
-                               ng-model="division.name">
-                        <select ng-model="division.portal_division_type_id"
-                                ng-options="division_type.id as division_type.id for division_type in data.division_types"></select>
-                        <button type="button" ng-click="removeDivision($index)">remove division
-                        </button>
+                    <div>
+                        <input type="text" placeholder="" disabled="disabled"
+                               value="{{ data.portal.name }}">
+                        <select disabled="disabled">
+                            <option>index</option>
+                        </select>
+                        <button type="button" disabled="disabled">remove division</button>
                     </div>
-                    <button type="button" ng-click="addDivision()">add division</button>
+                    <div ng-if="division.portal_division_type_id != 'index'"
+                         ng-repeat="division in data.portal.divisions">
+                        <input type="text" placeholder="Division name" ng-model="division.name">
+                        <select ng-model="division.portal_division_type_id">
+                            <option ng-selected="division_type.id == division.portal_division_type_id"
+                                    ng-if="division_type.id != 'index'"
+                                    ng-repeat="(division_type_id, division_type) in data.division_types"
+                                    value="{{ division_type_id }}">{{ division_type.id }}
+                            </option>
+                        </select>
+                        <button type="button" ng-click="removeDivision($index)">remove division</button>{{ __validated.errors['division_max_' + division_type.id] }}
+                    </div>
+                    <button type="button" ng-click="addDivision()">add division</button> {{ __validated.errors.add_division }}
                 </div>
                 <br/><br/>
-                <input type="submit" value="Create portal">
+                <input ng-disabled="!areAllEmpty(__validated.errors) || __validation" type="submit" value="Create portal">{{ __validated.errors.ok }}
             </form>
         </div>
     </div>

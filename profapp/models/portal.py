@@ -6,6 +6,10 @@ from flask import g
 from utils.db_utils import db
 from .company import Company
 from .pr_base import PRBase, Base
+import re
+import itertools
+
+import itertools
 
 
 class Portal(Base, PRBase):
@@ -27,8 +31,8 @@ class Portal(Base, PRBase):
     divisions = relationship('PortalDivision',
                              backref='portal',
                              primaryjoin='Portal.id==PortalDivision.portal_id')
-    article = relationship('ArticlePortal', backref='portal',
-                           uselist=False)
+    article = relationship('ArticlePortal', backref='portal', uselist=False)
+
     # companies = relationship('Company', secondary='company_portal')
 
     def __init__(self, name=None,
@@ -52,19 +56,49 @@ class Portal(Base, PRBase):
         instance of class with parameters: name, host, portal_layout_id, company_owner_id,
         divisions. Return portal)"""
 
-        if db(Portal, company_owner_id=self.company_owner_id).count():
-            raise errors.PortalAlreadyExist({
-                'message': 'portal for company %(name)s',
-                'data': self.get_client_side_dict()
-            })
-            # except errors.PortalAlreadyExist as e:
-            #     details = e.args[0]
-            #     print(details['message'])
+        # except errors.PortalAlreadyExist as e:
+        #     details = e.args[0]
+        #     print(details['message'])
         self.own_company = db(Company, id=self.company_owner_id).one()
         company_assoc = CompanyPortal(company_portal_plan_id=self.portal_plan_id)
         company_assoc.portal = self
         company_assoc.company = self.own_company
         return self
+
+    def validate(self):
+        ret = {'errors': {}, 'warnings': {}, 'notices': {}}
+        if db(Portal, company_owner_id=self.company_owner_id).count():
+            ret['errors']['ok'] = 'portal for company already exists'
+        if not re.match('[^\s]{3,}', self.name):
+            ret['errors']['name'] = 'pls enter a bit longer name'
+        if not re.match(
+                '^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+([A-Za-z]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9]{1,})$',
+                self.host):
+            ret['errors']['host'] = 'pls enter valid host name'
+
+        grouped = {}
+
+        for div in self.divisions:
+            if div.portal_division_type_id in grouped:
+                grouped[div.portal_division_type_id] += 1
+            else:
+                grouped[div.portal_division_type_id] = 1
+
+        for check_division in db(PortalDivisionType).all():
+            if check_division.id not in grouped:
+                grouped[check_division.id] = 0
+            if check_division.min > grouped[check_division.id]:
+                ret['errors'][
+                    'division_%s' % (check_division.id,)] = 'you need at least %s `%s`' % (
+                check_division.min, check_division.id)
+                if grouped[check_division.id] ==  0:
+                    ret['errors']['add_division'] = 'add at least one `%s`' % (check_division.id,)
+            if check_division.max < grouped[check_division.id]:
+                ret['errors'][
+                    'division_%s' % (check_division.id,)] = 'you you can have only %s `%s`' % (
+                check_division.max, check_division.id)
+
+        return ret
 
     def get_client_side_dict(self, fields='id|name, divisions.*, layout.*'):
         """This method make dictionary from portal object with fields have written above"""
@@ -107,13 +141,11 @@ class PortalLayout(Base, PRBase):
 
 class CompanyPortal(Base, PRBase):
     __tablename__ = 'company_portal'
-    id = Column(TABLE_TYPES['id_profireader'], nullable=False,
-                primary_key=True)
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey('company.id'))
-    portal_id = Column(TABLE_TYPES['id_profireader'],
-                       ForeignKey('portal.id'))
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     company_portal_plan_id = Column(TABLE_TYPES['id_profireader'])
+
     portal = relationship(Portal, backref='company_assoc')
     company = relationship(Company, backref='portal_assoc')
 
@@ -151,14 +183,12 @@ class PortalDivision(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
-    portal_division_type_id = Column(
-        TABLE_TYPES['id_profireader'],
-        ForeignKey('portal_division_type.id'))
+    portal_division_type_id = Column(TABLE_TYPES['id_profireader'],
+                                     ForeignKey('portal_division_type.id'))
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
-    def __init__(self, portal_division_type_id=None,
-                 name=None, portal_id=None):
+    def __init__(self, portal_division_type_id=None, name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id
         self.name = name
         self.portal_id = portal_id
@@ -167,23 +197,24 @@ class PortalDivision(Base, PRBase):
         """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 
-    # @staticmethod
-    # def add_new_division(portal_id, name, division_type):
-    #     """Add new division to current portal"""
-    #     return PortalDivision(portal_id=portal_id,
-    #                           name=name,
-    #                           portal_division_type_id=division_type)
+        # @staticmethod
+        # def add_new_division(portal_id, name, division_type):
+        #     """Add new division to current portal"""
+        #     return PortalDivision(portal_id=portal_id,
+        #                           name=name,
+        #                           portal_division_type_id=division_type)
 
 
 class PortalDivisionType(Base, PRBase):
     __tablename__ = 'portal_division_type'
     id = Column(TABLE_TYPES['short_name'], primary_key=True)
+    min = Column(TABLE_TYPES['int'])
+    max = Column(TABLE_TYPES['int'])
 
     @staticmethod
     def get_division_types():
         """Return all divisions on profireader"""
         return db(PortalDivisionType).all()
-
 
 
 class UserPortalReader(Base, PRBase):

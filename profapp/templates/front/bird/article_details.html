@@ -22,20 +22,21 @@
                 <!-- Blog Posts -->
 
 
-                    <div class="block-item" style="height: 720px; overflow: auto">
+                    <div class="block-item full-block-info" style="height: auto;">
 
                         <div class="item-type article">{{ article['division']['name']|safe }}</div>
-                        <div class="item-short-content">
-                            <p>{{ article['short']|safe }}</p>
-                        </div>
-                        <p>{{ article['long']|safe }}</p>
+{#                        <div class="item-short-content">#}
+{#                            <p>{{ article['short']|safe }}</p>#}
+{#                        </div>#}
+                        <p>
+                            <img style="width: 300px; height: 240px; background-size: cover; background-image: url({{ file_url(article['image_file_id']) }}); float: left" />
+{{ article['long'] | safe }}</p>
 
                         <div class="item-additional-info">
                             <div class="item-company">{{ article['company']['name']|safe }}</div>
                             <div class="item-publication-date">{{ article['publishing_tm']|safe }}</div>
                         </div>
 
-                        <img style="width: 300px; height: 240px; background-size: cover; background-image: url({{ file_url(article['image_file_id']) }}); float: left" />
 
                         <!--                <a class="btn btn-primary" href="#">Read More <span-->
                         <!--                        class="glyphicon glyphicon-chevron-right"></span></a>-->
@@ -74,9 +75,9 @@
 
                 <?php for ($i = 0; $i < 5; $i++) { ?>
                 <!-- Side Widget Well -->
-                <div class="well">
-		    {% include 'front/bird/shortabout.html' %}
-                </div>
+{#                <div class="well">#}
+{#		    {% include 'front/bird/shortabout.html' %}#}
+{#                </div>#}
                 <?php } ?>
 
             </div>

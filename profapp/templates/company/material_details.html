@@ -189,10 +189,9 @@
                     Publish this material at portal
             <span ng-if="statuses=='accepted'">
                 <select ng-model="data.selected_division">
-                    <!-- START OF IMPORTANT GROUP -->
                     <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
-                        <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-selected="selected">
-                            {{ division.name }}
+                        <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}"  ng-selected="selected">
+                            {{ division.name }} {{ division.portal_division_type_id }}
                         </option>
                     </optgroup>
                     <!-- END OF IMPORTANT GROUP -->

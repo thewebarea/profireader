@@ -88,7 +88,6 @@ def upload(json):
     return ret
 
 
-
 # # # #
 #
 # def upload(result#)# :
@@ -128,14 +127,14 @@ def upload(json):
 #         g.db.rollback#(# )
 #
 #     return result
-from ..models.google import YoutubeApi
-import json
+# from ..models.google import YoutubeApi
+# import json
 # from flask import url_for, request, redirect, session
 # import httplib2
-from apiclient import discovery
-
-from oauth2client import client
-from config import Config
+# from apiclient import discovery
+# 
+# from oauth2client import client
+# from config import Config
 #
 # @filemanager_bp.route('/uploader/', methods=['GET'])
 # def uploader():

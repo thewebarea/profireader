@@ -32,6 +32,7 @@ class User(Base, UserMixin, PRBase):
     # PROFIREADER REGISTRATION DATA
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     personal_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     profireader_email = Column(TABLE_TYPES['email'], unique=True, index=True)
     profireader_first_name = Column(TABLE_TYPES['name'])
     profireader_last_name = Column(TABLE_TYPES['name'])
@@ -463,7 +464,7 @@ class User(Base, UserMixin, PRBase):
     # TODO (AA to AA): it should be corrected
     def user_rights_in_company(self, company_id):
         user_company = self.employer_assoc.filter_by(company_id=company_id).first()
-        return user_company.rights_set[0] if user_company else []
+        return user_company.rights_set if user_company else []
 
 
 class Group(Base, PRBase):
