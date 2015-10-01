@@ -35,6 +35,7 @@ TABLE_TYPES = {
     'short_name': String(50),
     'title': String(100),
     'keywords': String(150),
+    'credentials': String(1000),
     'text': UnicodeText(length=65535),
     'gender': String(6),
     'avatar_url': String(100), #URLType,
