@@ -71,10 +71,9 @@
               {% endfor %}</form>
     {% for c_user in curr_user %}
         {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[key]['status']=='active' and c_user != key and curr_user[c_user]['status']=='active' %}
-        <form class="suspend_employee" action="{{ url_for('company.suspend_or_fire_employee') }}" onsubmit="return AjaxPost()" method="post">
+        <form class="suspend_employee" action="{{ url_for('company.suspend_employee') }}" onsubmit="return AjaxPost()" method="post">
         <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
         <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
-            <input type="hidden" id="status" name="status" value="suspended">
         <input type="submit" value="Suspend {{ company_user_rights[key]['name'] }} from your company">
         </form>
         {% endif %}
@@ -82,10 +81,9 @@
 
             {% for c_user in curr_user %}
         {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[key]['status']=='active' and c_user != key and curr_user[c_user]['status']=='active' %}
-        <form class="suspend_employee" action="{{ url_for('company.suspend_or_fire_employee') }}" onsubmit="return AjaxPost()" method="post">
+        <form class="suspend_employee" action="{{ url_for('company.fire_employee') }}" onsubmit="return AjaxPost()" method="post">
         <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
         <input type="hidden" id="user_id" name="user_id" value="{{ key }}">
-            <input type="hidden" id="status" name="status" value="deleted">
         <input type="submit" value="Fire {{ company_user_rights[key]['name'] }} from your company">
         </form>
         {% endif %}
