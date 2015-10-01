@@ -18,13 +18,12 @@
             </div>
             <ul class="nav navbar-nav">
                 {% for division in portal.divisions %}
+                    {% if division.portal_division_type_id != 'index' %}
                 <li>
-                    <a href="{{ url_for('front.division', division_name=division.name, page=1, search_text='%') }}">{{ division.name }}</a>
+                    <a {% if division.id == current_division.id %}id="navigation_selected_division"{% endif %} href="{{ url_for('front.division', division_name=division.name, page=1, search_text='%') }}">{{ division.name }}</a>
                 </li>
+                    {% endif %}
                 {% endfor %}
-                <li>
-                    <a href="/?about">{{ _('About us') }}</a>
-                </li>
             </ul>
         </div>
         <!-- /.navbar-collapse -->
