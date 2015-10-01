@@ -283,15 +283,17 @@ class GoogleAuthorize(object):
 
     def __init__(self, google_service_name=Config.YOUTUBE_API_SERVICE_NAME,
                  google_service_version=Config.YOUTUBE_API_VERSION,
-                 scope=Config.YOUTUBE_SCOPES['UPLOAD']):
+                 scope=Config.YOUTUBE_API['UPLOAD']['SCOPE'],
+                 redirect_uri=Config.YOUTUBE_API['UPLOAD']['REDIRECT_URI']):
         self.google_service_name = google_service_name
         self.google_service_version = google_service_version
         self.scope = scope
+        self.redirect_uri = redirect_uri
 
     def get_auth_code(self, ret_flow=False):
 
         flow = client.flow_from_clientsecrets(self.__project_secret, self.scope,
-                                              redirect_uri=Config.YOUTUBE_REDIRECT_URL)
+                                              redirect_uri=self.redirect_uri)
         flow.params['access_type'] = 'offline'
         flow.params['approval_prompt'] = 'force'
         auth_uri = flow.step1_get_authorize_url()

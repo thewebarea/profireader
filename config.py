@@ -66,10 +66,10 @@ class Config(object):
 # GOOGLE API
     GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY
     GOOGLE_API_SECRET_JSON = secret_data.GOOGLE_API_SECRET_JSON
-    YOUTUBE_SCOPES = {'UPLOAD': "https://www.googleapis.com/auth/youtube.upload"}
+    YOUTUBE_API = dict(UPLOAD=dict(SCOPE="https://www.googleapis.com/auth/youtube.upload",
+                                   REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/"))
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
-    YOUTUBE_REDIRECT_URL = 'http://aprofi.d.ntaxa.com/filemanager/uploader/'
     # MISSING_CLIENT_SECRETS_MESSAGE = """
     # WARNING: Please configure OAuth 2.0
     # To make this sample run you will need to populate the client_secrets.json file
