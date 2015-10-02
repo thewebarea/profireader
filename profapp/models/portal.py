@@ -1,15 +1,13 @@
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from ..controllers import errors
 from flask import g
 from utils.db_utils import db
 from .company import Company
 from .pr_base import PRBase, Base
 import re
-import itertools
-
-import itertools
+from .tag import TagPortalDivision
 
 
 class Portal(Base, PRBase):
@@ -95,7 +93,7 @@ class Portal(Base, PRBase):
                     ret['errors']['add_division'] = 'add at least one `%s`' % (check_division.id,)
             if check_division.max < grouped[check_division.id]:
                 ret['errors'][
-                    'division_%s' % (check_division.id,)] = 'you you can have only %s `%s`' % (
+                    'division_%s' % (check_division.id,)] = 'you can have only %s `%s`' % (
                 check_division.max, check_division.id)
 
         return ret
@@ -187,6 +185,9 @@ class PortalDivision(Base, PRBase):
                                      ForeignKey('portal_division_type.id'))
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
+
+    # tags = relationship('Tag', secondary='tag_portal_division')
+    # tags = relationship('Tag', secondary='TagPortalDivision')
 
     def __init__(self, portal_division_type_id=None, name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id

@@ -64,10 +64,6 @@ def confirm_create(json, company_id):
         return {'company_id': company_id}
 
 
-
-
-
-
 @portal_bp.route('/', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([]))
@@ -79,6 +75,28 @@ def apply_company(json):
     return {'portals_partners': [portal.portal.to_dict(
         'name, company_owner_id,id') for portal in CompanyPortal.get_portals(json['company_id'])],
         'company_id': json['company_id']}
+
+# TODO ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+@portal_bp.route('/profile/<string:portal_id>/', methods=['GET'])
+@login_required
+# @check_rights(simple_permissions([]))
+def profile(portal_id):
+    portal = db(Portal, id=portal_id).one()
+    return render_template('company/portal_profile.html',
+                           portal=portal.to_dict('*, divisions.*, own_company.*'),
+                           portal_id=portal_id
+                           )
+
+
+@portal_bp.route('/profile/<string:portal_id>/', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([]))
+@ok
+def profile_load(json, portal_id):
+    portal = db(Portal, id=portal_id).one()
+    print(portal.to_dict('*, divisions.*, own_company.*'))
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*'), 'portal_id': portal_id}
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
