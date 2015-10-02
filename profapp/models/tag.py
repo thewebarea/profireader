@@ -1,5 +1,5 @@
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from sqlalchemy import Column, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import relationship, backref
 from ..controllers import errors
 from flask import g
@@ -33,19 +33,23 @@ class TagPortalDivision(Base, PRBase):
     __tablename__ = 'tag_portal_division'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     tag_id = Column(TABLE_TYPES['id_profireader'], ForeignKey(Tag.id), nullable=False)
-    position = Column(TABLE_TYPES['int'], nullable=False, default=1)
+    position = Column(TABLE_TYPES['int'],
+                      CheckConstraint('position >= 1', name='cc_position'),
+                      nullable=False, default=1)
     portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                 ForeignKey('portal_division.id'),
                                 nullable=False)
     UniqueConstraint('tag_id', 'portal_division_id', name='uc_tag_id_portal_division_id')
+    UniqueConstraint('position', 'portal_division_id', name='uc_position_portal_division_id')
 
     tag = relationship('Tag', uselist=False)
     portal_division = relationship('PortalDivision', backref='tags')
     articles = relationship('ArticlePortal', secondary='tag_portal_division_article',
                             backref=backref('tags', lazy='dynamic'), lazy='dynamic')
 
-    def __init__(self, tag_id=None, portal_division_id=None):
+    def __init__(self, tag_id=None, portal_division_id=None, position=1):
         super(TagPortalDivision, self).__init__()
+        self.position = position
         self.tag_id = tag_id
         self.portal_division_id = portal_division_id
 
