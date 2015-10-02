@@ -10,7 +10,7 @@ from time import sleep
 from flask import jsonify
 import json as jsonmodule
 # from ..models.youtube import YoutubeApi
-
+import sys
 
 def parent_folder(func):
     @wraps(func)
@@ -88,28 +88,34 @@ def upload(json):
     return ret
 
 from ..models.google import YoutubeApi
-from flask import request
+from flask import request, make_response
 from flask import session, redirect
 from ..models.google import GoogleAuthorize, GoogleToken
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
 def uploader():
 
-    google = GoogleToken()
-    credentials_exist = google.check_credentials_exist()
+    token_db_class = GoogleToken()
+    credentials_exist = token_db_class.check_credentials_exist()
     if 'code' in request.args and not credentials_exist:
         session['auth_code'] = request.args['code']
-        google.save_credentials()
+        token_db_class.save_credentials()
     google = GoogleAuthorize()
-    return render_template('file_uploader.html') if credentials_exist else \
-        redirect(google.get_auth_code())
+    return redirect(google.get_auth_code()) if not credentials_exist and google.check_admins else \
+        render_template('file_uploader.html')
 
 @filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
 def send():
+
+    data = request.form
     body = {'title': 'test',
             'description': 'test description',
             'status': 'public'}
-    youtube = YoutubeApi(parts='id', body_dict=body,
-                         video_file=request.files['file'].stream.read(-1))
+    file = request.files['file'].stream.read(-1)
+    youtube = YoutubeApi(body_dict=body,
+                         video_file=file,
+                         chunk_info=dict(chunk_size=data.get('chunkSize'),
+                                         chunk_number=data.get('chunkNumber'),
+                                         total_size=data.get('totalSize')))
     youtube.upload()
 
     return jsonify({'result': {'size': 0}})
