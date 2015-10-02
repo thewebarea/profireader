@@ -12,6 +12,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
+from collections import OrderedDict
 # from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
@@ -165,13 +166,14 @@ def profile(company_id):
 def employees(company_id):
 
     company_user_rights = UserCompany.show_rights(company_id)
+    ordered_rights = sorted(Right.keys(), key=lambda t: Right.RIGHT_POSITION()[t.lower()])
+    ordered_rights = list(map((lambda x: getattr(x, 'lower')()), ordered_rights))
+
     for user_id in company_user_rights.keys():
         rights = company_user_rights[user_id]['rights']
-        rez = {}
-        # for elem in list_of_RightAtomic_attributes:
-        for elem in Right.keys():
-            rez[elem.lower()] = True if elem.lower(
-            ) in rights else False
+        rez = OrderedDict()
+        for elem in ordered_rights:
+            rez[elem] = True if elem in rights else False
         company_user_rights[user_id]['rights'] = rez
 
     user_id = current_user.get_id()
