@@ -23,21 +23,27 @@
 
 
                     <div class="block-item full-block-info" style="height: auto;">
+
+                        <img class="article-cover" style="background-image: url({{ file_url(article['image_file_id']) }});" />
 {#                        {{ dump articles }}#}
 
-                        <div class="item-type article">{{ article['division']['name']|safe }}</div>
+{#                        <div class="item-type article">{{ article['division']['name']|safe }}</div>#}
                         <h2 class="item-title">{{ article['title']|safe }}</h2>
-                        <div class="">
-                            <i>{{ article['short']|safe }}</i>
-                        </div>
-                        <p>
-                            <img style="width: 300px; height: 240px; background-size: cover; background-image: url({{ file_url(article['image_file_id']) }}); float: left" />
-{{ article['long'] | safe }}</p>
+                        <h3 style="font-weight: lighter; ">Покроковий план досягнення успіху</h3>
 
-                        <div class="item-additional-info">
+                        <div class="item-additional-info-top" style="display: block; width: 100%; padding-bottom: 5px; border-bottom: 1px #ccc solid; margin-bottom: 15px;">
                             <div class="item-company">{{ article['company']['name']|safe }}</div>
                             <div class="item-publication-date">{{ article['publishing_tm']|safe }}</div>
+                            <div class="comments-count">Коментарів 77</div>
                         </div>
+                        <div class="">
+                            <b>{{ article['short']|safe }}</b>
+                        </div>
+                        <p>
+
+{{ article['long'] | safe }}</p>
+
+
 
 
                         <!--                <a class="btn btn-primary" href="#">Read More <span-->
