@@ -5,9 +5,7 @@
 </head>
 
 <body>
-{% with aa='1' %}
 {% include 'front/bird/nav.html' %}
-{% endwith %}
 {% block content %}
 
     <div class="container">
@@ -16,12 +14,6 @@
             <!-- Blog Entries Column -->
             <div class="col-md-9">
 
-                <!--                <h1 class="page-header">-->
-                <!--                    Page Heading-->
-                <!--                    <small>Secondary Text</small>-->
-                <!--                </h1>-->
-
-                <!-- Blog Posts -->
 
                 {% for article_id in articles %}
 

@@ -353,7 +353,8 @@ CREATE TABLE article_portal (
     publishing_tm timestamp without time zone NOT NULL,
     portal_id character varying(36),
     image_file_id character varying(36),
-    long_stripped text DEFAULT ''::text NOT NULL
+    long_stripped text DEFAULT ''::text NOT NULL,
+    keywords character varying(1000) DEFAULT ''::character varying NOT NULL
 );
 
 
@@ -377,7 +378,6 @@ CREATE TABLE company (
     email character varying(100),
     short_description character varying(666),
     journalist_folder_file_id character varying(36),
-    corporate_folder_file_id character varying(36),
     portal_domain character varying,
     system_folder_file_id character varying(36)
 );
@@ -452,7 +452,8 @@ CREATE TABLE file (
     md_tm timestamp without time zone NOT NULL,
     ac_tm timestamp without time zone NOT NULL,
     copyright_author_name character varying(100) DEFAULT ''::character varying NOT NULL,
-    root_folder_id character varying(36)
+    root_folder_id character varying(36),
+    article_portal_id character varying(36)
 );
 
 
@@ -651,7 +652,6 @@ CREATE TABLE "user" (
     yahoo_gender character varying(6),
     yahoo_link text,
     yahoo_phone character varying(20),
-    personal_folder_file_id character varying(36),
     profireader_avatar_url text DEFAULT '/static/no_avatar.png'::text NOT NULL,
     group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL,
     _banned boolean DEFAULT false NOT NULL,
@@ -1108,6 +1108,14 @@ ALTER TABLE ONLY article_portal
 
 
 --
+-- Name: article_portal_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY file
+    ADD CONSTRAINT article_portal_id FOREIGN KEY (article_portal_id) REFERENCES article_portal(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
 -- Name: article_portal_portal_division_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
@@ -1172,11 +1180,11 @@ ALTER TABLE ONLY file
 
 
 --
--- Name: file_content_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+-- Name: file_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY file_content
-    ADD CONSTRAINT file_content_id_fkey FOREIGN KEY (id) REFERENCES file(id);
+    ADD CONSTRAINT file_id FOREIGN KEY (id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -1193,14 +1201,6 @@ ALTER TABLE ONLY file
 
 ALTER TABLE ONLY article_company
     ADD CONSTRAINT fk_article_article_bulk_id FOREIGN KEY (article_id) REFERENCES article(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: fk_user_personal_folder; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY "user"
-    ADD CONSTRAINT fk_user_personal_folder FOREIGN KEY (personal_folder_file_id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -1316,11 +1316,12 @@ ALTER TABLE ONLY user_portal_reader
 
 
 --
--- Name: public; Type: ACL; Schema: -; Owner: pfuser
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM pfuser;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO pfuser;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
@@ -1368,14 +1369,14 @@ INSERT INTO portal_division_type VALUES ('about', 1, 1);
 -- Data for Name: portal_layout; Type: TABLE DATA; Schema: public; Owner: pfuser
 --
 
-INSERT INTO portal_layout VALUES ('55e99785-bda1-4001-922f-ab974923999a', 'bird', 'bird/');
+INSERT INTO portal_layout VALUES ('5609c73a-ba26-4001-8810-0025b447adad', 'bird', 'bird/');
 
 
 --
 -- Data for Name: portal_plan; Type: TABLE DATA; Schema: public; Owner: pfuser
 --
 
-INSERT INTO portal_plan VALUES ('55dcb92a-6708-4001-acca-b94c96260506', 'free');
+INSERT INTO portal_plan VALUES ('5609c73a-1007-4001-9b16-f03044eeda5a', 'free');
 
 
 --

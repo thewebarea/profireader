@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    {% include 'front/bird/head.html' %}
+</head>
+
+<body>
+{% include 'front/bird/nav.html' %}
+{% block content %}
+
+    <div class="container">
+
+        <div class="row">
+            <!-- Blog Entries Column -->
+            <div class="col-md-9">
+
+                <!--                <h1 class="page-header">-->
+                <!--                    Page Heading-->
+                <!--                    <small>Secondary Text</small>-->
+                <!--                </h1>-->
+
+                <!-- Blog Posts -->
+
+                {% for member_id in members %}
+
+                    <div class="block-item">
+                        <a href="{{ url_for('front.subportal', member_company_id = member_id, member_company_name = members[member_id]['name']) }}" href>{{ members[member_id]['name'] }}</a>
+                    </div>
+
+                {% endfor %}
+
+
+
+
+            </div>
+
+        </div>
+        <!-- /.row -->
+    </div>
+
+{% endblock content %}
+
+{% include 'front/bird/footer.html' %}
+
+
+</body>
+</html>
