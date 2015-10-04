@@ -30,10 +30,11 @@ def filemanager():
     # library = {g.user.personal_folder_file_id:
     # {'name': 'My personal files',
     # 'icon': current_user.gravatar(size=18)}}
-    library = {
-        g.user.personal_folder_file_id: {
-            'name': 'My personal files',
-            'icon': current_user.profireader_small_avatar_url}}
+    library = {}
+    # library = {
+    #     g.user.personal_folder_file_id: {
+    #         'name': 'My personal files',
+    #         'icon': current_user.profireader_small_avatar_url}}
     for user_company in g.user.employer_assoc:
 
 # TODO VK by OZ: we need function that get all emploees with specific right
@@ -42,8 +43,8 @@ def filemanager():
 # similar function User.get_emploers ...
 
         if user_company.status == 'active' and 'upload_files' in g.user.user_rights_in_company(user_company.company_id):
-            library[user_company.employer.journalist_folder_file_id] = {'name': "%s materisals" % (user_company.employer.name,), 'icon': ''}
-            library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
+            library[user_company.employer.journalist_folder_file_id] = {'name': "%s" % (user_company.employer.name,), 'icon': ''}
+            # library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
 
     file_manager_called_for = request.args['file_manager_called_for'] if 'file_manager_called_for' in request.args else ''
     file_manager_on_action = jsonmodule.loads(request.args['file_manager_on_action']) if 'file_manager_on_action' in request.args else {}
@@ -82,7 +83,7 @@ def upload(json):
         file = File(parent_id=parent_id,
                     root_folder_id=root_id,
                     name=uploaded_file.filename,
-                mime=uploaded_file.content_type)
+                    mime=uploaded_file.content_type)
         uploaded = file.upload(content=uploaded_file.stream.read(-1))
         ret[uploaded.id] = True
     return ret
@@ -127,23 +128,58 @@ def upload(json):
 #         g.db.rollback#(# )
 #
 #     return result
-# from ..models.youtube import YoutubeApi
-
-@filemanager_bp.route('/uploader/', methods=['GET'])
-def uploader():
-    # youtube = YoutubeApi()
-    # youtube.p()
-    return render_template('file_uploader.html')
-
-
-@filemanager_bp.route('/send/', methods=['POST'])
-def send():
-    print(request.headers)
-
-    return jsonify({'result': {'size': 0}})
-
-
-@filemanager_bp.route('/resumeopload/', methods=['GET'])
-def resumeopload():
-
-    return jsonify({'size': 0})
+# from ..models.google import YoutubeApi
+# import json
+# from flask import url_for, request, redirect, session
+# import httplib2
+# from apiclient import discovery
+# 
+# from oauth2client import client
+# from config import Config
+#
+# @filemanager_bp.route('/uploader/', methods=['GET'])
+# def uploader():
+#     print(session)
+#     if 'credentials' not in session:
+#         return redirect(url_for('filemanager.send'))
+#     credentials = client.OAuth2Credentials.from_json(session['credentials'])
+#     if credentials.access_token_expired:
+#         return redirect(url_for('oauth2callback'))
+#     else:
+#         http_auth = credentials.authorize(httplib2.Http())
+#         youtube = discovery.build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION, http_auth)
+#         files = youtube.videos().list(id='SiOBAhUiNCc', part='id').execute()
+#         return render_template('file_uploader.html')
+# from flask import session, redirect
+# import os
+# from urllib import request as r
+# import io
+# from ..models.google import GoogleAuthorize, GoogleToken
+# @filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
+# def uploader():
+#
+#     google = GoogleToken()
+#     credentials_exist = google.check_credentials_exist()
+#     if 'code' in request.args and not credentials_exist:
+#         session['auth_code'] = request.args['code']
+#         google.save_credentials()
+#     google = GoogleAuthorize()
+#     return render_template('file_uploader.html') if credentials_exist else \
+#         redirect(google.get_auth_code())
+#
+# @filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
+# def send():
+#     body = {'title': 'test',
+#             'description': 'test description',
+#             'status': 'public'}
+#     youtube = YoutubeApi(parts='id', body_dict=body,
+#                          video_file=request.files['file'].stream.read(-1))
+#     youtube.upload()
+#
+#     return jsonify({'result': {'size': 0}})
+#
+#
+# @filemanager_bp.route('/resumeopload/', methods=['GET'])
+# def resumeopload():
+#
+#     return jsonify({'size': 0})

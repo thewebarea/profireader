@@ -2,8 +2,8 @@ from .blueprints import company_bp
 from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
-from ..models.company import Company, UserCompany, Right
-from ..models.rights import list_of_RightAtomic_attributes
+from ..models.company import Company, UserCompany, Right, RightHumnReadible
+# from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
@@ -12,14 +12,15 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
-from ..models.rights import list_of_RightAtomic_attributes
+from collections import OrderedDict
+# from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
 
 
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions(Right[RIGHTS.SEND_PUBLICATIONS()]))
+# @check_rights(simple_permissions(Right[RIGHTS.SUBMIT_PUBLICATIONS()]))
 def search_to_submit_article(json):
     companies = Company().search_for_company(g.user_dict['id'], json['search'])
     return companies
@@ -142,9 +143,8 @@ def confirm_add(json):
 
 @company_bp.route('/profile/<string:company_id>/')
 @login_required
-#@check_rights(simple_permissions(['manage_access_company'], allow_if_rights_undefined=True))
-# @check_rights(UserCompany.permissions(needed_rights_iterable=['manage_access_company'],
-#                                       allow_if_rights_undefined=True))
+@check_rights(simple_permissions(['manage_rights_company']))
+
 def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = list(g.user.user_rights_in_company(company_id))
@@ -166,12 +166,14 @@ def profile(company_id):
 def employees(company_id):
 
     company_user_rights = UserCompany.show_rights(company_id)
+    ordered_rights = sorted(Right.keys(), key=lambda t: Right.RIGHT_POSITION()[t.lower()])
+    ordered_rights = list(map((lambda x: getattr(x, 'lower')()), ordered_rights))
+
     for user_id in company_user_rights.keys():
         rights = company_user_rights[user_id]['rights']
-        rez = {}
-        for elem in list_of_RightAtomic_attributes:
-            rez[elem.lower()] = True if elem.lower(
-            ) in rights else False
+        rez = OrderedDict()
+        for elem in ordered_rights:
+            rez[elem] = True if elem in rights else False
         company_user_rights[user_id]['rights'] = rez
 
     user_id = current_user.get_id()
@@ -183,13 +185,14 @@ def employees(company_id):
                            company_id=company_id,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
-                           Right=Right
+                           Right=Right,
+                           RightHumnReadible=RightHumnReadible
                            )
 
 
 @company_bp.route('/update_rights', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def update_rights():
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
@@ -203,7 +206,7 @@ def update_rights():
 # todo: it must be checked!!!
 @company_bp.route('/edit/<string:company_id>/')
 @login_required
-# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def edit(company_id):
     company = db(Company, id=company_id).one()
     return render_template('company/company_edit.html',
@@ -215,7 +218,7 @@ def edit(company_id):
 
 @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
 @login_required
-# @check_rights(simple_permissions([RIGHTS.MANAGE_ACCESS_COMPANY()]))
+# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def confirm_edit(company_id):
     Company().update_comp(company_id=company_id, data=request.form,
                           passed_file=request.files['logo_file'])
@@ -293,10 +296,30 @@ def confirm_subscriber():
 # @check_rights(simple_permissions([RIGHTS.SUSPEND_EMPLOYEE()]))
 def suspend_employee():
     data = request.form
-    UserCompany.suspend_employee(user_id=data['user_id'],
-                                 company_id=data['company_id'])
+    UserCompany.change_status_employee(user_id=data['user_id'],
+                                       company_id=data['company_id'])
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
+
+@company_bp.route('/fire_employee/', methods=['POST'])
+@login_required
+def fire_employee():
+    data = request.form
+    UserCompany.change_status_employee(company_id=data.get('company_id'),
+                                       user_id=data.get('user_id'),
+                                       status=STATUS.DELETED())
+    return redirect(url_for('company.employees',
+                            company_id=data.get('company_id')))
+
+@company_bp.route('/unsuspend/<string:user_id>,<string:company_id>')
+@login_required
+def unsuspend(user_id, company_id):
+
+    UserCompany.change_status_employee(user_id=user_id,
+                                       company_id=company_id,
+                                       status=STATUS.ACTIVE())
+    return redirect(url_for('company.employees', company_id=company_id))
+
 
 
 @company_bp.route('/suspended_employees/<string:company_id>',
@@ -304,7 +327,7 @@ def suspend_employee():
 @login_required
 # @check_rights(simple_permissions([]))
 def suspended_employees(company_id):
-    return render_template('company/company_suspended.html', company_id=company_id)
+    return render_template('company/company_fired.html', company_id=company_id)
 
 
 @company_bp.route('/suspended_employees/<string:company_id>', methods=['POST'])

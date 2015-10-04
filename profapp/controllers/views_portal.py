@@ -20,33 +20,13 @@ def create_template(company_id):
     return render_template('company/portal_create.html', company_id=company_id)
 
 
-@portal_bp.route('/<any(create,update):action>/<string:company_id>/', methods=['POST'])
-@login_required
-# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
-@ok
-def create_load(json, action, state, company_id):
 
-    if action == 'create':
-        valid = Portal(name=json['name'], host=json['host'],
-                   portal_layout_id=json['portal_layout_id'],
-                   company_owner_id=company_id,
-                   divisions=[PortalDivision(**division) for division in json['divisions']]) \
-                    .create_portal().validate()
-        if state == 'validate':
-            # TODO OZ by OZ: next line is disgusting!!!!
-            getattr(g, 'db', None).rollback()
-            return valid
-        elif len(valid['errors'].keys()):
-            raise errors.ValidationException(valid)
-        else:
-            return Response(headers={'Location: http://google.com/'})
-    else:
-        return {}
 
 
 @portal_bp.route('/<any(create,update):action>/<any(validate,save):state>/<string:company_id>/',
                  methods=['POST'])
 @login_required
+# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
 @ok
 def create_save(json, action, state, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
@@ -157,8 +137,9 @@ def partners_load(json, company_id):
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
 @ok
 @login_required
+
 # @check_rights(simple_permissions([]))
-def search_for_portal_to_join(json, delme):
+def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(
         json['company_id'], json['search'])
     return portals_partners
