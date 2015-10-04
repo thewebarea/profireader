@@ -105,23 +105,23 @@ def get_my_attributes(my_class, with_values=False):
 
 
 class RightAtomic(dict):
-    UPLOAD_FILES = ('upload_files', 0x00008, "Upload files to company's folder")
-    SUBMIT_PUBLICATIONS = ('submit_publications', 0x00080, 'Submit materials to company')
-    ACCEPT_REFUSE_PUBLICATION = ('accept_refuse_publication', 0x08000, 'Accept or refuse submitted materials')
-    PUBLISH = ('publish', 0x00002, "Publish company's materials to portal")
-    UNPUBLISH = ('unpublish', 0x00004, "Unpublish company's publication from portal")
-    DELETE_FILES = ('delete_files', 0x00010, "Remove files from company's folder")
-    ADD_EMPLOYEE = ('add_employee', 0x00020, 'Approve new employee')
-    SUSPEND_EMPLOYEE = ('suspend_employee', 0x00040, 'Suspend and unsuspend employee')
-    SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x04000, 'Apply company request for portal membership')
-    MANAGE_RIGHTS_COMPANY = ('manage_rights_company', 0x00100, 'Change rights for company employees')
-    EDIT = ('edit', 0x00001, 'Edit company profile')
-    MANAGE_PORTAL = ('manage_portal', 0x00200, 'Create portal and manage portal divisions')
-    ARTICLE_PRIORITY = ('article_priority', 0x00400, 'Set publication priority on portal')
-    MANAGE_READERS = ('manage_readers', 0x0800, 'Manage readers subscriptions')
-    REMOVE_PUBLICATION = ('remove_publication', 0x10000, 'Remove any publication from owned portal')
-    MANAGE_COMMENTS = ('manage_comments', 0x2000, 'Manages comments')
-    MANAGE_COMPANIES_MEMBERS = ('manage_companies_members', 0x01000, 'Accept or refuse company membership on portal')
+    UPLOAD_FILES = ('upload_files', 0x00008, "Upload files to company's folder", 1)
+    SUBMIT_PUBLICATIONS = ('submit_publications', 0x00080, 'Submit materials to company', 2)
+    ACCEPT_REFUSE_PUBLICATION = ('accept_refuse_publication', 0x08000, 'Accept or refuse submitted materials', 3)
+    PUBLISH = ('publish', 0x00002, "Publish company's materials to portal", 4)
+    UNPUBLISH = ('unpublish', 0x00004, "Unpublish company's publication from portal", 5)
+    DELETE_FILES = ('delete_files', 0x00010, "Remove files from company's folder", 6)
+    ADD_EMPLOYEE = ('add_employee', 0x00020, 'Approve new employee', 7)
+    SUSPEND_EMPLOYEE = ('suspend_employee', 0x00040, 'Suspend and unsuspend employee', 8)
+    SUBSCRIBE_TO_PORTALS = ('subscribe_to_portals', 0x04000, 'Apply company request for portal membership', 9)
+    MANAGE_RIGHTS_COMPANY = ('manage_rights_company', 0x00100, 'Change rights for company employees', 10)
+    EDIT = ('edit', 0x00001, 'Edit company profile', 11)
+    MANAGE_PORTAL = ('manage_portal', 0x00200, 'Create portal and manage portal divisions', 12)
+    ARTICLE_PRIORITY = ('article_priority', 0x00400, 'Set publication priority on portal', 13)
+    MANAGE_READERS = ('manage_readers', 0x0800, 'Manage readers subscriptions', 14)
+    REMOVE_PUBLICATION = ('remove_publication', 0x10000, 'Remove any publication from owned portal', 15)
+    MANAGE_COMMENTS = ('manage_comments', 0x2000, 'Manages comments', 16)
+    MANAGE_COMPANIES_MEMBERS = ('manage_companies_members', 0x01000, 'Accept or refuse company membership on portal', 17)
 
     # read this:
     # http://stackoverflow.com/questions/9058305/getting-attributes-of-a-class
@@ -152,13 +152,18 @@ class Right(RightAtomic):
     # renamed from RIGHTS
 
     @classmethod
-    def RIGHT(cls):
+    def VALUE_RIGHT(cls):
         return {getattr(RightAtomic, field)[1]: getattr(RightAtomic, field)[0]
                 for field in RightAtomic.keys()}
 
     @classmethod
-    def RIGHT_REVERSED(cls):
+    def RIGHT_VALUE(cls):
         return {getattr(RightAtomic, field)[0]: getattr(RightAtomic, field)[1]
+                for field in RightAtomic.keys()}
+
+    @classmethod
+    def RIGHT_POSITION(cls):
+        return {getattr(RightAtomic, field)[0]: getattr(RightAtomic, field)[3]
                 for field in RightAtomic.keys()}
 
     @classmethod
@@ -166,7 +171,7 @@ class Right(RightAtomic):
         rights_in_integer = rights_in_integer & ALL_AVAILABLE_RIGHTS_TRUE
         return \
             frozenset(
-                [cls.RIGHT()[2**position] for position, right in
+                [cls.VALUE_RIGHT()[2**position] for position, right in
                  enumerate(
                      list(map(int, list(bin(rights_in_integer)[2:][::-1])))
                  )
@@ -176,16 +181,8 @@ class Right(RightAtomic):
     # TODO (AA to AA): check the correctness!!!
     @classmethod
     def transform_rights_into_integer(cls, rights_iterable):
-        rez = reduce(lambda x, y: x |
-                     cls.RIGHT_REVERSED()[y], rights_iterable, 0)
+        rez = reduce(lambda x, y: x | cls.RIGHT_VALUE()[y], rights_iterable, 0)
         return rez
-
-    @staticmethod
-    def check_type_rights_int(rights):
-        return type(rights) == tuple and \
-            len(rights) == 2 and \
-            type(rights[0]) == int and \
-            type(rights[1]) == int
 
 #  we really need RightAtomic to be inherited from dict.
 Right = Right()

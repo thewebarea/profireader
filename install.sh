@@ -183,7 +183,11 @@ service haproxy restart" sudo secret_data
     }
 
 function menu_secret_data {
-    down secret_data.txt secret_data.py secret_data.`$gitv`_`$datev`.bak python_3
+    down secret_data.txt secret_data.py secret_data.`$gitv`_`$datev`.bak secret_client
+    }
+
+function menu_secret_client {
+    down client_secret.json client_secret.json client_secret.json.`$gitv`_`$datev`.bak python_3
     }
 
 function menu_python_3 {
@@ -330,6 +334,7 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "hosts" "create virtual domain zone in /etc/hosts" \
 "haproxy" "install haproxy" \
 "secret_data" "download secret data" \
+"secret_client" "download secret client data" \
 "python_3" "install python 3" \
 "venv" "create virtual environment" \
 "modules" "install required python modules (via pip)" \
@@ -339,10 +344,10 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "db_create" "create empty database" \
 "db_save_minimal" "save initial database to file" \
 "db_download_minimal" "get minimal database from x.d.ntaxa.com" \
-"db_load_minimal" "load full database from file" \
+"db_load_minimal" "load minimal database from file" \
 "db_save_full" "save full database to file" \
 "db_download_full" "get full database from x.d.ntaxa.com" \
-"db_load_full" "load initial database from file" \
+"db_load_full" "load full database from file" \
 "compare_local_makarony" "compare local database and dev version" \
 "compare_local_artek" "compare local database and production version" \
 "compare_makarony_artek" "compare dev database and production version" \
