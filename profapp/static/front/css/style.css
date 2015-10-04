@@ -94,8 +94,12 @@ footer .btn-social-icon{
 }
 
 .block-item.full-block-info{
-    padding: 15px;
+    padding: 15px 15px 35px 15px;
     height: auto;
+}
+
+.block-item.full-block-info p::first-line {
+    padding-left: 20px;
 }
 
 .block-item img{

@@ -29,7 +29,7 @@ class Company(Base, PRBase):
     name = Column(TABLE_TYPES['name'], unique=True)
     logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    # corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
@@ -111,7 +111,7 @@ class Company(Base, PRBase):
 
         if passed_file:
             file = File(company_id=company_id,
-                        parent_id=company.one().corporate_folder_file_id,
+                        parent_id=company.one().system_folder_file_id,
                         author_user_id=g.user_dict['id'],
                         name=passed_file.filename,
                         mime=passed_file.content_type)
