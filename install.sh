@@ -262,7 +262,7 @@ function menu_compare_local_artek {
     }
 
 function menu_compare_makarony_artek {
-    conf_comm "./postgres.dump_and_compare_structure.sh d.ntaxa.com/profireader/5432 a.ntaxa.com/profireader/54321" nosudo db_rename
+    conf_comm "./postgres.dump_and_compare_structure.sh d.ntaxa.com/profireader/54321 a.ntaxa.com/profireader/54321" nosudo db_rename
     }
 
 function menu_db_rename {

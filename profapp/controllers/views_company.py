@@ -12,6 +12,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany
 from utils.db_utils import db
+from collections import OrderedDict
 # from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
@@ -165,13 +166,14 @@ def profile(company_id):
 def employees(company_id):
 
     company_user_rights = UserCompany.show_rights(company_id)
+    ordered_rights = sorted(Right.keys(), key=lambda t: Right.RIGHT_POSITION()[t.lower()])
+    ordered_rights = list(map((lambda x: getattr(x, 'lower')()), ordered_rights))
+
     for user_id in company_user_rights.keys():
         rights = company_user_rights[user_id]['rights']
-        rez = {}
-        # for elem in list_of_RightAtomic_attributes:
-        for elem in Right.keys():
-            rez[elem.lower()] = True if elem.lower(
-            ) in rights else False
+        rez = OrderedDict()
+        for elem in ordered_rights:
+            rez[elem] = True if elem in rights else False
         company_user_rights[user_id]['rights'] = rez
 
     user_id = current_user.get_id()
@@ -294,10 +296,30 @@ def confirm_subscriber():
 # @check_rights(simple_permissions([RIGHTS.SUSPEND_EMPLOYEE()]))
 def suspend_employee():
     data = request.form
-    UserCompany.suspend_employee(user_id=data['user_id'],
-                                 company_id=data['company_id'])
+    UserCompany.change_status_employee(user_id=data['user_id'],
+                                       company_id=data['company_id'])
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
+
+@company_bp.route('/fire_employee/', methods=['POST'])
+@login_required
+def fire_employee():
+    data = request.form
+    UserCompany.change_status_employee(company_id=data.get('company_id'),
+                                       user_id=data.get('user_id'),
+                                       status=STATUS.DELETED())
+    return redirect(url_for('company.employees',
+                            company_id=data.get('company_id')))
+
+@company_bp.route('/unsuspend/<string:user_id>,<string:company_id>')
+@login_required
+def unsuspend(user_id, company_id):
+
+    UserCompany.change_status_employee(user_id=user_id,
+                                       company_id=company_id,
+                                       status=STATUS.ACTIVE())
+    return redirect(url_for('company.employees', company_id=company_id))
+
 
 
 @company_bp.route('/suspended_employees/<string:company_id>',
@@ -305,7 +327,7 @@ def suspend_employee():
 @login_required
 # @check_rights(simple_permissions([]))
 def suspended_employees(company_id):
-    return render_template('company/company_suspended.html', company_id=company_id)
+    return render_template('company/company_fired.html', company_id=company_id)
 
 
 @company_bp.route('/suspended_employees/<string:company_id>', methods=['POST'])
