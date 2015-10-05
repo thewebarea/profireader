@@ -66,7 +66,7 @@ class Tag(Base, PRBase):
     # _relationship = relationship('File',
     #                               uselist=False,
     #                               backref='logo_owner_company',
-    #                               foreign_keys='Company.logo_file')
+    #                               foreign_keys='Company.logo_file_id')
 
 # class KeyWords(Base, PRBase):
 
