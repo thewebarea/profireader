@@ -116,10 +116,8 @@ def send(video_id=None):
                          chunk_info=dict(chunk_size=int(data.get('chunkSize')),
                                          chunk_number=int(data.get('chunkNumber')),
                                          total_size=int(data.get('totalSize'))))
-    response = youtube.upload(video_id)
-    print(response)
-    return redirect(url_for('filemanager.uploader')) if response == 'success' else \
-        jsonify({'result': {'size': 0}})
+    youtube.upload(video_id)
+    return jsonify({'result': {'size': 0}})
 
 
 @filemanager_bp.route('/resumeopload/', methods=['GET'])
