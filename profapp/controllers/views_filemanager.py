@@ -88,8 +88,7 @@ def upload(json):
     return ret
 
 from ..models.google import YoutubeApi
-from flask import request, make_response
-from flask import session, redirect
+from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
 def uploader():
@@ -103,8 +102,9 @@ def uploader():
     return redirect(google.get_auth_code()) if not credentials_exist and google.check_admins else \
         render_template('file_uploader.html')
 
+@filemanager_bp.route('/send/<string:video_id>', methods=['GET', 'POST', 'OPTIONS'])
 @filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
-def send():
+def send(video_id=None):
 
     data = request.form
     body = {'title': 'test',
@@ -113,15 +113,16 @@ def send():
     file = request.files['file'].stream.read(-1)
     youtube = YoutubeApi(body_dict=body,
                          video_file=file,
-                         chunk_info=dict(chunk_size=data.get('chunkSize'),
-                                         chunk_number=data.get('chunkNumber'),
-                                         total_size=data.get('totalSize')))
-    youtube.upload()
-
-    return jsonify({'result': {'size': 0}})
+                         chunk_info=dict(chunk_size=int(data.get('chunkSize')),
+                                         chunk_number=int(data.get('chunkNumber')),
+                                         total_size=int(data.get('totalSize'))))
+    response = youtube.upload(video_id)
+    print(response)
+    return redirect(url_for('filemanager.uploader')) if response == 'success' else \
+        jsonify({'result': {'size': 0}})
 
 
 @filemanager_bp.route('/resumeopload/', methods=['GET'])
 def resumeopload():
 
-    return jsonify({'size': 10000})
+    return jsonify({'size': 0})

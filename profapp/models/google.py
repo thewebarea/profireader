@@ -1,22 +1,19 @@
 from apiclient import discovery
 from config import Config
 import httplib2
-from flask import session, jsonify, url_for, redirect, request
-from apiclient.http import MediaFileUpload, MediaInMemoryUpload, MediaUpload, MediaIoBaseUpload
+from flask import session
 from oauth2client import client
 from oauth2client.client import Credentials
 from urllib import request as req
 
 from urllib import parse
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from sqlalchemy import Column
+from sqlalchemy import Column, ForeignKey
 from .pr_base import Base, PRBase
 from flask import g
 from utils.db_utils import db
-from urllib.error import HTTPError as errors
-import io
-from apiclient.errors import HttpError
-import requests
+from urllib.error import HTTPError as response_code
+from urllib.error import URLError as url_error
 import sys
 import json
 from ..controllers.errors import TooManyCredentialsInDb
@@ -163,12 +160,14 @@ class YoutubeApi(GoogleAuthorize):
 
     def make_headers_for_start_upload(self, content_length):
 
-        headers = {'authorization': 'Bearer {0}'.format(
-            GoogleToken.get_credentials_from_db().access_token),
-            'content-type': 'application/json; charset=utf-8',
-            'content-length': content_length,
-            'x-upload-content-length': int(self.chunk_info.get('total_size')),
-            'x-upload-content-type': 'application/octet-stream'}
+        authorization = GoogleToken.get_credentials_from_db().access_token
+        session['authorization'] = authorization
+        headers = {'authorization': 'Bearer {0}'.format(authorization),
+                   'content-type': 'application/json; charset=utf-8',
+                   'content-length': content_length,
+                   'x-upload-content-length': self.chunk_info.get('total_size'),
+                   'x-upload-content-type': 'application/octet-stream'}
+
         return headers
 
     def make_encoded_url(self, body_keys):
@@ -185,16 +184,31 @@ class YoutubeApi(GoogleAuthorize):
         try:
             r = req.Request(url=url, headers=headers,  method='POST')
             response = req.urlopen(r, data=body)
+            session['video_id'] = response.headers.get('X-Goog-Correlation-Id')
             session['url'] = response.headers.get('Location')
-        except errors as e:
+        except response_code as e:
             print(e.headers)
             print(e.code)
 
     def make_headers_for_upload(self):
         headers = {'authorization': 'Bearer {0}'.format(session.get('access_token')),
                    'content-type': 'application/octet-stream',
-                   'content-length': int(self.chunk_info.get('chunk_size')),
-                   'content-range': 'bytes 0-{0}/{1}'.format(int(self.chunk_info.get('chunk_size'))-1, self.chunk_info.get('total_size'))}
+                   'content-length': self.chunk_info.get('chunk_size'),
+                   'content-range': 'bytes 0-{0}/{1}'.format(
+                       self.chunk_info.get('chunk_size')-1, self.chunk_info.get('total_size'))}
+        return headers
+
+    def make_headers_for_resumable_upload(self):
+        video = db(YoutubeVideo, video_id=session['video_id']).one()
+        last_byte = self.chunk_info.get('chunk_size') + video.size - 1
+        last_byte = self.chunk_info.get('total_size') - 1 if (self.chunk_info.get(
+            'chunk_size') + video.size - 1) > self.chunk_info.get('total_size') else last_byte
+        headers = {'authorization': 'Bearer {0}'.format(video.authorization),
+                   'content-type': 'application/octet-stream',
+                   'content-length': self.chunk_info.get('total_size')-video.size - 1,
+                   'content-range': 'bytes {0}-{1}/{2}'.format(video.size,
+                                                               last_byte,
+                                                               self.chunk_info.get('total_size'))}
         return headers
 
     def check_upload_status(self):
@@ -205,22 +219,74 @@ class YoutubeApi(GoogleAuthorize):
         try:
             response = req.urlopen(r)
             return response
-        except errors as e:
+        except response_code as e:
             print(e.code)
 
-    def upload(self):
+    def upload(self, video_id):
 
-        if int(self.chunk_info.get('chunk_number')) == 0:
+        chunk_number = self.chunk_info.get('chunk_number')
+        if not chunk_number:
             self.set_youtube_service_url_to_session()
         headers = self.make_headers_for_upload()
         try:
-            r = req.Request(url=session['url'], headers=headers, method='PUT')
-            response = req.urlopen(r, data=self.video_file,)
-            print(response)
-            return response
-        except errors as e:
-            if e.code == 308:
+            if not chunk_number:
                 r = req.Request(url=session['url'], headers=headers, method='PUT')
                 response = req.urlopen(r, data=self.video_file,)
-            print(e.headers)
-            print(e.msg)
+
+                if response.code == 200:
+                    youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                                           size=self.chunk_info.get('total_size'),
+                                           user_id=g.user_dict['id'],
+                                           video_id=session['video_id'])
+                    youtube.save()
+                    return 'success'
+        except response_code as e:
+            if e.code == 308 and not chunk_number:
+                youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                                       size=int(e.headers.get('Range').split('-')[-1])+1,
+                                       user_id=g.user_dict['id'],
+                                       video_id=session['video_id'])
+                youtube.save()
+                db(YoutubeVideo, video_id=video_id).update({'size': int(e.headers.get(
+                                                            'Range').split('-')[-1])+1})
+        if chunk_number:
+            return self.resumable_upload(video_id)
+
+    def resumable_upload(self, video_id):
+
+        session['video_id'] = video_id
+        headers = self.make_headers_for_resumable_upload()
+        r = req.Request(url=session['url'], headers=headers, method='PUT')
+
+        try:
+            response = req.urlopen(r, data=self.video_file)
+            if response.code == 200 or response.code == 201:
+                db(YoutubeVideo, video_id=video_id).update(
+                    {'size': self.chunk_info.get('total_size'),
+                     'status': 'uploaded'})
+                return 'success'
+        except response_code as e:
+            if e.code == 308:
+                db(YoutubeVideo, video_id=video_id).update({'size': int(e.headers.get(
+                                                            'Range').split('-')[-1])+1})
+
+
+class YoutubeVideo(Base, PRBase):
+    __tablename__ = 'youtube_video'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    video_id = Column(TABLE_TYPES['string_30'])
+    title = Column(TABLE_TYPES['name'], default='Title')
+    authorization = Column(TABLE_TYPES['token'])
+    size = Column(TABLE_TYPES['bigint'])
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
+    status = Column(TABLE_TYPES['string_30'], default='uploading')
+
+    def __init__(self, title='Title', authorization=None, size=None, user_id=None, video_id=None,
+                 status='uploading'):
+        super(YoutubeVideo, self).__init__()
+        self.title = title
+        self.authorization = authorization
+        self.size = size
+        self.user_id = user_id
+        self.video_id = video_id
+        self.status = status
