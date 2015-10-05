@@ -1,6 +1,17 @@
 {% extends 'front/bird/layout.html' %}
 {% block content %}
-
+<div>
+    <ul class="nav navbar-nav">
+        {% for division in portal.divisions %}
+            {% if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events' %}
+                <li>
+                    <a {% if division.id == current_division.id %}id="navigation_selected_division"{% endif %}
+                       href="{{ url_for('front.division', division_name=division.name, page=1, search_text='%') }}">{{ division.name }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
 
     {% for article_id in articles %}
 
@@ -17,8 +28,6 @@
                 <p>{{ articles[article_id]['short']|safe }}</p>
             </div>
 
-            <div class="bottom-hide"></div>
-
             <div class="item-additional-info">
                 <div class="item-company">{{ articles[article_id]['company']['name']|safe }}</div>
                 <div class="item-publication-date">{{ articles[article_id]['publishing_tm']|safe }}</div>
@@ -27,9 +36,10 @@
             <img style="width: 300px; height: 240px; background-size: cover; background-image: url({{ file_url(articles[article_id]['image_file_id']) }})"/>
 
 
+            <!--                <a class="btn btn-primary" href="#">Read More <span-->
+            <!--                        class="glyphicon glyphicon-chevron-right"></span></a>-->
         </div>
 
     {% endfor %}
-
 
 {% endblock content %}
