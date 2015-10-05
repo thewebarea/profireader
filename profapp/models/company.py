@@ -29,7 +29,7 @@ class Company(Base, PRBase):
     name = Column(TABLE_TYPES['name'], unique=True)
     logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    # corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
@@ -81,7 +81,7 @@ class Company(Base, PRBase):
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc
-                               if x.status == STATUS.SUSPENDED()]
+                               if x.status == STATUS.DELETED()]
         return suspended_employees
 
     @staticmethod
@@ -111,7 +111,7 @@ class Company(Base, PRBase):
 
         if passed_file:
             file = File(company_id=company_id,
-                        parent_id=company.one().corporate_folder_file_id,
+                        parent_id=company.one().system_folder_file_id,
                         author_user_id=g.user_dict['id'],
                         name=passed_file.filename,
                         mime=passed_file.content_type)
@@ -254,10 +254,15 @@ class UserCompany(Base, PRBase):
         return self
 
     @staticmethod
-    def suspend_employee(company_id, user_id):
+    def change_status_employee(company_id, user_id, status=STATUS.SUSPENDED()):
         """This method make status employee in this company suspended"""
         db(UserCompany, company_id=company_id, user_id=user_id). \
-            update({'status': STATUS.SUSPENDED()})
+            update({'status': status})
+        if status == STATUS.DELETED():
+            UserCompany.update_rights(user_id=user_id,
+                                      company_id=company_id,
+                                      new_rights=()
+                                      )
         # db_session.flush()
 
     @staticmethod
@@ -276,7 +281,6 @@ class UserCompany(Base, PRBase):
            status=STATUS.NONACTIVE()).update({'status': stat})
 
     @staticmethod
-
     # @check_rights(simple_permissions([Right['manage_rights_company']]))
     @check_rights(forbidden_for_current_user)
     def update_rights(user_id, company_id, new_rights):

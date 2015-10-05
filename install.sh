@@ -183,7 +183,11 @@ service haproxy restart" sudo secret_data
     }
 
 function menu_secret_data {
-    down secret_data.txt secret_data.py secret_data.`$gitv`_`$datev`.bak python_3
+    down secret_data.txt secret_data.py secret_data.`$gitv`_`$datev`.bak secret_client
+    }
+
+function menu_secret_client {
+    down client_secret.json client_secret.json client_secret.json.`$gitv`_`$datev`.bak python_3
     }
 
 function menu_python_3 {
@@ -205,7 +209,7 @@ make
 make install
 rm /usr/bin/python3
 rm /usr/bin/pyvenv
-ln -s $destdir/binpython3 /usr/bin/python3
+ln -s $destdir/bin/python3 /usr/bin/python3
 ln -s $destdir/bin/pyvenv /usr/bin/pyvenv
 cd /tmp
 rm -rf 'Python-$pversion'" sudo venv
@@ -245,7 +249,20 @@ function menu_db_user_pass {
     profipass=`cat secret_data.py | grep 'DB_PASSWORD' | sed -e 's/^\s*DB_PASSWORD\s*=\s*['"'"'"]\([^'"'"'"]*\).*$/\1/g' `
     psqlpass=$(rr 'Enter postgresql password' $profipass)
     runsql "CREATE USER $psqluser;
-ALTER USER $psqluser WITH PASSWORD '$psqlpass';" db_create
+ALTER USER $psqluser WITH PASSWORD '$psqlpass';" compare_local_makarony
+    }
+
+
+function menu_compare_local_makarony {
+    conf_comm "./postgres.dump_and_compare_structure.sh localhost/profireader/5432 d.ntaxa.com/profireader/54321" nosudo compare_local_artek
+    }
+
+function menu_compare_local_artek {
+    conf_comm "./postgres.dump_and_compare_structure.sh localhost/profireader/5432 a.ntaxa.com/profireader/54321" nosudo compare_makarony_artek
+    }
+
+function menu_compare_makarony_artek {
+    conf_comm "./postgres.dump_and_compare_structure.sh d.ntaxa.com/profireader/54321 a.ntaxa.com/profireader/54321" nosudo db_rename
     }
 
 function menu_db_rename {
@@ -317,6 +334,7 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "hosts" "create virtual domain zone in /etc/hosts" \
 "haproxy" "install haproxy" \
 "secret_data" "download secret data" \
+"secret_client" "download secret client data" \
 "python_3" "install python 3" \
 "venv" "create virtual environment" \
 "modules" "install required python modules (via pip)" \
@@ -326,10 +344,13 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "db_create" "create empty database" \
 "db_save_minimal" "save initial database to file" \
 "db_download_minimal" "get minimal database from x.d.ntaxa.com" \
-"db_load_minimal" "load full database from file" \
+"db_load_minimal" "load minimal database from file" \
 "db_save_full" "save full database to file" \
 "db_download_full" "get full database from x.d.ntaxa.com" \
-"db_load_full" "load initial database from file" \
+"db_load_full" "load full database from file" \
+"compare_local_makarony" "compare local database and dev version" \
+"compare_local_artek" "compare local database and production version" \
+"compare_makarony_artek" "compare dev database and production version" \
 "exit" "Exit" 2> /tmp/selected_menu_
 reset
 datev="date +%y_%m_%d___%H_%M_%S"
