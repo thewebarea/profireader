@@ -84,7 +84,7 @@ def division(division_name, search_text, page=1):
         return render_template('front/bird/catalog.html',
                                members=members,
                                current_division=division.get_client_side_dict(),
-                               portal=portal.get_client_side_dict())
+                               portal=portal_and_settings(portal))
 
     else:
         return 'unknown division.portal_division_type_id = %s' % (division.portal_division_type_id,)
