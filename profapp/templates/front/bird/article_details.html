@@ -6,21 +6,28 @@
         <img class="article-cover"
              style="background-image: url({{ file_url(article['image_file_id']) }});"/>
 
-        <div class="item-type article">{{ article['division']['name']|safe }}</div>
+{#        <div class="item-type article">{{ article['division']['name']|safe }}</div>#}
         <h2 class="item-title">{{ article['title']|safe }}</h2>
 
-        <h3 style="font-weight: lighter; ">Покроковий план досягнення успіху</h3>
+        <h3 style="font-weight: lighter; font-size: 20px;">Покроковий план досягнення успіху</h3>
 
-        <div class="item-additional-info-top"
-             style="display: block; width: 100%; padding-bottom: 5px; border-bottom: 1px #ccc solid; margin-bottom: 15px;">
+        <div class="item-additional-info-top">
             <div class="item-company">{{ article['company']['name']|safe }}</div>
             <div class="item-publication-date">{{ article['publishing_tm']|safe }}</div>
-            <div class="comments-count">Коментарів 77</div>
+            <div class="item-comments">Коментарів 77</div>
         </div>
-        <div class="">
+        <div class="item-short-content">
             <b>{{ article['short']|safe }}</b>
         </div>
-        <p> {{ article['long'] | safe }} </p>
+        <div class="item-long-content"> {{ article['long'] | safe }} </div>
+        <div class="tag-list">
+            <a href="#">tag1</a>
+            <a href="#">tag2</a>
+            <a href="#">tag3</a>
+            <a href="#">tag4</a>
+            <a href="#">tag5</a>
+            <a href="#">tag6</a>
+        </div>
 
 
         <!--                <a class="btn btn-primary" href="#">Read More <span-->
