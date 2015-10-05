@@ -64,7 +64,7 @@ def division(division_name, search_text, page=1):
         # sub_query = Article.subquery_articles_at_portal(search_text=search_text,
         # articles, pages, page = pagination(query=sub_query, page=page)
 
-        members = {member.company_id:Company.get(member.company_id).get_client_side_dict('id,name') for member in division.portal.company_assoc}
+        members = {member.company_id:Company.get(member.company_id).get_client_side_dict() for member in division.portal.company_assoc}
 
         return render_template('front/bird/catalog.html',
                                members=members,
