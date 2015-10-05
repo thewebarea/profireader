@@ -25,9 +25,8 @@
                     <div class="block-item full-block-info" style="height: auto;">
 
                         <img class="article-cover" style="background-image: url({{ file_url(article['image_file_id']) }});" />
-{#                        {{ dump articles }}#}
 
-{#                        <div class="item-type article">{{ article['division']['name']|safe }}</div>#}
+                        <div class="item-type article">{{ article['division']['name']|safe }}</div>
                         <h2 class="item-title">{{ article['title']|safe }}</h2>
                         <h3 style="font-weight: lighter; ">Покроковий план досягнення успіху</h3>
 
@@ -39,14 +38,10 @@
                         <div class="">
                             <b>{{ article['short']|safe }}</b>
                         </div>
-                        <p>
-
-{{ article['long'] | safe }}</p>
+                        <p> {{ article['long'] | safe }} </p>
 
 
-
-
-                        <!--                <a class="btn btn-primary" href="#">Read More <span-->
+                    <!--                <a class="btn btn-primary" href="#">Read More <span-->
                         <!--                        class="glyphicon glyphicon-chevron-right"></span></a>-->
                     </div>
 
@@ -80,13 +75,6 @@
                     {#                 /.row #}
                 </div>
 
-
-                <?php for ($i = 0; $i < 5; $i++) { ?>
-                <!-- Side Widget Well -->
-{#                <div class="well">#}
-{#		    {% include 'front/bird/shortabout.html' %}#}
-{#                </div>#}
-                <?php } ?>
 
             </div>
 
