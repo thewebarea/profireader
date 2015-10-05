@@ -43,7 +43,7 @@ def division(division_name, search_text, page=1):
         'search_text') else request.args.get('search_text')
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, name=division_name).one()
 
-    if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'enents':
+    if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events':
 
         sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                         portal_division_id=division.id)
@@ -100,7 +100,7 @@ def subportal(member_company_id, member_company_name, page=1):
     articles, pages, page = pagination(query=sub_query, page=page)
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, portal_division_type_id='index').one()
 
-    return render_template('front/bird/index.html',
+    return render_template('front/bird/subportal.html',
                            articles={a.id: a.get_client_side_dict() for
                                      a in articles},
                            subportal = True,
