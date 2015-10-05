@@ -18,11 +18,12 @@ def index(page=1):
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, portal_division_type_id='index').one()
 
     return render_template('front/bird/index.html',
-                           articles={a.id: a.get_client_side_dict() for
-                                     a in articles},
+                           articles={a.id:
+                                     dict(list(a.get_client_side_dict().items()) +
+                                          list({'main_tags': {'foo': 'one_tag'}}.items()))
+                                     for a in articles},
                            portal=portal.get_client_side_dict(),
                            current_division=division.get_client_side_dict(),
-                           selected_division_id='index',
                            pages=pages,
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
@@ -79,6 +80,11 @@ def details(article_portal_id):
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
     article = ArticlePortal.get(article_portal_id)
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, id=article.division.id).one()
+    article_dict = article.to_dict('id, title,short, cr_tm, md_tm, '
+                'publishing_tm, keywords, status, long, image_file_id,'
+                'division.name, division.portal.id,'
+                'company.name')
+    article_dict['tags'] = {'foo': 'one tag', 'bar': 'second tag'}
 
     return render_template('front/bird/article_details.html',
                            portal=portal.get_client_side_dict(),
@@ -111,4 +117,3 @@ def subportal(member_company_id, member_company_name, page=1):
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
                            search_text=search_text)
-
