@@ -109,13 +109,13 @@ footer .btn-social-icon{
     z-index: 999;
 }
 
-.block-item.full-block-info img{
-    position: relative;
-    display: inline-block;
-    width: 300px;
-    height: 340px;
-    margin: 10px 10px 10px 0px;
-}
+/*.block-item.full-block-info img{*/
+    /*position: relative;*/
+    /*display: inline-block;*/
+    /*width: 300px;*/
+    /*height: 340px;*/
+    /*margin: 10px 10px 10px 0px;*/
+/*}*/
 
 .block-item .item-type{
     font-size: 16px;
@@ -242,4 +242,25 @@ footer .row{
 
 .well .input-group .form-control {
     width: 10em;
+}
+
+.bottom-hide{
+    display: block;
+    position: absolute;
+    height: 20px;
+    width: 100%;
+    bottom: 31px;
+    right: 0;
+    background: transparent url("../img/bottom.png") repeat-x;
+}
+
+
+.article-cover{
+    position: relative!important;
+    display: block;
+    width: 712px!important;
+    height: 400px;
+    left: -15px!important;
+    top: -15px!important;
+    margin-bottom: 15px;
 }
