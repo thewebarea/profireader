@@ -1,16 +1,16 @@
 import os
 from flask import request, render_template, make_response, send_file, g
 from flask.ext.login import current_user
-# from db_init import db_session
-from profapp.models.files import File, FileContent
+from profapp.models.files import File
 from .blueprints import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
 from flask import jsonify
 import json as jsonmodule
-# from ..models.youtube import YoutubeApi
-import sys
+from ..models.google import YoutubeApi
+from flask import session, redirect, request, url_for
+from ..models.google import GoogleAuthorize, GoogleToken
 
 def parent_folder(func):
     @wraps(func)
@@ -30,10 +30,7 @@ def filemanager():
     # library = {g.user.personal_folder_file_id:
     # {'name': 'My personal files',
     # 'icon': current_user.gravatar(size=18)}}
-    library = {
-        g.user.personal_folder_file_id: {
-            'name': 'My personal files',
-            'icon': current_user.profireader_small_avatar_url}}
+    library = {}
     for user_company in g.user.employer_assoc:
 
 # TODO VK by OZ: we need function that get all emploees with specific right
@@ -42,8 +39,8 @@ def filemanager():
 # similar function User.get_emploers ...
 
         if user_company.status == 'active' and 'upload_files' in g.user.user_rights_in_company(user_company.company_id):
-            library[user_company.employer.journalist_folder_file_id] = {'name': "%s materisals" % (user_company.employer.name,), 'icon': ''}
-            library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
+            library[user_company.employer.journalist_folder_file_id] = {'name': "%s files" % (user_company.employer.name,), 'icon': ''}
+            # library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
 
     file_manager_called_for = request.args['file_manager_called_for'] if 'file_manager_called_for' in request.args else ''
     file_manager_on_action = jsonmodule.loads(request.args['file_manager_on_action']) if 'file_manager_on_action' in request.args else {}
@@ -87,9 +84,7 @@ def upload(json):
         ret[uploaded.id] = True
     return ret
 
-from ..models.google import YoutubeApi
-from flask import session, redirect, request, url_for
-from ..models.google import GoogleAuthorize, GoogleToken
+
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
 def uploader():
 

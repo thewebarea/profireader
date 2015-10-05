@@ -5,7 +5,6 @@ from flask import session
 from oauth2client import client
 from oauth2client.client import Credentials
 from urllib import request as req
-
 from urllib import parse
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
@@ -13,7 +12,6 @@ from .pr_base import Base, PRBase
 from flask import g
 from utils.db_utils import db
 from urllib.error import HTTPError as response_code
-from urllib.error import URLError as url_error
 import sys
 import json
 from ..controllers.errors import TooManyCredentialsInDb
