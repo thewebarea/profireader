@@ -11,14 +11,12 @@
 
 {% block content %}
     <script>
-        module.controller('company_create', ['$scope', '$ok', function ($scope, $ok) {
-            $scope.url_confirm_add = {{ raw_url_for('company.confirm_add')|safe }};
-
+        module.controller('company_create', ['$scope', '$modal', '$ok', function ($scope, $modal, $ok) {
 
             {% if company_id %}
-                $scope.save_company = '{{ url_for('company.confirm_create') |safe }}';
-            {% else %}
                 $scope.save_company = '{{ url_for('company.confirm_edit', company_id = company_id)|safe }}';
+            {% else %}
+                $scope.save_company = '{{ url_for('company.confirm_create') |safe }}';
             {% endif %}
 
             $scope.url_back = {{ raw_url_for('company.show')|safe }};
@@ -32,30 +30,70 @@
             };
 
             $scope.afterSave = function () {
-                window.location.href = $scope.url_back();
+
+            };
+
+            $scope.articleImageSelected = function (item) {
+
+                $scope.data.logo_file_id = item.id;
+                $scope.setImageUrl();
+                closeFileManager();
+            }
+
+            $scope.setImageUrl = function () {
+                $scope.logo_file_url = fileUrl($scope.data.logo_file_id);
+            }
+
+            $scope.chooseImage = function () {
+                $scope.filemanagerModal = $modal.open({
+                    templateUrl: 'filemanager.html',
+                    controller: 'filemanagerCtrl',
+                    size: 'filemanager-halfscreen',
+                    resolve: {
+                        file_manager_called_for: function () {
+                            return 'file_browse_image'
+                        },
+                        file_manager_on_action: function () {
+                            return {
+                                choose: "parent.angularControllerFunction('company_create', 'articleImageSelected')"
+                            }
+                        }
+                    }
+                });
+
+
             };
 
         }])
     </script>
     {% raw %}
-    <div ng-controller="company_create">
-        <form class="add" ng-ok
-              ng-onsuccess="afterSave"
-              ng-onsubmit="getData"
-              ng-action="url_confirm_add()">
-            <h3>New company Account</h3>
-            Logo <input type="file" id="logo_file"><br/>
-            Company name<input ng-model="data.name"><br/>
-            Country<input type="text" ng-model="data.country"><br/>
-            Region<input type="text" ng-model="data.region"><br/>
-            Adress<input type="text" ng-model="data.address"><br/>
-            Phone<input type="text" ng-model="data.phone"><br/>
-            Fax<input type="text" ng-model="data.phone2"><br/>
-            Email<input type="text" ng-model="data.email"><br/>
-            Short Description<input type="text" смщng-model="data.short_description"><br/>
-            <input type="submit" value="create"/>
-            <input type="button" ng-click="cancel()" value="cancel"/>
-        </form>
+    <div ng-init="loadData(null,{},setImageUrl)" ng-controller="company_create">
+        <div ng-if="!data">Loading...</div>
+        <div ng-if="data">
+            <form class="add"
+                  ng-ok
+                  ng-onsuccess="afterSave"
+                  ng-onsubmit="getData"
+                  ng-action="save_company">
+                <h3>New company Account</h3>
+                Logo
+                <div ng-click="chooseImage()"
+                     style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
+                        background-size: cover; background-image:url({{ logo_file_url }});">
+                    {{ _('Select logo') }}
+                </div>
+                <br/>
+                Company name <input ng-model="data.name"><br/>
+                Country <input type="text" ng-model="data.country"><br/>
+                Region <input type="text" ng-model="data.region"><br/>
+                Adress <input type="text" ng-model="data.address"><br/>
+                Phone <input type="text" ng-model="data.phone"><br/>
+                Fax <input type="text" ng-model="data.phone2"><br/>
+                Email <input type="text" ng-model="data.email"><br/>
+                Short Description <textarea ng-model="data.short_description"></textarea><br/>
+                <input type="submit" value="{{ data.id ? 'save' : 'create' }}"/>
+            </form>
+        </div>
     </div>
 
 
