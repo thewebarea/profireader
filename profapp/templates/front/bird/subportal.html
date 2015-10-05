@@ -1,45 +1,38 @@
 {% extends 'front/bird/layout.html' %}
 {% block content %}
-<div>
-    <ul class="nav navbar-nav">
-        {% for division in portal.divisions %}
-            {% if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events' %}
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="margin-top: 140px;">
+        <div style="background: pink">
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+                <ul class="nav navbar-nav">
                 <li>
-                    <a {% if division.id == current_division.id %}id="navigation_selected_division"{% endif %}
-                       href="{{ url_for('front.division', division_name=division.name, page=1, search_text='%') }}">{{ division.name }}</a>
+                    <a class="" href="{{ url_for('front.subportal',
+                                   member_company_id = member_company['id'] ,
+                                   member_company_name = member_company['name'], page=1, search_text='%') }}"><img style="width: 50px; height: 40px; background-size: cover; background-image: url({{ file_url(member_company['logo_file_id']) }})"/></a>
                 </li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-</div>
-
-    {% for article_id in articles %}
-
-        <div class="block-item">
-
-            <div class="item-type article"><a
-                    href="{{ url_for('front.division', division_name=articles[article_id]['division']['name'], page=1, search_text='%') }}">{{ articles[article_id]['division']['name']|safe }}</a>
-            </div>
-            <h2 class="item-title">
-                <a href="{{ url_for('front.details', article_portal_id=articles[article_id]['id']) }}">{{ articles[article_id]['title']|safe }}</a>
-            </h2>
-
-            <div class="item-short-content">
-                <p>{{ articles[article_id]['short']|safe }}</p>
+                    {% for division in portal.divisions %}
+                        {% if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events' %}
+                            <li>
+                                <a {% if division.id == current_division.id %}id="navigation_selected_division"{% endif %}
+                                   href="{{ url_for('front.subportal_division',
+                                   member_company_id = member_company['id'] ,
+                                   member_company_name = member_company['name'],
+                                   division_name=division.name, page=1, search_text='%') }}">{{ division.name }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             </div>
 
-            <div class="item-additional-info">
-                <div class="item-company">{{ articles[article_id]['company']['name']|safe }}</div>
-                <div class="item-publication-date">{{ articles[article_id]['publishing_tm']|safe }}</div>
-            </div>
-
-            <img style="width: 300px; height: 240px; background-size: cover; background-image: url({{ file_url(articles[article_id]['image_file_id']) }})"/>
-
-
-            <!--                <a class="btn btn-primary" href="#">Read More <span-->
-            <!--                        class="glyphicon glyphicon-chevron-right"></span></a>-->
         </div>
 
-    {% endfor %}
+    </nav>
+
+<br/><br/>
+    <h2>{{ member_company['name'] }}</h2>
+    <h3>{{ member_company['short_description'] }}</h3>
+    <br/>
 
 {% endblock content %}

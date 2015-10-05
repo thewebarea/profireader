@@ -15,7 +15,7 @@
         <div class="col-md-9">
 
             {% block content %}{% endblock content %}
-            {% include 'front/bird/pager_index.html' %}
+            {% if pages %}{% include 'front/bird/pager_index.html' %}{% endif %}
         </div>
 
     </div>
