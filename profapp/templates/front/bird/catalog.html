@@ -1,0 +1,13 @@
+{% extends 'front/bird/layout.html' %}
+{% block content %}
+
+    {% for member_id in members %}
+
+        <div class="block-item">
+            <a href="{{ url_for('front.subportal', member_company_id = member_id, member_company_name = members[member_id]['name']) }}"
+               href>{{ members[member_id]['name'] }}</a>
+        </div>
+
+    {% endfor %}
+
+{% endblock content %}
