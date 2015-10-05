@@ -125,18 +125,23 @@ def submit_to_portal(json):
     return {'portal': portal.name}
 
 
-@company_bp.route('/add/')
+@company_bp.route('/create/')
 @login_required
 # @check_rights(simple_permissions([]))
-def add():
-    return render_template('company/company_add.html', user=g.user_dict)
+def create():
+    return render_template('company/company_edit.html', user=g.user_dict)
+
+@company_bp.route('/create/', methods=['POST'])
+@ok
+def load_form_create(json):
+    return {}
 
 
-@company_bp.route('/confirm_add/', methods=['POST'])
+@company_bp.route('/confirm_create/', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([]))
 @ok
-def confirm_add(json):
+def confirm_create(json):
     return Company(**json).create_new_company().\
         get_client_side_dict()
 
