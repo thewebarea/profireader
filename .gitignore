@@ -18,6 +18,9 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
+venv/
+/venv/
+venv/*
 lib/
 lib64/
 parts/
