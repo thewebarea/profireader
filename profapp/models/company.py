@@ -45,12 +45,15 @@ class Company(Base, PRBase):
     portal = relationship('Portal', secondary='company_portal', backref=backref('companies',
                                                                                 lazy='dynamic'))
     own_portal = relationship('Portal',
-                              backref="own_company", uselist=False,
+                              backref='own_company', uselist=False,
                               foreign_keys='Portal.company_owner_id',
                               )
-    user_owner = relationship('User', backref='companies')
-    # employees = relationship('User', secondary='user_company',
-    #                          lazy='dynamic')
+    user_owner = relationship('User', back_populates='companies')
+    employees = relationship('User',
+                             secondary='user_company',
+                             back_populates='employers',
+                             lazy='dynamic')
+
     # todo: add company time creation
     logo_file_relationship = relationship('File',
                                           uselist=False,
@@ -67,9 +70,7 @@ class Company(Base, PRBase):
                 'message': 'Company name %(name)s already exist. Please choose another name',
                 'data': self.get_client_side_dict()})
 
-        user_company = UserCompany(status=STATUS.ACTIVE(),
-                                   rights_int=COMPANY_OWNER_RIGHTS
-                                   )
+        user_company = UserCompany(status=STATUS.ACTIVE(), rights_int=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)

@@ -188,6 +188,8 @@ class PortalDivision(Base, PRBase):
 
     portal_division_tags = relationship('Tag', secondary='tag_portal_division')
 
+    tags_assoc = relationship('TagPortalDivision', back_populates='portal_division')
+
     def __init__(self, portal_division_type_id=None, name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id
         self.name = name

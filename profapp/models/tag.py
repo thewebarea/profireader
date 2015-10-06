@@ -15,6 +15,8 @@ class Tag(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     name = Column(TABLE_TYPES['short_name'], unique=True)
 
+    portal_divisions_assoc = relationship('TagPortalDivision', back_populates='tag')
+
     def __init__(self, name=None):
         super(Tag, self).__init__()
         self.name = name
@@ -37,21 +39,22 @@ class TagPortalDivision(Base, PRBase):
                     nullable=False)
     position = Column(TABLE_TYPES['int'],
                       CheckConstraint('position >= 1', name='cc_position'),
-                      nullable=False, default=1)
+                      nullable=False)
     portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                 ForeignKey('portal_division.id',
                                            onupdate='CASCADE',
                                            ondelete='CASCADE'),
                                 nullable=False)
+
     UniqueConstraint('tag_id', 'portal_division_id', name='uc_tag_id_portal_division_id')
     UniqueConstraint('position', 'portal_division_id', name='uc_position_portal_division_id')
     # there is an additional constraint implemented in DB via trigger:
     # tag position have to be unique within portal.
 
-    tag = relationship('Tag', uselist=False)
-    portal_division = relationship('PortalDivision', backref='tags')
+    tag = relationship('Tag', back_populates='portal_divisions_assoc')
+    portal_division = relationship('PortalDivision', back_populates='tags_assoc')
     articles = relationship('ArticlePortal', secondary='tag_portal_division_article',
-                            backref=backref('article_portal_tags', lazy='dynamic'), lazy='dynamic')
+                            back_populates='article_portal_tags', lazy='dynamic')
 
     def __init__(self, tag_id=None, portal_division_id=None, position=1):
         super(TagPortalDivision, self).__init__()
