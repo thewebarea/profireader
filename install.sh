@@ -209,7 +209,7 @@ make
 make install
 rm /usr/bin/python3
 rm /usr/bin/pyvenv
-ln -s $destdir/binpython3 /usr/bin/python3
+ln -s $destdir/bin/python3 /usr/bin/python3
 ln -s $destdir/bin/pyvenv /usr/bin/pyvenv
 cd /tmp
 rm -rf 'Python-$pversion'" sudo venv
@@ -262,7 +262,7 @@ function menu_compare_local_artek {
     }
 
 function menu_compare_makarony_artek {
-    conf_comm "./postgres.dump_and_compare_structure.sh d.ntaxa.com/profireader/5432 a.ntaxa.com/profireader/54321" nosudo db_rename
+    conf_comm "./postgres.dump_and_compare_structure.sh d.ntaxa.com/profireader/54321 a.ntaxa.com/profireader/54321" nosudo db_rename
     }
 
 function menu_db_rename {

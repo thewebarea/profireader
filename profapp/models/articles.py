@@ -58,6 +58,7 @@ class ArticlePortal(Base, PRBase):
     short = Column(TABLE_TYPES['text'], default='')
     long = Column(TABLE_TYPES['text'], default='')
     long_stripped = Column(TABLE_TYPES['text'], nullable=False)
+    keywords = Column(TABLE_TYPES['keywords'], nullable=False)
     md_tm = Column(TABLE_TYPES['timestamp'])
     publishing_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'], default=ARTICLE_STATUS_IN_PORTAL.published)
@@ -73,12 +74,13 @@ class ArticlePortal(Base, PRBase):
     #                                       ".id",
     #                         viewonly=True, uselist=False)
 
-    def __init__(self, article_company_id=None, title=None, short=None,
+    def __init__(self, article_company_id=None, title=None, short=None, keywords=None,
                  long=None, status=None, portal_division_id=None, image_file_id=None,
                  portal_id=None):
         self.article_company_id = article_company_id
         self.title = title
         self.short = short
+        self.keywords = keywords
         self.image_file_id = image_file_id
         self.long = long
         self.status = status
@@ -87,7 +89,7 @@ class ArticlePortal(Base, PRBase):
 
 
     def get_client_side_dict(self, fields='id|image_file_id|title|short|image_file_id|'
-                                          'long|cr_tm|md_tm|'
+                                          'long|keywords|cr_tm|md_tm|'
                                           'status|publishing_tm, '
                                           'company.id|name, division.id|name'):
         return self.to_dict(fields)
@@ -115,7 +117,7 @@ class ArticleCompany(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
-    keywords = Column(TABLE_TYPES['keywords'])
+    keywords = Column(TABLE_TYPES['keywords'], nullable=False)
 
     company = relationship(Company)
     editor = relationship(User)
@@ -128,7 +130,7 @@ class ArticleCompany(Base, PRBase):
                                   backref='company_article')
 
     def get_client_side_dict(self, fields='id|title|short|'
-                                          'long|cr_tm|md_tm|company_id|'
+                                          'long|keywords|cr_tm|md_tm|company_id|'
                                           'article_id|image_file_id|'
                                           'status, company.name'):
         return self.to_dict(fields)
@@ -163,6 +165,7 @@ class ArticleCompany(Base, PRBase):
         article_portal = ArticlePortal(title=self.title, short=self.short, long=self.long,
                            portal_division_id=division_id,
                            article_company_id=self.id,
+                           keywords=self.keywords,
                            portal_id=db(PortalDivision, id=division_id).one().portal_id).save()
 
         for file_id in filesintext:
