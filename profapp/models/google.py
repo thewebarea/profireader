@@ -108,6 +108,7 @@ class GoogleAuthorize(object):
 
     @staticmethod
     def check_admins():
+        """ This method check if current user is profireader admin. Return True or False """
         return True if session.get('user_id') in Config.PROFIREADER_ADMINS else False
 
     def service_build(self):
@@ -119,7 +120,8 @@ class GoogleAuthorize(object):
         return service
 
 class YoutubeApi(GoogleAuthorize):
-    """ Use this class for upload videos, get videos, create channels. Body should be dict like this:
+    """ Use this class for upload videos, get videos, create channels.
+        To udpload videos body should be dict like this:
         {
          "title": "My video title",
          "description": "This is a description of my video",
@@ -127,9 +129,9 @@ class YoutubeApi(GoogleAuthorize):
          "categoryId": 22
          "status": "public"
          }
-         Optional you can upload videos via chunks.
-         If you would, pass chunk info (dict) to constructor like:
-         chunk_size = 20000 (in bytes), chunk_number = 1, total_size = 1000000
+         Video will uploaded via chunks .You should, pass chunk info (dict) to constructor like:
+         chunk_size = 10240 (in bytes) must be multiple 256kb, chunk_number = 0-n (from zero),
+         total_size = 1000000
          Requirements : parts = 'snippet' .Pass to this what would you like to return from
           youtube server. (id, snippet, status, contentDetails, fileDetails, player,
           processingDetails, recordingDetails, statistics, suggestions, topicDetails)"""
@@ -157,7 +159,8 @@ class YoutubeApi(GoogleAuthorize):
         return body
 
     def make_headers_for_start_upload(self, content_length):
-
+        """ This method make headers for preupload request to get url for upload binary data.
+         content_length should be body length in bytes. First step to start upload """
         authorization = GoogleToken.get_credentials_from_db().access_token
         session['authorization'] = authorization
         headers = {'authorization': 'Bearer {0}'.format(authorization),
@@ -169,12 +172,16 @@ class YoutubeApi(GoogleAuthorize):
         return headers
 
     def make_encoded_url(self, body_keys):
+        """ This method make values of header url encoded.
+         body_keys are values which you want to return from youtube server """
         values = parse.urlencode(dict(uploadType='resumable', part=",".join(body_keys)))
         url_encoded = self.start_session % values
         return url_encoded
 
     def set_youtube_service_url_to_session(self):
 
+        """ This method add to flask session video_id from youtube server and url for upload
+         videos. If raise except - bad credentials """
         body = self.make_body_for_start_upload()
         url = self.make_encoded_url(body.keys())
         body = json.dumps(body).encode('utf8')
@@ -189,6 +196,7 @@ class YoutubeApi(GoogleAuthorize):
             print(e.code)
 
     def make_headers_for_upload(self):
+        """ This method make headers for upload videos. Second  step to start upload """
         headers = {'authorization': 'Bearer {0}'.format(session.get('access_token')),
                    'content-type': 'application/octet-stream',
                    'content-length': self.chunk_info.get('chunk_size'),
@@ -197,6 +205,7 @@ class YoutubeApi(GoogleAuthorize):
         return headers
 
     def make_headers_for_resumable_upload(self):
+        """ This method make headers for resumable upload videos. Thirst  step to start upload """
         video = db(YoutubeVideo, video_id=session['video_id']).one()
         last_byte = self.chunk_info.get('chunk_size') + video.size - 1
         last_byte = self.chunk_info.get('total_size') - 1 if (self.chunk_info.get(
@@ -210,6 +219,8 @@ class YoutubeApi(GoogleAuthorize):
         return headers
 
     def check_upload_status(self):
+        """ You can use this method to check upload status. If except you will get error
+        code from youtube server """
         headers = {'authorization': 'Bearer {0}'.format(session.get('access_token')),
                    'content-range': 'bytes */{0}'.format(self.chunk_info.get('total_size')),
                    'content-length': 0}
@@ -220,8 +231,11 @@ class YoutubeApi(GoogleAuthorize):
         except response_code as e:
             print(e.code)
 
-    def upload(self, video_id):
+    def upload(self, video_id=None):
 
+        """ Use this method for upload videos. If video_id you can get from session['video_id'].
+          If except error 308 - video has not yet been uploaded, pass next chunk.
+          If chunk > 0 run resumable_upload method. """
         chunk_number = self.chunk_info.get('chunk_number')
         if not chunk_number:
             self.set_youtube_service_url_to_session()
@@ -251,7 +265,8 @@ class YoutubeApi(GoogleAuthorize):
             return self.resumable_upload(video_id)
 
     def resumable_upload(self, video_id):
-
+        """ This method is useful when you upload video via chunks. Pass video_id from youtube
+         server. """
         session['video_id'] = video_id
         headers = self.make_headers_for_resumable_upload()
         r = req.Request(url=session['url'], headers=headers, method='PUT')
@@ -270,6 +285,8 @@ class YoutubeApi(GoogleAuthorize):
 
 
 class YoutubeVideo(Base, PRBase):
+    """ This class make models for youtube videos.
+     status video should be 'uploading' or 'uploaded' """
     __tablename__ = 'youtube_video'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     video_id = Column(TABLE_TYPES['string_30'])
