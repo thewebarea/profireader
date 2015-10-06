@@ -46,11 +46,6 @@ class ArticlePortal(Base, PRBase):
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
 
-    # TODO: is it ok???
-    # main_tag_id = Column(TABLE_TYPES['id_profireader'],
-    #                      ForeignKey('tag_portal_division.id'),
-    #                      nullable=False)
-
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
 
     cr_tm = Column(TABLE_TYPES['timestamp'])

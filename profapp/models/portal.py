@@ -186,8 +186,7 @@ class PortalDivision(Base, PRBase):
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
 
-    # tags = relationship('Tag', secondary='tag_portal_division')
-    # tags = relationship('Tag', secondary='TagPortalDivision')
+    portal_division_tags = relationship('Tag', secondary='tag_portal_division')
 
     def __init__(self, portal_division_type_id=None, name=None, portal_id=None):
         self.portal_division_type_id = portal_division_type_id

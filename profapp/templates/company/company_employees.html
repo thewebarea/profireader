@@ -27,7 +27,7 @@
         <input type="hidden" name="company_id" id="company_id" value="{{ company.id }}">
               <dt>
                 <img src="{{ company_user_rights[user_id]['user'].profireader_small_avatar_url }}" style="width:100px;height:100px;border:0">
-                {{ company_user_rights[user_id]['name'] }} {% if g.user_dict['id']==user_id %} YOU!!! {% endif %}{% if company_user_rights[user_id]['status']=='suspended' %} - Suspended<br>{% for c_user in curr_user %}{% if curr_user[c_user]['rights'][Right['suspend_employee']] %}<a href="{{ url_for('company.unsuspend', user_id=user_id, company_id=company_id) }}">Unsuspend</a>{% endif %}{% endfor %}{% endif %}<br>
+                {{ company_user_rights[user_id]['name'] }} {% if g.user_dict['id']==user_id %} (you) {% endif %}{% if company_user_rights[user_id]['status']=='suspended' %} - Suspended<br>{% for c_user in curr_user %}{% if curr_user[c_user]['rights'][Right['suspend_employee']] %}<a href="{{ url_for('company.unsuspend', user_id=user_id, company_id=company_id) }}">Unsuspend</a>{% endif %}{% endfor %}{% endif %}<br>
                 Phone number : {{ company_user_rights[user_id]['user'].phone_number }}<br>
                 Email : {{ company_user_rights[user_id]['user'].show_email }}
                 Subscribed : {{ company_user_rights[user_id]['date'] }}

@@ -151,6 +151,7 @@ def forbidden_for_current_user(**kwargs):
 # TODO: see the function params_for_user_company_business_rules.
 def simple_permissions(rights):
     def business_rule(**kwargs):
+        # TODO (AA to AA): Implement json handling when json is available among other parameters.
         params = kwargs['json'] if 'json' in kwargs.keys() else kwargs
 
         keys = params.keys()
