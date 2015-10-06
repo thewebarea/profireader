@@ -3,22 +3,6 @@
 
 
     <div class="well">
-
-        <form style="display: inline;    width: 20em;    right: 300px;    position: absolute;    top: 50px;}"
-              onsubmit="{{ url_for('front.index') }}">
-        Search
-            {% if search_text!='%' %}
-                <input style="width: 10em" type="text" name="search_text" value="{{ search_text }}">
-            {% else %}
-                <input style="width: 10em" type="text" name="search_text">
-            {% endif %}
-
-            <button class="btn btn-default" type="submit"><span
-                    class="glyphicon glyphicon-search"></span></button>
-
-        </form>
-
-
         {% include 'front/bird/social.html' %}
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
