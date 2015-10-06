@@ -89,13 +89,17 @@ def upload(json):
 def uploader():
 
     token_db_class = GoogleToken()
-    credentials_exist = token_db_class.check_credentials_exist()
-    if 'code' in request.args and not credentials_exist:
+    upload_credentials_exist = token_db_class.check_credentials_exist(kind='upload')
+    # playlist_credentials_exist = token_db_class.check_credentials_exist(kind='playlist')
+    if 'code' in request.args and not upload_credentials_exist:
         session['auth_code'] = request.args['code']
-        token_db_class.save_credentials()
+        token_db_class.save_credentials(kind='upload')
+    # elif 'code' in request.args and not playlist_credentials_exist:
+    #     session['auth_code'] = request.args['code']
+    #     token_db_class.save_credentials(kind='playlist')
     google = GoogleAuthorize()
-    return redirect(google.get_auth_code()) if not credentials_exist and google.check_admins else \
-        render_template('file_uploader.html')
+    return redirect(google.get_auth_code()) if not upload_credentials_exist and google.check_admins \
+        else render_template('file_uploader.html')
 
 @filemanager_bp.route('/send/<string:video_id>', methods=['GET', 'POST', 'OPTIONS'])
 @filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])

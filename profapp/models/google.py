@@ -20,18 +20,21 @@ class GoogleToken(Base, PRBase):
     __tablename__ = 'google_token'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     credentials = Column(TABLE_TYPES['credentials'], nullable=False)
+    kind = Column(TABLE_TYPES['string_30'])
 
-    def __init__(self, credentials=None):
+    def __init__(self, credentials=None, kind=None):
         super(GoogleToken, self).__init__()
         self.credentials = credentials
+        self.kind = kind
 
     @staticmethod
-    def check_credentials_exist():
+    def check_credentials_exist(kind=None):
         """ Method check rather credentials is exist in db. Can be only one credentials in db.
+         kind should be update, playlist
          If None you should to redirect admin to google auth page.
          If >1 some think is wrong . Raise exception"""
         try:
-            credentials = db(GoogleToken).count()
+            credentials = db(GoogleToken, kind=kind).count()
             if credentials < 2:
                 return credentials
             else:
@@ -40,14 +43,14 @@ class GoogleToken(Base, PRBase):
             e = e.args[0]
             print(e['message'])
 
-    def save_credentials(self):
+    def save_credentials(self, kind=None):
         """ This method save and return your credentials to/from db in json format.
          When you will need credentials you have to convert json to object(
          method: Credentials().new_from_json ) """
         google = GoogleAuthorize()
         flow = google.get_auth_code(ret_flow=True)
         credentials = flow.step2_exchange(session['auth_code'])
-        self.credentials = credentials.to_json()
+        self.credentials, self.kind = credentials.to_json(), kind
         self.save()
         return self.credentials
 
@@ -235,7 +238,7 @@ class YoutubeApi(GoogleAuthorize):
 
         """ Use this method for upload videos. If video_id you can get from session['video_id'].
           If except error 308 - video has not yet been uploaded, pass next chunk.
-          If chunk > 0 run resumable_upload method. """
+          If chunk > 0 run resumable_upload method. If video was uploaded return success """
         chunk_number = self.chunk_info.get('chunk_number')
         if not chunk_number:
             self.set_youtube_service_url_to_session()

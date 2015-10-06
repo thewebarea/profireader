@@ -68,9 +68,11 @@ class Config(object):
     GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY
     GOOGLE_API_SECRET_JSON = secret_data.GOOGLE_API_SECRET_JSON
     YOUTUBE_API = dict(UPLOAD=dict(SCOPE="https://www.googleapis.com/auth/youtube.upload",
-                                   REDIRECT_URI="http://profi.ntaxa.com/filemanager/send/",
+                                   REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/",
                                    SEND_URI="https://www.googleapis.com/upload/youtube/v3/"
-                                            "videos?%s"))
+                                            "videos?%s"),
+                       CREATE_PLAYLIST=dict(SCOPE="https://www.googleapis.com/auth/youtube")
+                       )
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
     # MISSING_CLIENT_SECRETS_MESSAGE = """
