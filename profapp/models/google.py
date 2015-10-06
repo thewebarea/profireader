@@ -1,4 +1,4 @@
-from apiclient import discovery
+# from apiclient import discovery
 from config import Config
 import httplib2
 from flask import session
@@ -114,13 +114,13 @@ class GoogleAuthorize(object):
         """ This method check if current user is profireader admin. Return True or False """
         return True if session.get('user_id') in Config.PROFIREADER_ADMINS else False
 
-    def service_build(self):
-        """ This method is helpful when you want to use google_api_client.
-            Return authorized service """
-        http = GoogleToken.get_authorize_http()
-        service = discovery.build(self.google_service_name, self.google_service_version,
-                                  http=http)
-        return service
+    # def service_build(self):
+    #     """ This method is helpful when you want to use google_api_client.
+    #         Return authorized service """
+    #     http = GoogleToken.get_authorize_http()
+    #     service = discovery.build(self.google_service_name, self.google_service_version,
+    #                               http=http)
+    #     return service
 
 class YoutubeApi(GoogleAuthorize):
     """ Use this class for upload videos, get videos, create channels.
@@ -146,7 +146,7 @@ class YoutubeApi(GoogleAuthorize):
         self.chunk_info = chunk_info
         self.resumable = True if self.chunk_info else False
         self.parts = parts
-        self.youtube = self.service_build()
+        # self.youtube = self.service_build()
         self.start_session = Config.YOUTUBE_API['UPLOAD']['SEND_URI']
 
     def make_body_for_start_upload(self):

@@ -24,3 +24,4 @@ google-api-python-client-py3
 apiclient==1.0.2
 oauth2client==1.5.1
 httplib2==0.9.1
+urllib3==1.12

@@ -18,6 +18,9 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
+venv/
+/venv/
+venv/*
 lib/
 lib64/
 parts/
@@ -29,6 +32,7 @@ var/
 *client_secrets.json
 /*client_secrets.json
 # PyInstaller
+client_secret.json
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
