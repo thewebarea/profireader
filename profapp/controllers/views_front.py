@@ -105,9 +105,12 @@ def details(article_portal_id):
 
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
+    related_articles = g.db().query(ArticlePortal).filter(division.portal.id == article.division.portal_id).order_by(ArticlePortal.cr_tm.desc()).limit(10).all()
+
     return render_template('front/bird/article_details.html',
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
+                           articles_related = {a.id:a.to_dict('id, title, cr_tm, company.name') for a in related_articles},
                            article=article.to_dict('id, title,short, cr_tm, md_tm, '
                                                    'publishing_tm, status, long, image_file_id,'
                                                    'division.name, division.portal.id,'
