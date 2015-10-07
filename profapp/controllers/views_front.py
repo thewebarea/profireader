@@ -13,18 +13,18 @@ def get_params(**argv):
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
 
-    sub_query = Article.subquery_articles_at_portal(search_text=search_text, portal=portal)
+    sub_query = Article.subquery_articles_at_portal(search_text=search_text, portal_id=portal.id)
+    return search_text, portal, sub_query
 
-    return (search_text, portal, sub_query)
 
 def portal_and_settings(portal):
-    ret=portal.get_client_side_dict()
 
+    ret = portal.get_client_side_dict()
     newd = []
     for di in ret['divisions']:
         if di['portal_division_type_id'] == 'company_subportal':
             pdset = g.db().query(PortalDivisionSettings_company_subportal).filter_by(portal_division_id=di['id']).one()
-            com_port =  g.db().query(CompanyPortal).get(pdset.company_portal_id)
+            com_port = g.db().query(CompanyPortal).get(pdset.company_portal_id)
             di['member_company'] = Company.get(com_port.company_id)
         newd.append(di)
     ret['divisions'] = newd
