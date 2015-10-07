@@ -52,8 +52,3 @@ def register_front(app):
 def register_file(app):
     from . import views_file
     app.register_blueprint(file_bp, url_prefix='/')
-
-
-
-
-

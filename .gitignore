@@ -13,6 +13,7 @@ Virtualenviroment/
 .Python
 env/
 env2/
+venv/
 build/
 develop-eggs/
 downloads/
@@ -29,6 +30,7 @@ var/
 *client_secrets.json
 /*client_secrets.json
 # PyInstaller
+client_secret.json
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
@@ -54,7 +56,7 @@ service_key.*
 
 # Django stuff:
 *.log
-
+client_secret.*
 # Sphinx documentation
 docs/_build/
 

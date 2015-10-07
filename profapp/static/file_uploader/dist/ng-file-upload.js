@@ -217,6 +217,7 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           slice.name = file.name;
           file = slice;
           if (config._chunkSize) {
+
             formData.append('chunkSize', config._end - config._start);
             formData.append('chunkNumber', Math.floor(config._start / config._chunkSize));
             formData.append('totalSize', config._file.size);

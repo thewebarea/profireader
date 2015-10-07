@@ -6,51 +6,28 @@
 
 <body>
 {% include 'front/bird/nav.html' %}
+<br/>
+<br/>
 
 <div class="container">
 
-    <div class="row">
+    <div class="row site-content">
         <!-- Blog Entries Column -->
         <div class="col-md-9">
 
             {% block content %}{% endblock content %}
-            {% include 'front/bird/pager_index.html' %}
+            {% if pages %}{% include 'front/bird/pager_index.html' %}{% endif %}
+
         </div>
-
         <div class="col-md-3">
-            <div class="well">
-                <h4>Search</h4>
-
-                <div class="input-group">
-                    <form onsubmit="{{ url_for('front.index') }}">
-                        {% if search_text!='%' %}
-                            <input type="text" name="search_text" value="{{ search_text }}"
-                                   class="form-control">
-                        {% else %}
-                            <input type="text" name="search_text" class="form-control">
-                        {% endif %}
-                        <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit">
-                                    <span class="glyphicon glyphicon-search"></span>
-                                </button>
-                            </span>
-                    </form>
-                </div>
-
-            </div>
-
-
-            <div class="well">
-                {% include 'front/bird/tags.html' %}
-            </div>
-
-
-            <div class="well">
-                {% include 'front/bird/shortabout.html' %}
-            </div>
+            <a href="#" class="right-banner"></a>
+            <a href="#" class="right-banner"></a>
+            <a href="#" class="right-banner"></a>
+            <a href="#" class="right-banner"></a>
         </div>
 
     </div>
+
 
 </div>
 
