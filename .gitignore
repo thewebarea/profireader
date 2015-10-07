@@ -80,6 +80,7 @@ target/
 
 # secret data
 secret_data.*
+client_secret.*
 database.*.bak
 *.sql
 *.bak
