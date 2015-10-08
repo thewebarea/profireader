@@ -237,12 +237,12 @@ class PortalDivisionSettings_company_subportal(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    portal_division_id= Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
-    company_portal_id= Column(TABLE_TYPES['id_profireader'], ForeignKey('company_portal.id'))
+    portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
+    company_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company_portal.id'))
 
     company_portal = relationship(CompanyPortal)
-    portal_division = relationship(PortalDivision)
 
+    portal_division = relationship(PortalDivision)
 
 class PortalDivisionType(Base, PRBase):
     __tablename__ = 'portal_division_type'
