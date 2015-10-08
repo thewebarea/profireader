@@ -42,8 +42,7 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
-    portal = relationship('Portal', secondary='company_portal', backref=backref('companies',
-                                                                                lazy='dynamic'))
+    portal = relationship('Portal', secondary='company_portal', back_populates='companies')
     own_portal = relationship('Portal',
                               backref='own_company', uselist=False,
                               foreign_keys='Portal.company_owner_id',
