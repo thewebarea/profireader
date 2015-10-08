@@ -1,38 +1,5 @@
 {% extends 'front/bird/layout.html' %}
 {% block content %}
-
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation"
-         style="margin-top: 140px;">
-        <div style="background: pink">
-
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-
-                <ul class="nav navbar-nav">
-                    <li>
-                        <a class="" href="{{ url_for('front.subportal',
-                                   member_company_id = member_company['id'] ,
-                                   member_company_name = member_company['name'], page=1, search_text='%') }}"><img
-                                style="width: 50px; height: 40px; background-size: cover; background-image: url({{ file_url(member_company['logo_file_id']) }})"/></a>
-                    </li>
-                    {% for division in portal.divisions %}
-                        {% if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events' %}
-                            <li>
-                                <a {% if division.id == current_division.id %}id="navigation_selected_division"{% endif %}
-                                   href="{{ url_for('front.subportal_division',
-                                   member_company_id = member_company['id'] ,
-                                   member_company_name = member_company['name'],
-                                   division_name=division.name, page=1, search_text='%') }}">{{ division.name }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-
-        </div>
-
-    </nav>
-
-    <br/><br/>
     {% for article_id in articles %}
 
         <div class="block-item">

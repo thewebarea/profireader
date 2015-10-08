@@ -1,7 +1,9 @@
 from .blueprints import front_bp
 from flask import render_template, request, url_for, redirect, g, current_app
 from ..models.articles import Article, ArticlePortal
-from ..models.portal import CompanyPortal, PortalDivision, Portal, Company, PortalDivisionSettings_company_subportal
+from ..models.portal import CompanyPortal, PortalDivision, Portal, Company, \
+    PortalDivisionSettings_company_subportal
+from ..models.users import User
 from config import Config
 # from profapp import
 from .pagination import pagination
@@ -17,14 +19,16 @@ def get_params(**argv):
 
     return (search_text, portal, sub_query)
 
+
 def portal_and_settings(portal):
-    ret=portal.get_client_side_dict()
+    ret = portal.get_client_side_dict()
 
     newd = []
     for di in ret['divisions']:
         if di['portal_division_type_id'] == 'company_subportal':
-            pdset = g.db().query(PortalDivisionSettings_company_subportal).filter_by(portal_division_id=di['id']).one()
-            com_port =  g.db().query(CompanyPortal).get(pdset.company_portal_id)
+            pdset = g.db().query(PortalDivisionSettings_company_subportal).filter_by(
+                portal_division_id=di['id']).one()
+            com_port = g.db().query(CompanyPortal).get(pdset.company_portal_id)
             di['member_company'] = Company.get(com_port.company_id)
         newd.append(di)
     ret['divisions'] = newd
@@ -35,7 +39,8 @@ def portal_and_settings(portal):
 @front_bp.route('<int:page>/', methods=['GET'])
 def index(page=1):
     search_text, portal, sub_query = get_params()
-    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, portal_division_type_id='index').one()
+    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
+                                                      portal_division_type_id='index').one()
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/index.html',
@@ -61,7 +66,6 @@ def division(division_name, search_text, page=1):
         sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                         portal_division_id=division.id)
         articles, pages, page = pagination(query=sub_query, page=page)
-
 
         return render_template('front/bird/division.html',
                                articles={a.id: a.get_client_side_dict() for
@@ -105,32 +109,50 @@ def details(article_portal_id):
 
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
-    related_articles = g.db().query(ArticlePortal).filter(division.portal.id == article.division.portal_id).order_by(ArticlePortal.cr_tm.desc()).limit(10).all()
+    related_articles = g.db().query(ArticlePortal).filter(
+        division.portal.id == article.division.portal_id).order_by(
+        ArticlePortal.cr_tm.desc()).limit(10).all()
 
     return render_template('front/bird/article_details.html',
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
-                           articles_related = {a.id:a.to_dict('id, title, cr_tm, company.name') for a in related_articles},
+                           articles_related={a.id: a.to_dict('id, title, cr_tm, company.name') for a
+                                             in related_articles},
                            article=article.to_dict('id, title,short, cr_tm, md_tm, '
                                                    'publishing_tm, status, long, image_file_id,'
                                                    'division.name, division.portal.id,'
                                                    'company.name'))
 
 
-@front_bp.route('<string:division_name>/_c/<string:member_company_id>/<string:member_company_name>/')
-@front_bp.route('<string:division_name>/_c/<string:member_company_id>/<string:member_company_name>/<int:page>/')
-
+@front_bp.route(
+    '<string:division_name>/_c/<string:member_company_id>/<string:member_company_name>/')
+@front_bp.route(
+    '<string:division_name>/_c/<string:member_company_id>/<string:member_company_name>/<int:page>/')
 def subportal_division(division_name, member_company_id, member_company_name, page=1):
-
     member_company = Company.get(member_company_id)
 
     search_text, portal, sub_query = get_params()
 
+    q = g.db().query(PortalDivisionSettings_company_subportal). \
+        join(CompanyPortal,
+             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
+        join(PortalDivision,
+             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
+        filter(CompanyPortal.company_id == member_company_id). \
+        filter(PortalDivision.portal_id == portal.id)
 
-    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, name=division_name).one()
+    PortalDivisionSettings = q.one()
+
+    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
+                                                      portal_id=portal.id,
+                                                      portal_division_type_id='company_subportal').one()
+
+    subportal_division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
+                                                                name=division_name).one()
 
     sub_query = Article.subquery_articles_at_portal(search_text=search_text,
-                                                        portal_division_id=division.id).filter(Company.id == member_company_id)
+                                                    portal_division_id=subportal_division.id).filter(
+        Company.id == member_company_id)
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/subportal_division.html',
@@ -139,8 +161,8 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
                            subportal=True,
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
-                           selected_division_id='index',
-                           member_company = member_company.get_client_side_dict(),
+                           current_subportal_division=subportal_division.get_client_side_dict(),
+                           member_company=member_company.get_client_side_dict(),
                            pages=False,
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
@@ -148,27 +170,107 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
 
 
 @front_bp.route('_c/<string:member_company_id>/<string:member_company_name>/')
-@front_bp.route('_c/<string:member_company_id>/<string:member_company_name>/<int:page>/')
 def subportal(member_company_id, member_company_name, page=1):
+    search_text, portal, sub_query = get_params()
 
     member_company = Company.get(member_company_id)
 
-    search_text, portal, sub_query = get_params()
-    sub_query = sub_query.filter(Company.id == member_company_id)
+    q = g.db().query(PortalDivisionSettings_company_subportal). \
+        join(CompanyPortal,
+             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
+        join(PortalDivision,
+             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
+        filter(CompanyPortal.company_id == member_company_id). \
+        filter(PortalDivision.portal_id == portal.id)
 
-    division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, portal_division_type_id='index').one()
+    PortalDivisionSettings = q.one()
 
-    articles, pages, page = pagination(query=sub_query, page=page)
+    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
+                                                      portal_id=portal.id,
+                                                      portal_division_type_id='company_subportal').one()
+
+    subportal_division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
+                                                                portal_division_type_id='index').one()
 
     return render_template('front/bird/subportal.html',
-                           articles={a.id: a.get_client_side_dict() for
-                                     a in articles},
                            subportal=True,
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
-                           selected_division_id='index',
-                           member_company = member_company.get_client_side_dict(),
+                           current_subportal_division=subportal_division.get_client_side_dict(),
+                           member_company=member_company.get_client_side_dict(),
+                           current_subportal_division_name = 'index',
                            pages=False,
-                           current_page=page,
-                           page_buttons=Config.PAGINATION_BUTTONS,
-                           search_text=search_text)
+                           # current_page=page,
+                           # page_buttons=Config.PAGINATION_BUTTONS,
+                           # search_text=search_text
+                           )
+
+
+@front_bp.route('_c/<string:member_company_id>/<string:member_company_name>/address/')
+def subportal_address(member_company_id, member_company_name):
+    search_text, portal, sub_query = get_params()
+
+    member_company = Company.get(member_company_id)
+
+    q = g.db().query(PortalDivisionSettings_company_subportal). \
+        join(CompanyPortal,
+             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
+        join(PortalDivision,
+             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
+        filter(CompanyPortal.company_id == member_company_id). \
+        filter(PortalDivision.portal_id == portal.id)
+
+    PortalDivisionSettings = q.one()
+
+    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
+                                                      portal_id=portal.id,
+                                                      portal_division_type_id='company_subportal').one()
+
+    return render_template('front/bird/subportal_address.html',
+                           subportal=True,
+                           portal=portal_and_settings(portal),
+                           current_division=division.get_client_side_dict(),
+                           current_subportal_division=False,
+                           current_subportal_division_name = 'address',
+                           member_company=member_company.get_client_side_dict(),
+                           pages=False,
+                           # current_page=page,
+                           # page_buttons=Config.PAGINATION_BUTTONS,
+                           # search_text=search_text
+                           )
+
+@front_bp.route('_c/<string:member_company_id>/<string:member_company_name>/contacts/')
+def subportal_contacts(member_company_id, member_company_name):
+    search_text, portal, sub_query = get_params()
+
+    member_company = Company.get(member_company_id)
+
+    q = g.db().query(PortalDivisionSettings_company_subportal). \
+        join(CompanyPortal,
+             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
+        join(PortalDivision,
+             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
+        filter(CompanyPortal.company_id == member_company_id). \
+        filter(PortalDivision.portal_id == portal.id)
+
+    PortalDivisionSettings = q.one()
+
+    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
+                                                      portal_id=portal.id,
+                                                      portal_division_type_id='company_subportal').one()
+
+    company_users = g.db().query(User).all()
+
+    return render_template('front/bird/subportal_contacts.html',
+                           subportal=True,
+                           company_users = {u.id:u.get_client_side_dict() for u in company_users},
+                           portal=portal_and_settings(portal),
+                           current_division=division.get_client_side_dict(),
+                           current_subportal_division=False,
+                           current_subportal_division_name = 'contacts',
+                           member_company=member_company.get_client_side_dict(),
+                           pages=False,
+                           # current_page=page,
+                           # page_buttons=Config.PAGINATION_BUTTONS,
+                           # search_text=search_text
+                           )
