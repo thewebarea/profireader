@@ -55,12 +55,12 @@ class GoogleToken(Base, PRBase):
         return self.credentials
 
     @staticmethod
-    def get_credentials_from_db():
+    def get_credentials_from_db(kind='upload'):
         """ Static method. This method make query from db to get json-credentials, and
          then return object correct credentials which has been made from json.
           Set httplib2.debuglevel = 4 to debug http"""
         # httplib2.debuglevel = 4
-        json = db(GoogleToken).first().credentials
+        json = db(GoogleToken, kind=kind).one().credentials
         cred = Credentials()
         credentials = cred.new_from_json(json)
         http = httplib2.Http()
@@ -72,7 +72,7 @@ class GoogleToken(Base, PRBase):
     @staticmethod
     def get_authorize_http():
         """ Method which is helpful to get authorize http from your credentials.
-         Can be used for make some service from google api"""
+         Can be used for make some service from google api """
         json = db(GoogleToken).first().credentials
         cred = Credentials()
         credentials = cred.new_from_json(json)
@@ -174,19 +174,19 @@ class YoutubeApi(GoogleAuthorize):
 
         return headers
 
-    def make_encoded_url(self, body_keys):
+    def make_encoded_url_for_upload(self, body_keys, **kwargs):
         """ This method make values of header url encoded.
          body_keys are values which you want to return from youtube server """
         values = parse.urlencode(dict(uploadType='resumable', part=",".join(body_keys)))
         url_encoded = self.start_session % values
         return url_encoded
 
-    def set_youtube_service_url_to_session(self):
+    def set_youtube_upload_service_url_to_session(self):
 
-        """ This method add to flask session video_id from youtube server and url for upload
+        """ This method add to flask session video_id and url from youtube server and url for upload
          videos. If raise except - bad credentials """
         body = self.make_body_for_start_upload()
-        url = self.make_encoded_url(body.keys())
+        url = self.make_encoded_url_for_upload(body.keys())
         body = json.dumps(body).encode('utf8')
         headers = self.make_headers_for_start_upload(sys.getsizeof(body))
         try:
@@ -234,6 +234,48 @@ class YoutubeApi(GoogleAuthorize):
         except response_code as e:
             print(e.code)
 
+    def create_new_playlist(self):
+
+        """ This method create playlist and return id playlist """
+        body = self.make_body_to_get_playlist_url()
+        url = self.make_encoded_url_for_playlists()
+        body = json.dumps(body).encode('utf8')
+        headers = self.make_headers_for_get_playlists(sys.getsizeof(body))
+        try:
+            r = req.Request(url=url, headers=headers,  method='POST')
+            response = req.urlopen(r, data=body)
+            return response
+        except response_code as e:
+            print(e.headers)
+            print(e.code)
+
+    def make_body_to_get_playlist_url(self):
+        """ make body to create playlist """
+
+        body = dict(snippet=dict(title='Playlist company'),
+                    id=0)
+        return body
+
+    def make_encoded_url_for_playlists(self):
+        """ This method make values of header url encoded.
+         body_keys are values which you want to return from youtube server """
+        values = parse.urlencode(dict(part='snippet,id'))
+        url_encoded = Config.YOUTUBE_API['CREATE_PLAYLIST']['SEND_URI'] % values
+        return url_encoded
+
+    def make_headers_for_get_playlists(self, content_length):
+        """ This method make headers for create playlist.
+         content_length should be body length in bytes. """
+        authorization = GoogleToken.get_credentials_from_db(kind='playlist').access_token
+        session['authorization'] = authorization
+        headers = {'authorization': 'Bearer {0}'.format(authorization),
+                   'content-type': 'application/json; charset=utf-8',
+                   'content-length': content_length}
+
+        return headers
+
+
+
     def upload(self, video_id=None):
 
         """ Use this method for upload videos. If video_id you can get from session['video_id'].
@@ -241,14 +283,15 @@ class YoutubeApi(GoogleAuthorize):
           If chunk > 0 run resumable_upload method. If video was uploaded return success """
         chunk_number = self.chunk_info.get('chunk_number')
         if not chunk_number:
-            self.set_youtube_service_url_to_session()
+            self.set_youtube_upload_service_url_to_session()
         headers = self.make_headers_for_upload()
         try:
             if not chunk_number:
                 r = req.Request(url=session['url'], headers=headers, method='PUT')
                 response = req.urlopen(r, data=self.video_file,)
 
-                if response.code == 200:
+                if response.code == 200 or response.code == 201:
+                    playlist = self.create_new_playlist()
                     youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
                                            size=self.chunk_info.get('total_size'),
                                            user_id=g.user_dict['id'],
@@ -277,11 +320,13 @@ class YoutubeApi(GoogleAuthorize):
         try:
             response = req.urlopen(r, data=self.video_file)
             if response.code == 200 or response.code == 201:
+                playlist = self.create_new_playlist()
                 db(YoutubeVideo, video_id=video_id).update(
                     {'size': self.chunk_info.get('total_size'),
                      'status': 'uploaded'})
                 return 'success'
         except response_code as e:
+
             if e.code == 308:
                 db(YoutubeVideo, video_id=video_id).update({'size': int(e.headers.get(
                                                             'Range').split('-')[-1])+1})
