@@ -6,10 +6,10 @@
         <img class="article-cover"
              style="background-size: cover; background-image: url({{ file_url(article['image_file_id']) }});"/>
 
-        <div class="item-type article">{{ article['division']['name']|safe }}</div>
+{#        <div class="item-type article">{{ article['division']['name']|safe }}</div>#}
         <h2 class="item-title">{{ article['title']|safe }}</h2>
 
-        <h3 style="font-weight: lighter; ">Покроковий план досягнення успіху</h3>
+        <h3 class="item-subtitle">Покроковий план досягнення успіху</h3>
 
         <div class="item-additional-info-top"
              style="display: block; width: 100%; padding-bottom: 5px; border-bottom: 1px #ccc solid; margin-bottom: 15px;">
