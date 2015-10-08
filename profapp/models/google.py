@@ -285,7 +285,6 @@ class YoutubeApi(GoogleAuthorize):
         if not chunk_number:
             self.set_youtube_upload_service_url_to_session()
         headers = self.make_headers_for_upload()
-        playlist = self.create_new_playlist()
         try:
             if not chunk_number:
                 r = req.Request(url=session['url'], headers=headers, method='PUT')
