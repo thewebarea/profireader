@@ -111,8 +111,7 @@ class Portal(Base, PRBase):
                 db(Portal).filter(~db(CompanyPortal,
                                       company_id=company_id,
                                       portal_id=Portal.id).exists()
-                                  ).filter(
-                    Portal.name.ilike("%" + searchtext + "%")).all()]
+                                  ).filter(Portal.name.ilike("%" + searchtext + "%")).all()]
 
 
 class PortalPlan(Base, PRBase):
@@ -212,12 +211,12 @@ class PortalDivisionSettings_company_subportal(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'])
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    portal_division_id= Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
-    company_portal_id= Column(TABLE_TYPES['id_profireader'], ForeignKey('company_portal.id'))
+    portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
+    company_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company_portal.id'))
 
     company_portal = relationship(CompanyPortal)
-    portal_division = relationship(PortalDivision)
 
+    portal_division = relationship(PortalDivision)
 
 
 class PortalDivisionType(Base, PRBase):
