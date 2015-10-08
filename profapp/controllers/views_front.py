@@ -13,14 +13,14 @@ def get_params(**argv):
     app = current_app._get_current_object()
     portal = g.db().query(Portal).filter_by(host=app.config['SERVER_NAME']).one()
 
-    sub_query = Article.subquery_articles_at_portal(search_text=search_text, portal=portal)
+    sub_query = Article.subquery_articles_at_portal(search_text=search_text, portal_id=portal.id)
+    return search_text, portal, sub_query
 
-    return (search_text, portal, sub_query)
 
 
 def portal_and_settings(portal):
-    ret=portal.get_client_side_dict()
 
+    ret = portal.get_client_side_dict()
     newd = []
     for di in ret['divisions']:
         if di['portal_division_type_id'] == 'company_subportal':
@@ -106,9 +106,12 @@ def details(article_portal_id):
 
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
+    related_articles = g.db().query(ArticlePortal).filter(division.portal.id == article.division.portal_id).order_by(ArticlePortal.cr_tm.desc()).limit(10).all()
+
     return render_template('front/bird/article_details.html',
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
+                           articles_related = {a.id:a.to_dict('id, title, cr_tm, company.name') for a in related_articles},
                            article=article.to_dict('id, title,short, cr_tm, md_tm, '
                                                    'publishing_tm, status, long, image_file_id,'
                                                    'division.name, division.portal.id,'

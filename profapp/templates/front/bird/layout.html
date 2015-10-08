@@ -24,6 +24,18 @@
             <a href="#" class="right-banner"></a>
             <a href="#" class="right-banner"></a>
             <a href="#" class="right-banner"></a>
+            {% if articles_related %}
+                {% for article_related_id  in articles_related %}
+                    <div>
+                    {{ articles_related[article_related_id]['title'] }}<br/>
+                    {{ articles_related[article_related_id]['company']['name'] }}<br/>
+                    {{ articles_related[article_related_id]['cr_tm'] }}<br/>
+                    <hr/>
+                    </div>
+                {% endfor %}
+
+            {% endif %}
+
         </div>
 
     </div>

@@ -132,8 +132,7 @@ class Portal(Base, PRBase):
                 db(Portal).filter(~db(CompanyPortal,
                                       company_id=company_id,
                                       portal_id=Portal.id).exists()
-                                  ).filter(
-                    Portal.name.ilike("%" + searchtext + "%")).all()]
+                                  ).filter(Portal.name.ilike("%" + searchtext + "%")).all()]
 
 
 class PortalPlan(Base, PRBase):
