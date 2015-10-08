@@ -494,5 +494,31 @@ footer .row {
 }
 
 
+.s-cover-l{
+    display: inline-block;
+    width: 300px;
+    height: 240px;
+    margin: 0px 15px 15px 0px;
+    border: 1px #eee solid;
+    float: left;
+    background: #ddd no-repeat center center;
+    background-size: cover;
+}
 
+.article-short{
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+
+/*.article-content p,
+.article-content span{
+    display: inline-block !important;
+}*/
+
+/* BOTSTRAP CORRECTION */
+
+.col-md-9{
+    padding-right: 0;
+}
 

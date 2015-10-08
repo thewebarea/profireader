@@ -2,10 +2,6 @@
 {% block content %}
 
     <div class="block-item full-block-info" style="height: auto;">
-
-        <img class="article-cover"
-             style="background-image: url({{ file_url(article['image_file_id']) }});"/>
-
 {#        <div class="item-type article">{{ article['division']['name']|safe }}</div>#}
         <h2 class="item-title">{{ article['title']|safe }}</h2>
 
@@ -17,10 +13,14 @@
             <div class="item-publication-date">{{ article['publishing_tm']|safe }}</div>
             <div class="item-comments">Коментарів 77</div>
         </div>
-        <div class="">
-            <b>{{ article['short']|safe }}</b>
+        <div class="article-short">
+            {{ article['short']|safe }}
         </div>
-        <p> {{ article['long'] | safe }} </p>
+        <div class="article-content">
+{#            <img class="article-cover"#}
+{#             style="background-image: url({{ file_url(article['image_file_id']) }});"/>#}
+            <div class="s-cover-l"
+             style="background-image: url({{ file_url(article['image_file_id']) }});"/></div> {{ article['long'] | safe }} </div>
 
 
         <!--                <a class="btn btn-primary" href="#">Read More <span-->
