@@ -24,6 +24,7 @@ class Portal(Base, PRBase):
     divisions = relationship('PortalDivision',
                              backref='portal',
                              primaryjoin='Portal.id==PortalDivision.portal_id')
+    own_company = relationship('Company', back_populates='own_portal', uselist=False)
     article = relationship('ArticlePortal', backref='portal', uselist=False)
     companies = relationship('Company',
                              secondary='company_portal',
