@@ -71,7 +71,8 @@ class Config(object):
                                    REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/",
                                    SEND_URI="https://www.googleapis.com/upload/youtube/v3/"
                                             "videos?%s"),
-                       CREATE_PLAYLIST=dict(SCOPE="https://www.googleapis.com/auth/youtube")
+                       CREATE_PLAYLIST=dict(SCOPE="https://www.googleapis.com/auth/youtube",
+                                            SEND_URI="https://www.googleapis.com/youtube/v3/playlists?%s")
                        )
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
