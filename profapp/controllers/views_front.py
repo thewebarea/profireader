@@ -65,6 +65,7 @@ def division(division_name, search_text, page=1):
                                                         portal_division_id=division.id)
         articles, pages, page = pagination(query=sub_query, page=page)
 
+
         return render_template('front/bird/division.html',
                                articles={a.id: a.get_client_side_dict() for
                                          a in articles},
@@ -127,6 +128,7 @@ def details(article_portal_id):
 @front_bp.route(
     '<string:division_name>/_c/<string:member_company_id>/<string:member_company_name>/<int:page>/')
 def subportal_division(division_name, member_company_id, member_company_name, page=1):
+
     member_company = Company.get(member_company_id)
 
     search_text, portal, sub_query = get_params()
@@ -256,7 +258,8 @@ def subportal_contacts(member_company_id, member_company_name):
     division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
                                                       portal_id=portal.id,
                                                       portal_division_type_id='company_subportal').one()
-    company_users = member_company.employees
+
+    company_users = g.db().query(User).all()
 
     return render_template('front/bird/subportal_contacts.html',
                            subportal=True,
