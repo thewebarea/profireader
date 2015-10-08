@@ -9,6 +9,24 @@ from config import Config
 from .pagination import pagination
 from sqlalchemy import Column, ForeignKey, text
 
+def get_division_for_subportal(portal_id, member_company_id):
+    q = g.db().query(PortalDivisionSettings_company_subportal). \
+        join(CompanyPortal,
+             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
+        join(PortalDivision,
+             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
+        filter(CompanyPortal.company_id == member_company_id). \
+        filter(PortalDivision.portal_id == portal_id)
+
+    PortalDivisionSettings = q.all()
+    if (len(PortalDivisionSettings)):
+        return g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
+                                                          portal_id=portal_id,
+                                                          portal_division_type_id='company_subportal').one()
+    else:
+        return g.db().query(PortalDivision).filter_by(portal_id=portal_id,
+                                                      portal_division_type_id='index').one()
+
 
 def get_params(**argv):
     search_text = request.args.get('search_text') if request.args.get('search_text') else ''
@@ -131,19 +149,7 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
 
     search_text, portal, sub_query = get_params()
 
-    q = g.db().query(PortalDivisionSettings_company_subportal). \
-        join(CompanyPortal,
-             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
-        join(PortalDivision,
-             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
-        filter(CompanyPortal.company_id == member_company_id). \
-        filter(PortalDivision.portal_id == portal.id)
-
-    PortalDivisionSettings = q.one()
-
-    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
-                                                      portal_id=portal.id,
-                                                      portal_division_type_id='company_subportal').one()
+    division = get_division_for_subportal(portal.id, member_company_id)
 
     subportal_division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
                                                                 name=division_name).one()
@@ -167,25 +173,14 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
                            search_text=search_text)
 
 
+
 @front_bp.route('_c/<string:member_company_id>/<string:member_company_name>/')
 def subportal(member_company_id, member_company_name, page=1):
     search_text, portal, sub_query = get_params()
 
     member_company = Company.get(member_company_id)
 
-    q = g.db().query(PortalDivisionSettings_company_subportal). \
-        join(CompanyPortal,
-             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
-        join(PortalDivision,
-             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
-        filter(CompanyPortal.company_id == member_company_id). \
-        filter(PortalDivision.portal_id == portal.id)
-
-    PortalDivisionSettings = q.one()
-
-    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
-                                                      portal_id=portal.id,
-                                                      portal_division_type_id='company_subportal').one()
+    division = get_division_for_subportal(portal.id, member_company_id)
 
     subportal_division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
                                                                 portal_division_type_id='index').one()
@@ -210,19 +205,7 @@ def subportal_address(member_company_id, member_company_name):
 
     member_company = Company.get(member_company_id)
 
-    q = g.db().query(PortalDivisionSettings_company_subportal). \
-        join(CompanyPortal,
-             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
-        join(PortalDivision,
-             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
-        filter(CompanyPortal.company_id == member_company_id). \
-        filter(PortalDivision.portal_id == portal.id)
-
-    PortalDivisionSettings = q.one()
-
-    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
-                                                      portal_id=portal.id,
-                                                      portal_division_type_id='company_subportal').one()
+    division = get_division_for_subportal(portal.id, member_company_id)
 
     return render_template('front/bird/subportal_address.html',
                            subportal=True,
@@ -243,19 +226,7 @@ def subportal_contacts(member_company_id, member_company_name):
 
     member_company = Company.get(member_company_id)
 
-    q = g.db().query(PortalDivisionSettings_company_subportal). \
-        join(CompanyPortal,
-             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
-        join(PortalDivision,
-             PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
-        filter(CompanyPortal.company_id == member_company_id). \
-        filter(PortalDivision.portal_id == portal.id)
-
-    PortalDivisionSettings = q.one()
-
-    division = g.db().query(PortalDivision).filter_by(id=PortalDivisionSettings.portal_division_id,
-                                                      portal_id=portal.id,
-                                                      portal_division_type_id='company_subportal').one()
+    division = get_division_for_subportal(portal.id, member_company_id)
 
     company_users = g.db().query(User).all()
 
