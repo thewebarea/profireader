@@ -95,10 +95,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     # parser = argparse.ArgumentParser(prog='unittests')
-    parser.add_argument("--host", help="host", default='aprofi.d.ntaxa.com')
+    parser.add_argument("--host", help="host", default='profi.ntaxa.com')
     parser.add_argument("--port", help="port", default='8080', type=int)
     parser.add_argument("--front", help="frontend", default='n')
     args = parser.parse_args()
 
     # unittest.main(host='0.0.0.0', port=args.port, debug=False)
+    # --host=profi.ntaxa.com --port=8080 --front=n
     unittest.main()
