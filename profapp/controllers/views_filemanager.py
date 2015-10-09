@@ -11,6 +11,7 @@ import json as jsonmodule
 from ..models.google import YoutubeApi
 from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
+from config import Config
 
 def parent_folder(func):
     @wraps(func)
@@ -90,16 +91,21 @@ def uploader():
 
     token_db_class = GoogleToken()
     upload_credentials_exist = token_db_class.check_credentials_exist(kind='upload')
-    # playlist_credentials_exist = token_db_class.check_credentials_exist(kind='playlist')
-    if 'code' in request.args and not upload_credentials_exist:
-        session['auth_code'] = request.args['code']
-        token_db_class.save_credentials(kind='upload')
-    # elif 'code' in request.args and not playlist_credentials_exist:
-    #     session['auth_code'] = request.args['code']
-    #     token_db_class.save_credentials(kind='playlist')
+    playlist_credentials_exist = token_db_class.check_credentials_exist(kind='playlist')
     google = GoogleAuthorize()
-    return redirect(google.get_auth_code()) if not upload_credentials_exist and google.check_admins \
-        else render_template('file_uploader.html')
+    if not upload_credentials_exist and google.check_admins():
+        if 'code' in request.args:
+            session['auth_code'] = request.args['code']
+            token_db_class.save_credentials(kind='upload')
+        return redirect(url_for('filemanager.uploader')) if 'code' in request.args else redirect(google.get_auth_code())
+    if not playlist_credentials_exist and google.check_admins():
+        if 'code' in request.args:
+            session['auth_code'] = request.args['code']
+            token_db_class.save_credentials(kind='playlist')
+        else:
+            google = GoogleAuthorize(scope=Config.YOUTUBE_API['CREATE_PLAYLIST']['SCOPE'])
+            return redirect(google.get_auth_code())
+    return render_template('file_uploader.html')
 
 @filemanager_bp.route('/send/<string:video_id>', methods=['GET', 'POST', 'OPTIONS'])
 @filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
