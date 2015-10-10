@@ -62,7 +62,7 @@ class ArticlePortal(Base, PRBase):
     publishing_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'], default=ARTICLE_STATUS_IN_PORTAL.published)
 
-    portal_division = relationship('PortalDivision', backref='article_portal')
+    division = relationship('PortalDivision', backref='article_portal')
     company = relationship(Company, secondary='article_company',
                            primaryjoin="ArticlePortal.article_company_id == ArticleCompany.id",
                            secondaryjoin="ArticleCompany.company_id == Company.id",
