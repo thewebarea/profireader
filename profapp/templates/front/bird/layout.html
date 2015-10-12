@@ -16,7 +16,7 @@
     <div class="row site-content">
 
         {% if member_company %}
-            {% include 'front/bird/subportal_nav.html' %}
+            {% include 'front/bird/subportal_nav.4html' %}
         {% endif %}
 
 
@@ -60,7 +60,7 @@
                 <div class="right-list-container">
                     {% for article_related_id  in articles_related %}
                         <div class="list-elements right-sidebar">
-                            <h2 class="item-title">{{ articles_related[article_related_id]['title'] }}</h2>
+                            <a href="#" class="item-title">{{ articles_related[article_related_id]['title'] }}</a>
 
                             <div class="item-additional-info">
                                 <div class="item-company">{{ articles_related[article_related_id]['company']['name'] }}</div>
