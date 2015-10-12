@@ -43,6 +43,7 @@ class Config(object):
     PROFIREADER_MAIL_SENDER = 'Profireader Admin ' \
                               '<profireader.service@gmail.com>'
     PROFIREADER_ADMIN = os.environ.get('PROFIREADER_ADMIN') or 'Oles'
+    PROFIREADER_ADMINS = secret_data.PROFIREADER_ADMINS
 
     # Application threads. A common general assumption is
     # using 2 per available processor cores - to handle
@@ -67,7 +68,13 @@ class Config(object):
     GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY
     GOOGLE_API_SECRET_JSON = secret_data.GOOGLE_API_SECRET_JSON
     YOUTUBE_API = dict(UPLOAD=dict(SCOPE="https://www.googleapis.com/auth/youtube.upload",
-                                   REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/"))
+                                   REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/",
+                                   SEND_URI="https://www.googleapis.com/upload/youtube/v3/"
+                                            "videos?%s"),
+                       CREATE_PLAYLIST=dict(SCOPE="https://www.googleapis.com/auth/youtube",
+                                            SEND_URI="https://www.googleapis.com/youtube/v3/"
+                                                     "playlists?%s")
+                       )
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
     # MISSING_CLIENT_SECRETS_MESSAGE = """
