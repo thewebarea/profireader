@@ -10,7 +10,8 @@ body {
 /*}*/
 
 h1, h2, h3, h4, h5, h6{
-    font-family: 'Droid Serif', serif!important;
+    /*font-family: 'Droid Serif', serif!important;*/
+    font-family: 'Droid Serif', serif;
 }
 
 @media (min-width: 1200px) {
@@ -211,12 +212,22 @@ position: relative;
 }
 
 .list-elements.right-sidebar{
-    margin-bottom: 15px;
+    /*margin-bottom: 15px;*/
     border-bottom: 1px #ccc solid;
+    padding: 7px 0;
 }
 
 .list-elements.right-sidebar .item-title{
-    font-size: 18px;
+    display: block;
+    font-size: 16px;
+    margin: 0 0 10px 0;
+    font-family: 'Open Sans', sans-serif!important;
+    color: #333;
+    margin-bottom: 7px;
+}
+
+.list-elements.right-sidebar .item-title:hover{
+    color: #3273B2;
 }
 
 .block-item .item-additional-info .item-company,
@@ -231,7 +242,7 @@ position: relative;
     float: none;
 }
 
-.block-item .item-additional-info .item-publication-date
+.block-item .item-additional-info .item-publication-date,
 .list-elements.right-sidebar .item-publication-date {
     float: right;
     padding-left: 18px;
@@ -278,16 +289,28 @@ position: relative;
     padding: 3px;
 }
 
+.pager li.previous,
+.pager li.next{
+    height: 24px;
+}
+
+
+.pager li.previous:hover,
+.pager li.next:hover{
+    background-position-y: bottom;
+}
+
 
 .pager li.previous{
     left: 20px;
-
-    padding-left: 25px;
+    padding-left: 30px;
+    background: url("../img/prev.png") top left no-repeat;
 }
 
 .pager li.next{
     right: 20px;
-    padding-right: 25px;
+    padding-right: 30px;
+    background: url("../img/next.png") top right no-repeat;
 }
 
 footer {
