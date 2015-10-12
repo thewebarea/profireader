@@ -73,7 +73,9 @@ class Config(object):
                                             "videos?%s"),
                        CREATE_PLAYLIST=dict(SCOPE="https://www.googleapis.com/auth/youtube",
                                             SEND_URI="https://www.googleapis.com/youtube/v3/"
-                                                     "playlists?%s")
+                                                     "playlists?%s"),
+                       PLAYLIST_ITEMS=dict(SEND_URI="https://www.googleapis.com/youtube/v3/"
+                                                    "playlistItems?%s")
                        )
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"

@@ -80,8 +80,8 @@ class Company(Base, PRBase):
         return self
 
     def suspended_employees(self):
-        """Show all suspended employees from company. Before define method you should have
-        query with one company"""
+        """ Show all suspended employees from company. Before define method you should have
+        query with one company """
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc

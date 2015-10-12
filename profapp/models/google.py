@@ -7,7 +7,7 @@ from oauth2client.client import Credentials
 from urllib import request as req
 from urllib import parse
 from ..constants.TABLE_TYPES import TABLE_TYPES
-from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Column, ForeignKey, desc
 from sqlalchemy.orm import relationship
 from .pr_base import Base, PRBase
 from flask import g
@@ -140,15 +140,16 @@ class YoutubeApi(GoogleAuthorize):
           youtube server. (id, snippet, status, contentDetails, fileDetails, player,
           processingDetails, recordingDetails, statistics, suggestions, topicDetails)"""
 
-    def __init__(self, parts=None, video_file=None, body_dict=None, chunk_info=None):
+    def __init__(self, parts=None, video_file=None, body_dict=None, chunk_info=None,
+                 company_id=None):
         super(YoutubeApi, self).__init__()
         self.video_file = video_file
         self.body_dict = body_dict
         self.chunk_info = chunk_info
         self.resumable = True if self.chunk_info else False
         self.parts = parts
-        # self.youtube = self.service_build()
         self.start_session = Config.YOUTUBE_API['UPLOAD']['SEND_URI']
+        self.company_id = company_id
 
     def make_body_for_start_upload(self):
         """ make body to create request. category_id default 22, status default 'public'. """
@@ -250,11 +251,13 @@ class YoutubeApi(GoogleAuthorize):
                 response = req.urlopen(r, data=self.video_file,)
 
                 if response.code == 200 or response.code == 201:
+                    playlist = YoutubePlaylist.get_not_full_company_playlist(self.company_id)
                     youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
                                            size=self.chunk_info.get('total_size'),
                                            user_id=g.user_dict['id'],
                                            video_id=session['video_id'],
-                                           status='uploaded')
+                                           status='uploaded',
+                                           playlist=playlist)
                     youtube.save()
                     return 'success'
         except response_code as e:
@@ -326,6 +329,7 @@ class YoutubePlaylist(Base, PRBase):
     name = Column(TABLE_TYPES['short_text'], unique=True)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
     company_owner = relationship('Company', uselist=False)
+    md_tm = Column(TABLE_TYPES['timestamp'])
 
     def __init__(self, name=None, company_id=None, company_owner=None):
         super(YoutubePlaylist, self).__init__()
@@ -376,3 +380,10 @@ class YoutubePlaylist(Base, PRBase):
                    'content-length': content_length}
 
         return headers
+
+    @staticmethod
+    def get_not_full_company_playlist(company_id):
+        # TODO VK by VK: fix problem if playlists>1
+        playlist = db(YoutubePlaylist, company_id=company_id).order_by(
+            desc(YoutubePlaylist.md_tm)).first()
+        return playlist

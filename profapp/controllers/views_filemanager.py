@@ -88,7 +88,8 @@ def upload(json):
 
 
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST'])
-def uploader():
+@filemanager_bp.route('/uploader/<string:company_id>', methods=['GET', 'POST'])
+def uploader(company_id=None):
 
     token_db_class = GoogleToken()
     upload_credentials_exist = token_db_class.check_credentials_exist(kind='upload')
@@ -103,14 +104,15 @@ def uploader():
         if 'code' in request.args:
             session['auth_code'] = request.args['code']
             token_db_class.save_credentials(kind='playlist')
+            return 'Credentials were added to db'
         else:
             google = GoogleAuthorize(scope=Config.YOUTUBE_API['CREATE_PLAYLIST']['SCOPE'])
             return redirect(google.get_auth_code())
-    return render_template('file_uploader.html')
+    return render_template('file_uploader.html', company_id=company_id)
 
 
-@filemanager_bp.route('/send/', methods=['POST'])
-def send():
+@filemanager_bp.route('/send/<string:company_id>', methods=['POST'])
+def send(company_id):
 
     data = request.form
     body = {'title': 'test',
@@ -121,8 +123,9 @@ def send():
                          video_file=file,
                          chunk_info=dict(chunk_size=int(data.get('chunkSize')),
                                          chunk_number=int(data.get('chunkNumber')),
-                                         total_size=int(data.get('totalSize'))))
-    status = youtube.upload(session.get('video_id'))
+                                         total_size=int(data.get('totalSize'))),
+                         company_id=company_id)
+    youtube.upload(session.get('video_id'))
     return jsonify({'result': {'size': 0}})
 
 
