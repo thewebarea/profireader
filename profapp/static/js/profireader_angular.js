@@ -394,7 +394,7 @@ module.run(function ($rootScope, $ok) {
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
                 scope.data = data;
                 scope.original_data = $.extend(true, {}, data);
-                if (onok) onok();
+                if (onok) onok(data);
             }).finally(function () {
                 scope.loading = false;
             });

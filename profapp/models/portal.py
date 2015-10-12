@@ -95,7 +95,7 @@ class Portal(Base, PRBase):
     def validate(self):
         ret = {'errors': {}, 'warnings': {}, 'notices': {}}
         if db(Portal, company_owner_id=self.company_owner_id).filter(Portal.id != self.id).count():
-            ret['errors']['ok'] = 'portal for company already exists'
+            ret['errors']['form'] = 'portal for company already exists'
         if not re.match('[^\s]{3,}', self.name):
             ret['errors']['name'] = 'pls enter a bit longer name'
         if not re.match(
