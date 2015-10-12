@@ -67,6 +67,9 @@ class PortalAlreadyExist(Error):
 class AlreadyJoined(Error):
     pass
 
+class TooManyCredentialsInDb(Error):
+    pass
+
 class ValidationException(Error):
     """ Inappropriate argument value (of correct type). """
 

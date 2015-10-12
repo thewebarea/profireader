@@ -8,6 +8,7 @@ from urllib import request as req
 from urllib import parse
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey
+from sqlalchemy.orm import relationship
 from .pr_base import Base, PRBase
 from flask import g
 from utils.db_utils import db
@@ -234,47 +235,6 @@ class YoutubeApi(GoogleAuthorize):
         except response_code as e:
             print(e.code)
 
-    def create_new_playlist(self):
-
-        """ This method create playlist and return id playlist """
-        body = self.make_body_to_get_playlist_url()
-        url = self.make_encoded_url_for_playlists()
-        body = json.dumps(body).encode('utf8')
-        headers = self.make_headers_for_get_playlists(sys.getsizeof(body))
-        try:
-            r = req.Request(url=url, headers=headers,  method='POST')
-            response = req.urlopen(r, data=body)
-            print(json.load(response))
-            return response
-        except response_code as e:
-            print(e.headers)
-            print(e.code)
-
-    def make_body_to_get_playlist_url(self):
-        """ make body to create playlist """
-
-        body = dict(snippet=dict(title='Playlist company'),
-                    status=dict(privacyStatus='public'))
-        return body
-
-    def make_encoded_url_for_playlists(self):
-        """ This method make values of header url encoded.
-         body_keys are values which you want to return from youtube server """
-        values = parse.urlencode(dict(part='snippet,status', fields='id'))
-        url_encoded = Config.YOUTUBE_API['CREATE_PLAYLIST']['SEND_URI'] % values
-        return url_encoded
-
-    def make_headers_for_get_playlists(self, content_length):
-        """ This method make headers for create playlist.
-         content_length should be body length in bytes. """
-        authorization = GoogleToken.get_credentials_from_db(kind='playlist').access_token
-        session['authorization'] = authorization
-        headers = {'authorization': 'Bearer {0}'.format(authorization),
-                   'content-type': 'application/json; charset=utf-8',
-                   'content-length': content_length}
-
-        return headers
-
     def upload(self, video_id=None):
 
         """ Use this method for upload videos. If video_id you can get from session['video_id'].
@@ -284,18 +244,17 @@ class YoutubeApi(GoogleAuthorize):
         if not chunk_number:
             self.set_youtube_upload_service_url_to_session()
         headers = self.make_headers_for_upload()
-        playlist = self.create_new_playlist()
         try:
             if not chunk_number:
                 r = req.Request(url=session['url'], headers=headers, method='PUT')
                 response = req.urlopen(r, data=self.video_file,)
 
                 if response.code == 200 or response.code == 201:
-
                     youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
                                            size=self.chunk_info.get('total_size'),
                                            user_id=g.user_dict['id'],
-                                           video_id=session['video_id'])
+                                           video_id=session['video_id'],
+                                           status='uploaded')
                     youtube.save()
                     return 'success'
         except response_code as e:
@@ -321,7 +280,6 @@ class YoutubeApi(GoogleAuthorize):
         try:
             response = req.urlopen(r, data=self.video_file)
             if response.code == 200 or response.code == 201:
-                playlist = self.create_new_playlist()
                 db(YoutubeVideo, video_id=video_id).update(
                     {'size': self.chunk_info.get('total_size'),
                      'status': 'uploaded'})
@@ -339,15 +297,17 @@ class YoutubeVideo(Base, PRBase):
      status video should be 'uploading' or 'uploaded' """
     __tablename__ = 'youtube_video'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
-    video_id = Column(TABLE_TYPES['string_30'])
+    video_id = Column(TABLE_TYPES['short_text'])
     title = Column(TABLE_TYPES['name'], default='Title')
     authorization = Column(TABLE_TYPES['token'])
     size = Column(TABLE_TYPES['bigint'])
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
     status = Column(TABLE_TYPES['string_30'], default='uploading')
+    playlist_id = Column(TABLE_TYPES['short_text'], ForeignKey('youtube_playlist.playlist_id'))
+    playlist = relationship('YoutubePlaylist', uselist=False)
 
     def __init__(self, title='Title', authorization=None, size=None, user_id=None, video_id=None,
-                 status='uploading'):
+                 status='uploading', playlist_id=None, playlist=None):
         super(YoutubeVideo, self).__init__()
         self.title = title
         self.authorization = authorization
@@ -355,3 +315,64 @@ class YoutubeVideo(Base, PRBase):
         self.user_id = user_id
         self.video_id = video_id
         self.status = status
+        self.playlist_id = playlist_id
+        self.playlist = playlist
+
+
+class YoutubePlaylist(Base, PRBase):
+    __tablename__ = 'youtube_playlist'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    playlist_id = Column(TABLE_TYPES['short_text'], nullable=False, unique=True)
+    name = Column(TABLE_TYPES['short_text'], unique=True)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    company_owner = relationship('Company', uselist=False)
+
+    def __init__(self, name=None, company_id=None, company_owner=None):
+        super(YoutubePlaylist, self).__init__()
+        self.name = name
+        self.company_id = company_id
+        self.company_owner = company_owner
+        self.playlist_id = self.create_new_playlist().get('id')
+        self.save()
+
+    def create_new_playlist(self):
+
+        """ This method create playlist and return id playlist """
+        body = self.make_body_to_get_playlist_url()
+        url = self.make_encoded_url_for_playlists()
+        body = json.dumps(body).encode('utf8')
+        headers = self.make_headers_for_get_playlists(sys.getsizeof(body))
+        try:
+            r = req.Request(url=url, headers=headers,  method='POST')
+            response = req.urlopen(r, data=body)
+            response_str_from_bytes = response.readall().decode('utf-8')
+            fields = json.loads(response_str_from_bytes)
+            return fields
+        except response_code as e:
+            print(e.headers)
+            print(e.code)
+
+    def make_body_to_get_playlist_url(self):
+        """ make body to create playlist """
+
+        body = dict(snippet=dict(title=self.name),
+                    status=dict(privacyStatus='public'))
+        return body
+
+    def make_encoded_url_for_playlists(self):
+        """ This method make values of header url encoded.
+         body_keys are values which you want to return from youtube server """
+        values = parse.urlencode(dict(part='snippet,status'))
+        url_encoded = Config.YOUTUBE_API['CREATE_PLAYLIST']['SEND_URI'] % values
+        return url_encoded
+
+    def make_headers_for_get_playlists(self, content_length):
+        """ This method make headers for create playlist.
+         content_length should be body length in bytes. """
+        authorization = GoogleToken.get_credentials_from_db(kind='playlist').access_token
+        session['authorization'] = authorization
+        headers = {'authorization': 'Bearer {0}'.format(authorization),
+                   'content-type': 'application/json; charset=utf-8',
+                   'content-length': content_length}
+
+        return headers

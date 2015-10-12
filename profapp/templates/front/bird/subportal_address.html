@@ -1,0 +1,17 @@
+{% extends 'front/bird/layout.html' %}
+
+{% block content %}
+
+    <br/><br/>
+    <h2>{{ member_company['name'] }}</h2>
+
+    Company country: {{ member_company['country'] }}<br/>
+    Company region: {{ member_company['region'] }}<br/>
+    Company address: {{ member_company['address'] }}<br/>
+    Company phone: {{ member_company['phone'] }}<br/>
+    Company fax: {{ member_company['fax'] }}<br/>
+    Company email: {{ member_company['email'] }}<br/>
+
+    <br/>
+
+{% endblock content %}

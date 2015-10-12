@@ -32,10 +32,7 @@ def filemanager():
     # library = {g.user.personal_folder_file_id:
     # {'name': 'My personal files',
     # 'icon': current_user.gravatar(size=18)}}
-    library = {
-        g.user.personal_folder_file_id: {
-            'name': 'My personal files',
-            'icon': current_user.profireader_small_avatar_url}}
+    library = {}
     for user_company in g.user.employer_assoc:
 
 # TODO VK by OZ: we need function that get all emploees with specific right
@@ -44,8 +41,8 @@ def filemanager():
 # similar function User.get_emploers ...
 
         if user_company.status == 'active' and 'upload_files' in g.user.user_rights_in_company(user_company.company_id):
-            library[user_company.employer.journalist_folder_file_id] = {'name': "%s materisals" % (user_company.employer.name,), 'icon': ''}
-            library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
+            library[user_company.employer.journalist_folder_file_id] = {'name': "%s files" % (user_company.employer.name,), 'icon': ''}
+            # library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
 
     file_manager_called_for = request.args['file_manager_called_for'] if 'file_manager_called_for' in request.args else ''
     file_manager_on_action = jsonmodule.loads(request.args['file_manager_on_action']) if 'file_manager_on_action' in request.args else {}
