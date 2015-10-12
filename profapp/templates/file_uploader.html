@@ -21,12 +21,12 @@
 var app = angular.module('fileUpload', ['ngFileUpload']);
 
 app.controller('MyCtrl', ['$scope', 'Upload', '$timeout', function ($scope, Upload, $timeout) {
-
-      $scope.chunkSize = '1000MB';
+      $scope.chunkSize = '25600KB';
   $scope.uploadUsingUpload=function(file) {
       $scope.f = file;
       console.log(file);
     file.upload = Upload.upload({
+
       url: 'http://profi.ntaxa.com/filemanager/send/',
       resumeSizeUrl: 'http://profi.ntaxa.com/filemanager/resumeopload/',
       resumeChunkSize: $scope.chunkSize,
@@ -46,6 +46,7 @@ app.controller('MyCtrl', ['$scope', 'Upload', '$timeout', function ($scope, Uplo
 </script>
 {% raw %}
 <body ng-app="fileUpload" ng-controller="MyCtrl">
+
   <h4>Upload on file select</h4>
   <button type="file" ngf-select="uploadUsingUpload($file)" ngf-max-size="10000MB">
       Select File</button>

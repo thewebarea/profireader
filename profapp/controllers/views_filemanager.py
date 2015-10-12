@@ -1,15 +1,17 @@
 import os
-from flask import request, render_template, make_response, send_file, g
+from flask import render_template, g
 from flask.ext.login import current_user
-# from db_init import db_session
-from profapp.models.files import File, FileContent
+from profapp.models.files import File
 from .blueprints import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
 from flask import jsonify
 import json as jsonmodule
-# from ..models.youtube import YoutubeApi
+from ..models.google import YoutubeApi
+from flask import session, redirect, request, url_for
+from ..models.google import GoogleAuthorize, GoogleToken
+from config import Config
 
 
 def parent_folder(func):
@@ -87,35 +89,47 @@ def upload(json):
         ret[uploaded.id] = True
     return ret
 
-from ..models.google import YoutubeApi
-from flask import request
-from flask import session, redirect
-from ..models.google import GoogleAuthorize, GoogleToken
-@filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
+
+@filemanager_bp.route('/uploader/', methods=['GET', 'POST'])
 def uploader():
 
-    google = GoogleToken()
-    credentials_exist = google.check_credentials_exist()
-    if 'code' in request.args and not credentials_exist:
-        session['auth_code'] = request.args['code']
-        google.save_credentials()
+    token_db_class = GoogleToken()
+    upload_credentials_exist = token_db_class.check_credentials_exist(kind='upload')
+    playlist_credentials_exist = token_db_class.check_credentials_exist(kind='playlist')
     google = GoogleAuthorize()
-    return render_template('file_uploader.html') if credentials_exist else \
-        redirect(google.get_auth_code())
+    if not upload_credentials_exist and google.check_admins():
+        if 'code' in request.args:
+            session['auth_code'] = request.args['code']
+            token_db_class.save_credentials(kind='upload')
+        return redirect(url_for('filemanager.uploader')) if 'code' in request.args else redirect(google.get_auth_code())
+    if not playlist_credentials_exist and google.check_admins():
+        if 'code' in request.args:
+            session['auth_code'] = request.args['code']
+            token_db_class.save_credentials(kind='playlist')
+        else:
+            google = GoogleAuthorize(scope=Config.YOUTUBE_API['CREATE_PLAYLIST']['SCOPE'])
+            return redirect(google.get_auth_code())
+    return render_template('file_uploader.html')
 
-@filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
+
+@filemanager_bp.route('/send/', methods=['POST'])
 def send():
+
+    data = request.form
     body = {'title': 'test',
             'description': 'test description',
             'status': 'public'}
-    youtube = YoutubeApi(parts='id', body_dict=body,
-                         video_file=request.files['file'].stream.read(-1))
-    youtube.upload()
-
+    file = request.files['file'].stream.read(-1)
+    youtube = YoutubeApi(body_dict=body,
+                         video_file=file,
+                         chunk_info=dict(chunk_size=int(data.get('chunkSize')),
+                                         chunk_number=int(data.get('chunkNumber')),
+                                         total_size=int(data.get('totalSize'))))
+    status = youtube.upload(session.get('video_id'))
     return jsonify({'result': {'size': 0}})
 
 
 @filemanager_bp.route('/resumeopload/', methods=['GET'])
 def resumeopload():
 
-    return jsonify({'size': 10000})
+    return jsonify({'size': 0})
