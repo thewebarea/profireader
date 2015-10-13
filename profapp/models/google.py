@@ -245,13 +245,13 @@ class YoutubeApi(GoogleAuthorize):
         if not chunk_number:
             self.set_youtube_upload_service_url_to_session()
         headers = self.make_headers_for_upload()
+        playlist = YoutubePlaylist.get_not_full_company_playlist(self.company_id)
         try:
             if not chunk_number:
                 r = req.Request(url=session['url'], headers=headers, method='PUT')
                 response = req.urlopen(r, data=self.video_file,)
 
                 if response.code == 200 or response.code == 201:
-                    playlist = YoutubePlaylist.get_not_full_company_playlist(self.company_id)
                     youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
                                            size=self.chunk_info.get('total_size'),
                                            user_id=g.user_dict['id'],
@@ -265,10 +265,9 @@ class YoutubeApi(GoogleAuthorize):
                 youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
                                        size=int(e.headers.get('Range').split('-')[-1])+1,
                                        user_id=g.user_dict['id'],
-                                       video_id=session['video_id'])
+                                       video_id=session['video_id'],
+                                       playlist=playlist)
                 youtube.save()
-                db(YoutubeVideo, video_id=video_id).update({'size': int(e.headers.get(
-                                                            'Range').split('-')[-1])+1})
                 return 'uploading'
         if chunk_number:
             return self.resumable_upload(video_id)
@@ -306,7 +305,8 @@ class YoutubeVideo(Base, PRBase):
     size = Column(TABLE_TYPES['bigint'])
     user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
     status = Column(TABLE_TYPES['string_30'], default='uploading')
-    playlist_id = Column(TABLE_TYPES['short_text'], ForeignKey('youtube_playlist.playlist_id'))
+    playlist_id = Column(TABLE_TYPES['short_text'], ForeignKey('youtube_playlist.playlist_id'),
+                         nullable=False)
     playlist = relationship('YoutubePlaylist', uselist=False)
 
     def __init__(self, title='Title', authorization=None, size=None, user_id=None, video_id=None,
@@ -345,7 +345,7 @@ class YoutubePlaylist(Base, PRBase):
         body = self.make_body_to_get_playlist_url()
         url = self.make_encoded_url_for_playlists()
         body = json.dumps(body).encode('utf8')
-        headers = self.make_headers_for_get_playlists(sys.getsizeof(body))
+        headers = self.make_headers_to_get_playlists(sys.getsizeof(body))
         try:
             r = req.Request(url=url, headers=headers,  method='POST')
             response = req.urlopen(r, data=body)
@@ -370,7 +370,7 @@ class YoutubePlaylist(Base, PRBase):
         url_encoded = Config.YOUTUBE_API['CREATE_PLAYLIST']['SEND_URI'] % values
         return url_encoded
 
-    def make_headers_for_get_playlists(self, content_length):
+    def make_headers_to_get_playlists(self, content_length):
         """ This method make headers for create playlist.
          content_length should be body length in bytes. """
         authorization = GoogleToken.get_credentials_from_db(kind='playlist').access_token
@@ -383,7 +383,6 @@ class YoutubePlaylist(Base, PRBase):
 
     @staticmethod
     def get_not_full_company_playlist(company_id):
-        # TODO VK by VK: fix problem if playlists>1
         playlist = db(YoutubePlaylist, company_id=company_id).order_by(
             desc(YoutubePlaylist.md_tm)).first()
         return playlist
