@@ -1,5 +1,5 @@
 import os
-from flask import request, render_template, make_response, send_file, g
+from flask import render_template, g
 from flask.ext.login import current_user
 from profapp.models.files import File
 from .blueprints import filemanager_bp
@@ -11,7 +11,8 @@ import json as jsonmodule
 from ..models.google import YoutubeApi
 from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
-from config import Config
+from utils.db_utils import db
+from ..models.company import Company
 
 def parent_folder(func):
     @wraps(func)
@@ -86,42 +87,42 @@ def upload(json):
     return ret
 
 
-@filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
-def uploader():
+@filemanager_bp.route('/uploader/', methods=['GET', 'POST'])
+@filemanager_bp.route('/uploader/<string:company_id>', methods=['GET', 'POST'])
+def uploader(company_id=None):
 
     token_db_class = GoogleToken()
-    upload_credentials_exist = token_db_class.check_credentials_exist(kind='upload')
-    playlist_credentials_exist = token_db_class.check_credentials_exist(kind='playlist')
+    credentials_exist = token_db_class.check_credentials_exist()
     google = GoogleAuthorize()
-    if not upload_credentials_exist and google.check_admins():
+    if not credentials_exist and google.check_admins():
         if 'code' in request.args:
             session['auth_code'] = request.args['code']
-            token_db_class.save_credentials(kind='upload')
-        return redirect(url_for('filemanager.uploader')) if 'code' in request.args else redirect(google.get_auth_code())
-    if not playlist_credentials_exist and google.check_admins():
-        if 'code' in request.args:
-            session['auth_code'] = request.args['code']
-            token_db_class.save_credentials(kind='playlist')
-        else:
-            google = GoogleAuthorize(scope=Config.YOUTUBE_API['CREATE_PLAYLIST']['SCOPE'])
-            return redirect(google.get_auth_code())
-    return render_template('file_uploader.html')
+            token_db_class.save_credentials()
+        return redirect(url_for('company.show')) if 'code' in request.args \
+            else redirect(google.get_auth_code())
+    return render_template('file_uploader.html', company_id=company_id)
 
-@filemanager_bp.route('/send/<string:video_id>', methods=['GET', 'POST', 'OPTIONS'])
-@filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
-def send(video_id=None):
 
+@filemanager_bp.route('/send/<string:company_id>', methods=['POST'])
+def send(company_id):
+    """ YOU SHOULD SEND PROPERTY NAME, DESCRIPTION, ROOT_FOLDER AND FOLDER.
+    NOW THIS VALUES GET FROM DB. HARDCODE!!! """
+    company = db(Company, id=company_id).one() ## HARD CODE
+    file = request.files['file']
     data = request.form
-    body = {'title': 'test',
-            'description': 'test description',
+    body = {'title': file.filename,
+            'description': 'TESTING', ## HARD CODE
             'status': 'public'}
-    file = request.files['file'].stream.read(-1)
+
     youtube = YoutubeApi(body_dict=body,
-                         video_file=file,
+                         video_file=file.stream.read(-1),
                          chunk_info=dict(chunk_size=int(data.get('chunkSize')),
                                          chunk_number=int(data.get('chunkNumber')),
-                                         total_size=int(data.get('totalSize'))))
-    youtube.upload(video_id)
+                                         total_size=int(data.get('totalSize'))),
+                         company_id=company_id,
+                         root_folder_id=company.journalist_folder_file_id, ## HARD CODE
+                         parent_folder_id=company.journalist_folder_file_id) ## HARD CODE
+    youtube.upload()
     return jsonify({'result': {'size': 0}})
 
 

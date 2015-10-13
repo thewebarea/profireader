@@ -67,23 +67,17 @@ class Config(object):
 # GOOGLE API
     GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY
     GOOGLE_API_SECRET_JSON = secret_data.GOOGLE_API_SECRET_JSON
-    YOUTUBE_API = dict(UPLOAD=dict(SCOPE="https://www.googleapis.com/auth/youtube.upload",
-                                   REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/",
+    YOUTUBE_API = dict(SCOPE="https://www.googleapis.com/auth/youtube",
+                       UPLOAD=dict(REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/",
                                    SEND_URI="https://www.googleapis.com/upload/youtube/v3/"
                                             "videos?%s"),
-                       CREATE_PLAYLIST=dict(SCOPE="https://www.googleapis.com/auth/youtube",
-                                            SEND_URI="https://www.googleapis.com/youtube/v3/playlists?%s")
+                       CREATE_PLAYLIST=dict(SEND_URI="https://www.googleapis.com/youtube/v3/"
+                                                     "playlists?%s"),
+                       PLAYLIST_ITEMS=dict(SEND_URI="https://www.googleapis.com/youtube/v3/"
+                                                    "playlistItems?%s")
                        )
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
-    # MISSING_CLIENT_SECRETS_MESSAGE = """
-    # WARNING: Please configure OAuth 2.0
-    # To make this sample run you will need to populate the client_secrets.json file
-    # found at:%swith information from the Developers Console
-    # https://console.developers.google.com/
-    # For more information about the client_secrets.json file format, please visit:
-    # https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-    # """ % os.path.abspath()
 
 # Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'submit_publications']
