@@ -1,31 +1,6 @@
 {% extends 'front/bird/layout.html' %}
 {% block content %}
 
-
-                {% for article_id in articles %}
-
-                    <div class="block-item">
-                         <div class="item-type article"><a href="{{ url_for('front.division', division_name=articles[article_id]['division']['name'], page=1, search_text='%') }}">{{ articles[article_id]['division']['name']|safe }}</a></div>
-                        <h2 class="item-title">
-                            <a href="{{ url_for('front.details', article_portal_id=articles[article_id]['id']) }}">{{ articles[article_id]['title']|safe }}</a> {% for tag_id in articles[article_id]['main_tags'] %}<span class="tag_in_article">{{ articles[article_id]['main_tags'][tag_id] }}</span> {% endfor %}
-                        </h2>
-
-                        <div class="item-short-content">
-                            <p>{{ articles[article_id]['short']|safe }}</p>
-                        </div>
-
-                        <div class="item-additional-info">
-                            <div class="item-company">{{ articles[article_id]['company']['name']|safe }}</div>
-                            <div class="item-publication-date">{{ articles[article_id]['publishing_tm']|safe }}</div>
-                        </div>
-                        <img class="block-item-img" style="background-image: url({{ file_url(articles[article_id]['image_file_id']) }})" />
-
-
-                        <!--                <a class="btn btn-primary" href="#">Read More <span-->
-                        <!--                        class="glyphicon glyphicon-chevron-right"></span></a>-->
-                    </div>
-
-                {% endfor %}
-
+    {% include 'front/bird/articles-list.html' %}
 
 {% endblock content %}
