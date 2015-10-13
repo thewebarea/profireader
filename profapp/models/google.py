@@ -15,27 +15,25 @@ from utils.db_utils import db
 from urllib.error import HTTPError as response_code
 import sys
 import json
-from ..controllers.errors import TooManyCredentialsInDb
+from ..controllers.errors import TooManyCredentialsInDb, VideoAlreadyExistInPlaylist
 
 class GoogleToken(Base, PRBase):
     __tablename__ = 'google_token'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     credentials = Column(TABLE_TYPES['credentials'], nullable=False)
-    kind = Column(TABLE_TYPES['string_30'])
 
-    def __init__(self, credentials=None, kind=None):
+    def __init__(self, credentials=None):
         super(GoogleToken, self).__init__()
         self.credentials = credentials
-        self.kind = kind
 
     @staticmethod
-    def check_credentials_exist(kind=None):
+    def check_credentials_exist():
         """ Method check rather credentials is exist in db. Can be only one credentials in db.
          kind should be update, playlist
          If None you should to redirect admin to google auth page.
          If >1 some think is wrong . Raise exception"""
         try:
-            credentials = db(GoogleToken, kind=kind).count()
+            credentials = db(GoogleToken).count()
             if credentials < 2:
                 return credentials
             else:
@@ -44,24 +42,24 @@ class GoogleToken(Base, PRBase):
             e = e.args[0]
             print(e['message'])
 
-    def save_credentials(self, kind=None):
+    def save_credentials(self):
         """ This method save and return your credentials to/from db in json format.
          When you will need credentials you have to convert json to object(
          method: Credentials().new_from_json ) """
         google = GoogleAuthorize()
         flow = google.get_auth_code(ret_flow=True)
         credentials = flow.step2_exchange(session['auth_code'])
-        self.credentials, self.kind = credentials.to_json(), kind
+        self.credentials = credentials.to_json()
         self.save()
         return self.credentials
 
     @staticmethod
-    def get_credentials_from_db(kind='upload'):
+    def get_credentials_from_db():
         """ Static method. This method make query from db to get json-credentials, and
          then return object correct credentials which has been made from json.
           Set httplib2.debuglevel = 4 to debug http"""
         # httplib2.debuglevel = 4
-        json = db(GoogleToken, kind=kind).one().credentials
+        json = db(GoogleToken).one().credentials
         cred = Credentials()
         credentials = cred.new_from_json(json)
         http = httplib2.Http()
@@ -90,7 +88,7 @@ class GoogleAuthorize(object):
 
     def __init__(self, google_service_name=Config.YOUTUBE_API_SERVICE_NAME,
                  google_service_version=Config.YOUTUBE_API_VERSION,
-                 scope=Config.YOUTUBE_API['UPLOAD']['SCOPE'],
+                 scope=Config.YOUTUBE_API['SCOPE'],
                  redirect_uri=Config.YOUTUBE_API['UPLOAD']['REDIRECT_URI']):
         self.google_service_name = google_service_name
         self.google_service_version = google_service_version
@@ -257,8 +255,8 @@ class YoutubeApi(GoogleAuthorize):
                                            user_id=g.user_dict['id'],
                                            video_id=session['video_id'],
                                            status='uploaded',
-                                           playlist=playlist)
-                    youtube.save()
+                                           playlist=playlist).save()
+                    youtube.put_video_in_playlist()
                     return 'success'
         except response_code as e:
             if e.code == 308 and not chunk_number:
@@ -283,11 +281,9 @@ class YoutubeApi(GoogleAuthorize):
             response = req.urlopen(r, data=self.video_file)
             if response.code == 200 or response.code == 201:
                 db(YoutubeVideo, video_id=video_id).update(
-                    {'size': self.chunk_info.get('total_size'),
-                     'status': 'uploaded'})
+                    {'size': self.chunk_info.get('total_size'), 'status': 'uploaded'})
                 return 'success'
         except response_code as e:
-
             if e.code == 308:
                 db(YoutubeVideo, video_id=video_id).update({'size': int(e.headers.get(
                                                             'Range').split('-')[-1])+1})
@@ -321,6 +317,47 @@ class YoutubeVideo(Base, PRBase):
         self.playlist_id = playlist_id
         self.playlist = playlist
 
+    def put_video_in_playlist(self):
+
+        """ This method put video to playlist and return response """
+        body = self.make_body_to_put_video_in_playlist()
+        url = self.make_encoded_url_to_put_video_in_playlist()
+        body = json.dumps(body).encode('utf8')
+        headers = self.make_headers_to_put_video_in_playlist(sys.getsizeof(body))
+        try:
+            r = req.Request(url=url, headers=headers,  method='POST')
+            response = req.urlopen(r, data=body)
+            response_str_from_bytes = response.readall().decode('utf-8')
+            fields = json.loads(response_str_from_bytes)
+            return fields
+        except response_code as e:
+            if e.reason == 'duplicate':
+                raise VideoAlreadyExistInPlaylist({'message': 'Video already exist in playlist'})
+            elif e.reason == 'forbidden':
+                self.playlist.add_video_to_cloned_playlist_with_new_name(self)
+
+    def make_encoded_url_to_put_video_in_playlist(self):
+        """ This method make values of header url encoded.
+         part are values which you want to send to youtube server """
+        values = parse.urlencode(dict(part='snippet'))
+        url_encoded = Config.YOUTUBE_API['PLAYLIST_ITEMS']['SEND_URI'] % values
+        return url_encoded
+
+    def make_body_to_put_video_in_playlist(self):
+        """ make body """
+        body = dict(snippet=dict(playlistId=self.playlist_id,
+                                 resourceId=dict(videoId=self.video_id, kind='youtube#video')))
+        return body
+
+    def make_headers_to_put_video_in_playlist(self, content_length):
+        """ This method make headers .
+         content_length should be body length in bytes. """
+        authorization = GoogleToken.get_credentials_from_db().access_token
+        headers = {'authorization': 'Bearer {0}'.format(authorization),
+                   'content-type': 'application/json; charset=utf-8',
+                   'content-length': content_length}
+        return headers
+
 
 class YoutubePlaylist(Base, PRBase):
     __tablename__ = 'youtube_playlist'
@@ -341,7 +378,7 @@ class YoutubePlaylist(Base, PRBase):
 
     def create_new_playlist(self):
 
-        """ This method create playlist and return id playlist """
+        """ This method create playlist and return response """
         body = self.make_body_to_get_playlist_url()
         url = self.make_encoded_url_for_playlists()
         body = json.dumps(body).encode('utf8')
@@ -373,16 +410,23 @@ class YoutubePlaylist(Base, PRBase):
     def make_headers_to_get_playlists(self, content_length):
         """ This method make headers for create playlist.
          content_length should be body length in bytes. """
-        authorization = GoogleToken.get_credentials_from_db(kind='playlist').access_token
+        authorization = GoogleToken.get_credentials_from_db().access_token
         session['authorization'] = authorization
         headers = {'authorization': 'Bearer {0}'.format(authorization),
                    'content-type': 'application/json; charset=utf-8',
                    'content-length': content_length}
-
         return headers
 
     @staticmethod
     def get_not_full_company_playlist(company_id):
         playlist = db(YoutubePlaylist, company_id=company_id).order_by(
             desc(YoutubePlaylist.md_tm)).first()
+        return playlist
+
+    def add_video_to_cloned_playlist_with_new_name(self, video):
+        # TODO DOES NOT TESTED YET !!! IF DOES NOT WORK ASK VIKTOR
+        playlist = self.detach()
+        playlist.name = self.name + '*'
+        playlist.save()
+        video.playlist = playlist
         return playlist
