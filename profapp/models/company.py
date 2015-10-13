@@ -50,6 +50,7 @@ class Company(Base, PRBase):
                               foreign_keys='Portal.company_owner_id')
 
     user_owner = relationship('User', backref='companies')
+    youtube_playlists = relationship('YoutubePlaylist')
     # employees = relationship('User', secondary='user_company',
     #                          lazy='dynamic')
     # todo: add company time creation
@@ -74,8 +75,8 @@ class Company(Base, PRBase):
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
+        self.youtube_playlists.append(YoutubePlaylist(name=self.name, company_owner=self))
         self.save()
-        YoutubePlaylist(name=self.name, company_owner=self)
 
         return self
 

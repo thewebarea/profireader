@@ -11,8 +11,8 @@ import json as jsonmodule
 from ..models.google import YoutubeApi
 from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
-from config import Config
-
+from utils.db_utils import db
+from ..models.company import Company
 
 def parent_folder(func):
     @wraps(func)
@@ -105,19 +105,24 @@ def uploader(company_id=None):
 
 @filemanager_bp.route('/send/<string:company_id>', methods=['POST'])
 def send(company_id):
-
+    """ YOU SHOULD SEND PROPERTY NAME, DESCRIPTION, ROOT_FOLDER AND FOLDER.
+    NOW THIS VALUES GET FROM DB. HARDCODE!!! """
+    company = db(Company, id=company_id).one() ## HARD CODE
+    file = request.files['file']
     data = request.form
-    body = {'title': 'test',
-            'description': 'test description',
+    body = {'title': file.filename,
+            'description': 'TESTING', ## HARD CODE
             'status': 'public'}
-    file = request.files['file'].stream.read(-1)
+
     youtube = YoutubeApi(body_dict=body,
-                         video_file=file,
+                         video_file=file.stream.read(-1),
                          chunk_info=dict(chunk_size=int(data.get('chunkSize')),
                                          chunk_number=int(data.get('chunkNumber')),
                                          total_size=int(data.get('totalSize'))),
-                         company_id=company_id)
-    youtube.upload(session.get('video_id'))
+                         company_id=company_id,
+                         root_folder_id=company.journalist_folder_file_id, ## HARD CODE
+                         parent_folder_id=company.journalist_folder_file_id) ## HARD CODE
+    youtube.upload()
     return jsonify({'result': {'size': 0}})
 
 

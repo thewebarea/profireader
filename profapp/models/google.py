@@ -1,4 +1,3 @@
-# from apiclient import discovery
 from config import Config
 import httplib2
 from flask import session
@@ -16,6 +15,7 @@ from urllib.error import HTTPError as response_code
 import sys
 import json
 from ..controllers.errors import TooManyCredentialsInDb, VideoAlreadyExistInPlaylist
+from .files import File
 
 class GoogleToken(Base, PRBase):
     __tablename__ = 'google_token'
@@ -139,7 +139,7 @@ class YoutubeApi(GoogleAuthorize):
           processingDetails, recordingDetails, statistics, suggestions, topicDetails)"""
 
     def __init__(self, parts=None, video_file=None, body_dict=None, chunk_info=None,
-                 company_id=None):
+                 company_id=None, root_folder_id=None, parent_folder_id=None):
         super(YoutubeApi, self).__init__()
         self.video_file = video_file
         self.body_dict = body_dict
@@ -148,6 +148,8 @@ class YoutubeApi(GoogleAuthorize):
         self.parts = parts
         self.start_session = Config.YOUTUBE_API['UPLOAD']['SEND_URI']
         self.company_id = company_id
+        self.root_folder_id = root_folder_id
+        self.parent_folder_id = parent_folder_id
 
     def make_body_for_start_upload(self):
         """ make body to create request. category_id default 22, status default 'public'. """
@@ -209,7 +211,7 @@ class YoutubeApi(GoogleAuthorize):
 
     def make_headers_for_resumable_upload(self):
         """ This method make headers for resumable upload videos. Thirst  step to start upload """
-        video = db(YoutubeVideo, video_id=session['video_id']).one()
+        video = db(YoutubeVideo, id=session['video_id']).one()
         last_byte = self.chunk_info.get('chunk_size') + video.size - 1
         last_byte = self.chunk_info.get('total_size') - 1 if (self.chunk_info.get(
             'chunk_size') + video.size - 1) > self.chunk_info.get('total_size') else last_byte
@@ -234,7 +236,7 @@ class YoutubeApi(GoogleAuthorize):
         except response_code as e:
             print(e.code)
 
-    def upload(self, video_id=None):
+    def upload(self):
 
         """ Use this method for upload videos. If video_id you can get from session['video_id'].
           If except error 308 - video has not yet been uploaded, pass next chunk.
@@ -256,6 +258,12 @@ class YoutubeApi(GoogleAuthorize):
                                            video_id=session['video_id'],
                                            status='uploaded',
                                            playlist=playlist).save()
+                    File(parent_id=self.parent_folder_id,
+                         root_folder_id=self.root_folder_id,
+                         name=self.body_dict['title'],
+                         mime='video/*',
+                         youtube_id=youtube.id).save()
+                    session['video_id'] = youtube.id
                     youtube.put_video_in_playlist()
                     return 'success'
         except response_code as e:
@@ -264,29 +272,34 @@ class YoutubeApi(GoogleAuthorize):
                                        size=int(e.headers.get('Range').split('-')[-1])+1,
                                        user_id=g.user_dict['id'],
                                        video_id=session['video_id'],
-                                       playlist=playlist)
-                youtube.save()
+                                       playlist=playlist).save()
+                session['video_id'] = youtube.id
+                youtube.put_video_in_playlist()
                 return 'uploading'
         if chunk_number:
-            return self.resumable_upload(video_id)
+            return self.resumable_upload()
 
-    def resumable_upload(self, video_id):
-        """ This method is useful when you upload video via chunks. Pass video_id from youtube
-         server. """
-        session['video_id'] = video_id
+    def resumable_upload(self):
+        """ This method is useful when you upload video via chunks. Pass video_id from db to flask
+        session. """
         headers = self.make_headers_for_resumable_upload()
         r = req.Request(url=session['url'], headers=headers, method='PUT')
 
         try:
             response = req.urlopen(r, data=self.video_file)
             if response.code == 200 or response.code == 201:
-                db(YoutubeVideo, video_id=video_id).update(
-                    {'size': self.chunk_info.get('total_size'), 'status': 'uploaded'})
+                video = db(YoutubeVideo, id=session['video_id'])
+                video.update({'size': self.chunk_info.get('total_size'), 'status': 'uploaded'})
+                File(parent_id=self.parent_folder_id,
+                     root_folder_id=self.root_folder_id,
+                     name=self.body_dict['title'],
+                     mime='video/*',
+                     youtube_id=session['video_id']).save()
                 return 'success'
         except response_code as e:
             if e.code == 308:
-                db(YoutubeVideo, video_id=video_id).update({'size': int(e.headers.get(
-                                                            'Range').split('-')[-1])+1})
+                db(YoutubeVideo, id=session['video_id']).update(
+                    {'size': int(e.headers.get('Range').split('-')[-1])+1})
             return 'uploading'
 
 
