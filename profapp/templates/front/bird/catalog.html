@@ -3,12 +3,11 @@
 
     {% for member_id in members %}
 
-        <div class="block-item">
-        <img style="margin-left: 0px; width: 300px; height: 240px; border: 0px solid #aaa;
-                        background-size: contain; background-repeat: no-repeat; background-position: center center; background-image:url({{ file_url(members[member_id]['logo_file_id']) }});"/>
+        <div class="block-item company-item">
+            <img class="block-item-img" style="background-image:url({{ file_url(members[member_id]['logo_file_id']) }});"/>
             <a href="{{ url_for('front.subportal', member_company_id = member_id, member_company_name = members[member_id]['name']) }}"
                href>{{ members[member_id]['name'] }}</a><br/><br/>
-        {{ members[member_id]['short_description']|safe }}
+            {{ members[member_id]['short_description']|safe }}
         </div>
 
     {% endfor %}

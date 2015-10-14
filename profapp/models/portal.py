@@ -32,6 +32,7 @@ class Portal(Base, PRBase):
     layout = relationship('PortalLayout')
     divisions = relationship('PortalDivision',
                              backref='portal',
+                             order_by='desc(PortalDivision.position)',
                              primaryjoin='Portal.id==PortalDivision.portal_id')
     article = relationship('ArticlePortal', backref='portal', uselist=False)
 
@@ -193,6 +194,7 @@ class PortalDivision(Base, PRBase):
                                      ForeignKey('portal_division_type.id'))
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
+    position = Column(TABLE_TYPES['position'])
 
     settings = False
 

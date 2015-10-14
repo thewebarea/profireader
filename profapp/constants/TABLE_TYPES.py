@@ -20,6 +20,7 @@ TABLE_TYPES = {
     'rights': String(40),
     'bigint': BIGINT,
     'int': INTEGER,
+    'position': INTEGER,
 
     # http://sqlalchemy-utils.readthedocs.org/en/latest/data_types.html#module-sqlalchemy_utils.types.phone_number
     # 'phone': PhoneNumberType(country_code='UA'),  # (country_code='UA')
