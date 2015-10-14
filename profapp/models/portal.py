@@ -271,3 +271,5 @@ class UserPortalReader(Base, PRBase):
         self.company_id = company_id
         self.status = status
         self.portal_plan_id = portal_plan_id
+
+
