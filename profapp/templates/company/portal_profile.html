@@ -18,11 +18,11 @@
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
 
             $scope.getValues = function(objList, key){
-                var values = [], x;
-                x = objList;
-                x = ['a', 'b', 'c'];
-                console.log(typeof objList);
-                return x[0];
+                var values = [];
+{#                var x;#}
+{#                x = objList;#}
+{#                console.log(typeof objList);#}
+{#                return x[0];#}
                 for (var i = 0; i < objList.length; i++){
                     values.push(objList[i][key]);
                 }
@@ -33,17 +33,30 @@
                 $scope.data.PortalDivisionTags1 = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', true)
             };
 
+            $scope.loadPortalDivisionTags2 = function(){
+                $scope.data.PortalDivisionTags2 = objectTransformation.getValues2($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id')
+            };
+
+            $scope.loadPortalDivisionTags3 = function(key2List){
+                $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', key2List)
+            };
+
         }]);
 
     </script>
     {% raw %}
  <div ng-init="loadData()" ng-controller="portal_list">
+    {{ loadPortalDivisionTags1() }}
+    {{ loadPortalDivisionTags2() }}
+    {{ loadPortalDivisionTags3(data.PortalDivisionTags1) }}
     <br/><br/>
     <br/>
     <strong>Portal tags:</strong><br/><br/>
-    {{ type(data.portal.portal_tags[0]) }}<br/><br/><br/>
-    {{ getValues(data.portal.portal_tags, 'tag_id') }}<br/><br/>
-    {{ type(data.portal.portal_tags) }}<br/><br/>
+    {{ data.portal.portal_tags }}***<br/><br/><br/>
+    {{ getValues(data.portal.portal_tags, 'tag_id') }}+++<br/><br/>
+    {{ data.PortalDivisionTags1 }}---<br/><br/>
+    {{ data.PortalDivisionTags2 }}^^^<br/><br/>
+    {{ data.PortalDivisionTags3 }}...<br/><br/>
 
 </div>
 {% endraw %}

@@ -221,7 +221,6 @@ class PortalDivision(Base, PRBase):
     name = Column(TABLE_TYPES['short_name'], default='')
 
     portal_division_tags = relationship('Tag', secondary='tag_portal_division')
-
     tags_assoc = relationship('TagPortalDivision', back_populates='portal_division')
 
     settings = False

@@ -44,6 +44,9 @@ class TagCompany(Base, PRBase):
                       CheckConstraint('position >= 1', name='cc_position'),
                       nullable=False)
 
+    UniqueConstraint('tag_id', 'company_id', name='uc_tag_id_company_id')
+    UniqueConstraint('position', 'company_id', name='uc_position_company_id')
+
 
 class TagPortalDivision(Base, PRBase):
     __tablename__ = 'tag_portal_division'
@@ -69,6 +72,15 @@ class TagPortalDivision(Base, PRBase):
     portal_division = relationship('PortalDivision', back_populates='tags_assoc')
     articles = relationship('ArticlePortal', secondary='tag_portal_division_article',
                             back_populates='article_portal_tags', lazy='dynamic')
+    # tag_company = relationship('TagCompany',
+    #                            back_populates='tag_portal_division',
+    #                            primaryjoin='TagPortalDivision.portal_division_id == remote(PortalDivision.id)',
+    #                            secondaryjoin='PortalDivision.portal_id == remote(Portal.id)',
+    #                            secondaryjoin='Portal.company_owner_id == remote(Company)',
+    #                            uselist=False)
+
+    # SELECT * FROM TagPortalDivision LEFT JOIN PortalDivision ON (TagPortalDivision.portal_division_id = PortalDivision.id)
+    # TagCompany.company_id == TagPortalDivision.portal_division_id
 
     def __init__(self, tag_id=None, portal_division_id=None, position=1):
         super(TagPortalDivision, self).__init__()
