@@ -150,17 +150,19 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     };
 
                     objectTransformation.getValues3 = function(objList, key1, key2, key2List){
-                        var resultObject = {}, key, key2Json = {}, i;
-
-                        for (i = 0; i < key2List.length; i++){
-                            key2Json[key2List[i]] = false
-                        }
+                        var resultObject = {}, key, key2Json = {}, i, objFilledWithFalse;
+                        objFilledWithFalse = function(list){
+                            var rez = {}, j;
+                            for (j = 0; j < list.length; j++){
+                                rez[list[j]] = false
+                            }
+                            return rez;
+                        };
 
                         for (i = 0; i < objList.length; i++){
                             key = objList[i][key1];
-                            console.log(key);
                             if (resultObject[key] === undefined){
-                                resultObject[key] = key2Json;
+                                resultObject[key] = objFilledWithFalse(key2List);
                             }
                             resultObject[key][objList[i][key2]] = true;
                         }

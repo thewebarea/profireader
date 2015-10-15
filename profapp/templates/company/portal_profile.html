@@ -29,8 +29,8 @@
                 return values;
             };
 
-            $scope.loadPortalDivisionTags1 = function(){
-                $scope.data.PortalDivisionTags1 = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', true)
+            $scope.loadPortalDivisionTags1 = function(bool){
+                $scope.data.PortalDivisionTags1 = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', bool)
             };
 
             $scope.loadPortalDivisionTags2 = function(){
@@ -46,7 +46,7 @@
     </script>
     {% raw %}
  <div ng-init="loadData()" ng-controller="portal_list">
-    {{ loadPortalDivisionTags1() }}
+    {{ loadPortalDivisionTags1(true) }}
     {{ loadPortalDivisionTags2() }}
     {{ loadPortalDivisionTags3(data.PortalDivisionTags1) }}
     <br/><br/>
@@ -57,6 +57,38 @@
     {{ data.PortalDivisionTags1 }}---<br/><br/>
     {{ data.PortalDivisionTags2 }}^^^<br/><br/>
     {{ data.PortalDivisionTags3 }}...<br/><br/>
+
+    <table style="width:100%">
+     <tr>
+         <td>
+             <strong>tag/division</strong>
+         </td>
+         <th ng-repeat="division in data.portal.divisions">
+             {{ division.name }}<br/>
+             <input type="checkbox" ng-model="data.portal.portal_tags.portal_division_id" ng-value="data.portal.portal_tags.tag_id"/>
+         </th>
+     </tr>
+     <tr ng-repeat="(tag_id, tag_name) in data.tag">
+         <th>
+             <input type="checkbox" value=""/>{{ tag_name }}
+         </th>
+         <td ng-repeat="portal_division in data.portal.divisions">
+             <input name="chk_group[tag_id][division.id]" type="checkbox" value=""  ng-checked="data.PortalDivisionTags3[portal_division.id][tag_id]"/>
+         </td>
+     </tr>
+<!-- data.portal.portal_tags -->
+     <!--<tr ng-repeat="tag_portal_division in data.portal.portal_tags">
+         <td>
+             {{ data.tag[tag_portal_division.tag_id] }}
+         </td>
+     </tr> -->
+    </table>
+    <input type="submit" value="...">
+    <br/>
+    <br/>
+
+    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> profile
+
 
 </div>
 {% endraw %}
