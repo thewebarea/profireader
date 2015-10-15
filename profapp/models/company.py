@@ -21,7 +21,7 @@ from ..controllers import errors
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
 from functools import wraps
-
+from .google import YoutubePlaylist
 
 class Company(Base, PRBase):
     __tablename__ = 'company'
@@ -42,6 +42,7 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
+    about = Column(TABLE_TYPES['text'])
     portal = relationship('Portal', secondary='company_portal', backref=backref('companies',
                                                                                 lazy='dynamic'))
     own_portal = relationship('Portal',
@@ -49,6 +50,7 @@ class Company(Base, PRBase):
                               foreign_keys='Portal.company_owner_id')
 
     user_owner = relationship('User', backref='companies')
+    youtube_playlists = relationship('YoutubePlaylist')
     # employees = relationship('User', secondary='user_company',
     #                          lazy='dynamic')
     # todo: add company time creation
@@ -73,11 +75,14 @@ class Company(Base, PRBase):
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
+        self.youtube_playlists.append(YoutubePlaylist(name=self.name, company_owner=self))
+        self.save()
+
         return self
 
     def suspended_employees(self):
-        """Show all suspended employees from company. Before define method you should have
-        query with one company"""
+        """ Show all suspended employees from company. Before define method you should have
+        query with one company """
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc
@@ -130,7 +135,7 @@ class Company(Base, PRBase):
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 
-    def get_client_side_dict(self, fields='id,name,country,region,address,phone,phone2,email,short_description,logo_file_id'):
+    def get_client_side_dict(self, fields='id,name,country,region,address,phone,phone2,email,short_description,logo_file_id,about'):
         """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 

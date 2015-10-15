@@ -1,16 +1,18 @@
 import os
-from flask import request, render_template, make_response, send_file, g
+from flask import render_template, g
 from flask.ext.login import current_user
-# from db_init import db_session
-from profapp.models.files import File, FileContent
+from profapp.models.files import File
 from .blueprints import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
 from flask import jsonify
 import json as jsonmodule
-# from ..models.youtube import YoutubeApi
-
+from ..models.google import YoutubeApi
+from flask import session, redirect, request, url_for
+from ..models.google import GoogleAuthorize, GoogleToken
+from utils.db_utils import db
+from ..models.company import Company
 
 def parent_folder(func):
     @wraps(func)
@@ -85,97 +87,46 @@ def upload(json):
     return ret
 
 
-# # # #
-#
-# def upload(result#)# :
-#
-#     file = request.files['file-1# ']
-#     filename = file.filena# me
-#     file_db = File# ()
-#     file.save(os.path.join(root, filename# ))
-#     for tmp_file in os.listdir(root# ):
-#         st = os.stat(root+'/'+filenam# e)
-#         file_db.name = filena# me
-#         file_db.md_tm = time.ctime(
-# os.path.getmtime(root+'/'+filename# ))
-#         file_db.ac_tm = time.ctime(
-# os.path.getctime(root+'/'+filename# ))
-#         file_db.cr_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime(# ))
-#         file_db.size = st[ST_SIZ# E]
-#         if os.path.isfile(root+'/'+tmp_file# ):
-#             file_db.mime = 'fil# e'
-#         els# e:
-#             file_db.mime = 'di# r'
-#     binary_out = open(root+'/'+filename, 'rb# ')
-#     file_db.content = binary_out.read# ()
-#     binary_out.close# ()
-#     if os.path.isfile(root+'/'+filename# ):
-#         os.remove(root+'/'+filenam# e)
-#     els# e:
-#         os.removedirs(root+'/'+filenam# e)
-#     g.db.add(file_d# b)
-#     tr# y:
-#         g.db.commit# ()
-#     except PermissionErro# r:
-#         result = {"result":#  {
-#                 "success": Fals# e,
-#                 "error": "Access denied to remove file# "}
-#            #  }
-#         g.db.rollback#(# )
-#
-#     return result
-# from ..models.google import YoutubeApi
-# import json
-# from flask import url_for, request, redirect, session
-# import httplib2
-# from apiclient import discovery
-# 
-# from oauth2client import client
-# from config import Config
-#
-# @filemanager_bp.route('/uploader/', methods=['GET'])
-# def uploader():
-#     print(session)
-#     if 'credentials' not in session:
-#         return redirect(url_for('filemanager.send'))
-#     credentials = client.OAuth2Credentials.from_json(session['credentials'])
-#     if credentials.access_token_expired:
-#         return redirect(url_for('oauth2callback'))
-#     else:
-#         http_auth = credentials.authorize(httplib2.Http())
-#         youtube = discovery.build(Config.YOUTUBE_API_SERVICE_NAME, Config.YOUTUBE_API_VERSION, http_auth)
-#         files = youtube.videos().list(id='SiOBAhUiNCc', part='id').execute()
-#         return render_template('file_uploader.html')
-# from flask import session, redirect
-# import os
-# from urllib import request as r
-# import io
-# from ..models.google import GoogleAuthorize, GoogleToken
-# @filemanager_bp.route('/uploader/', methods=['GET', 'POST', 'OPTIONS'])
-# def uploader():
-#
-#     google = GoogleToken()
-#     credentials_exist = google.check_credentials_exist()
-#     if 'code' in request.args and not credentials_exist:
-#         session['auth_code'] = request.args['code']
-#         google.save_credentials()
-#     google = GoogleAuthorize()
-#     return render_template('file_uploader.html') if credentials_exist else \
-#         redirect(google.get_auth_code())
-#
-# @filemanager_bp.route('/send/', methods=['GET', 'POST', 'OPTIONS'])
-# def send():
-#     body = {'title': 'test',
-#             'description': 'test description',
-#             'status': 'public'}
-#     youtube = YoutubeApi(parts='id', body_dict=body,
-#                          video_file=request.files['file'].stream.read(-1))
-#     youtube.upload()
-#
-#     return jsonify({'result': {'size': 0}})
-#
-#
-# @filemanager_bp.route('/resumeopload/', methods=['GET'])
-# def resumeopload():
-#
-#     return jsonify({'size': 0})
+@filemanager_bp.route('/uploader/', methods=['GET', 'POST'])
+@filemanager_bp.route('/uploader/<string:company_id>', methods=['GET', 'POST'])
+def uploader(company_id=None):
+
+    token_db_class = GoogleToken()
+    credentials_exist = token_db_class.check_credentials_exist()
+    google = GoogleAuthorize()
+    if not credentials_exist and google.check_admins():
+        if 'code' in request.args:
+            session['auth_code'] = request.args['code']
+            token_db_class.save_credentials()
+        return redirect(url_for('company.show')) if 'code' in request.args \
+            else redirect(google.get_auth_code())
+    return render_template('file_uploader.html', company_id=company_id)
+
+
+@filemanager_bp.route('/send/<string:company_id>', methods=['POST'])
+def send(company_id):
+    """ YOU SHOULD SEND PROPERTY NAME, DESCRIPTION, ROOT_FOLDER AND FOLDER.
+    NOW THIS VALUES GET FROM DB. HARDCODE!!! """
+    company = db(Company, id=company_id).one() ## HARD CODE
+    file = request.files['file']
+    data = request.form
+    body = {'title': file.filename,
+            'description': 'TESTING', ## HARD CODE
+            'status': 'public'}
+
+    youtube = YoutubeApi(body_dict=body,
+                         video_file=file.stream.read(-1),
+                         chunk_info=dict(chunk_size=int(data.get('chunkSize')),
+                                         chunk_number=int(data.get('chunkNumber')),
+                                         total_size=int(data.get('totalSize'))),
+                         company_id=company_id,
+                         root_folder_id=company.journalist_folder_file_id, ## HARD CODE
+                         parent_folder_id=company.journalist_folder_file_id) ## HARD CODE
+    youtube.upload()
+    return jsonify({'result': {'size': 0}})
+
+
+@filemanager_bp.route('/resumeopload/', methods=['GET'])
+def resumeopload():
+
+    return jsonify({'size': 0})

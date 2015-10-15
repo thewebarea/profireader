@@ -12,10 +12,44 @@
 
 
 <!-- Custom CSS -->
+<link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,300italic,400italic,600,600italic,700,700italic,800,800italic&subset=latin,cyrillic,cyrillic-ext,latin-ext' rel='stylesheet' type='text/css'>
+
 <link href="/static/front/css/bootstrap-social.css" rel="stylesheet">
 <link href="/static/front/css/font-awesome.css" rel="stylesheet">
 <link href="/static/front/css/style.css" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/oles.css">
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script type="text/javascript">
+    //jQuery to collapse the navbar on scroll
+$(window).scroll(function() {
+    if ($(".navbar").offset().top > 120) {
+{#        alert(150);#}
+        $(".social-block").addClass("top-nav-collapse");
+        $(".navbar").addClass("top-nav-collapse");
+
+    } else {
+{#        alert("Menshe 150");#}
+        $(".social-block").removeClass("top-nav-collapse");
+        $(".navbar").removeClass("top-nav-collapse");
+    }
+});
+
+//jQuery for page scrolling feature - requires jQuery Easing plugin
+$(function() {
+    $('a.page-scroll').bind('click', function(event) {
+        var $anchor = $(this);
+        $('html, body').stop().animate({
+            scrollTop: $($anchor.attr('href')).offset().top
+        }, 1500, 'easeInOutExpo');
+        event.preventDefault();
+    });
+});
+</script>
 
 <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
