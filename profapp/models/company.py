@@ -291,6 +291,7 @@ class UserCompany(Base, PRBase):
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id, company_id=company_id)
         rights_dict = {'_rights': new_rights_binary}
+        # rights_dict = {'rights_int': new_rights_binary}  # TODO (AA to AA): does it work?
         user_company.update(rights_dict)
 
     #  corrected

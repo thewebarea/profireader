@@ -13,51 +13,37 @@
         {% include 'company/company_base.html' %}
     {% endblock company_base %}<br/>
 
-        <script>
-        module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
+    <script>
+        module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
+
+            $scope.getValues = function(objList, key){
+                var values = [], x;
+                x = objList;
+                x = ['a', 'b', 'c'];
+                console.log(typeof objList);
+                return x[0];
+                for (var i = 0; i < objList.length; i++){
+                    values.push(objList[i][key]);
+                }
+                return values;
+            };
+
+            $scope.loadPortalDivisionTags1 = function(){
+                $scope.data.PortalDivisionTags1 = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', true)
+            };
+
         }]);
+
     </script>
     {% raw %}
  <div ng-init="loadData()" ng-controller="portal_list">
-
-    Tags...<br/><br/>
-    <table style="width:100%">
-     <tr>
-         <td>
-             <strong>tags/divisions</strong>
-         </td>
-         <td ng-repeat="division in data.portal.divisions">
-             {{ division.name }}
-         </td>
-     </tr>
-     <tr>
-         <td>
-         </td>
-         <td ng-repeat="division in data.portal.divisions">
-             <input type="checkbox" ng-model="multiple[division]">
-         </td>
-     </tr>
-     <tr ng-repeat="tag0 in data.tag">
-         <td>
-             {{ tag0 }}
-         </td>
-         <td ng-repeat="division in data.portal.divisions">
-             <input type="checkbox">
-         </td>
-     </tr>
-     <!--<tr ng-repeat="tag_portal_division in data.portal.portal_tags">
-         <td>
-             {{ data.tag[tag_portal_division.tag_id] }}
-         </td>
-     </tr> -->
-    </table>
-    <input type="submit" value="...">
+    <br/><br/>
     <br/>
-    <br/>
-
-    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> profile
-
+    <strong>Portal tags:</strong><br/><br/>
+    {{ type(data.portal.portal_tags[0]) }}<br/><br/><br/>
+    {{ getValues(data.portal.portal_tags, 'tag_id') }}<br/><br/>
+    {{ type(data.portal.portal_tags) }}<br/><br/>
 
 </div>
 {% endraw %}

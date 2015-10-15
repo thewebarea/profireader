@@ -118,6 +118,58 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             }
         };
     }])
+    .service('objectTransformation', function() {
+                    var objectTransformation = {};
+
+                    objectTransformation.getValues1 = function(objList, key, unique){
+                        var values = [], value;
+                        for (var i = 0; i < objList.length; i++){
+                            value = objList[i][key];
+                            if (!unique || (values.indexOf(value) === -1)){
+                                values.push(value);
+                            }
+                        }
+                        return values;
+                    };
+
+                    objectTransformation.getValues2 = function(objList, key1, key2){
+                        var resultObject = {}, key, value;
+                        for (var i = 0; i < objList.length; i++){
+                            key = objList[i][key1];
+                            value = objList[i][key2];
+
+                            if (resultObject[key] === undefined){
+                                resultObject[key] = [value]
+                            } else {
+                                if (resultObject[key].indexOf(value) === -1){
+                                    resultObject[key].push(value)
+                                }
+                            }
+                        }
+                        return resultObject;
+                    };
+
+                    objectTransformation.getValues3 = function(objList, key1, key2, key2List){
+                        var resultObject = {}, key, key2Json = {}, i;
+
+                        for (i = 0; i < key2List.length; i++){
+                            key2Json[key2List[i]] = false
+                        }
+
+                        for (i = 0; i < objList.length; i++){
+                            key = objList[i][key1];
+                            console.log(key);
+                            if (resultObject[key] === undefined){
+                                resultObject[key] = key2Json;
+                            }
+                            resultObject[key][objList[i][key2]] = true;
+                        }
+
+                        return resultObject;
+                    };
+
+                    return objectTransformation;
+                })
     .directive('ngOk', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',
@@ -392,9 +444,10 @@ module.run(function ($rootScope, $ok) {
             var scope = this;
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
-                scope.data = data;
-                scope.original_data = $.extend(true, {}, data);
-                if (onok) onok(data);
+                if (!onok) onok = function (d) {return d;}
+                scope.data = onok(data);
+                scope.original_data = $.extend(true, {}, scope.data);
+
             }).finally(function () {
                 scope.loading = false;
             });

@@ -31,6 +31,20 @@ class Tag(Base, PRBase):
         pass
 
 
+class TagCompany(Base, PRBase):
+    __tablename__ = 'tag_company'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    tag_id = Column(TABLE_TYPES['id_profireader'],
+                    ForeignKey(Tag.id, onupdate='CASCADE', ondelete='CASCADE'),
+                    nullable=False)
+    company_id = Column(TABLE_TYPES['id_profireader'],
+                        ForeignKey(Company.id, onupdate='CASCADE', ondelete='CASCADE'),
+                        nullable=False)
+    position = Column(TABLE_TYPES['int'],
+                      CheckConstraint('position >= 1', name='cc_position'),
+                      nullable=False)
+
+
 class TagPortalDivision(Base, PRBase):
     __tablename__ = 'tag_portal_division'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)

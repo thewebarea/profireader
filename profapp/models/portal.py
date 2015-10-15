@@ -13,6 +13,7 @@ import itertools
 from sqlalchemy import orm
 import itertools
 
+
 class Portal(Base, PRBase):
     __tablename__ = 'portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
