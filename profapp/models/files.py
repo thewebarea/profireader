@@ -142,22 +142,204 @@ class File(Base, PRBase):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
         return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
 
-    def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
-        file_content = FileContent.get(self.id).detach()
-        attr = {}
-        if company_id:
-            attr['company_id'] = company_id
-        if parent_folder_id:
-            attr['parent_folder_id'] = parent_folder_id
-        if article_portal_id:
-            attr['article_portal_id'] = article_portal_id
-        if root_folder_id:
-            attr['root_folder_id'] = root_folder_id
-        new_file = self.detach().attr(attr)
-        new_file.save()
-        file_content.id = new_file.id
-        new_file.file_content = [file_content]
-        return new_file
+
+    def save_files(files, new_id, attr):
+        for file in files:
+            attr['parent_id'] = new_id
+            file.detach().attr(attr)
+            file.save()
+        return files
+
+    @staticmethod
+    def save_all_in_dir(id, attr, new_id):
+        lists = [file for file in db(File, parent_id = id) if file.mime == 'directory']
+        files = [file for file in db(File, parent_id = id) if file.mime != 'directory']
+        f = File.save_files(files, new_id, attr)
+        count_first_list = len(lists)
+        c = 1
+        c_new = 0
+        new_list = []
+        for list in lists:
+            if c <= count_first_list:
+                attr['parent_id'] = new_id
+                list.detach().attr(attr)
+                list.save()
+                new_list.append(list)
+            for file in db(File,parent_id = list.id):
+                if len(file) > 0 and file.mime == 'directory':
+                        lists.append(file)
+                        attr['parent_id'] = new_list[c_new].id
+                        file.detach().attr(attr)
+                        file.save()
+                        new_list.append(file)
+                elif len(file) > 0 and file.mime != 'directory':
+                    file_content = FileContent.get(file.id).detach()
+                    attr['parent_id'] = new_list[c_new].id
+                    file.detach().attr(attr)
+                    file.save()
+                    file_content.id = file.id
+                    file.file_content = [file_content]
+            c_new += 1
+            c += 1
+        return lists
+
+    @staticmethod
+    def save_all(copy_dir_id, attr,files_in_parent):
+        del attr['name']
+        for fil in files_in_parent:
+            if fil.mime == 'directory':
+                id_f = {'id':fil.id}
+                attr['parent_id'] = copy_dir_id
+                copy_directory = fil.detach().attr(attr)
+                copy_directory.save()
+                save_all_dir = File.save_all_in_dir(id_f['id'],attr,copy_directory.id)
+            else:
+                file_content = FileContent.get(fil.id).detach()
+                attr['parent_id'] = copy_dir_id
+                f = fil.detach().attr(attr)
+                f.save()
+                file_content.id = f.id
+                f.file_content = [file_content]
+        return files_in_parent
+    @staticmethod
+    def update_files(files,attr):
+        for file in files:
+            file.updates(attr)
+        return files
+    @staticmethod
+    def update_all_in_dir(id, attr):
+        lists = [file for file in db(File, parent_id = id) if file.mime == 'directory']
+        files = [file for file in db(File, parent_id = id) if file.mime != 'directory']
+        c = len(lists)
+        c_ = 1
+        f = File.update_files(files, attr)
+        new_list = []
+        for list in lists:
+            if c_ <= c:
+                list.updates(attr)
+                new_list.append(list)
+            for file in db(File,parent_id = list.id):
+                if len(file) > 0 and file.mime == 'directory':
+                        lists.append(file)
+                        file.updates(attr)
+                        new_list.append(file)
+                elif len(file) > 0 and file.mime != 'directory':
+                    file.updates(attr)
+            c_ += 1
+        return lists
+
+    @staticmethod
+    def update_all(id, attr):
+        files_in_parent = [file for file in db(File, parent_id = id)]
+        del attr['name']
+        del attr['parent_id']
+        for fil in files_in_parent:
+            if fil.mime == 'directory':
+                fil.updates(attr)
+                update_all_dir = File.update_all_in_dir(fil.id, attr)
+            else:
+                fil.updates(attr)
+        return files_in_parent
+
+    @staticmethod
+    def get_name(oldname):
+        ex = File.ext(oldname)
+        l = len(ex)
+        name = oldname[:-l]
+        return  name
+
+    @staticmethod
+    def ext(oldname):
+        name = oldname[::-1]
+        b = name.find('.')
+        c = name[0:(b+1):1]
+        c = c[::-1]
+        return c
+
+    def if_copy(self):
+        ext = File.ext(self.name)
+        if ext and re.search('\(\d+\)'+ext, self.name):
+            return File.get_name(self.name)[0:-3]
+        elif re.search('\(\d+\)$', self.name):
+            return self.name[0:-3]
+        else:
+            return self.name
+
+    def is_name(self,parent_id):
+        if [file for file in db(File,parent_id = parent_id, mime=self.mime,name=self.name)]:
+            return True
+        else:
+            return False
+
+    def get_unique_name(self,parent_id):
+        if File.is_name(self,parent_id):
+            ext = File.ext(self.name)
+            name = File.if_copy(self)
+            list = []
+            for n in db(File,parent_id = parent_id, mime=self.mime):
+                if re.match(name+'\(\d+\)'+ext, n.name):
+                    pos = (len(n.name) - 2) - len(ext)
+                    list.append(int(n.name[pos:pos+1]))
+            if list == []:
+                return name+'(1)'+ext
+            else:
+                list.sort()
+                index = list[-1] + 1
+                return name+'('+str(index)+')'+ext
+        else:
+            return self.name
+
+    def copy_file(self, parent_id, **kwargs):
+        id = self.id
+        folder = File.get(parent_id)
+        root = folder.root_folder_id
+        if folder.root_folder_id == None:
+            root = folder.id
+        attr = {f:kwargs[f] for f in kwargs}
+        attr['name'] = File.get_unique_name(self,parent_id)
+        attr['parent_id'] = parent_id
+        attr['root_folder_id'] = root
+        copy_file = self.detach().attr(attr)
+        copy_file.save()
+        if self.mime == 'directory':
+            files_in_dir = [file for file in db(File,parent_id = id)]
+            all_in_dir = File.save_all(copy_file.id, attr,files_in_dir)
+        else:
+            file_content = FileContent.get(id).detach()
+            file_content.id = copy_file.id
+            copy_file.file_content = [file_content]
+        return copy_file
+
+    def move_to(self, parent_id, **kwargs):
+        folder = File.get(parent_id)
+        root = folder.root_folder_id
+        if folder.root_folder_id == None:
+            root = folder.id
+        attr = {f:kwargs[f] for f in kwargs}
+        attr['name'] = File.get_unique_name(self,parent_id)
+        attr['parent_id'] = parent_id
+        attr['root_folder_id'] = root
+        self.updates(attr)
+        if self.mime == 'directory':
+            b = File.update_all(self.id,attr)
+        return self
+
+    # def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
+    #     file_content = FileContent.get(self.id).detach()
+    #     attr = {}
+    #     if company_id:
+    #         attr['company_id'] = company_id
+    #     if parent_folder_id:
+    #         attr['parent_folder_id'] = parent_folder_id
+    #     if article_portal_id:
+    #         attr['article_portal_id'] = article_portal_id
+    #     if root_folder_id:
+    #         attr['root_folder_id'] = root_folder_id
+    #     new_file = self.detach().attr(attr)
+    #     new_file.save()
+    #     file_content.id = new_file.id
+    #     new_file.file_content = [file_content]
+    #     return new_file
 
 
 class FileContent(Base, PRBase):
