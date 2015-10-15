@@ -138,6 +138,14 @@ class ArticleCompany(Base, PRBase):
                                           'status, company.name'):
         return self.to_dict(fields)
 
+    @staticmethod
+    def get_companies_where_user_send_article(user_id):
+        companies = []
+        for article in db(Article, author_user_id=user_id).all():
+            for comp in article.submitted_versions:
+                companies.append(comp.company.to_dict('id, name'))
+        return companies
+
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
                                    'status': ARTICLE_STATUS_IN_COMPANY.
@@ -351,6 +359,7 @@ class ArticleCompanyHistory(Base, PRBase):
     def __init__(self, editor_user_id=None, company_id=None, name=None,
                  short=None, long=None, article_company_id=None,
                  article_id=None):
+        super(ArticleCompanyHistory, self).__init__()
         self.editor_user_id = editor_user_id
         self.company_id = company_id
         self.name = name

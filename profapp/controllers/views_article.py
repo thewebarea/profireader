@@ -18,8 +18,11 @@ def show_mine():
 @article_bp.route('/list/', methods=['POST'])
 @ok
 def load_mine(json):
-    return {'articles': [a.get_client_side_dict()
-                         for a in Article.get_articles_for_user(g.user.id)]}
+
+    return {'articles': [{'article': a.get_client_side_dict(),
+                          'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
+                         for a in Article.get_articles_for_user(g.user.id)],
+            'companies': ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])}
 
 
 @article_bp.route('/create/', methods=['GET'])
