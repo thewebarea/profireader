@@ -17,14 +17,14 @@
         module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
 
-            $scope.getValues = function(objList, key){
+            $scope.getValues = function(objArray, key){
                 var values = [];
 {#                var x;#}
 {#                x = objList;#}
 {#                console.log(typeof objList);#}
 {#                return x[0];#}
-                for (var i = 0; i < objList.length; i++){
-                    values.push(objList[i][key]);
+                for (var i = 0; i < objArray.length; i++){
+                    values.push(objArray[i][key]);
                 }
                 return values;
             };
@@ -41,7 +41,17 @@
                 $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', key2List)
             };
 
+            $scope.tagsCheckUncheck = function(portal_division_id){
+                var keys, i;
+                keys = Object.keys($scope.data.PortalDivisionTags3[portal_division_id]);
+                for (i = 0; i < keys.length; i++){
+                    $scope.data.PortalDivisionTags3[portal_division_id][keys[i]] = true;
+                }
+            };
+
         }]);
+
+
 
     </script>
     {% raw %}
@@ -50,32 +60,27 @@
     {{ loadPortalDivisionTags2() }}
     {{ loadPortalDivisionTags3(data.PortalDivisionTags1) }}
     <br/><br/>
-    <br/>
-    <strong>Portal tags:</strong><br/><br/>
-    {{ data.portal.portal_tags }}***<br/><br/><br/>
-    {{ getValues(data.portal.portal_tags, 'tag_id') }}+++<br/><br/>
-    {{ data.PortalDivisionTags1 }}---<br/><br/>
-    {{ data.PortalDivisionTags2 }}^^^<br/><br/>
-    {{ data.PortalDivisionTags3 }}...<br/><br/>
+    <strong>Portal tags:</strong><br/>
 
     <table style="width:100%">
-     <tr>
-         <td>
-             <strong>tag/division</strong>
-         </td>
-         <th ng-repeat="division in data.portal.divisions">
-             {{ division.name }}<br/>
-             <input type="checkbox" ng-model="data.portal.portal_tags.portal_division_id" ng-value="data.portal.portal_tags.tag_id"/>
-         </th>
-     </tr>
-     <tr ng-repeat="(tag_id, tag_name) in data.tag">
-         <th>
-             <input type="checkbox" value=""/>{{ tag_name }}
-         </th>
-         <td ng-repeat="portal_division in data.portal.divisions">
-             <input name="chk_group[tag_id][division.id]" type="checkbox" value=""  ng-checked="data.PortalDivisionTags3[portal_division.id][tag_id]"/>
-         </td>
-     </tr>
+    <tr>
+        <td>
+            <strong>tag/division</strong>
+        </td>
+        <th ng-repeat="division in data.portal.divisions">
+            {{ division.name }}<br/>
+            <input type="checkbox" onchange=""/>
+            <!-- <input type="checkbox" ng-change="tagsCheckUncheck(division.id)"/> -->
+        </th>
+    </tr>
+    <tr ng-repeat="(tag_id, tag_name) in data.tag">
+        <th>
+            <input type="checkbox" value=""/>{{ tag_name }}
+        </th>
+        <td ng-repeat="portal_division in data.portal.divisions">
+            <input name="chk_group[tag_id][division.id]" type="checkbox" value=""  ng-checked="data.PortalDivisionTags3[portal_division.id][tag_id]"/>
+        </td>
+    </tr>
 <!-- data.portal.portal_tags -->
      <!--<tr ng-repeat="tag_portal_division in data.portal.portal_tags">
          <td>
