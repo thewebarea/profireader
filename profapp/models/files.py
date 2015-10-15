@@ -142,7 +142,7 @@ class File(Base, PRBase):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
         return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
 
-
+    @staticmethod
     def save_files(files, new_id, attr):
         for file in files:
             attr['parent_id'] = new_id
