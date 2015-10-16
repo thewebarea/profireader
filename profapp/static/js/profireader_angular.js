@@ -121,6 +121,15 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
     .service('objectTransformation', function() {
                     var objectTransformation = {};
 
+                    objectTransformation.reverseKeyValue = function(objIn){
+                        var objOut = {}, keys, i;
+                        keys = Object.keys($scope.data.PortalDivisionTags3);
+                        for (i = 0; i < objIn.length; i++){
+                            objOut[objIn[keys[i]]] = keys[i];
+                            }
+                        return objOut;
+                        };
+
                     objectTransformation.getValues1 = function(objList, key, unique){
                         var values = [], value;
                         for (var i = 0; i < objList.length; i++){
@@ -168,6 +177,20 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                         }
 
                         return resultObject;
+                    };
+
+                    // here substitution in keys is performed
+                    objectTransformation.getValues4 = function(objIn, objForSubstitution){
+                        var keys, i, objOut;
+
+                        keys = Object.keys(objIn);
+                        objOut = {};
+
+                        for (i = 0; i < keys.length; i++){
+                            objOut[objForSubstitution[keys[i]]] = objIn[keys[i]];
+                        }
+
+                        return objOut;
                     };
 
                     return objectTransformation;
