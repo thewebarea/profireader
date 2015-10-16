@@ -151,6 +151,19 @@ class ArticleCompany(Base, PRBase):
                                    'status': ARTICLE_STATUS_IN_COMPANY.
                                   submitted})
 
+    @staticmethod
+    def subquery_user_articles(search_text=None, user_id=None, **kwargs):
+
+        if not search_text:
+            sub_query = db(Article, author_user_id=user_id).\
+                filter(db(ArticleCompany, article_id=Article.id, **kwargs).exists())
+        else:
+            sub_query = db(Article, author_user_id=user_id).\
+                filter(db(ArticleCompany, article_id=Article.id, **kwargs).
+                       filter(ArticleCompany.title.ilike("%" + search_text + "%")).exists())
+
+        return sub_query
+
         # self.portal_devision_id = portal_devision_id
         # self.article_company_id = article_company_id
         # self.title = title

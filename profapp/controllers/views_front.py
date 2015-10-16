@@ -81,7 +81,6 @@ def division(division_name, search_text, page=1):
                                                         portal_division_id=division.id)
         articles, pages, page = pagination(query=sub_query, page=page)
 
-
         return render_template('front/bird/division.html',
                                articles={a.id: a.get_client_side_dict() for
                                          a in articles},

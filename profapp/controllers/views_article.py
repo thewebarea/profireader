@@ -8,6 +8,7 @@ from .blueprints import article_bp
 from .request_wrapers import ok, object_to_dict
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 # import os
+from .pagination import pagination
 
 
 @article_bp.route('/list/', methods=['GET'])
@@ -19,10 +20,20 @@ def show_mine():
 @ok
 def load_mine(json):
 
+    subquery = ArticleCompany.subquery_user_articles(search_text=json.get('search_text'),
+                                                     user_id=g.user_dict['id'],
+                                                     company_id=json.get('chosen_company')['id']) \
+        if json.get('chosen_company') else ArticleCompany.subquery_user_articles(
+        search_text=json.get('search_text'), user_id=g.user_dict['id'])
+    articles, pages, current_page = pagination(subquery, json.get('page') or 1, items_per_page=10)
+
     return {'articles': [{'article': a.get_client_side_dict(),
                           'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
-                         for a in Article.get_articles_for_user(g.user.id)],
-            'companies': ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])}
+                         for a in articles],
+            'companies': ArticleCompany.get_companies_where_user_send_article(g.user_dict['id']),
+            'search_text': json.get('search_text') or '',
+            'chosen_company': json.get('chosen_company') or '', 'page': current_page,
+            'pages': pages}
 
 
 @article_bp.route('/create/', methods=['GET'])
