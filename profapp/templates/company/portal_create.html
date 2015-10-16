@@ -23,22 +23,22 @@
                     portal_division_type_id: 'news'
                 });
                 return false;
-            }
+            };
 
             $scope.removeDivision = function (index) {
                 $scope.data.portal.divisions.splice(index, 1);
-            }
+            };
 
             $scope.articleImageSelected = function (item) {
 
                 $scope.data.portal.logo_file_id = item.id;
                 $scope.setImageUrl();
                 closeFileManager();
-            }
+            };
 
             $scope.setImageUrl = function () {
                 $scope.logo_file_url = fileUrl($scope.data.portal.logo_file_id);
-            }
+            };
 
             $scope.chooseImage = function () {
                 $scope.filemanagerModal = $modal.open({

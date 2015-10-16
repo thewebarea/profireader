@@ -101,20 +101,7 @@ def apply_company(json):
 @login_required
 # @check_rights(simple_permissions([]))
 def profile(portal_id):
-    # portal = db(Portal, id=portal_id).one()
-    # tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
-    # tags_dict = {tag.id: tag.name for tag in tags}
-
-    # portal_tags = portal.to_dict('portal_tags.*')
-    # for tag in portal_tags['portal_tags']:
-    #     tag['tag_name'] = tags_dict[tag['tag_id']]
-    #
-
-    return render_template('company/portal_profile.html',
-                           # portal=portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
-                           # tag=tags_dict,
-                           # portal_id=portal_id
-                           )
+    return render_template('company/portal_profile.html')
 
 
 @portal_bp.route('/profile/<string:portal_id>/', methods=['POST'])
@@ -125,7 +112,7 @@ def profile_load(json, portal_id):
     portal = db(Portal, id=portal_id).one()
 
     tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
-    tags_dict = {tag.id: tag.name for tag in tags}  # TODO (AA to AA): add tag position here
+    tags_dict = {tag.id: tag.name for tag in tags}
     return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
             'portal_id': portal_id,
             'tag': tags_dict}

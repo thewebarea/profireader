@@ -160,6 +160,8 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
                     objectTransformation.getValues3 = function(objList, key1, key2, key2List){
                         var resultObject = {}, key, i, objFilledWithFalse;
+                        console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+                        console.log(key2List);
                         objFilledWithFalse = function(list){
                             var rez = {}, j;
                             for (j = 0; j < list.length; j++){
@@ -179,8 +181,8 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                         return resultObject;
                     };
 
-                    // here substitution in keys is performed
-                    objectTransformation.getValues4 = function(objIn, objForSubstitution){
+                    // substitution in keys is performed
+                    objectTransformation.subsInKey = function(objIn, objForSubstitution){
                         var keys, i, objOut;
 
                         keys = Object.keys(objIn);
@@ -191,6 +193,16 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                         }
 
                         return objOut;
+                    };
+
+                    // substitution of list elements is performed
+                    objectTransformation.subsElemOfList = function(listIn, objForSubstitution){
+                        var i, listOut;
+                        listOut = [];
+                        for (i = 0; i < listIn.length; i++){
+                            listOut.push(objForSubstitution[listIn[i]])
+                        }
+                        return listOut;
                     };
 
                     return objectTransformation;

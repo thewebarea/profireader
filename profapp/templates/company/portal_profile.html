@@ -17,21 +17,27 @@
         module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
 
-            $scope.getValues = function(objArray, key){
-                var values = [];
-{#                var x;#}
-{#                x = objList;#}
-{#                console.log(typeof objList);#}
-{#                return x[0];#}
-                for (var i = 0; i < objArray.length; i++){
-                    values.push(objArray[i][key]);
+            $scope.loadPortalDivisionTagsID = function(bool){
+                if ($scope.data){
+                    $scope.data.PortalDivisionTagsID = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', bool)
                 }
-                return values;
             };
 
-            $scope.loadPortalDivisionTags1 = function(bool){
+            $scope.getDataPortalDivisionTagsID = function(){
+                var res;
                 if ($scope.data){
-                    $scope.data.PortalDivisionTags1 = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', bool)
+                    res = $scope.data.PortalDivisionTagsID
+                } else {
+                    res = false
+                }
+                return res
+            };
+
+            $scope.loadPortalDivisionTagsName = function(bool) {
+                var PortalDivisionTagsID;
+                if ($scope.data) {
+                    PortalDivisionTagsID = $scope.getDataPortalDivisionTagsID();
+                    $scope.data.PortalDivisionTagsName = objectTransformation.subsElemOfList(PortalDivisionTagsID, $scope.data.tag)
                 }
             };
 
@@ -41,14 +47,14 @@
                 }
             };
 
-            $scope.loadPortalDivisionTags3 = function(key2List){
-                var i, objIn, objOut;
+            $scope.loadPortalDivisionTags3 = function(list){
+                var i, objIn, objOut, keys, newList;
                 if ($scope.data){
-                    $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', key2List)
+                    $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
                     keys = Object.keys($scope.data.PortalDivisionTags3);
                     for (i = 0; i < keys.length; i++){
                         objIn = $scope.data.PortalDivisionTags3[keys[i]];
-                        objOut = objectTransformation.getValues4(objIn, $scope.data.tag);
+                        objOut = objectTransformation.subsInKey(objIn, $scope.data.tag);
                         $scope.data.PortalDivisionTags3[keys[i]] = objOut;
                     }
                 }
@@ -85,18 +91,22 @@
                 }
             };
 
-            $scope.addTag = function () {
-                $scope.data.PortalDivisionTags3[portal_division.id][tag_name].push({
-                    name: '',
-                    portal_division_type_id: 'news'
-                });
-                return false;
+            $scope.addTag = function (portal_division_id, tag_name) {
+                if ($scope.data){
+                    $scope.data.PortalDivisionTags3[portal_division_id][tag_name] = true;
+                }
+                return true;
             };
 
-            $scope.removeTag = function (index) {
-                $scope.data.PortalDivisionTags3[portal_division.id][tag_name].splice(index, 1);
+            $scope.removeTag = function (tag_name) {
+                var allPortalDivisions, i;
+                if ($scope.data){
+                    allPortalDivisions = Object.keys($scope.data.PortalDivisionTags3);
+                    for (i = 0; i < allPortalDivisions.length; i++){
+                        delete $scope.data.PortalDivisionTags3[allPortalDivisions[i]][tag_name];
+                    }
+                }
             };
-
 
         }]);
 
@@ -105,10 +115,11 @@
     </script>
     {% raw %}
  <div ng-init="loadData()" ng-controller="portal_list">
-    {{ loadPortalDivisionTags1(true) }}
-    {{ data.PortalDivisionTags1 }}!!!<br/><br/>
+    {{ loadPortalDivisionTagsID(true) }}
+    {{ loadPortalDivisionTagsName(true) }}
+    {{ data.PortalDivisionTagsName }}!!!<br/><br/>
     <!-- {{ loadPortalDivisionTags2() }} -->
-    {{ loadPortalDivisionTags3(data.PortalDivisionTags1) }}
+    {{ loadPortalDivisionTags3(getDataPortalDivisionTagsID()) }}
     {{ data.PortalDivisionTags3 }}???<br/><br/>
     {{ loadXXX(['560bdd30-4b23-4001-bc31-6be09e72586d', '560bdd30-4b23-4001-92c8-5317c142f421', '560bdd30-4b23-4001-acb7-6cc254313aab', '560bdd30-4b23-4001-9fae-7935eb9118d5']) }}
 
@@ -125,7 +136,7 @@
             <input type="checkbox" ng-model="data.XXX[portal_division.id]" ng-change="tagsCheckUncheck2(portal_division.id)"/>
         </th>
     </tr>
-    <tr ng-repeat="(tag_id, tag_name) in data.tag">
+    <tr ng-repeat="tag_name in data.tag">
         <th>
             <input type="checkbox" value=""/>{{ tag_name }}
         </th>
