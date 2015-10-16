@@ -48,7 +48,20 @@
             };
 
             $scope.loadPortalDivisionTags3 = function(list){
-                var i, objIn, objOut, keys, newList;
+                var i, objIn, objOut, keys;
+                if ($scope.data){
+                    $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
+                    keys = Object.keys($scope.data.PortalDivisionTags3);
+                    for (i = 0; i < keys.length; i++){
+                        objIn = $scope.data.PortalDivisionTags3[keys[i]];
+                        objOut = objectTransformation.subsInKey(objIn, $scope.data.tag);
+                        $scope.data.PortalDivisionTags3[keys[i]] = objOut;
+                    }
+                }
+            };
+
+            $scope.loadPortalDivisionTags4 = function(list){
+                var i, objIn, objOut, keys;
                 if ($scope.data){
                     $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
                     keys = Object.keys($scope.data.PortalDivisionTags3);
@@ -91,9 +104,19 @@
                 }
             };
 
-            $scope.addTag = function (portal_division_id, tag_name) {
-                if ($scope.data){
-                    $scope.data.PortalDivisionTags3[portal_division_id][tag_name] = true;
+            $scope.addTag = function (portal_division_id, tag_name, values) {
+{#                $scope.newtagselection#}
+{#                $scope.newtagname#}
+{#                $scope.tag[$scope.newtagname] = $.extend(true, {}, $scope.newtagselection);#}
+{#                ng-disable="$scope.tag[$scope.newtagname]"#}
+
+                var allPortalDivisions, i;
+                if ($scope.data) {
+                    //
+                    allPortalDivisions = Object.keys($scope.data.PortalDivisionTags3);
+                    for (i = 0; i < allPortalDivisions.length; i++) {
+                        $scope.data.PortalDivisionTags3[portal_division_id][tag_name] = values[i];
+                    }
                 }
                 return true;
             };
