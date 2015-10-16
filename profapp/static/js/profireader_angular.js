@@ -147,7 +147,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                             key = objList[i][key1];
                             value = objList[i][key2];
 
-                            if (resultObject[key] === undefined){
+                            if (typeof resultObject[key] === 'undefined'){
                                 resultObject[key] = [value]
                             } else {
                                 if (resultObject[key].indexOf(value) === -1){
@@ -159,20 +159,45 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     };
 
                     objectTransformation.getValues3 = function(objList, key1, key2, key2List){
-                        var resultObject = {}, key, i, j, objFilledWithFalse = {};
+                        var resultObject = {}, key, i, objFilledWithFalse = {};
 
-                        for (j = 0; j < key2List.length; j++){
-                            objFilledWithFalse[key2List[j]] = false
+                        for (i = 0; i < key2List.length; i++){
+                            objFilledWithFalse[key2List[i]] = false
                         }
 
                         for (i = 0; i < objList.length; i++){
                             key = objList[i][key1];
-                            if (resultObject[key] === undefined){
+                            if (typeof resultObject[key] === 'undefined'){
                                 resultObject[key] = $.extend(true, {}, objFilledWithFalse);
                             }
                             resultObject[key][objList[i][key2]] = true;
                         }
 
+                        return resultObject;
+                    };
+
+                    objectTransformation.getValues4 = function(objList, key1, key2, key2List){
+                        var resultObject = {}, key, i, objFilledWithFalse = {}, lList, elem;
+
+                        lList = [];
+                        for (i = 0; i < objList.length; i++){
+                            elem = objList[i][key1];
+                            if (lList.indexOf(elem) === -1){
+                                lList.push(elem);
+                                }
+                        }
+
+                        for (i = 0; i < lList.length; i++){
+                            objFilledWithFalse[lList[i]] = false;
+                        }
+
+                        for (i = 0; i < key2List.length; i++){
+                            key = key2List[i];
+                            if (typeof resultObject[key] === 'undefined'){
+                                resultObject[key] = $.extend(true, {}, objFilledWithFalse);
+                            }
+                            resultObject[key][objList[i][key1]] = true;
+                        }
                         return resultObject;
                     };
 
