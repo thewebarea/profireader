@@ -11,7 +11,11 @@ from ..models.company import simple_permissions
 from ..models.rights import Right
 from profapp.models.rights import RIGHTS
 from ..controllers import errors
+<<<<<<< HEAD
 from flask import request, Response
+=======
+from ..models.files import File, FileContent
+>>>>>>> origin/master
 
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
@@ -30,6 +34,59 @@ def create_template(company_id):
 @ok
 def create_save(json, action, state, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
+    types = {x.id: x.get_client_side_dict() for x in
+             PortalDivisionType.get_division_types()}
+
+
+
+    # member_company = Portal.companies
+
+    company = Company.get(company_id)
+
+    member_companies = {company_id: company.get_client_side_dict()}
+
+    return {'company_id': company_id,
+            'portal_company_members': member_companies,
+            'portal': {'company_id': company_id, 'name': '', 'host': '',
+                       'logo_file_id': company.logo_file_id,
+                       'portal_layout_id': layouts[0]['id'],
+                       'divisions': [
+                           {'name': 'index page', 'portal_division_type_id': 'index'},
+                           {'name': 'news', 'portal_division_type_id': 'news'},
+                           {'name': 'events', 'portal_division_type_id': 'events'},
+                           {'name': 'catalog', 'portal_division_type_id': 'catalog'},
+                           {'name': 'our subportal', 'portal_division_type_id': 'company_subportal',
+                            'settings': {'company_id': company_id}},
+                       ]},
+            'layouts': layouts, 'division_types': types}
+
+
+@portal_bp.route('/confirm_create/<string:company_id>/', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
+@ok
+def confirm_create(json, company_id):
+    portal = Portal(name=json['name'], host=json['host'], portal_layout_id=json['portal_layout_id'],
+                    company_owner_id=company_id).create_portal().save()
+
+    portal.divisions = [PortalDivision(portal_id=portal.id, **division) for division in
+                        json['divisions']]
+
+    validation_result = portal.validate()
+
+    if '__validation' in json:
+        db = getattr(g, 'db', None)
+        db.rollback()
+        return validation_result
+    elif len(validation_result['errors'].keys()):
+        raise errors.ValidationException(validation_result)
+    else:
+        company_owner = Company.get(company_id)
+        portal.logo_file_id = File.get(json['logo_file_id']).copy_file(company_id=company_id,
+                                                 root_folder_id=company_owner.system_folder_file_id,
+                                                 parent_folder_id=company_owner.system_folder_file_id,
+                                                 article_portal_id=None).save().id
+        return {'company_id': company_id}
 
     ret = {
         'company_id': company_id,
@@ -53,45 +110,6 @@ def create_save(json, action, state, company_id):
 
     return ret
 
-
-@portal_bp.route('/save/<string:company_id>/', methods=['POST'])
-@login_required
-# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_ACCESS_PORTAL()]]))
-@ok
-def create_load(json, company_id):
-    state = request.headers.get('state')
-    if state in ['validate', 'send']:
-        valid = Portal(name=json['name'], host=json['host'],
-                       portal_layout_id=json['portal_layout_id'],
-                       company_owner_id=company_id,
-                       divisions=[PortalDivision(**division) for division in json['divisions']]) \
-            .create_portal().validate()
-        if state == 'validate':
-            # TODO OZ by OZ: next line is disgusting!!!!
-            getattr(g, 'db', None).rollback()
-            return valid
-        elif len(valid['errors'].keys()):
-            raise errors.ValidationException(valid)
-        else:
-            return Response(headers={'Location: http://google.com/'})
-    else:
-        layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
-        division_types = {x.id: x.get_client_side_dict() for x in
-                          PortalDivisionType.get_division_types()}
-
-        return {'company_id': company_id,
-                'portal': {'company_id': company_id, 'name': '', 'host': '',
-                           'portal_layout_id': layouts[0]['id'],
-                           'divisions': [
-                               {'name': 'index page', 'portal_division_type_id': 'index'},
-                               {'name': 'news', 'portal_division_type_id': 'news'},
-                               {'name': 'events', 'portal_division_type_id': 'events'},
-                               {'name': 'catalog', 'portal_division_type_id': 'catalog'},
-                               {'name': 'about', 'portal_division_type_id': 'about'},
-                           ]},
-                'layouts': layouts,
-                'division_types': division_types
-                }
 
 
 @portal_bp.route('/', methods=['POST'])
@@ -137,7 +155,10 @@ def partners_load(json, company_id):
 @portal_bp.route('/search_for_portal_to_join/', methods=['POST'])
 @ok
 @login_required
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
 # @check_rights(simple_permissions([]))
 def search_for_portal_to_join(json):
     portals_partners = Portal.search_for_portal_to_join(

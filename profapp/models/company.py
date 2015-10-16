@@ -21,15 +21,15 @@ from ..controllers import errors
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
 from functools import wraps
-
+from .google import YoutubePlaylist
 
 class Company(Base, PRBase):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
     name = Column(TABLE_TYPES['name'], unique=True)
-    logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    logo_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    # corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
     system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
@@ -42,20 +42,22 @@ class Company(Base, PRBase):
     phone2 = Column(TABLE_TYPES['phone'])
     email = Column(TABLE_TYPES['email'])
     short_description = Column(TABLE_TYPES['text'])
+    about = Column(TABLE_TYPES['text'])
     portal = relationship('Portal', secondary='company_portal', backref=backref('companies',
                                                                                 lazy='dynamic'))
     own_portal = relationship('Portal',
                               backref="own_company", uselist=False,
-                              foreign_keys='Portal.company_owner_id',
-                              )
+                              foreign_keys='Portal.company_owner_id')
+
     user_owner = relationship('User', backref='companies')
+    youtube_playlists = relationship('YoutubePlaylist')
     # employees = relationship('User', secondary='user_company',
     #                          lazy='dynamic')
     # todo: add company time creation
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
-                                          foreign_keys='Company.logo_file')
+                                          foreign_keys='Company.logo_file_id')
     # get all users in company : company.employees
     # get all users companies : user.employers
 
@@ -73,11 +75,14 @@ class Company(Base, PRBase):
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
+        self.youtube_playlists.append(YoutubePlaylist(name=self.name, company_owner=self))
+        self.save()
+
         return self
 
     def suspended_employees(self):
-        """Show all suspended employees from company. Before define method you should have
-        query with one company"""
+        """ Show all suspended employees from company. Before define method you should have
+        query with one company """
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc
@@ -103,22 +108,22 @@ class Company(Base, PRBase):
         # return PRBase.searchResult(query_companies)
 
     @staticmethod
-    def update_comp(company_id, data, passed_file):
+    def update_comp(company_id, data):
         """Edit company. Pass to data parameters which will be edited"""
         company = db(Company, id=company_id)
         upd = {x: y for x, y in zip(data.keys(), data.values())}
         company.update(upd)
 
-        if passed_file:
-            file = File(company_id=company_id,
-                        parent_id=company.one().corporate_folder_file_id,
-                        author_user_id=g.user_dict['id'],
-                        name=passed_file.filename,
-                        mime=passed_file.content_type)
-            company.update(
-                {'logo_file': file.upload(
-                    content=passed_file.stream.read(-1)).id}
-            )
+        # if passed_file:
+        #     file = File(company_id=company_id,
+        #                 parent_id=company.one().system_folder_file_id,
+        #                 author_user_id=g.user_dict['id'],
+        #                 name=passed_file.filename,
+        #                 mime=passed_file.content_type)
+        #     company.update(
+        #         {'logo_file_id': file.upload(
+        #             content=passed_file.stream.read(-1)).id}
+        #     )
         # db_session.flush()
 
     @staticmethod
@@ -130,7 +135,7 @@ class Company(Base, PRBase):
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 
-    def get_client_side_dict(self, fields='id|name'):
+    def get_client_side_dict(self, fields='id,name,country,region,address,phone,phone2,email,short_description,logo_file_id,about'):
         """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 

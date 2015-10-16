@@ -31,6 +31,7 @@ class File(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     md_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     ac_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
+    youtube_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('youtube_video.id'))
 
     UniqueConstraint('name', 'parent_id', name='unique_name_in_folder')
 
@@ -40,9 +41,9 @@ class File(Base, PRBase):
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
-                 root_folder_id=None,
+                 root_folder_id=None, youtube_id = None,
                  company_id=None, author_user_id=None):
-
+        super(File, self).__init__()
         self.parent_id = parent_id
         self.name = name
         self.mime = mime
@@ -54,6 +55,7 @@ class File(Base, PRBase):
         self.ac_tm = ac_tm
         self.author_user_id = author_user_id
         self.company_id = company_id
+        self.youtube_id = youtube_id
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
@@ -140,9 +142,18 @@ class File(Base, PRBase):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
         return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
 
-    def copy_file(self, company_id, parent_folder_id, article_portal_id):
+    def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
         file_content = FileContent.get(self.id).detach()
-        new_file = self.detach().attr({'company_id': company_id, 'parent_id': parent_folder_id, 'root_folder_id': parent_folder_id, 'article_portal_id': article_portal_id})
+        attr = {}
+        if company_id:
+            attr['company_id'] = company_id
+        if parent_folder_id:
+            attr['parent_folder_id'] = parent_folder_id
+        if article_portal_id:
+            attr['article_portal_id'] = article_portal_id
+        if root_folder_id:
+            attr['root_folder_id'] = root_folder_id
+        new_file = self.detach().attr(attr)
         new_file.save()
         file_content.id = new_file.id
         new_file.file_content = [file_content]

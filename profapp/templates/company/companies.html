@@ -9,7 +9,7 @@
 {% endblock portal_base %}
 
 
-{% block content %}
+{% block portal_content %}
 
     <script>
         module.controller('companies_list', ['$scope', '$ok', function ($scope, $ok) {
@@ -17,7 +17,7 @@
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
             $scope.url_search_for_company = {{ raw_url_for('company.search_for_company_to_join')|safe }};
             $scope.url_join = {{ raw_url_for('company.join_to_company')|safe }};
-            $scope.url_create_own_company = {{ raw_url_for('company.add')|safe }};
+            $scope.url_create_own_company = {{ raw_url_for('company.create')|safe }};
 
             $scope.selectedCompany_name = '';
             $scope.selectedCompany = null;
@@ -104,8 +104,7 @@
 
     {% endraw %}
 
-    {% include 'partials/portal_footer_Profireader.html' %}
 
-{% endblock content %}
+{% endblock portal_content %}
 
 
