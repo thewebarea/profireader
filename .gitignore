@@ -19,9 +19,6 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
-venv/
-/venv/
-venv/*
 lib/
 lib64/
 parts/
@@ -58,7 +55,7 @@ service_key.*
 
 # Django stuff:
 *.log
-client_secret.*
+
 # Sphinx documentation
 docs/_build/
 
@@ -92,3 +89,5 @@ tmp*
 
 **/node_modules
 **/bower_components
+
+*.sql

@@ -29,6 +29,7 @@ class Portal(Base, PRBase):
     layout = relationship('PortalLayout')
     divisions = relationship('PortalDivision',
                              backref='portal',
+                             order_by='desc(PortalDivision.position)',
                              primaryjoin='Portal.id==PortalDivision.portal_id')
     own_company = relationship('Company', back_populates='own_portal', uselist=False)
     article = relationship('ArticlePortal', backref='portal', uselist=False)
@@ -219,6 +220,7 @@ class PortalDivision(Base, PRBase):
                                      ForeignKey('portal_division_type.id'))
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
+    position = Column(TABLE_TYPES['position'])
 
     portal_division_tags = relationship('Tag', secondary='tag_portal_division')
     tags_assoc = relationship('TagPortalDivision', back_populates='portal_division')
@@ -297,3 +299,5 @@ class UserPortalReader(Base, PRBase):
         self.company_id = company_id
         self.status = status
         self.portal_plan_id = portal_plan_id
+
+

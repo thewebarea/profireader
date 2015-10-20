@@ -21,6 +21,7 @@ from ..controllers import errors
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
 from functools import wraps
+from .google import YoutubePlaylist
 
 
 class Company(Base, PRBase):
@@ -55,6 +56,8 @@ class Company(Base, PRBase):
                              back_populates='employers',
                              lazy='dynamic')
 
+    youtube_playlists = relationship('YoutubePlaylist')
+    
     # todo: add company time creation
     logo_file_relationship = relationship('File',
                                           uselist=False,
@@ -78,11 +81,14 @@ class Company(Base, PRBase):
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
+        self.youtube_playlists.append(YoutubePlaylist(name=self.name, company_owner=self))
+        self.save()
+
         return self
 
     def suspended_employees(self):
-        """Show all suspended employees from company. Before define method you should have
-        query with one company"""
+        """ Show all suspended employees from company. Before define method you should have
+        query with one company """
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc

@@ -70,6 +70,9 @@ class AlreadyJoined(Error):
 class TooManyCredentialsInDb(Error):
     pass
 
+class VideoAlreadyExistInPlaylist(Error):
+    pass
+
 class ValidationException(Error):
     """ Inappropriate argument value (of correct type). """
 
