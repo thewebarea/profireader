@@ -168,7 +168,7 @@
     <!-- ???{{ PortDivCheckbox }}<br/><br/> -->
     <!-- ***{{ data.PortalDivisionTags4 }}<br/><br/> -->
 
-    <br/><br/>
+    <br/>
     <strong>Portal tags:</strong><br/>
 
     <table style="width:100%">
@@ -185,7 +185,7 @@
     <tr ng-repeat="tag_name in data.tag">
         <th>
             <input type="checkbox" ng-click='toggleTag(tag_name)' ng-model="tagCheckbox[tag_name]"/>
-            {{ tag_name }}{{ TagCheckbox[tag_name] }}
+            {{ tag_name }}
         </th>
         <td ng-repeat="portal_division in data.portal.divisions">
             <input name="chk_group[tag_name][portal_division.id]" type="checkbox" ng-model="data.PortalDivisionTags4[tag_name][portal_division.id]"/>
