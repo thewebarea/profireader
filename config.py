@@ -62,7 +62,7 @@ class Config(object):
 
 # Pagination
     ITEMS_PER_PAGE = 5
-    PAGINATION_BUTTONS = 4
+    PAGINATION_BUTTONS = 2
 
 # GOOGLE API
     GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY

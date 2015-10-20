@@ -262,6 +262,12 @@ class Article(Base, PRBase):
                                                    **kwargs),
                        author_user_id=user_id)
 
+    def get_article_with_html_tag(self, text_into_html):
+        article = self.get_client_side_dict()
+        article['mine_version']['title'] = \
+            escape(article['mine_version']['title'].replace(text_into_html, '<span class=colored>%s</span>' % text_into_html))
+        return article
+
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
         # TODO: AA by OZ:    .filter(user_id has to be employee in company and

@@ -1,0 +1,80 @@
+    <script>
+        module.controller('pager', ['$scope', '$ok', function ($scope, $ok) {
+            $scope.data = {};
+            $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
+            $scope.getData = function () {
+                return $scope.data;
+            };
+            $scope.afterSave = function (resp) {
+                $scope.data = resp;
+            };
+            $scope.range = function(number){
+                var range = [];
+for(var i=0;i<number;i++) {
+  range.push(i);
+}
+return range;
+            };
+{#                        $scope.loadpage = function(page)#}
+{#            {#}
+{#                $scope.loading = true;#}
+{#                $ok('url', {page = page}, function (resp) {#}
+{#                    $scope.loading = false;#}
+{#                    $scope.data = resp#}
+{#                });#}
+{#            };#}
+
+        }])
+    </script>
+{% raw %}
+        <div ng-init="loadData()" ng-controller="pager">
+        <div ng-if="loading">Loading...</div>
+        <div ng-if="!loading">
+<ul class="pager">
+    <div ng-if="data.articles">
+    <li>
+        <div ng-if="data.current_page!=1">
+         <a href="http://profi.ntaxa.com/articles/list/{{ data.current_page }} - 1/{{ data.search_text }}/{{ data.chosen_company }}"> < prev </a>
+        </div>
+    </li>
+
+        <div ng-repeat="button in range(data.page_buttons)">
+            <div ng-if="data.current_page - (button + 1) > 0">
+    <li>
+        <a href="">{{ data.current_page - (button + 1) }}</a>
+    </li>
+        </div></div>
+
+
+    <li class="current-page">
+        <a href="http://profi.ntaxa.com/articles/list/{{ data.current_page }}/{{ data.search_text }}/{{ data.chosen_company }}">
+       {{ data.current_page }}</a>
+    </li>
+    <div ng-repeat="button in range(data.page_buttons)">
+        <div ng-if="data.current_page + (button + 1) < data.pages">
+    <li>
+        <a href="">{{ data.current_page + (button + 1) }}</a>
+    </li>
+        </div></div>
+  <div ng-if="data.current_page + data.page_buttons < data.pages ">
+        <li>
+            ...
+        </li>
+    </div>
+        <div ng-if="data.current_page != data.pages">
+        <li>
+            <a href="">{{ data.pages }}</a>
+        </li>
+    </div>
+
+    <li>
+       <div ng-if="data.current_page != data.pages">
+        <a href="">next > </a>
+           </div>
+        <div ng-if="data.current_page == data.pages">
+      Newer &rarr;</div>
+    </li>
+    </div>
+</ul>
+            </div></div>
+    {% endraw %}

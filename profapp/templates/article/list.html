@@ -12,6 +12,9 @@
             $scope.data = {};
             $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
             $scope.url_search_article = '{{ url_for('article.load_mine')|safe }}';
+
+
+
             $scope.cancel = function () {
                 window.location.href = $scope.url_back();
                 return false;
@@ -33,8 +36,9 @@
 
         }])
     </script>
-    {% raw %}
+ {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
+
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
             <h2><a href="{{ url_create_article() }}">Create article</a></h2>
@@ -56,16 +60,22 @@
 
                 <tr ng-if="article_dict.company_count>1">
                     <td rowspan="{{ article_dict.company_count }}" width="300px">{{ article_dict.article.mine_version.md_tm }}</td>
-                    <td rowspan="{{ article_dict.company_count }}" width="200px">{{ article_dict.article.mine_version.title }}</td>
+                   <td rowspan="{{ article_dict.company_count }}" width="200px"><a href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}">{{ article_dict.article.mine_version.title }}</a></td>
                 </tr>
                 <tr ng-if="article_dict.company_count>1" ng-repeat="companies in article_dict.article.submitted_versions"><td width="200px">{{ companies.company.name }}</td><td width="150px">{{ companies.status }}</td></tr>
                 <tr ng-if="article_dict.company_count==1"><td  width="300px">{{ article_dict.article.mine_version.md_tm }}</td>
-                    <td  width="200px">{{ article_dict.article.mine_version.title }}</td><td width="200px">Not sent to any company yet</td><td width="150px">Not sent</td></tr>
+                    <td  width="200px"><a href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}">{{ article_dict.article.mine_version.title }}</a></td><td width="200px">Not sent to any company yet</td><td width="150px">Not sent</td></tr>
 
 
             </table>
 
-        </div>
-    </div>
-    {% endraw %}
+        </div></div>
+        {% endraw %}
+        {% include 'article/pager.html' %}
+
+
+
+
+
+
 {% endblock portal_content %}
