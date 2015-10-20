@@ -314,34 +314,72 @@ module.run(function ($rootScope, $ok) {
             });
         },
         areAllEmpty: areAllEmpty,
+
         tinymceImageOptions: {
             inline: false,
             plugins: 'advlist autolink link image lists charmap print preview',
-            skin: 'lightgray',
-            theme: 'modern',
-            file_browser_callback: function (field_name, url, type, win) {
-                var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
-                    '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
-                tinymce.activeEditor.windowManager.open({
-                        file: cmsURL,
-                        title: 'Select an Image',
-                        width: 950,  // Your dimensions may differ - toy around with them!
-                        height: 700,
-                        resizable: "yes",
-                        //inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
-                        close_previous: "yes"
+            style_formats: [
+                {title: 'Bold text', inline: 'b'},
+                {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
+                {title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+
+                {
+                    title: 'Image Left',
+                    selector: 'img',
+                    styles: {
+                        'float': 'left',
+                        'margin': '0 10px 0 10px'
                     }
-                    ,
-                    {
-                        window: win,
-                        input: field_name
+                },
+                {
+                    title: 'Image Right',
+                    selector: 'img',
+                    styles: {
+                        'float': 'right',
+                        'margin': '0 0 10px 10px'
                     }
-                )
-                ;
-            }
+                }
+            ]
         }
-    })
-});
+    });
+
+    skin: 'lightgray',
+        width
+    :
+    '100%',
+        height
+    :
+    '100%',
+        theme
+    :
+    'modern',
+        file_browser_callback
+    :
+    function (field_name, url, type, win) {
+        var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
+            '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
+        tinymce.activeEditor.windowManager.open({
+                file: cmsURL,
+                title: 'Select an Image',
+
+                width: 950,  // Your dimensions may differ - toy around with them!
+                height: 700,
+                resizable: "yes",
+                //inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+                close_previous: "yes"
+            }
+            ,
+            {
+                window: win,
+                input: field_name
+            }
+        )
+        ;
+    }
+}
+})
+})
+;
 
 
 None = null;
