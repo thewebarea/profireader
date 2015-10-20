@@ -19,11 +19,20 @@
 
             $scope.PortDivCheckboxLoad = function(portal_divisions){
                 var i;
-                console.log(portal_divisions);
                 $scope.PortDivCheckbox = {};
                 if ($scope.data){
                     for (i = 0; i < portal_divisions.length; i++){
-                        $scope.PortDivCheckbox[portal_divisions[i].id] = false;
+                        $scope.PortDivCheckbox[portal_divisions[i]] = false;
+                    }
+                }
+            };
+
+            $scope.tagCheckboxLoad = function(tag_names){
+                var i;
+                $scope.tagCheckbox = {};
+                if ($scope.data){
+                    for (i = 0; i < tag_names.length; i++){
+                        $scope.tagCheckbox[tag_names[i]] = false;
                     }
                 }
             };
@@ -52,6 +61,12 @@
                 }
             };
 
+            $scope.loadPortalDivisionIDs = function(bool){
+                if ($scope.data) {
+                    $scope.PortalDivisionIDs = objectTransformation.getValues1($scope.data.portal.divisions, 'id', true);
+                }
+            };
+
             $scope.loadPortalDivisionTags2 = function(){
                 if ($scope.data){
                     $scope.data.PortalDivisionTags2 = objectTransformation.getValues2($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id')
@@ -72,14 +87,14 @@
             };
 
             $scope.loadPortalDivisionTags4 = function(){
-
                 var res;
                 if ($scope.data){
                     $scope.loadPortalDivisionTagsID(true);
                     $scope.loadPortalDivisionTagsName(true);
-                    $scope.PortDivCheckboxLoad($scope.data.portal.divisions);
-                    var list = $scope.getDataPortalDivisionTagsID();
-                    res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
+                    $scope.loadPortalDivisionIDs();
+                    $scope.PortDivCheckboxLoad($scope.PortalDivisionIDs);
+                    $scope.tagCheckboxLoad($scope.data.PortalDivisionTagsName);
+                    res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', $scope.data.PortalDivisionTagsID);
                     $scope.data.PortalDivisionTags4 = objectTransformation.subsInKey(res, $scope.data.tag);
                 }
             };
@@ -90,9 +105,25 @@
                 if ($scope.data){
                     keys = Object.keys($scope.data.PortalDivisionTags4);
                     for (i = 0; i < keys.length; i++){
-{# todo:                         +++++++  todo:  it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
+                        {# it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
                         $scope.data.PortalDivisionTags4[keys[i]][portal_division_id] = !$scope.PortDivCheckbox[portal_division_id];
                     }
+                }
+            };
+
+            $scope.toggleTag = function(tag_name){
+                var i, PortDivIDs, tagCheckboxesState, currState = false;
+                console.log('bbbbbbb');
+                if ($scope.data){
+                    {# it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
+                    currState = !$scope.tagCheckbox[tag_name];
+                    PortDivIDs = $scope.PortalDivisionIDs;
+                    tagCheckboxesState = {};
+                    for (i = 0; i < PortDivIDs.length; i++){
+                        tagCheckboxesState[PortDivIDs[i]] = currState;
+                    }
+
+                    $scope.data.PortalDivisionTags4[tag_name] = tagCheckboxesState;
                 }
             };
 {# TODO ++++++++++++++++++++            TODO: it is main function!!!     ++++++++++++++++++++++++++++++++++++++++++ #}
@@ -153,7 +184,8 @@
     </tr>
     <tr ng-repeat="tag_name in data.tag">
         <th>
-            <input type="checkbox" value=""/>{{ tag_name }}
+            <input type="checkbox" ng-click='toggleTag(tag_name)' ng-model="tagCheckbox[tag_name]"/>
+            {{ tag_name }}{{ TagCheckbox[tag_name] }}
         </th>
         <td ng-repeat="portal_division in data.portal.divisions">
             <input name="chk_group[tag_name][portal_division.id]" type="checkbox" ng-model="data.PortalDivisionTags4[tag_name][portal_division.id]"/>
