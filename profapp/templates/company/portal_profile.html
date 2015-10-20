@@ -26,7 +26,7 @@
             $scope.getDataPortalDivisionTagsID = function(){
                 var res;
                 if ($scope.data){
-                    res = $scope.data.PortalDivisionTagsID
+                    res = $scope.data.PortalDivisionTagsID;
                 } else {
                     res = false
                 }
@@ -60,12 +60,20 @@
                 }
             };
 
-            $scope.loadPortalDivisionTags4 = function(list){
+            $scope.loadPortalDivisionTags4 = function(){
+
                 var res;
+                console.log('loadPortalDivisionTags4',$scope.data);
+
                 if ($scope.data){
+                    $scope.loadPortalDivisionTagsID(true);
+                    $scope.loadPortalDivisionTagsName(true);
+                    var list = $scope.getDataPortalDivisionTagsID();
+
                     res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
                     $scope.data.PortalDivisionTags4 = objectTransformation.subsInKey(res, $scope.data.tag);
                 }
+
             };
 
             $scope.tagsCheckUncheck = function(portal_division_id){
@@ -85,16 +93,37 @@
                 $scope.data.XXX[portal_division_id] = true;
             };
 
+
+{# TODO ++++++++++++++++++++            TODO: it is main function!!!     ++++++++++++++++++++++++++++++++++++++++++ #}
+            $scope.togglePortalDivision = function(portal_division_id){
+                var i, keys;
+                if ($scope.data){
+                    keys = Object.keys($scope.data.PortalDivisionTags4);
+
+                    for (i = 0; i < keys.length; i++){
+                        $scope.data.PortalDivisionTags4[keys[i]][portal_division_id] = true;
+                        console.log('bbbbbb');
+                        console.log(portal_division_id);
+                        console.log(keys[i]);
+                        console.log($scope.data.PortalDivisionTags4[keys[i]][portal_division_id]);
+                        console.log($scope.data.PortalDivisionTags4);
+                    }
+                    console.log('aaaaaa');
+                    console.log($scope.data.PortalDivisionTags4);
+                }
+            };
+{# TODO ++++++++++++++++++++            TODO: it is main function!!!     ++++++++++++++++++++++++++++++++++++++++++ #}
+
             $scope.loadXXX = function(portalDivisions){
                 var i;
                 if ($scope.data){
                     $scope.data.XXX = {};
-                    console.log('aaa');
-                    console.log(JSON.stringify($scope.data.XXX));
-                    console.log(portalDivisions);
-                    for (i=0; i<portalDivisions.length; i++){
-                        $scope.data.XXX[portalDivisions[i]] = false;
-                        console.log($scope.data.XXX[portalDivisions[i]]);
+{#                    console.log('aaa');#}
+{#                    console.log(JSON.stringify($scope.data.XXX));#}
+{#                    console.log(portalDivisions);#}
+                    for (i=0; i < portalDivisions.length; i++){
+                        $scope.data.XXX[portalDivisions[i]] = {'rock and roll':true, 'sex':true, 'money':true};
+{#                        console.log($scope.data.XXX[portalDivisions[i]]);#}
                     }
                 }
             };
@@ -129,31 +158,32 @@
         }]);
 
 
-
     </script>
     {% raw %}
- <div ng-init="loadData()" ng-controller="portal_list">
-    {{ loadPortalDivisionTagsID(true) }}
-    {{ loadPortalDivisionTagsName(true) }}
+ <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="portal_list">
+
     !!!{{ data.PortalDivisionTagsName }}<br/><br/>
     <!-- {{ loadPortalDivisionTags2() }} -->
-    {{ loadPortalDivisionTags3(getDataPortalDivisionTagsID()) }}
-    {{ loadPortalDivisionTags4(getDataPortalDivisionTagsID()) }}
+    <!-- {{ loadPortalDivisionTags3(getDataPortalDivisionTagsID()) }} -->
+    {{  }}
     ???{{ data.PortalDivisionTags3 }}<br/><br/>
     ***{{ data.PortalDivisionTags4 }}<br/><br/>
-    {{ loadXXX(['560bdd30-4b23-4001-bc31-6be09e72586d', '560bdd30-4b23-4001-92c8-5317c142f421', '560bdd30-4b23-4001-acb7-6cc254313aab', '560bdd30-4b23-4001-9fae-7935eb9118d5']) }}
+    <!-- {{ loadXXX(['560bdd30-4b23-4001-bc31-6be09e72586d', '560bdd30-4b23-4001-92c8-5317c142f421', '560bdd30-4b23-4001-acb7-6cc254313aab', '560bdd30-4b23-4001-9fae-7935eb9118d5']) }} -->
 
     <br/><br/>
     <strong>Portal tags:</strong><br/>
 
-    <table style="width:100%" ng-init="params=data.PortalDivisionTags3">
+    <table style="width:100%">
     <tr>
         <th>
             <strong>tag/division</strong>
         </th>
         <th ng-repeat="portal_division in data.portal.divisions">
             {{ portal_division.name }}<br/>
-            <input type="checkbox" ng-model="data.XXX[portal_division.id]" ng-change="tagsCheckUncheck2(portal_division.id)"/>
+            <!-- <input type="checkbox" ng-model="data.XXX[portal_division.id]" ng-change="tagsCheckUncheck3(portal_division.id)"/> -->
+            <!-- <input type="checkbox" onchange='{{ tagsCheckUncheck3(null) }}'/> -->
+            <input type="checkbox" ng-click='togglePortalDivision(portal_division.id)'/>
+            <!-- <input type="checkbox" ng-model='data.XXX[portal_division.id]'/> -->
         </th>
     </tr>
     <tr ng-repeat="tag_name in data.tag">
@@ -161,8 +191,8 @@
             <input type="checkbox" value=""/>{{ tag_name }}
         </th>
         <td ng-repeat="portal_division in data.portal.divisions">
-            <input name="chk_group[tag_name][portal_division.id]" type="checkbox" value="" ng-model="data.PortalDivisionTags3[portal_division.id][tag_name]"/>
-            {{  }}
+            <input name="chk_group[tag_name][portal_division.id]" type="checkbox" ng-checked="data.PortalDivisionTags4[tag_name][portal_division.id]"/>
+            {{ data.PortalDivisionTags4[tag_name][portal_division.id] }}
         </td>
     </tr>
     </table>

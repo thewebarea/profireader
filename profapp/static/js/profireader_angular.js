@@ -192,12 +192,14 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                         }
 
                         for (i = 0; i < key2List.length; i++){
-                            key = key2List[i];
-                            if (typeof resultObject[key] === 'undefined'){
-                                resultObject[key] = $.extend(true, {}, objFilledWithFalse);
-                            }
-                            resultObject[key][objList[i][key1]] = true;
+                            resultObject[key2List[i]] = $.extend(true, {}, objFilledWithFalse);
                         }
+
+                        for (i = 0; i < objList.length; i++){
+                            key = objList[i];
+                            resultObject[key[key2]][key[key1]] = true;
+                        }
+
                         return resultObject;
                     };
 
@@ -497,13 +499,14 @@ module.run(function ($rootScope, $ok) {
                 return phrase
             }
         },
-        loadData: function (url, senddata, onok) {
+        loadData: function (url, senddata, beforeload, afterload) {
             var scope = this;
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
-                if (!onok) onok = function (d) {return d;}
-                scope.data = onok(data);
+                if (!beforeload) beforeload = function (d) {return d;};
+                scope.data = beforeload(data);
                 scope.original_data = $.extend(true, {}, scope.data);
+                if (afterload) afterload();
 
             }).finally(function () {
                 scope.loading = false;
