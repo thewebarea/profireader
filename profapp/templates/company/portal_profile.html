@@ -39,14 +39,14 @@
 
             $scope.loadPortalDivisionTagsID = function(bool){
                 if ($scope.data){
-                    $scope.data.PortalDivisionTagsID = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', bool)
+                    $scope.PortalDivisionTagsID = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', bool)
                 }
             };
 
             $scope.getDataPortalDivisionTagsID = function(){
                 var res;
                 if ($scope.data){
-                    res = $scope.data.PortalDivisionTagsID;
+                    res = $scope.PortalDivisionTagsID;
                 } else {
                     res = false
                 }
@@ -57,7 +57,7 @@
                 var PortalDivisionTagsID;
                 if ($scope.data) {
                     PortalDivisionTagsID = $scope.getDataPortalDivisionTagsID();
-                    $scope.data.PortalDivisionTagsName = objectTransformation.subsElemOfList(PortalDivisionTagsID, $scope.data.tag)
+                    $scope.PortalDivisionTagsName = objectTransformation.subsElemOfList(PortalDivisionTagsID, $scope.data.tag)
                 }
             };
 
@@ -93,8 +93,8 @@
                     $scope.loadPortalDivisionTagsName(true);
                     $scope.loadPortalDivisionIDs();
                     $scope.PortDivCheckboxLoad($scope.PortalDivisionIDs);
-                    $scope.tagCheckboxLoad($scope.data.PortalDivisionTagsName);
-                    res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', $scope.data.PortalDivisionTagsID);
+                    $scope.tagCheckboxLoad($scope.PortalDivisionTagsName);
+                    res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', $scope.PortalDivisionTagsID);
                     $scope.data.PortalDivisionTags4 = objectTransformation.subsInKey(res, $scope.data.tag);
                 }
             };
@@ -162,11 +162,11 @@
     {% raw %}
  <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="portal_list">
 
-    !!!{{ data.PortalDivisionTagsName }}<br/><br/>
+    <!-- !!!{{ data.PortalDivisionTagsName }}<br/><br/> -->
     <!-- {{ loadPortalDivisionTags2() }} -->
     <!-- {{ loadPortalDivisionTags3(getDataPortalDivisionTagsID()) }} -->
-    ???{{ PortDivCheckbox }}<br/><br/>
-    ***{{ data.PortalDivisionTags4 }}<br/><br/>
+    <!-- ???{{ PortDivCheckbox }}<br/><br/> -->
+    <!-- ***{{ data.PortalDivisionTags4 }}<br/><br/> -->
 
     <br/><br/>
     <strong>Portal tags:</strong><br/>
