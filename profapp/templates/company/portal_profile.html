@@ -79,40 +79,19 @@
                     $scope.loadPortalDivisionTagsName(true);
                     $scope.PortDivCheckboxLoad($scope.data.portal.divisions);
                     var list = $scope.getDataPortalDivisionTagsID();
-                    console.log(JSON.stringify($scope.data.portal));
-
                     res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
                     $scope.data.PortalDivisionTags4 = objectTransformation.subsInKey(res, $scope.data.tag);
                 }
             };
-
-            $scope.tagsCheckUncheck = function(portal_division_id){
-                var keys, i;
-                keys = Object.keys($scope.data.PortalDivisionTags3[portal_division_id]);
-                for (i = 0; i < keys.length; i++){
-                    console.log($scope.data.PortalDivisionTags3[portal_division_id][keys[i]]);
-                    $scope.data.XXX[portal_division_id] = true;
-                    $scope.data.PortalDivisionTags3[portal_division_id][keys[i]] = true;
-                    console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$');
-                    console.log($scope.data.PortalDivisionTags3[portal_division_id][keys[i]]);
-                }
-                console.log("@@@");
-            };
-
-            $scope.tagsCheckUncheck2 = function(portal_division_id){
-                $scope.data.XXX[portal_division_id] = true;
-            };
-
 
 {# TODO ++++++++++++++++++++            TODO: it is main function!!!     ++++++++++++++++++++++++++++++++++++++++++ #}
             $scope.togglePortalDivision = function(portal_division_id){
                 var i, keys;
                 if ($scope.data){
                     keys = Object.keys($scope.data.PortalDivisionTags4);
-
                     for (i = 0; i < keys.length; i++){
-{#                        $scope.data.PortalDivisionTags4[keys[i]][portal_division_id] = true;#}
-                        $scope.data.PortalDivisionTags4[keys[i]][portal_division_id] = true;
+{# todo:                         +++++++  todo:  it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
+                        $scope.data.PortalDivisionTags4[keys[i]][portal_division_id] = !$scope.PortDivCheckbox[portal_division_id];
                     }
                 }
             };
@@ -177,7 +156,7 @@
             <input type="checkbox" value=""/>{{ tag_name }}
         </th>
         <td ng-repeat="portal_division in data.portal.divisions">
-            <input name="chk_group[tag_name][portal_division.id]" type="checkbox" ng-checked="data.PortalDivisionTags4[tag_name][portal_division.id]"/>
+            <input name="chk_group[tag_name][portal_division.id]" type="checkbox" ng-model="data.PortalDivisionTags4[tag_name][portal_division.id]"/>
             {{ data.PortalDivisionTags4[tag_name][portal_division.id] }}
         </td>
     </tr>
