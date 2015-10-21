@@ -1,19 +1,18 @@
-    <script>
-        module.controller('pager', ['$scope', '$ok', function ($scope, $ok) {
-            $scope.data = {};
-            $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
-            $scope.getData = function () {
-                return $scope.data;
-            };
-            $scope.afterSave = function (resp) {
-                $scope.data = resp;
-            };
-            $scope.range = function(number){
-                var range = [];
-for(var i=0;i<number;i++) {
-  range.push(i);
-}
-return range;
+{#    <script>#}
+{#        module.controller('pager', ['$scope', '$ok', function ($scope, $ok) {#}
+{#            $scope.data = {};#}
+{#            $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};#}
+{#            $scope.getData = function () {#}
+{#                return $scope.data;#}
+{#            };#}
+{#            $scope.afterSave = function (resp) {#}
+{#                $scope.data = resp;#}
+{#            };#}
+{#            $scope.range = function(number){#}
+{#                var range = [];#}
+{#for(var i=0;i<number;i++) {#}
+{#  range.push(i);#}
+{#return range;#}
             };
 {#                        $scope.loadpage = function(page)#}
 {#            {#}
@@ -24,57 +23,40 @@ return range;
 {#                });#}
 {#            };#}
 
-        }])
-    </script>
-{% raw %}
-        <div ng-init="loadData()" ng-controller="pager">
-        <div ng-if="loading">Loading...</div>
-        <div ng-if="!loading">
-<ul class="pager">
-    <div ng-if="data.articles">
-    <li>
-        <div ng-if="data.current_page!=1">
-         <a href="http://profi.ntaxa.com/articles/list/{{ data.current_page }} - 1/{{ data.search_text }}/{{ data.chosen_company }}"> < prev </a>
-        </div>
-    </li>
+{#        }])#}
+{#    </script>#}<script>
+angular.module('ui.bootstrap.pagination').controller('PaginationDemoCtrl', function ($scope, $log) {
+  $scope.totalItems = 64;
+  $scope.currentPage = 4;
 
-        <div ng-repeat="button in range(data.page_buttons)">
-            <div ng-if="data.current_page - (button + 1) > 0">
-    <li>
-        <a href="">{{ data.current_page - (button + 1) }}</a>
-    </li>
-        </div></div>
+  $scope.setPage = function (pageNo) {
+    $scope.currentPage = pageNo;
+  };
 
+  $scope.pageChanged = function() {
+    $log.log('Page changed to: ' + $scope.currentPage);
+  };
 
-    <li class="current-page">
-        <a href="http://profi.ntaxa.com/articles/list/{{ data.current_page }}/{{ data.search_text }}/{{ data.chosen_company }}">
-       {{ data.current_page }}</a>
-    </li>
-    <div ng-repeat="button in range(data.page_buttons)">
-        <div ng-if="data.current_page + (button + 1) < data.pages">
-    <li>
-        <a href="">{{ data.current_page + (button + 1) }}</a>
-    </li>
-        </div></div>
-  <div ng-if="data.current_page + data.page_buttons < data.pages ">
-        <li>
-            ...
-        </li>
-    </div>
-        <div ng-if="data.current_page != data.pages">
-        <li>
-            <a href="">{{ data.pages }}</a>
-        </li>
-    </div>
+  $scope.maxSize = 5;
+  $scope.bigTotalItems = 175;
+  $scope.bigCurrentPage = 1;
+});</script>{% raw %}
+<div ng-controller="PaginationDemoCtrl">
+    <h4>Default</h4>
+    <uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()"></uib-pagination>
+    <uib-pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></uib-pagination>
+    <uib-pagination direction-links="false" boundary-links="true" total-items="totalItems" ng-model="currentPage"></uib-pagination>
+    <uib-pagination direction-links="false" total-items="totalItems" ng-model="currentPage" num-pages="smallnumPages"></uib-pagination>
+    <pre>The selected page no: {{currentPage}}</pre>
+    <button type="button" class="btn btn-info" ng-click="setPage(3)">Set current page to: 3</button>
 
-    <li>
-       <div ng-if="data.current_page != data.pages">
-        <a href="">next > </a>
-           </div>
-        <div ng-if="data.current_page == data.pages">
-      Newer &rarr;</div>
-    </li>
-    </div>
-</ul>
-            </div></div>
-    {% endraw %}
+    <hr />
+    <h4>Pager</h4>
+    <uib-pager total-items="totalItems" ng-model="currentPage"></uib-pager>
+
+    <hr />
+    <h4>Limit the maximum visible buttons</h4>
+    <uib-pagination total-items="bigTotalItems" ng-model="bigCurrentPage" max-size="maxSize" class="pagination-sm" boundary-links="true"></uib-pagination>
+    <uib-pagination total-items="bigTotalItems" ng-model="bigCurrentPage" max-size="maxSize" class="pagination-sm" boundary-links="true" rotate="false" num-pages="numPages"></uib-pagination>
+    <pre>Page: {{bigCurrentPage}} / {{numPages}}</pre>
+</div>{% endraw %}

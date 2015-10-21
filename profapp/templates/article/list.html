@@ -6,12 +6,17 @@
 
 
     <script>
-        module.controller('article_list', ['$scope', '$ok', function ($scope, $ok) {
+        module.controller('article_list', ['$scope', '$ok', '$sce', function ($scope, $ok, $sce) {
+
             $scope.url_details = {{ raw_url_for('article.details')|safe }};
             $scope.url_create_article = {{ raw_url_for('article.show_form_create')|safe }};
             $scope.data = {};
             $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
             $scope.url_search_article = '{{ url_for('article.load_mine')|safe }}';
+            $scope.get_colored_title = function (text_to_change) {
+                return text_to_change
+            };
+
 
 
 
@@ -34,7 +39,126 @@
                 $scope.getCompanies = submitted_viersions
             };
 
-        }])
+            $scope.change_text_color = function(full_text, search_text, id){
+                var new_tag = document.createElement("P");
+
+                var re = new RegExp(search_text, "g");
+{#                full_text = full_text.replace(/#/g, '');#}
+{#                full_text = full_text.replace(re, '#');#}
+
+                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">'  + search_text + '</span>'));}
+              }]);
+{#                var search = full_text.search(search_text);#}
+{#                var empty_string = '';#}
+{#                var number = 0;#}
+{#                if(search_text){#}
+{#                for(var i=0; i<full_text.length;i++){#}
+{#                    if (full_text[i]=='#'){#}
+{#                        var colored_tag = document.createElement("span");#}
+{#                        full_text = full_text.replace('#', '');#}
+{#                        var text = full_text.slice(number, i);#}
+{#                        var t = document.createTextNode(text);#}
+{#                        new_tag.appendChild(t);#}
+{#                        var colored_text = document.createTextNode(search_text);#}
+{#                        colored_tag.className = 'x_id';#}
+{#                        colored_tag.appendChild(colored_text);#}
+{#                        new_tag.appendChild(colored_tag);#}
+{#                        number = i;#}
+{#                    }#}
+{#                    else{#}
+{#                        var t = document.createTextNode(full_text[i]);#}
+{#                        new_tag.appendChild(t);#}
+{#                    }#}
+{#                                    }#}
+{#                                    }#}
+{#                else{#}
+{#                    var s = document.createTextNode(full_text);#}
+{#                    new_tag.appendChild(s);#}
+{#                }#}
+{#                return new_tag;#}
+{#                console.log(new_tag);#}
+{#                document.getElementById(id).appendChild(new_tag);#}
+{#            };#}
+
+{#                if(search_text) {#}
+{#                    var short = full_text.slice(0, full_text.search(search_text));#}
+{#                    var t = document.createTextNode(short);#}
+{#                    new_tag.appendChild(t);#}
+{#                    var colored_text = document.createTextNode(search_text);#}
+{#                    colored_tag.className = 'x_id';#}
+{#                    colored_tag.appendChild(colored_text);#}
+{#                    new_tag.appendChild(colored_tag);#}
+
+
+
+{#                    var start_from = short.length + search_text.length;#}
+{#                    for(var i=0; i<full_text.length-1; i++){#}
+{#                        var sliced = full_text.slice(start_from-1, full_text.indexOf(search_text, start_from));#}
+{#                        var x = document.createTextNode(sliced);#}
+{#                        new_tag.appendChild(x);#}
+{#                        colored_text = document.createTextNode(search_text);#}
+{#                        colored_tag.className = 'x_id';#}
+{#                        colored_tag.appendChild(colored_text);#}
+{#                        new_tag.appendChild(colored_tag);#}
+{#                        start_from = sliced.length-1#}
+{##}
+{#                    }#}
+{##}
+{#                    var length = full_text.search(search_text);#}
+{#                    full_text = full_text.slice(length, full_text.length-1);#}
+{#                    while(full_text.search(search_text)){#}
+{#                        full_text = full_text.slice(length, full_text.search(search_text));#}
+{#                        var n = document.createTextNode(full_text);#}
+{#                        new_tag.appendChild(n);#}
+{#                        length = full_text.search(search_text)#}
+{#                    }#}
+
+{#                    var count = 0;#}
+                    {#                while(full_text.search(search_text)){#}
+                    {#                    if(full_text.search(search_text)){#}
+                    {#                        var t = document.createTextNode(short);#}
+                    {#                        new_tag.appendChild(t);#}
+                    {#                        full_text = full_text.slice(full_text.search(search_text));#}
+                    {#                        var t = document.createTextNode(full_text);#}
+                    {#                        new_tag.appendChild(t);#}
+                    {##}
+                    {#                        count++#}
+                    {#                    }#}
+                    {#                }#}
+                    {#                for(var i=0; i<count; i++){#}
+                    {#                    var t = document.createTextNode('s');#}
+                    {#                    new_tag.appendChild(t);#}
+                    {#                }#}
+                    {#                for(var i= 0, j=0; i<full_text.length; i++, j++)#}
+                    {#                {#}
+                    {#                    if(full_text[i]==deleted_text[j]){#}
+                    {#                        empty_string = empty_string+full_text[i];}#}
+                    {#                    else{#}
+                    {#                        var t = document.createTextNode(empty_string);#}
+                    {#                        new_tag.appendChild(t);#}
+                    {#                        i = i + search_text.length;#}
+                    {#                        full_text = full_text.replace(empty_string+search_text, '');#}
+
+                    {#                        deleted_text = deleted_text.replace(empty_string, '');#}
+                    {#                        i = 0;#}
+                    {#                    }#}
+                    {#                }#}
+
+
+{#            $scope.change_color = function myFunction() {#}
+{#                var para = document.createElement("P");#}
+{#                var t = document.createTextNode("This is a paragraph.");#}
+{#                var v = document.createElement("H1");#}
+{#                var x = document.createTextNode("This is big");#}
+{#                v.className = 'x_id';#}
+{#                para.appendChild(t);#}
+{#                v.appendChild(x);#}
+{#                para.appendChild(v);#}
+{#                document.getElementById("myDIV").appendChild(para);#}
+
+{##}
+
+
     </script>
  {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
@@ -49,6 +173,7 @@
                 ng-action="url_search_article">
                     <input type="submit" value="search">
                 </form>
+
             <table style="width:114%">
 
 
@@ -62,9 +187,13 @@
                     <td rowspan="{{ article_dict.company_count }}" width="300px">{{ article_dict.article.mine_version.md_tm }}</td>
                    <td rowspan="{{ article_dict.company_count }}" width="200px"><a href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}">{{ article_dict.article.mine_version.title }}</a></td>
                 </tr>
-                <tr ng-if="article_dict.company_count>1" ng-repeat="companies in article_dict.article.submitted_versions"><td width="200px">{{ companies.company.name }}</td><td width="150px">{{ companies.status }}</td></tr>
+                <tr ng-if="article_dict.company_count>1" ng-repeat="companies in article_dict.article.submitted_versions">
+                    <td width="200px">{{ companies.company.name }}</td><td width="150px">{{ companies.status }}</td></tr>
                 <tr ng-if="article_dict.company_count==1"><td  width="300px">{{ article_dict.article.mine_version.md_tm }}</td>
-                    <td  width="200px"><a href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}">{{ article_dict.article.mine_version.title }}</a></td><td width="200px">Not sent to any company yet</td><td width="150px">Not sent</td></tr>
+                    <td  width="200px"><a href="/articles/details/{{ article_dict.article.id }}"  id="{{ article_dict.article.id }}"
+                                          ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.search_text, article_dict.article.id)"></a></td>
+                    <td width="200px">Not sent to any company yet</td><td width="150px">Not sent</td>
+                </tr>
 
 
             </table>
@@ -72,10 +201,4 @@
         </div></div>
         {% endraw %}
         {% include 'article/pager.html' %}
-
-
-
-
-
-
 {% endblock portal_content %}
