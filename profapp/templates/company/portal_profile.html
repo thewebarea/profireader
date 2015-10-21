@@ -16,6 +16,7 @@
     <script>
         module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_portal_profile_edit = {{ raw_url_for('portal.profile_edit')|safe }};
+            $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
 {#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
 {#            $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};#}
 
@@ -125,8 +126,9 @@
     <!-- ???{{ PortDivCheckbox }}<br/><br/> -->
     <!-- ***{{ data.PortalDivisionTags4 }}<br/><br/> -->
 
+    <h3>Portal <strong>{{ data.portal.name }}</strong> profile</h3>
     <br/>
-    <strong>Portal tags:</strong><br/>
+    <h4>Portal tags:</h4>
     <table style="width:100%">
             <tr>
                 <th>
@@ -150,7 +152,7 @@
     <br/>
     <br/>
 
-    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> profile
+    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> company profile
 
 
 </div>

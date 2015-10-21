@@ -15,8 +15,9 @@
 
     <script>
         module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
+            $scope.url_portal_profile = {{ raw_url_for('portal.profile')|safe }};
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
-{#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
+            $scope.url_confirm_profile_edit = {{ raw_url_for('portal.confirm_profile_edit')|safe }};
 {#            $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};#}
 
             $scope.newTag = '';
@@ -158,9 +159,9 @@
             $scope.getData = function () {
                 return $scope.data.PortalDivisionTags4;
             };
-            $scope.afterSave = function (resp) {
-                window.location.href = $scope.url_after_save({company_id: resp.company_id})
-            };
+{#            $scope.afterSave = function (resp) {#}
+{#                window.location.href = $scope.url_after_save({company_id: resp.company_id})#}
+{#            };#}
 
         }]);
 
@@ -175,12 +176,13 @@
     <!-- ???{{ PortDivCheckbox }}<br/><br/> -->
     <!-- ***{{ data.PortalDivisionTags4 }}<br/><br/> -->
 
+    <h3>Portal <strong>{{ data.portal.name }}</strong> profile</h3>
     <br/>
-    <strong>Portal tags:</strong><br/>
+    <h4>Portal tags:</h4>
     <!-- <form ng-ok ng-onsuccess="afterSave"
           ng-onsubmit="getData"
           ng-action="url_confirm_create({company_id: data.company_id})"> -->
-    <form action="url_confirm_create({company_id: data.company_id})" method="post">
+    <form action="{{ url_confirm_profile_edit({portal_id: data.portal.id}) }}" method="post">
         <table style="width:100%">
             <tr>
                 <th>
@@ -219,11 +221,9 @@
             <input  type="submit" value="Save Tags"/>
         </div>
     </form>
-    <br/>
-    <br/>
 
-    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> profile
-
+    Back to <a href="{{ url_portal_profile({portal_id: data.portal['id']}) }}"> "{{ data.portal.name }}"</a> portal profile<br/>
+    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> company profile
 
 </div>
 {% endraw %}

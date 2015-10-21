@@ -1,5 +1,5 @@
 from .blueprints import portal_bp
-from flask import render_template, g, jsonify
+from flask import render_template, g, redirect, url_for, jsonify
 from ..models.company import Company
 from flask.ext.login import current_user, login_required
 from ..models.portal import PortalDivisionType
@@ -91,13 +91,13 @@ def apply_company(json):
         'name, company_owner_id,id') for portal in CompanyPortal.get_portals(json['company_id'])],
             'company_id': json['company_id']}
 
-# TODO ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 @portal_bp.route('/profile/<string:portal_id>/', methods=['GET'])
 @login_required
 # @check_rights(simple_permissions([]))
 def profile(portal_id):
-    return render_template('company/portal_profile.html')
+    company_id = db(Portal, id=portal_id).one().company_owner_id
+    return render_template('company/portal_profile.html', company_id=company_id)
 
 
 @portal_bp.route('/profile/<string:portal_id>/', methods=['POST'])
@@ -118,7 +118,8 @@ def profile_load(json, portal_id):
 @login_required
 # @check_rights(simple_permissions([]))
 def profile_edit(portal_id):
-    return render_template('company/portal_profile_edit.html')
+    company_id = db(Portal, id=portal_id).one().company_owner_id
+    return render_template('company/portal_profile_edit.html', company_id=company_id)
 
 
 @portal_bp.route('/profile_edit/<string:portal_id>/', methods=['POST'])
@@ -139,14 +140,12 @@ def profile_edit_load(json, portal_id):
 @login_required
 # @check_rights(simple_permissions([]))
 @ok
-def profile_check(json, portal_id):
-    portal = db(Portal, id=portal_id).one()
+def confirm_profile_edit(json, portal_id):
+    # portal = db(Portal, id=portal_id).one()
 
-    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
-    tags_dict = {tag.id: tag.name for tag in tags}
-    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
-            'portal_id': portal_id,
-            'tag': tags_dict}
+    # tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
+    # tags_dict = {tag.id: tag.name for tag in tags}
+    return redirect(url_for('portal.profile', portal_id=portal_id))
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
