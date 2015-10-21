@@ -5,7 +5,7 @@ from ..controllers import errors
 from flask import g
 from utils.db_utils import db
 from .company import Company
-from .portal import Portal
+#from .portal import Portal
 # from .articles import ArticlePortal
 from .pr_base import PRBase, Base
 
@@ -88,18 +88,18 @@ class TagPortalDivision(Base, PRBase):
         self.tag_id = tag_id
         self.portal_division_id = portal_division_id
 
-    def validate(self, tag_name):
-        ret = {'errors': {}, 'warnings': {}, 'notices': {}}
-
-        if tag_name == '':
-            ret['errors']['name'] = 'empty tag is not allowed'
-
-        portal_tags = db(Portal, id=self.portal_division.portal_id).portal_tags
-        portal_tag_names = map(lambda obj: getattr(obj, 'name'), portal_tags)
-        if tag_name in portal_tag_names:
-            ret['errors']['name'] = 'this portal tag already exists'
-            
-        return ret
+    # def validate(self, tag_name):
+    #     ret = {'errors': {}, 'warnings': {}, 'notices': {}}
+    #
+    #     if tag_name == '':
+    #         ret['errors']['name'] = 'empty tag is not allowed'
+    #
+    #     portal_tags = db(Portal, id=self.portal_division.portal_id).portal_tags
+    #     portal_tag_names = map(lambda obj: getattr(obj, 'name'), portal_tags)
+    #     if tag_name in portal_tag_names:
+    #         ret['errors']['name'] = 'this portal tag already exists'
+    #
+    #     return ret
 
 
 class TagPortalDivisionArticle(Base, PRBase):

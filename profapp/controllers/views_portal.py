@@ -71,10 +71,12 @@ def confirm_create(json, company_id):
         raise errors.ValidationException(validation_result)
     else:
         company_owner = Company.get(company_id)
-        portal.logo_file_id = File.get(json['logo_file_id']).copy_file(company_id=company_id,
-                                                 root_folder_id=company_owner.system_folder_file_id,
-                                                 parent_folder_id=company_owner.system_folder_file_id,
-                                                 article_portal_id=None).save().id
+        portal.logo_file_id = \
+            File.get(json['logo_file_id']).\
+            copy_file(company_id=company_id,
+                      root_folder_id=company_owner.system_folder_file_id,
+                      parent_folder_id=company_owner.system_folder_file_id,
+                      article_portal_id=None).save().id
         return {'company_id': company_id}
 
 
@@ -91,7 +93,6 @@ def apply_company(json):
 
 # TODO ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
 @portal_bp.route('/profile/<string:portal_id>/', methods=['GET'])
 @login_required
 # @check_rights(simple_permissions([]))
@@ -104,6 +105,41 @@ def profile(portal_id):
 # @check_rights(simple_permissions([]))
 @ok
 def profile_load(json, portal_id):
+    portal = db(Portal, id=portal_id).one()
+
+    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
+    tags_dict = {tag.id: tag.name for tag in tags}
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
+            'portal_id': portal_id,
+            'tag': tags_dict}
+
+
+@portal_bp.route('/profile_edit/<string:portal_id>/', methods=['GET'])
+@login_required
+# @check_rights(simple_permissions([]))
+def profile_edit(portal_id):
+    return render_template('company/portal_profile_edit.html')
+
+
+@portal_bp.route('/profile_edit/<string:portal_id>/', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([]))
+@ok
+def profile_edit_load(json, portal_id):
+    portal = db(Portal, id=portal_id).one()
+
+    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
+    tags_dict = {tag.id: tag.name for tag in tags}
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
+            'portal_id': portal_id,
+            'tag': tags_dict}
+
+
+@portal_bp.route('/confirm_profile_edit/<string:portal_id>/', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([]))
+@ok
+def profile_check(json, portal_id):
     portal = db(Portal, id=portal_id).one()
 
     tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
