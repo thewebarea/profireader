@@ -12,8 +12,7 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT,\
     ISOLATION_LEVEL_READ_COMMITTED
 import json
 
-engine = create_engine(database_uri(Config.host, Config.username,
-                                    Config.password, 'postgres'))
+engine = create_engine(database_uri(Config.host, Config.username, Config.password, 'postgres'))
 
 
 class TestCase(Base):
