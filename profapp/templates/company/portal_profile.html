@@ -17,6 +17,7 @@
         module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
             $scope.newTag = '';
+            $scope.newTagPortDivAvailability = {};
 
             $scope.PortDivCheckboxLoad = function(portal_divisions){
                 var i;
@@ -105,6 +106,7 @@
                 var i, keys;
                 if ($scope.data){
                     keys = Object.keys($scope.data.PortalDivisionTags4);
+                    console.log(keys);
                     for (i = 0; i < keys.length; i++){
                         {# it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
                         $scope.data.PortalDivisionTags4[keys[i]][portal_division_id] = !$scope.PortDivCheckbox[portal_division_id];
@@ -128,14 +130,19 @@
                 }
             };
 
-            $scope.addTag = function (portal_division_id, tag_name, values) {
+            $scope.addTag = function (tag_name, values) {
+                if ($scope.data){
 {#                $scope.newtagselection#}
 {#                $scope.newtagname#}
 {#                $scope.tag[$scope.newtagname] = $.extend(true, {}, $scope.newtagselection);#}
-{#                ng-disable="$scope.tag[$scope.newtagname]"#}
+{#                ng-disabled="$scope.tag[$scope.newtagname]"#}
 
                 console.log(values);
                 $scope.data.PortalDivisionTags4[tag_name] = $.extend(true, {}, values);
+                $scope.data.tagNew = Object.keys($scope.data.PortalDivisionTags4);
+                $scope.newTag = '';
+                console.log($scope.data.PortalDivisionTags4);
+                }
             };
 
             $scope.removeTag = function (tag_name) {
@@ -188,10 +195,11 @@
     <tr>
         <td>
             <input type="text" name="newTag" ng-model="newTag"/>
-            <button type="button" ng-click="addTag(newTag)" ng-disabled="data.tagNew.indexOf(newTag) !== -1">add tag</button>
+            <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)" ng-disabled="data.tagNew.indexOf(newTag) !== -1 || newTag === ''">add tag</button>
         </td>
         <td ng-repeat="portal_division_id in PortalDivisionIDs">
-            <input name="chk_group[newTag][portal_division_id]" type="checkbox" ng-model="checkboxValues[portal_division_id]"/>
+            <input name="chk_group[newTag][portal_division_id]" type="checkbox" ng-model="newTagPortDivAvailability[portal_division_id]" value=''/>
+            {{ newTagPortDivAvailability[portal_division_id] }}
             {{ data.PortalDivisionTags4[tag_name][portal_division_id] }}
         </td>
     </tr>
