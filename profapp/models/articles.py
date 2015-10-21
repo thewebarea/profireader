@@ -42,18 +42,10 @@ class MLStripper(HTMLParser):
 class ArticlePortal(Base, PRBase):
     __tablename__ = 'article_portal'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True, nullable=False)
-    # TODO (AA asks):
-    # TODO: 1) isn't it better to have columns portal_division_id and article_id
-    # TODO: instead of article_company_id and portal_id and portal_division_id?
-    # TODO: 2) having portal_division_id do we really need column portal_id?
+    # TODO: (AA to AA) delete portal_id!
     article_company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_company.id'))
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
-
-    # TODO: is it ok???
-    # main_tag_id = Column(TABLE_TYPES['id_profireader'],
-    #                      ForeignKey('tag_portal_division.id'),
-    #                      nullable=False)
 
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
 
@@ -72,11 +64,8 @@ class ArticlePortal(Base, PRBase):
                            primaryjoin="ArticlePortal.article_company_id == ArticleCompany.id",
                            secondaryjoin="ArticleCompany.company_id == Company.id",
                            viewonly=True, uselist=False)
-    # main_tag = relationship(Tag, secondary='tag_portal_division',
-    #                         primaryjoin="ArticlePortal.main_tag_id == TagPortalDivisionArticle.id",
-    #                         secondaryjoin="TagPortalDivisionArticle.tag_portal_division_id == "
-    #                                       ".id",
-    #                         viewonly=True, uselist=False)
+    article_portal_tags = relationship('TagPortalDivision', secondary='tag_portal_division_article',
+                                       back_populates='articles', lazy='dynamic')
 
     def __init__(self, article_company_id=None, title=None, short=None, keywords=None,
                  long=None, status=None, portal_division_id=None, image_file_id=None,
