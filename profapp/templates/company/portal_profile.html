@@ -145,12 +145,10 @@
             };
 
             $scope.removeTag = function (tag_name) {
-                var allPortalDivisions, i;
                 if ($scope.data){
-                    allPortalDivisions = Object.keys($scope.data.PortalDivisionTags3);
-                    for (i = 0; i < allPortalDivisions.length; i++){
-                        delete $scope.data.PortalDivisionTags3[allPortalDivisions[i]][tag_name];
-                    }
+                    delete $scope.data.PortalDivisionTags4[tag_name];
+                    $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
+                    console.log($scope.data.PortalDivisionTags4);
                 }
             };
 
@@ -184,6 +182,7 @@
     <tr ng-repeat="tag_name in data.tagsNew">
         <th>
             <input type="checkbox" ng-click='toggleTag(tag_name)' ng-model="tagCheckbox[tag_name]"/>
+            <button type="button" ng-click='removeTag(tag_name)'>remove tag</button>
             {{ tag_name }}
         </th>
         <td ng-repeat="portal_division_id in PortalDivisionIDs">
