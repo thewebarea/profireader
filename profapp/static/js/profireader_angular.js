@@ -119,6 +119,117 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             }
         };
     }])
+    .service('objectTransformation', function () {
+        var objectTransformation = {};
+
+        objectTransformation.reverseKeyValue = function (objIn) {
+            var objOut = {}, keys, i;
+            keys = Object.keys($scope.data.PortalDivisionTags3);
+            for (i = 0; i < objIn.length; i++) {
+                objOut[objIn[keys[i]]] = keys[i];
+            }
+            return objOut;
+        };
+
+        objectTransformation.getValues1 = function (objList, key, unique) {
+            var values = [], value;
+            for (var i = 0; i < objList.length; i++) {
+                value = objList[i][key];
+                if (!unique || (values.indexOf(value) === -1)) {
+                    values.push(value);
+                }
+            }
+            return values;
+        };
+
+        objectTransformation.getValues2 = function (objList, key1, key2) {
+            var resultObject = {}, key, value;
+            for (var i = 0; i < objList.length; i++) {
+                key = objList[i][key1];
+                value = objList[i][key2];
+
+                if (typeof resultObject[key] === 'undefined') {
+                    resultObject[key] = [value]
+                } else {
+                    if (resultObject[key].indexOf(value) === -1) {
+                        resultObject[key].push(value)
+                    }
+                }
+            }
+            return resultObject;
+        };
+
+        objectTransformation.getValues3 = function (objList, key1, key2, key2List) {
+            var resultObject = {}, key, i, objFilledWithFalse = {};
+
+            for (i = 0; i < key2List.length; i++) {
+                objFilledWithFalse[key2List[i]] = false
+            }
+
+            for (i = 0; i < objList.length; i++) {
+                key = objList[i][key1];
+                if (typeof resultObject[key] === 'undefined') {
+                    resultObject[key] = $.extend(true, {}, objFilledWithFalse);
+                }
+                resultObject[key][objList[i][key2]] = true;
+            }
+
+            return resultObject;
+        };
+
+        objectTransformation.getValues4 = function (objList, key1, key2, key2List) {
+            var resultObject = {}, key, i, objFilledWithFalse = {}, lList, elem;
+
+            lList = [];
+            for (i = 0; i < objList.length; i++) {
+                elem = objList[i][key1];
+                if (lList.indexOf(elem) === -1) {
+                    lList.push(elem);
+                }
+            }
+
+            for (i = 0; i < lList.length; i++) {
+                objFilledWithFalse[lList[i]] = false;
+            }
+
+            for (i = 0; i < key2List.length; i++) {
+                resultObject[key2List[i]] = $.extend(true, {}, objFilledWithFalse);
+            }
+
+            for (i = 0; i < objList.length; i++) {
+                key = objList[i];
+                resultObject[key[key2]][key[key1]] = true;
+            }
+
+            return resultObject;
+        };
+
+        // substitution in keys is performed
+        objectTransformation.subsInKey = function (objIn, objForSubstitution) {
+            var keys, i, objOut;
+
+            keys = Object.keys(objIn);
+            objOut = {};
+
+            for (i = 0; i < keys.length; i++) {
+                objOut[objForSubstitution[keys[i]]] = objIn[keys[i]];
+            }
+
+            return objOut;
+        };
+
+        // substitution of list elements is performed
+        objectTransformation.subsElemOfList = function (listIn, objForSubstitution) {
+            var i, listOut;
+            listOut = [];
+            for (i = 0; i < listIn.length; i++) {
+                listOut.push(objForSubstitution[listIn[i]])
+            }
+            return listOut;
+        };
+
+        return objectTransformation;
+    })
     .directive('ngOk', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',
@@ -302,13 +413,17 @@ module.run(function ($rootScope, $ok) {
                 return phrase
             }
         },
-        loadData: function (url, senddata, onok) {
+        loadData: function (url, senddata, beforeload, afterload) {
             var scope = this;
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
-                scope.data = data;
-                scope.original_data = $.extend(true, {}, data);
-                if (onok) onok();
+                if (!beforeload) beforeload = function (d) {
+                    return d;
+                };
+                scope.data = beforeload(data);
+                scope.original_data = $.extend(true, {}, scope.data);
+                if (afterload) afterload();
+
             }).finally(function () {
                 scope.loading = false;
             });
@@ -318,6 +433,31 @@ module.run(function ($rootScope, $ok) {
         tinymceImageOptions: {
             inline: false,
             plugins: 'advlist autolink link image lists charmap print preview',
+            skin: 'lightgray',
+            width: '100%',
+            height: '100%',
+            theme: 'modern',
+            file_browser_callback: function (field_name, url, type, win) {
+                var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
+                    '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
+                tinymce.activeEditor.windowManager.open({
+                        file: cmsURL,
+                        title: 'Select an Image',
+
+                        width: 950,  // Your dimensions may differ - toy around with them!
+                        height: 700,
+                        resizable: "yes",
+                        //inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
+                        close_previous: "yes"
+                    }
+                    ,
+                    {
+                        window: win,
+                        input: field_name
+                    }
+                )
+                ;
+            },
             style_formats: [
                 {title: 'Bold text', inline: 'b'},
                 {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
@@ -342,44 +482,7 @@ module.run(function ($rootScope, $ok) {
             ]
         }
     });
-
-    skin: 'lightgray',
-        width
-    :
-    '100%',
-        height
-    :
-    '100%',
-        theme
-    :
-    'modern',
-        file_browser_callback
-    :
-    function (field_name, url, type, win) {
-        var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
-            '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
-        tinymce.activeEditor.windowManager.open({
-                file: cmsURL,
-                title: 'Select an Image',
-
-                width: 950,  // Your dimensions may differ - toy around with them!
-                height: 700,
-                resizable: "yes",
-                //inline: "yes",  // This parameter only has an effect if you use the inlinepopups plugin!
-                close_previous: "yes"
-            }
-            ,
-            {
-                window: win,
-                input: field_name
-            }
-        )
-        ;
-    }
-}
-})
-})
-;
+});
 
 
 None = null;

@@ -12,6 +12,15 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 
 }
 
+.navbar-brand{
+    padding: 5px;
+}
+
+.navbar-brand img{
+    height: 40px;
+    width: auto;
+}
+
 ul.dropdown-menu li a.typeahead-item strong {
     color: #f00;
 }
@@ -1469,26 +1478,33 @@ fieldset[disabled] .btn-tales-two.active {
     padding: 0;
 }
 
+.via-social{
+    text-align: center;
+    font-size: 0;
+}
+
 .login-by {
     position: relative;
     display: inline-block;
-    width: 110px;
-    height: 110px;
-    margin: 0px 10px 10px 0px;
+    width: 65px;
+    height: 65px;
+    margin: 2px;
     background: #eee;
     margin-bottom: 50px;
+    background-size: cover;
 }
 
 .login-by span {
-    display: none;
+    display: block;
     position: absolute;
-    bottom: -40px;
+    bottom: -31px;
     background: #777;
     color: #FFFFFF;
-    width: 110px;
+    width: 65px;
     box-sizing: border-box;
-    padding: 5px;
+    padding: 2px;
     text-align: center;
+    font-size: 12px;
 
     /*background: #152d00; /!* Old browsers *!/*/
     /*background: -moz-linear-gradient(left,  #152d00 0%, #97d800 100%); /!* FF3.6+ *!/*/
@@ -1501,28 +1517,32 @@ fieldset[disabled] .btn-tales-two.active {
 }
 
 .login-by:hover span {
-    display: block;
+    /*display: block;*/
+    background: #555;
 }
+
 
 .login-by span i {
+    display: none;
     font-size: 10px;
-    margin-right: 5px;
+    /*margin-right: 5px;*/
 }
 
+
 .login-by-google {
-    background: url("/static/images/social/g.png");
+    background-image: url("/static/images/social/g.png");
 }
 
 .login-by-facebook {
-    background: url("/static/images/social/f.png");
+    background-image: url("/static/images/social/f.png");
 }
 
 .login-by-linkedin {
-    background: url("/static/images/social/l.png");
+    background-image: url("/static/images/social/l.png");
 }
 
 .login-by-microsoft {
-    background: url("/static/images/social/m.png");
+    background-image: url("/static/images/social/m.png");
 }
 
 .by-socials-block {

@@ -69,7 +69,7 @@
         }])
     </script>
     {% raw %}
-    <div ng-init="loadData(null,{},setImageUrl)" ng-controller="company_create">
+    <div ng-init="loadData(null,{}, null, setImageUrl)" ng-controller="company_create">
         <div ng-if="!data">Loading...</div>
         <div ng-if="data">
             <form class="add"
@@ -108,9 +108,6 @@
                 <textarea ui-tinymce="tinymceImageOptions" placeholder=""
                           ng-model="data.about"></textarea><br/>
                 </div>
-
-
-
 
                 <input type="submit" value="{{ data.id ? 'save' : 'create' }}"/>
             </form>
