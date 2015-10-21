@@ -176,6 +176,10 @@ footer .btn-social-icon {
     background-color: #fff !important;
 }
 
+.btn-social-icon:hover{
+    /*background-color: inherit!important;*/
+}
+
 .block-item {
     display: block;
     position: relative;
@@ -338,6 +342,7 @@ a.item-company{
     border: none;
     font-size: 18px!important;
     color: #999!important;
+    background-color: transparent;
 }
 
 .pager li.current-page > a{
@@ -355,7 +360,11 @@ a.item-company{
 .pager li.next a,
 .pager li.previous span,
 .pager li.next span {
-    padding: 3px;
+    /*padding: 3px;*/
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: transparent!important;
 }
 
 .pager li.previous,
@@ -370,13 +379,13 @@ a.item-company{
 
 .pager li.previous {
     left: 20px;
-    padding-left: 30px;
+    padding-left: 0px;
     background: url("../img/prev.png") top left no-repeat;
 }
 
 .pager li.next {
     right: 20px;
-    padding-right: 30px;
+    padding-right: 0px;
     background: url("../img/next.png") top right no-repeat;
 }
 
@@ -385,6 +394,10 @@ footer {
     color: #eee;
     padding: 25px 0;
     height: 220px;
+}
+
+footer .social-block{
+    top: 0;
 }
 
 .footer-menu ul {
@@ -399,8 +412,9 @@ footer {
 
 .footer-menu ul li a {
     color: #ddd;
-    line-height: 1.8em;
+    line-height: 2.2em;
     border: none;
+    font-size: 16px;
 }
 
 .footer-menu ul li a.current {
@@ -650,7 +664,7 @@ footer .promo{
 /* --------------------------------------------------- */
 
 .subportal.collapse.navbar-collapse {
-    margin: 30px 0px 15px 0px;
+    margin: 0px 0px 15px 0px;
 }
 
 .subportal.collapse.navbar-collapse ul {
@@ -670,19 +684,35 @@ footer .promo{
     border: none;
 }
 
+.subportal.collapse.navbar-collapse ul {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
 .subportal.collapse.navbar-collapse ul li {
-    border-right: rgba(255, 255, 255, 0.2);
+    border-right: 1px rgba(255, 255, 255, 1) solid;
+    text-transform: uppercase;
+    flex-grow: 1;
+}
+
+.subportal.collapse.navbar-collapse ul li a{
+    display: block;
+    font-size: 14px;
+    padding: 7px 0px;
+    text-align: center;
 }
 
 .subportal-cover {
     width: 100%;
-    height: 100px;
+    height: 150px;
     background-color: #fff;
     overflow: hidden;
 }
 
 .subportal-cover img {
-    height: 100px;
+    height: 150px;
+    /*width: 100%;*/
     background-color: #fff;
     float: left;
     margin-right: 1em;
@@ -706,4 +736,14 @@ footer .promo{
 
 .company-block {
 
+}
+
+#map{
+    width: 100%;
+    height:  auto;
+}
+
+#map img{
+    width: 100%;
+    border: 1px #fff solid;
 }
