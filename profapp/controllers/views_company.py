@@ -132,6 +132,7 @@ def submit_to_portal(json):
 def create():
     return render_template('company/company_edit.html', user=g.user_dict)
 
+
 @company_bp.route('/create/', methods=['POST'])
 @ok
 def load_form_create(json):

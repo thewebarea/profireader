@@ -31,14 +31,9 @@ def create_load(json, company_id):
     types = {x.id: x.get_client_side_dict() for x in
              PortalDivisionType.get_division_types()}
 
-
-
     # member_company = Portal.companies
-
     company = Company.get(company_id)
-
     member_companies = {company_id: company.get_client_side_dict()}
-
     return {'company_id': company_id,
             'portal_company_members': member_companies,
             'portal': {'company_id': company_id, 'name': '', 'host': '',

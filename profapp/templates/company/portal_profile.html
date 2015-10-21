@@ -16,6 +16,9 @@
     <script>
         module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
+{#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
+{#            $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};#}
+
             $scope.newTag = '';
             $scope.newTagPortDivAvailability = {};
 
@@ -152,6 +155,13 @@
                 }
             };
 
+            $scope.getData = function () {
+                return $scope.data.PortalDivisionTags4;
+            };
+            $scope.afterSave = function (resp) {
+                window.location.href = $scope.url_after_save({company_id: resp.company_id})
+            };
+
         }]);
 
 
@@ -167,44 +177,50 @@
 
     <br/>
     <strong>Portal tags:</strong><br/>
-
-    <table style="width:100%">
-    <tr>
-        <th>
-            <strong>tag/division</strong>
-        </th>
-        <th ng-repeat="portal_division in data.portal.divisions">
-            {{ portal_division.name }}<br/>
-            <input type="checkbox" ng-click='togglePortalDivision(portal_division.id)' ng-model="PortDivCheckbox[portal_division.id]"/>
-            {{ PortDivCheckbox[portal_division.id] }}
-        </th>
-    </tr>
-    <tr ng-repeat="tag_name in data.tagsNew">
-        <th>
-            <input type="checkbox" ng-click='toggleTag(tag_name)' ng-model="tagCheckbox[tag_name]"/>
-            <button type="button" ng-click='removeTag(tag_name)'>remove tag</button>
-            {{ tag_name }}
-        </th>
-        <td ng-repeat="portal_division_id in PortalDivisionIDs">
-            <input name="chk_group[tag_name][portal_division_id]" type="checkbox" ng-model="data.PortalDivisionTags4[tag_name][portal_division_id]"/>
-            {{ data.PortalDivisionTags4[tag_name][portal_division_id] }}
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <input type="text" name="newTag" ng-model="newTag"/>
-            <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)" ng-disabled="data.tagsNew.indexOf(newTag) !== -1 || newTag === ''">add tag</button>
-        </td>
-        <td ng-repeat="portal_division_id in PortalDivisionIDs">
-            <input name="chk_group[newTag][portal_division_id]" type="checkbox" ng-model="newTagPortDivAvailability[portal_division_id]" value=''/>
-            {{ newTagPortDivAvailability[portal_division_id] }}
-        </td>
-    </tr>
-    </table>
-
-    <br/>
-
-    <input type="submit" value="Save Tags">
+    <!-- <form ng-ok ng-watch="data.PortalDivisionTags4" ng-onsuccess="afterSave"
+          ng-onsubmit="getData"
+          ng-action="url_confirm_create({company_id: data.company_id})"> -->
+        <table style="width:100%">
+            <tr>
+                <th>
+                    <strong>tag/division</strong>
+                </th>
+                <th ng-repeat="portal_division in data.portal.divisions">
+                    {{ portal_division.name }}<br/>
+                    <input type="checkbox" ng-click='togglePortalDivision(portal_division.id)' ng-model="PortDivCheckbox[portal_division.id]"/>
+                    {{ PortDivCheckbox[portal_division.id] }}
+                </th>
+            </tr>
+            <tr ng-repeat="tag_name in data.tagsNew  | orderBy: 'toString()'">
+                <th>
+                    <input type="checkbox" ng-click='toggleTag(tag_name)' ng-model="tagCheckbox[tag_name]"/>
+                    <button type="button" ng-click='removeTag(tag_name)'>remove tag</button>
+                    {{ tag_name }}
+                </th>
+                <td ng-repeat="portal_division_id in PortalDivisionIDs">
+                    <input name="chk_group[tag_name][portal_division_id]" type="checkbox" ng-model="data.PortalDivisionTags4[tag_name][portal_division_id]"/>
+                    {{ data.PortalDivisionTags4[tag_name][portal_division_id] }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="text" name="newTag" ng-model="newTag"/>
+                    <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)" ng-disabled="data.tagsNew.indexOf(newTag) !== -1 || newTag === ''">add tag</button>
+                </td>
+                <td ng-repeat="portal_division_id in PortalDivisionIDs">
+                    <input name="chk_group[newTag][portal_division_id]" type="checkbox" ng-model="newTagPortDivAvailability[portal_division_id]" value=''/>
+                    {{ newTagPortDivAvailability[portal_division_id] }}
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <div class="item text-align-left">
+            <span class="error">{{ }}</span>
+            <input  ng-disabled="false"
+                    type="submit"
+                    value="Save Tags"/>
+        </div>
+    <!-- </form> -->
     <br/>
     <br/>
 
