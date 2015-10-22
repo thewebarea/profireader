@@ -66,7 +66,7 @@ function down {
     if [[ "$3" != '' ]]; then
 	echo "  mv $filetoget $filetobak"
     fi
-    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://x.d.ntaxa.com/profireader/$filetoget
+    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://ntaxa.com/profireader/$filetoget
 if [[ \"\$?\" == \"0\" ]]; then"
     if [[ "$3" != '' ]]; then
 	command="$command
@@ -165,6 +165,7 @@ sed -i '/\(companyportal\|aprofi\).d.ntaxa.com/d' /etc/hosts
 sed -i '/profi.ntaxa.com/d' /etc/hosts
 echo '' >> /etc/hosts
 echo '127.0.0.1 db.profi web.profi mail.profi' >> /etc/hosts
+echo '127.0.0.1 db.profi_test' >> /etc/hosts
 echo '127.0.0.1 profi.ntaxa.com oles.profi.ntaxa.com rodynnifirmy.profi.ntaxa.com derevoobrobka.profi.ntaxa.com viktor.profi.ntaxa.com aa.profi.ntaxa.com md.profi.ntaxa.com oleh.profi.ntaxa.com file001.profi.ntaxa.com fsm.profi.ntaxa.com' >> /etc/hosts
 echo '127.0.0.1 test.profi.ntaxa.com test1.profi.ntaxa.com test2.profi.ntaxa.com test3.profi.ntaxa.com test4.profi.ntaxa.com test5.profi.ntaxa.com test6.profi.ntaxa.com test7.profi.ntaxa.com test8.profi.ntaxa.com test9.profi.ntaxa.com' >> /etc/hosts
 cat /etc/hosts" sudo haproxy
@@ -252,17 +253,21 @@ function menu_db_user_pass {
 ALTER USER $psqluser WITH PASSWORD '$psqlpass';" compare_local_makarony
     }
 
+makaronyaddress='d.ntaxa.com/profireader/54321'
+makaronyaddress='a.ntaxa.com/profireader/54111'
+localaddress='localhost/profireader/5432'
+artekaddress='a.ntaxa.com/profireader/54321'
 
 function menu_compare_local_makarony {
-    conf_comm "./postgres.dump_and_compare_structure.sh localhost/profireader/5432 d.ntaxa.com/profireader/54321" nosudo compare_local_artek
+    conf_comm "./postgres.dump_and_compare_structure.sh $makaronyaddress $localaddress" nosudo compare_local_artek
     }
 
 function menu_compare_local_artek {
-    conf_comm "./postgres.dump_and_compare_structure.sh localhost/profireader/5432 a.ntaxa.com/profireader/54321" nosudo compare_makarony_artek
+    conf_comm "./postgres.dump_and_compare_structure.sh $localaddress $artekaddress" nosudo compare_makarony_artek
     }
 
 function menu_compare_makarony_artek {
-    conf_comm "./postgres.dump_and_compare_structure.sh d.ntaxa.com/profireader/54321 a.ntaxa.com/profireader/54321" nosudo db_rename
+    conf_comm "./postgres.dump_and_compare_structure.sh $makaronyaddress $artekaddress" nosudo db_rename
     }
 
 function menu_db_rename {

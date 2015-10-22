@@ -13,31 +13,21 @@ Virtualenviroment/
 .Python
 env/
 env2/
+venv/
 build/
 develop-eggs/
 downloads/
 eggs/
-/client_secret.*
-client_secret.*
 .eggs/
-venv/
-.venv/
-/venv/
-venv/*
 lib/
 lib64/
 parts/
 sdist/
 var/
-database_full.*
-/database_full.*
 *.egg-info/
 .installed.cfg
 *.egg
-*client_secrets.json
-*client_secret.json
-/*client_secrets.json
-/*client_secret.json
+
 # PyInstaller
 client_secret.json
 #  Usually these files are written by a python script from a template
@@ -81,6 +71,15 @@ target/
 # secret data
 secret_data.*
 client_secret.*
+/client_secret.*
+*client_secrets.json
+*client_secret.json
+/*client_secrets.json
+/*client_secret.json
+
+# database
+database_full.*
+/database_full.*
 database.*.bak
 *.sql
 *.bak

@@ -24,11 +24,11 @@ def show_mine():
 def load_mine(json):
 
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
+    chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
     subquery = ArticleCompany.subquery_user_articles(search_text=json.get('search_text'),
                                                      user_id=g.user_dict['id'],
-                                                     company_id=json.get(
-                                                         'chosen_company')['id'])\
-        if json.get('chosen_company') else ArticleCompany.\
+                                                     company_id=chosen_company_id)\
+        if chosen_company_id else ArticleCompany.\
         subquery_user_articles(search_text=json.get('search_text'), user_id=g.user_dict['id'])
     articles, pages, current_page = pagination(subquery,
                                                current_page,
@@ -41,7 +41,7 @@ def load_mine(json):
             'companies': companies,
             'search_text': json.get('search_text') or '',
             'original_search_text': json.get('search_text') or '',
-
+            'chosen_company': json.get('chosen_company') or companies[0],
             'pages': {'total': pages,
                       'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS}}
