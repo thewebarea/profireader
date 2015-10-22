@@ -127,10 +127,31 @@ class ArticleCompany(Base, PRBase):
                                           'status, company.name'):
         return self.to_dict(fields)
 
+    @staticmethod
+    def get_companies_where_user_send_article(user_id):
+        companies = []
+        for article in db(Article, author_user_id=user_id).all():
+            for comp in article.submitted_versions:
+                companies.append(comp.company.to_dict('id, name'))
+        return companies
+
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
                                    'status': ARTICLE_STATUS_IN_COMPANY.
                                   submitted})
+
+    @staticmethod
+    def subquery_user_articles(search_text=None, user_id=None, **kwargs):
+
+        if not search_text:
+            sub_query = db(Article, author_user_id=user_id).\
+                filter(db(ArticleCompany, article_id=Article.id, **kwargs).exists())
+        else:
+            sub_query = db(Article, author_user_id=user_id).\
+                filter(db(ArticleCompany, article_id=Article.id, **kwargs).
+                       filter(ArticleCompany.title.ilike("%" + search_text + "%")).exists())
+
+        return sub_query
 
         # self.portal_devision_id = portal_devision_id
         # self.article_company_id = article_company_id
@@ -230,16 +251,20 @@ class Article(Base, PRBase):
                                                    **kwargs),
                        author_user_id=user_id)
 
+    def get_article_with_html_tag(self, text_into_html):
+        article = self.get_client_side_dict()
+        article['mine_version']['title'] = article['mine_version']['title'].replace(text_into_html, '<span class=colored>%s</span>' % text_into_html)
+        return article
+
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
         # TODO: AA by OZ:    .filter(user_id has to be employee in company and
         # TODO: must have rights to submit article to this company)
-        return [x.to_dict('id,name') for x in db(Company)
-            .filter(~db(ArticleCompany).
-                    filter_by(company_id=Company.id,
-                              article_id=article_id).exists())
-            .filter(Company.name.ilike(
-            "%" + searchtext + "%")).all()]
+        return [x.to_dict('id,name') for x in db(Company).filter(~db(ArticleCompany).
+                                                                 filter_by(company_id=Company.id,
+                                                                           article_id=article_id).
+                                                                 exists()).filter(
+            Company.name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
@@ -278,10 +303,9 @@ class Article(Base, PRBase):
         else:
             sub_query = db(ArticlePortal, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
                 order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')). \
-                filter(or_(
-                ArticlePortal.title.ilike("%" + search_text + "%"),
-                ArticlePortal.short.ilike("%" + search_text + "%"),
-                ArticlePortal.long.ilike("%" + search_text + "%")))
+                filter(or_(ArticlePortal.title.ilike("%" + search_text + "%"),
+                           ArticlePortal.short.ilike("%" + search_text + "%"),
+                           ArticlePortal.long.ilike("%" + search_text + "%")))
         return sub_query
 
     # @staticmethod
@@ -340,6 +364,7 @@ class ArticleCompanyHistory(Base, PRBase):
     def __init__(self, editor_user_id=None, company_id=None, name=None,
                  short=None, long=None, article_company_id=None,
                  article_id=None):
+        super(ArticleCompanyHistory, self).__init__()
         self.editor_user_id = editor_user_id
         self.company_id = company_id
         self.name = name
