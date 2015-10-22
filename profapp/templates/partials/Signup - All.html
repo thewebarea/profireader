@@ -1,12 +1,43 @@
 <div class="tabs" style="border-bottom: 1px #ccc solid;">
     <a class="tab" href="{{ url_for('auth.login') }}" title="Log in to Profireader">Log in</a>
-    <a class="tab actual" style="border: 1px #ccc solid; border-bottom: 1px #fff solid;" href="{{ url_for('auth.signup') }}" title="Sign up to Profireader">Sign up</a>
-    <a class="tab" href="{{ url_for('auth.signup') }}" title="Sign up to Profireader">Help</a>
+    <a class="tab actual" style="border: 1px #ccc solid; border-bottom: 1px #fff solid;"
+       href="{{ url_for('auth.signup') }}" title="Sign up to Profireader">Sign up</a>
 </div>
 
+<h2>Sign up via social or Simple registration</h2>
+
+<div class="" style="width: 320px; margin: 0 auto;">
+    <div class="via-social">
+        <a class="login-by login-by-google"
+           href="{{ url_for('auth.signup_soc_network', soc_network_name='google') }}"><span><i>by</i>google</span></a>
+        <a class="login-by login-by-facebook"
+           href="{{ url_for('auth.signup_soc_network', soc_network_name='facebook') }}"><span><i>by</i>facebook</span></a>
+        <a class="login-by login-by-linkedin"
+           href="{{ url_for('auth.signup_soc_network', soc_network_name='linkedin') }}"><span><i>by</i>linkedin</span></a>
+        {#<a href="{{ url_for('auth.signup_soc_network', soc_network_name='twitter') }}">twitter</a>#}
+        <a class="login-by login-by-microsoft"
+           href="{{ url_for('auth.signup_soc_network', soc_network_name='microsoft') }}"><span><i>by</i>microsoft</span></a>
+        {#<a href="{{ url_for('auth.signup_soc_network', soc_network_name='yahoo') }}">yahoo</a>#}
+    </div>
+    <div class="simple-register">
+        <form style="background: transparent; border: none;" action="{{ url_for('auth.signup') }}" method="POST"/>
+        {{ form.email(placeholder='yourname@email.com', size="30", maxlength="100", type="email") }} <br/>
+        {{ form.displayname(placeholder='Name (your public display name)', size="30", maxlength="100", type="text") }}
+        <br/>
+        {{ form.password(placeholder='Password', value="", type="password") }} <br/>
+        {{ form.password2(placeholder='Confirm password', value="", type="password") }} <br/>
+        {{ form.submit(type="submit", value="Sign Up") }}<br/>
+        <!-- <input name="submit" type="submit" value="Sign Up" /> <br/> -->
+        {{ form.csrf_token }}
+        </form>
+    </div>
 
 
+</div>
 
+{#
 
-<div class="by-socials-block"><h2>Sign up using any of the following services:</h2>{% include 'partials/Signup - Soc Networks.html' %}</div>
+<div class="by-socials-block"><h2>Sign up using any of the following
+    services:</h2>{% include 'partials/Signup - Soc Networks.html' %}</div>
 <div class="by-profireader-block"><h2>Simple registration</h2>{% include 'partials/Signup - Profireader.html' %}</div>
+#}
