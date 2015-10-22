@@ -227,7 +227,7 @@ def subportal_contacts(member_company_id, member_company_name):
 
     division = get_division_for_subportal(portal.id, member_company_id)
 
-    company_users = g.db().query(User).all()
+    company_users = member_company.employees
 
     return render_template('front/bird/subportal_contacts.html',
                            subportal=True,
