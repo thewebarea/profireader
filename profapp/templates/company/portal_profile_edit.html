@@ -35,6 +35,7 @@
 
             $scope.tagCheckboxLoad = function(tag_names){
                 var i;
+                $scope.newTagCheckbox = false;
                 $scope.tagCheckbox = {};
                 if ($scope.data){
                     for (i = 0; i < tag_names.length; i++){
@@ -139,11 +140,28 @@
                 }
             };
 
+            $scope.toggleNewTag = function(){
+                var i, PortDivIDs, newTagCheckboxesState, currState = false;
+                if ($scope.data){
+                    {# it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
+                    currState = !$scope.newTagCheckbox;
+                    PortDivIDs = $scope.PortalDivisionIDs;
+                    newTagCheckboxesState = {};
+                    for (i = 0; i < PortDivIDs.length; i++){
+                        newTagCheckboxesState[PortDivIDs[i]] = currState;
+                    }
+
+                    $scope.newTagPortDivAvailability = newTagCheckboxesState;
+                    console.log($scope.data.newTagPortDivAvailability)
+                }
+            };
+
             $scope.addTag = function (tag_name, values) {
                 if ($scope.data){
                 $scope.data.PortalDivisionTags4[tag_name] = $.extend(true, {}, values);
                 $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
                 $scope.newTag = '';
+                $scope.newTagCheckbox = false;
                 $scope.newTagPortDivAvailability = $.extend(true, {}, $scope.TagPortDivAvailabilityFalse);
                 }
             };
@@ -159,9 +177,10 @@
             $scope.getData = function () {
                 return $scope.data.PortalDivisionTags4;
             };
-{#            $scope.afterSave = function (resp) {#}
-{#                window.location.href = $scope.url_after_save({company_id: resp.company_id})#}
-{#            };#}
+
+            $scope.afterSave = function (resp) {
+                window.location.href = $scope.url_after_save({company_id: resp.company_id})
+            };
 
         }]);
 
@@ -182,7 +201,6 @@
     <!-- <form ng-ok ng-onsuccess="afterSave"
           ng-onsubmit="getData"
           ng-action="url_confirm_create({company_id: data.company_id})"> -->
-    <form action="{{ url_confirm_profile_edit({portal_id: data.portal.id}) }}" method="post">
         <table style="width:100%">
             <tr>
                 <th>
@@ -207,6 +225,7 @@
             </tr>
             <tr>
                 <td>
+                    <input type="checkbox" ng-click='toggleNewTag()' ng-model="newTagCheckbox"/>
                     <input type="text" name="newTag" ng-model="newTag"/>
                     <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)" ng-disabled="data.tagsNew.indexOf(newTag) !== -1 || newTag === ''">add tag</button>
                 </td>
@@ -217,6 +236,10 @@
             </tr>
         </table>
         <br/>
+
+    <form ng-ok ng-onsuccess="afterSave"
+          ng-onsubmit="getData"
+          ng-action="url_confirm_profile_edit({portal_id: data.portal.id})">
         <div class="item text-align-left">
             <input  type="submit" value="Save Tags"/>
         </div>

@@ -1,5 +1,5 @@
 from .blueprints import portal_bp
-from flask import render_template, g, redirect, url_for, jsonify
+from flask import render_template, g, flash, redirect, url_for, jsonify
 from ..models.company import Company
 from flask.ext.login import current_user, login_required
 from ..models.portal import PortalDivisionType
@@ -141,11 +141,13 @@ def profile_edit_load(json, portal_id):
 # @check_rights(simple_permissions([]))
 @ok
 def confirm_profile_edit(json, portal_id):
-    # portal = db(Portal, id=portal_id).one()
+    portal = db(Portal, id=portal_id).one()
+    flash('Portal tags successfully updated')
+    x = json
 
     # tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
     # tags_dict = {tag.id: tag.name for tag in tags}
-    return redirect(url_for('portal.profile', portal_id=portal_id))
+    return json
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
