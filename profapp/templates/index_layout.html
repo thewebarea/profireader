@@ -41,7 +41,10 @@
     <script src="{{ url_for('static', filename = 'angular-ui-tinymce/tinymce.js') }}"></script>
     <script src="{{ url_for('static', filename = 'angular-bootstrap/ui-bootstrap.min.js') }}"></script>
     <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.2.js"></script>
-    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js"></script>
+
+    {% if angular_version %}
+    <script src="{{ angular_version }}"></script>
+    {% endif %}
         <script src="{{ url_for('static', filename = 'image_editor/dist/cropper.js') }}"></script>
     {#<script src="{{ url_for('static', filename = 'image_editor/demo/js/main.js') }}"></script>#}
     {#    <script src="/static/filemanager/angular-filemanager.min.js"></script><!-- Comment if you need to use raw source code -->#}

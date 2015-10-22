@@ -14,7 +14,9 @@ from config import Config
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
-    return render_template('article/list.html')
+    return render_template(
+        'article/list.html',
+        angular_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
 
 
 @article_bp.route('/list/', methods=['POST'])
@@ -30,7 +32,7 @@ def load_mine(json):
         subquery_user_articles(search_text=json.get('search_text'), user_id=g.user_dict['id'])
     articles, pages, current_page = pagination(subquery,
                                                current_page,
-                                               items_per_page=2)
+                                               items_per_page=5)
 
     return {'articles': [{'article': a.get_client_side_dict(),
                           'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
