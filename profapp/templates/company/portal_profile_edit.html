@@ -106,6 +106,8 @@
                     $scope.data.PortalDivisionTags4 = objectTransformation.subsInKey(res, $scope.data.tag);
                     $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
 
+                    $scope.tagAvailabilityOnAllPortDivs = false;
+
                     $scope.TagPortDivAvailabilityFalse = {};
                     for (i = 0; i < $scope.PortalDivisionIDs.length; i++){
                         $scope.TagPortDivAvailabilityFalse[$scope.PortalDivisionIDs[i]] = false;
@@ -141,7 +143,7 @@
                 }
             };
 
-            $scope.toggleNewTag = function(){
+            $scope.toggleMultNewTag = function(){
                 var i, PortDivIDs, newTagCheckboxesState, currState = false;
                 if ($scope.data){
                     {# it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
@@ -153,6 +155,7 @@
                     }
 
                     $scope.newTagPortDivAvailability = newTagCheckboxesState;
+                    $scope.tagAvailabilityOnAllPortDivs = currState;
                 }
             };
 
@@ -162,6 +165,7 @@
                 $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
                 $scope.newTag = '';
                 $scope.newTagCheckbox = false;
+                $scope.tagAvailabilityOnAllPortDivs = false;
                 $scope.newTagPortDivAvailability = $.extend(true, {}, $scope.TagPortDivAvailabilityFalse);
                 }
             };
@@ -173,11 +177,25 @@
                 }
             };
 
+            $scope.toggleNewTag = function(portal_division_id){
+                var keys, i, res;
+                keys = Object.keys($scope.newTagPortDivAvailability);
+                res = false;
+                for (i = 0; i < keys.length; i++){
+                    if (keys[i] === portal_division_id){
+                        res = res || !$scope.newTagPortDivAvailability[keys[i]];
+                    } else {
+                        res = res || $scope.newTagPortDivAvailability[keys[i]];
+                    }
+                }
+                $scope.tagAvailabilityOnAllPortDivs = res;
+            };
+
             $scope.getData = function () {
                 var binded_to_por_div_tags, tags, i, j, port_divs, portal_tag, divisions;
-                var tag_binding_indication, unbinded_tags, x;
-                binded_to_por_div_tags = [];
-                unbinded_tags = [];
+{#                var tag_binding_indication, unbinded_tags;#}
+                binded_to_port_div_tags = [];
+{#                unbinded_tags = [];#}
                 tags = Object.keys($scope.data.PortalDivisionTags4);
                 divisions = $scope.data.portal.divisions;
                 port_divs = [];
@@ -187,19 +205,20 @@
                 for (i = 0; i < tags.length; i++){
                     portal_tag = {};
                     portal_tag.tag_name = tags[i];
-                    tag_binding_indication = false;
+{#                    tag_binding_indication = false;#}
                     for (j = 0; j < port_divs.length; j++){
                         if ($scope.data.PortalDivisionTags4[tags[i]][port_divs[j]]){
-                            tag_binding_indication = true;
+{#                            tag_binding_indication = true;#}
                             portal_tag.portal_division_id = port_divs[j];
-                            binded_to_por_div_tags.push($.extend(true, {}, portal_tag));
+                            binded_to_port_div_tags.push($.extend(true, {}, portal_tag));
                         }
                     }
-                    if (!tag_binding_indication){
-                        unbinded_tags.push(tags[i])
-                    }
+{#                    if (!tag_binding_indication){#}
+{#                        unbinded_tags.push(tags[i])#}
+{#                    }#}
                 }
-                return {'binded_tags': binded_to_por_div_tags, 'unbinded_tags': unbinded_tags};
+{#                return {'binded_tags': binded_to_por_div_tags, 'unbinded_tags': unbinded_tags};#}
+                return binded_to_port_div_tags
             };
 
             $scope.afterSave = function (resp) {  // TODO: do we need resp here?
@@ -247,12 +266,13 @@
             </tr>
             <tr>
                 <td>
-                    <input type="checkbox" ng-click='toggleNewTag()' ng-model="newTagCheckbox"/>
-                    <input type="text" name="newTag" ng-model="newTag"/>
-                    <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)" ng-disabled="data.tagsNew.indexOf(newTag) !== -1 || newTag === ''">add tag</button>
+                    <input type="checkbox" ng-click='toggleMultNewTag()' ng-model="newTagCheckbox"/>
+                    <input type="text" ng-model="newTag"/>
+                    <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)"
+                                          ng-disabled="data.tagsNew.indexOf(newTag) !== -1 || newTag === '' || !tagAvailabilityOnAllPortDivs">add tag</button>
                 </td>
                 <td ng-repeat="portal_division_id in PortalDivisionIDs">
-                    <input name="chk_group[newTag][portal_division_id]" type="checkbox" ng-model="newTagPortDivAvailability[portal_division_id]" value=''/>
+                    <input type="checkbox" ng-click='toggleNewTag(portal_division_id)' ng-model="newTagPortDivAvailability[portal_division_id]"/>
                     {{ newTagPortDivAvailability[portal_division_id] }}
                 </td>
             </tr>
