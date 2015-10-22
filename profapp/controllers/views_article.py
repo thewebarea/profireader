@@ -13,7 +13,7 @@ from config import Config
 
 
 @article_bp.route('/list/', methods=['GET'])
-def show_mine(page=1, search_text=None, chosen_company=None):
+def show_mine():
     return render_template('article/list.html')
 
 
@@ -21,23 +21,27 @@ def show_mine(page=1, search_text=None, chosen_company=None):
 @ok
 def load_mine(json):
 
+    current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     subquery = ArticleCompany.subquery_user_articles(search_text=json.get('search_text'),
                                                      user_id=g.user_dict['id'],
                                                      company_id=json.get(
                                                          'chosen_company')['id'])\
         if json.get('chosen_company') else ArticleCompany.\
         subquery_user_articles(search_text=json.get('search_text'), user_id=g.user_dict['id'])
-    articles, pages, current_page = pagination(subquery, json.get('page') or 1, items_per_page=2)
+    articles, pages, current_page = pagination(subquery,
+                                               current_page,
+                                               items_per_page=2)
 
     return {'articles': [{'article': a.get_client_side_dict(),
                           'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
                          for a in articles],
             'companies': ArticleCompany.get_companies_where_user_send_article(g.user_dict['id']),
             'search_text': json.get('search_text') or '',
-            'chosen_company': json.get('chosen_company') or '', 'page': current_page,
-            'pages': pages,
-            'current_page': current_page,
-            'page_buttons': Config.PAGINATION_BUTTONS}
+            'original_search_text': json.get('search_text') or '',
+            'chosen_company': json.get('chosen_company') or '',
+            'pages': {'total': pages,
+                      'current_page': current_page,
+                      'page_buttons': Config.PAGINATION_BUTTONS}}
 
 
 @article_bp.route('/create/', methods=['GET'])

@@ -25,7 +25,7 @@
 
 {#        }])#}
 {#    </script>#}<script>
-angular.module('ui.bootstrap.pagination').controller('PaginationDemoCtrl', function ($scope, $log) {
+module.controller('PaginationDemoCtrl', function ($scope, $log) {
   $scope.currentPage = 4;
 
   $scope.setPage = function (pageNo) {
@@ -52,7 +52,11 @@ $scope.clickable = function(){document.getElementById("hidden_submit").click();}
                 ng-action="url_search_article">
                                    <input type="submit" hidden id="hidden_submit"></form>
 
-
-    <uib-pagination boundary-links="true" total-items="data.pages" items-per-page="1" ng-model="data.page" ng-change="clickable()" class="pagination-sm" previous-text="&lsaquo;" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></uib-pagination>
+{% if data.pages %}
+    <uib-pagination boundary-links="true" total-items="data.pages" items-per-page="1" ng-model="data.current_page" ng-change="clickable()"
+                    class="pagination-sm"
+                    previous-text="&lsaquo;" next-text="&rsaquo;"
+                    first-text="&laquo;"
+                    last-text="&raquo;"></uib-pagination>{% if data.pages %}
 
 </div></div>{% endraw %}

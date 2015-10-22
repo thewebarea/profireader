@@ -17,8 +17,11 @@
                 return text_to_change
             };
 
-
-
+            $scope.page_changed = function () {
+                $scope.data.search_text = $scope.data.original_search_text;
+                $('#pagerform').trigger('submit');
+                return false;
+            };
 
             $scope.cancel = function () {
                 window.location.href = $scope.url_back();
@@ -49,116 +52,6 @@
 
                 return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">'  + search_text + '</span>'));}
               }]);
-{#                var search = full_text.search(search_text);#}
-{#                var empty_string = '';#}
-{#                var number = 0;#}
-{#                if(search_text){#}
-{#                for(var i=0; i<full_text.length;i++){#}
-{#                    if (full_text[i]=='#'){#}
-{#                        var colored_tag = document.createElement("span");#}
-{#                        full_text = full_text.replace('#', '');#}
-{#                        var text = full_text.slice(number, i);#}
-{#                        var t = document.createTextNode(text);#}
-{#                        new_tag.appendChild(t);#}
-{#                        var colored_text = document.createTextNode(search_text);#}
-{#                        colored_tag.className = 'x_id';#}
-{#                        colored_tag.appendChild(colored_text);#}
-{#                        new_tag.appendChild(colored_tag);#}
-{#                        number = i;#}
-{#                    }#}
-{#                    else{#}
-{#                        var t = document.createTextNode(full_text[i]);#}
-{#                        new_tag.appendChild(t);#}
-{#                    }#}
-{#                                    }#}
-{#                                    }#}
-{#                else{#}
-{#                    var s = document.createTextNode(full_text);#}
-{#                    new_tag.appendChild(s);#}
-{#                }#}
-{#                return new_tag;#}
-{#                console.log(new_tag);#}
-{#                document.getElementById(id).appendChild(new_tag);#}
-{#            };#}
-
-{#                if(search_text) {#}
-{#                    var short = full_text.slice(0, full_text.search(search_text));#}
-{#                    var t = document.createTextNode(short);#}
-{#                    new_tag.appendChild(t);#}
-{#                    var colored_text = document.createTextNode(search_text);#}
-{#                    colored_tag.className = 'x_id';#}
-{#                    colored_tag.appendChild(colored_text);#}
-{#                    new_tag.appendChild(colored_tag);#}
-
-
-
-{#                    var start_from = short.length + search_text.length;#}
-{#                    for(var i=0; i<full_text.length-1; i++){#}
-{#                        var sliced = full_text.slice(start_from-1, full_text.indexOf(search_text, start_from));#}
-{#                        var x = document.createTextNode(sliced);#}
-{#                        new_tag.appendChild(x);#}
-{#                        colored_text = document.createTextNode(search_text);#}
-{#                        colored_tag.className = 'x_id';#}
-{#                        colored_tag.appendChild(colored_text);#}
-{#                        new_tag.appendChild(colored_tag);#}
-{#                        start_from = sliced.length-1#}
-{##}
-{#                    }#}
-{##}
-{#                    var length = full_text.search(search_text);#}
-{#                    full_text = full_text.slice(length, full_text.length-1);#}
-{#                    while(full_text.search(search_text)){#}
-{#                        full_text = full_text.slice(length, full_text.search(search_text));#}
-{#                        var n = document.createTextNode(full_text);#}
-{#                        new_tag.appendChild(n);#}
-{#                        length = full_text.search(search_text)#}
-{#                    }#}
-
-{#                    var count = 0;#}
-                    {#                while(full_text.search(search_text)){#}
-                    {#                    if(full_text.search(search_text)){#}
-                    {#                        var t = document.createTextNode(short);#}
-                    {#                        new_tag.appendChild(t);#}
-                    {#                        full_text = full_text.slice(full_text.search(search_text));#}
-                    {#                        var t = document.createTextNode(full_text);#}
-                    {#                        new_tag.appendChild(t);#}
-                    {##}
-                    {#                        count++#}
-                    {#                    }#}
-                    {#                }#}
-                    {#                for(var i=0; i<count; i++){#}
-                    {#                    var t = document.createTextNode('s');#}
-                    {#                    new_tag.appendChild(t);#}
-                    {#                }#}
-                    {#                for(var i= 0, j=0; i<full_text.length; i++, j++)#}
-                    {#                {#}
-                    {#                    if(full_text[i]==deleted_text[j]){#}
-                    {#                        empty_string = empty_string+full_text[i];}#}
-                    {#                    else{#}
-                    {#                        var t = document.createTextNode(empty_string);#}
-                    {#                        new_tag.appendChild(t);#}
-                    {#                        i = i + search_text.length;#}
-                    {#                        full_text = full_text.replace(empty_string+search_text, '');#}
-
-                    {#                        deleted_text = deleted_text.replace(empty_string, '');#}
-                    {#                        i = 0;#}
-                    {#                    }#}
-                    {#                }#}
-
-
-{#            $scope.change_color = function myFunction() {#}
-{#                var para = document.createElement("P");#}
-{#                var t = document.createTextNode("This is a paragraph.");#}
-{#                var v = document.createElement("H1");#}
-{#                var x = document.createTextNode("This is big");#}
-{#                v.className = 'x_id';#}
-{#                para.appendChild(t);#}
-{#                v.appendChild(x);#}
-{#                para.appendChild(v);#}
-{#                document.getElementById("myDIV").appendChild(para);#}
-
-{##}
-
 
     </script>
  {% raw %}
@@ -172,7 +65,7 @@
                 ng-onsuccess="afterSave"
                 ng-onsubmit="getData"
                 ng-action="url_search_article">
-                    <input type="submit" onclick="data.page=1" value="search">
+                    <input type="submit" onclick="data.pages.current_page=1" value="search">
                 </form>
 
             <table style="width:114%">
@@ -186,7 +79,8 @@
 
                 <tr ng-if="article_dict.company_count>1">
                     <td rowspan="{{ article_dict.company_count }}" width="300px">{{ article_dict.article.mine_version.md_tm }}</td>
-                   <td rowspan="{{ article_dict.company_count }}" width="200px"><a href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}">{{ article_dict.article.mine_version.title }}</a></td>
+                   <td rowspan="{{ article_dict.company_count }}" width="200px"><a href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}" ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.search_text, article_dict.article.id)">
+                       </a></td>
                 </tr>
                 <tr ng-if="article_dict.company_count>1" ng-repeat="companies in article_dict.article.submitted_versions">
                     <td width="200px">{{ companies.company.name }}</td><td width="150px">{{ companies.status }}</td></tr>
@@ -199,7 +93,22 @@
 
             </table>
 
-        </div></div>
+        </div>
+        <form id="pagerform"
+              ng-ok
+                ng-onsuccess="afterSave"
+                ng-onsubmit="getData"
+                ng-action="url_search_article">
+                    <input type="submit" hidden>
+                </form>
+
+    <uib-pagination boundary-links="true" total-items="data.pages.total" items-per-page="1" ng-model="data.pages.current_page" ng-change="page_changed()"
+                    class="pagination-sm"
+                    previous-text="&lsaquo;" next-text="&rsaquo;"
+                    first-text="&laquo;"
+                    last-text="&raquo;"></uib-pagination>
+
+    </div>
         {% endraw %}
-        {% include 'article/pager.html' %}
+
 {% endblock portal_content %}

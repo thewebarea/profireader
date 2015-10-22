@@ -231,7 +231,7 @@ def subportal_contacts(member_company_id, member_company_name):
 
     return render_template('front/bird/subportal_contacts.html',
                            subportal=True,
-                           company_users = {u.id:u.get_client_side_dict() for u in company_users},
+                           company_users={u.id:u.get_client_side_dict() for u in company_users},
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
                            current_subportal_division=False,
