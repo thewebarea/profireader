@@ -34,6 +34,14 @@
                 $scope.data = resp;
 
             };
+
+            $scope.selectDefaultCompany = function () {
+                console.log($scope, $scope.loading);
+                $scope.data.chosen_company = $scope.data.companies[0];
+                console.log($scope.data.chosen_company);
+
+            };
+
             $scope.getCompanies = [];
             $scope.getCompaniesFunc = function(submitted_viersions){
 {#                var array = {};#}
@@ -55,7 +63,7 @@
 
     </script>
  {% raw %}
-    <div ng-init="loadData()" ng-controller="article_list">
+    <div ng-init="loadData(); selectDefaultCompany();" ng-controller="article_list">
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
@@ -72,7 +80,7 @@
 
 
 
-                    <tr><td></td><td><input type="text" placeholder="Search" ng-model="data.search_text"></td><td><select ng-model="data.chosen_company" ng-options="comp.name for comp in data.companies"><option value="" selected hidden></select></td><td></td></tr>
+                    <tr><td></td><td><input type="text" placeholder="Search" ng-model="data.search_text"></td><td>{{ data.chosen_company }}<select name="sel" ng-model="data.chosen_company" ng-options="comp as comp.name for comp in data.companies"></select></td><td></td></tr>
 
                   <tr><td width="400px">&nbsp;&nbsp;Date</td><td width="120px">&nbsp;&nbsp;&nbsp;Title</td><td width="120px">Campanies</td><td><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status</p></td></tr></table>
             <table style="width:100%" ng-repeat="article_dict in data.articles">

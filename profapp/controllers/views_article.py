@@ -33,14 +33,15 @@ def load_mine(json):
     articles, pages, current_page = pagination(subquery,
                                                current_page,
                                                items_per_page=5)
+    companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
 
     return {'articles': [{'article': a.get_client_side_dict(),
                           'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
                          for a in articles],
-            'companies': ArticleCompany.get_companies_where_user_send_article(g.user_dict['id']),
+            'companies': companies,
             'search_text': json.get('search_text') or '',
             'original_search_text': json.get('search_text') or '',
-            'chosen_company': json.get('chosen_company') or '',
+
             'pages': {'total': pages,
                       'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS}}
