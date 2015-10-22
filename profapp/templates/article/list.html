@@ -10,7 +10,7 @@
 
             $scope.url_details = {{ raw_url_for('article.details')|safe }};
             $scope.url_create_article = {{ raw_url_for('article.show_form_create')|safe }};
-            $scope.data = {};
+{#            $scope.data = {};#}
             $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
             $scope.url_search_article = '{{ url_for('article.load_mine')|safe }}';
             $scope.get_colored_title = function (text_to_change) {
@@ -29,6 +29,7 @@
             };
             $scope.afterSave = function (resp) {
                 $scope.data = resp;
+
             };
             $scope.getCompanies = [];
             $scope.getCompaniesFunc = function(submitted_viersions){
@@ -171,7 +172,7 @@
                 ng-onsuccess="afterSave"
                 ng-onsubmit="getData"
                 ng-action="url_search_article">
-                    <input type="submit" value="search">
+                    <input type="submit" onclick="data.page=1" value="search">
                 </form>
 
             <table style="width:114%">

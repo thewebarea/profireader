@@ -154,8 +154,8 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
                                                                 name=division_name).one()
 
     sub_query = Article.subquery_articles_at_portal(search_text=search_text,
-                                                    portal_division_id=subportal_division.id).filter(
-        Company.id == member_company_id)
+                                                    portal_division_id=subportal_division.id).\
+        filter(Company.id == member_company_id)
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/subportal_division.html',

@@ -13,23 +13,21 @@ from config import Config
 
 
 @article_bp.route('/list/', methods=['GET'])
-@article_bp.route('/list/<int:page>/<string:search_text>/<string:chosen_company>', methods=['GET'])
 def show_mine(page=1, search_text=None, chosen_company=None):
     return render_template('article/list.html')
 
 
 @article_bp.route('/list/', methods=['POST'])
-@article_bp.route('/list/<int:page>/<string:search_text>/<string:chosen_company>', methods=['POST'])
 @ok
-def load_mine(json, page=1, search_text=None, chosen_company=None):
+def load_mine(json):
 
-    subquery = ArticleCompany.subquery_user_articles(search_text=json.get('search_text') or search_text,
+    subquery = ArticleCompany.subquery_user_articles(search_text=json.get('search_text'),
                                                      user_id=g.user_dict['id'],
                                                      company_id=json.get(
-                                                         'chosen_company')['id'] or chosen_company)\
-        if (json.get('chosen_company') or chosen_company) else ArticleCompany.\
+                                                         'chosen_company')['id'])\
+        if json.get('chosen_company') else ArticleCompany.\
         subquery_user_articles(search_text=json.get('search_text'), user_id=g.user_dict['id'])
-    articles, pages, current_page = pagination(subquery, page, items_per_page=2)
+    articles, pages, current_page = pagination(subquery, json.get('page') or 1, items_per_page=2)
 
     return {'articles': [{'article': a.get_client_side_dict(),
                           'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}

@@ -271,12 +271,11 @@ class Article(Base, PRBase):
     def search_for_company_to_submit(user_id, article_id, searchtext):
         # TODO: AA by OZ:    .filter(user_id has to be employee in company and
         # TODO: must have rights to submit article to this company)
-        return [x.to_dict('id,name') for x in db(Company)
-            .filter(~db(ArticleCompany).
-                    filter_by(company_id=Company.id,
-                              article_id=article_id).exists())
-            .filter(Company.name.ilike(
-            "%" + searchtext + "%")).all()]
+        return [x.to_dict('id,name') for x in db(Company).filter(~db(ArticleCompany).
+                                                                 filter_by(company_id=Company.id,
+                                                                           article_id=article_id).
+                                                                 exists()).filter(
+            Company.name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
@@ -315,10 +314,9 @@ class Article(Base, PRBase):
         else:
             sub_query = db(ArticlePortal, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
                 order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')). \
-                filter(or_(
-                ArticlePortal.title.ilike("%" + search_text + "%"),
-                ArticlePortal.short.ilike("%" + search_text + "%"),
-                ArticlePortal.long.ilike("%" + search_text + "%")))
+                filter(or_(ArticlePortal.title.ilike("%" + search_text + "%"),
+                           ArticlePortal.short.ilike("%" + search_text + "%"),
+                           ArticlePortal.long.ilike("%" + search_text + "%")))
         return sub_query
 
     # @staticmethod
