@@ -153,7 +153,6 @@
                     }
 
                     $scope.newTagPortDivAvailability = newTagCheckboxesState;
-                    console.log($scope.data.newTagPortDivAvailability)
                 }
             };
 
@@ -171,18 +170,39 @@
                 if ($scope.data){
                     delete $scope.data.PortalDivisionTags4[tag_name];
                     $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
-                    console.log($scope.data.PortalDivisionTags4);
                 }
             };
 
             $scope.getData = function () {
-                var portal_tags;
-                portal_tags = {'tag1': 'aaa'}; // transform it from $scope.data.PortalDivisionTags4;
-{#                delete $scope.data.PortalDivisionTags4;#}
-                return portal_tags;
+                var binded_to_por_div_tags, tags, i, j, port_divs, portal_tag, divisions;
+                var tag_binding_indication, unbinded_tags, x;
+                binded_to_por_div_tags = [];
+                unbinded_tags = [];
+                tags = Object.keys($scope.data.PortalDivisionTags4);
+                divisions = $scope.data.portal.divisions;
+                port_divs = [];
+                for (i = 0; i < divisions.length; i++){
+                    port_divs.push(divisions[i].id)
+                }
+                for (i = 0; i < tags.length; i++){
+                    portal_tag = {};
+                    portal_tag.tag_name = tags[i];
+                    tag_binding_indication = false;
+                    for (j = 0; j < port_divs.length; j++){
+                        if ($scope.data.PortalDivisionTags4[tags[i]][port_divs[j]]){
+                            tag_binding_indication = true;
+                            portal_tag.portal_division_id = port_divs[j];
+                            binded_to_por_div_tags.push($.extend(true, {}, portal_tag));
+                        }
+                    }
+                    if (!tag_binding_indication){
+                        unbinded_tags.push(tags[i])
+                    }
+                }
+                return {'binded_tags': binded_to_por_div_tags, 'unbinded_tags': unbinded_tags};
             };
 
-            $scope.afterSave = function (resp) {  // TODO: do we neeed resp here?
+            $scope.afterSave = function (resp) {  // TODO: do we need resp here?
 {#                window.location.href = $scope.url_after_save({portal_id: resp.portal_id})#}
                 window.location.href = $scope.url_after_save({portal_id: $scope.data.portal['id']})
             };
