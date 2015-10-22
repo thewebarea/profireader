@@ -140,14 +140,16 @@ def profile_edit_load(json, portal_id):
 @login_required
 # @check_rights(simple_permissions([]))
 @ok
-def confirm_profile_edit(json, portal_id):
+def confirm_profile_edit(portal_tags, portal_id):
     portal = db(Portal, id=portal_id).one()
-    flash('Portal tags successfully updated')
-    x = json
 
-    # tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
-    # tags_dict = {tag.id: tag.name for tag in tags}
-    return json
+    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
+    tags_dict = {tag.id: tag.name for tag in tags}
+
+    flash('Portal tags successfully updated')
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
+            'portal_id': portal_id,
+            'tag': tags_dict}
 
 
 @portal_bp.route('/partners/<string:company_id>/', methods=['GET'])

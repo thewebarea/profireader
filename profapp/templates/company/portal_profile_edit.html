@@ -18,7 +18,8 @@
             $scope.url_portal_profile = {{ raw_url_for('portal.profile')|safe }};
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
             $scope.url_confirm_profile_edit = {{ raw_url_for('portal.confirm_profile_edit')|safe }};
-{#            $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};#}
+{#            $scope.url_portal_profile_edit = {{ raw_url_for('portal.profile_edit')|safe }}; // this page#}
+            $scope.url_after_save = {{ raw_url_for('portal.profile_edit')|safe }}; // this page
 
             $scope.newTag = '';
             $scope.newTagPortDivAvailability = {};
@@ -175,11 +176,15 @@
             };
 
             $scope.getData = function () {
-                return $scope.data.PortalDivisionTags4;
+                var portal_tags;
+                portal_tags = {'tag1': 'aaa'}; // transform it from $scope.data.PortalDivisionTags4;
+{#                delete $scope.data.PortalDivisionTags4;#}
+                return portal_tags;
             };
 
-            $scope.afterSave = function (resp) {
-                window.location.href = $scope.url_after_save({company_id: resp.company_id})
+            $scope.afterSave = function (resp) {  // TODO: do we neeed resp here?
+{#                window.location.href = $scope.url_after_save({portal_id: resp.portal_id})#}
+                window.location.href = $scope.url_after_save({portal_id: $scope.data.portal['id']})
             };
 
         }]);
@@ -198,9 +203,6 @@
     <h3>Portal <strong>{{ data.portal.name }}</strong> profile</h3>
     <br/>
     <h4>Portal tags:</h4>
-    <!-- <form ng-ok ng-onsuccess="afterSave"
-          ng-onsubmit="getData"
-          ng-action="url_confirm_create({company_id: data.company_id})"> -->
         <table style="width:100%">
             <tr>
                 <th>
