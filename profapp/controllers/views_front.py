@@ -1,8 +1,9 @@
 from .blueprints import front_bp
 from flask import render_template, request, url_for, redirect, g, current_app
-from ..models.articles import Article, ArticlePortal
+from ..models.articles import Article, ArticlePortal, ArticleCompany
 from ..models.portal import CompanyPortal, PortalDivision, Portal, Company, \
     PortalDivisionSettings_company_subportal
+from utils.db_utils import db
 from ..models.users import User
 from config import Config
 # from profapp import
@@ -40,7 +41,8 @@ def portal_and_settings(portal):
     newd = []
     for di in ret['divisions']:
         if di['portal_division_type_id'] == 'company_subportal':
-            pdset = g.db().query(PortalDivisionSettings_company_subportal).filter_by(portal_division_id=di['id']).one()
+            pdset = g.db().query(PortalDivisionSettings_company_subportal).\
+                filter_by(portal_division_id=di['id']).one()
             com_port = g.db().query(CompanyPortal).get(pdset.company_portal_id)
             di['member_company'] = Company.get(com_port.company_id)
         newd.append(di)
@@ -154,7 +156,8 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
 
     sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                     portal_division_id=subportal_division.id).\
-        filter(Company.id == member_company_id)
+        filter(db(ArticleCompany, company_id=member_company_id, id=ArticlePortal.article_company_id).exists())
+        # filter(Company.id == member_company_id)
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/subportal_division.html',

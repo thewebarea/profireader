@@ -311,6 +311,20 @@ class Article(Base, PRBase):
                            ArticlePortal.long.ilike("%" + search_text + "%")))
         return sub_query
 
+    @staticmethod
+    def subquery_articles_at_portal(search_text=None, **kwargs):
+
+        if not search_text:
+            sub_query = db(ArticlePortal, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
+                order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() '))
+        else:
+            sub_query = db(ArticlePortal, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
+                order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')). \
+                filter(or_(ArticlePortal.title.ilike("%" + search_text + "%"),
+                           ArticlePortal.short.ilike("%" + search_text + "%"),
+                           ArticlePortal.long.ilike("%" + search_text + "%")))
+        return sub_query
+
     # @staticmethod
     # def get_articles_for_portal(page_size, portal_division_id,
     #                             pages, page=1, search_text=None):
