@@ -80,7 +80,6 @@ def division(division_name, search_text, page=1):
                                                         portal_division_id=division.id)
         articles, pages, page = pagination(query=sub_query, page=page)
 
-
         return render_template('front/bird/division.html',
                                articles={a.id: a.get_client_side_dict() for
                                          a in articles},
@@ -154,8 +153,8 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
                                                                 name=division_name).one()
 
     sub_query = Article.subquery_articles_at_portal(search_text=search_text,
-                                                    portal_division_id=subportal_division.id).filter(
-        Company.id == member_company_id)
+                                                    portal_division_id=subportal_division.id).\
+        filter(Company.id == member_company_id)
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/subportal_division.html',
@@ -227,11 +226,11 @@ def subportal_contacts(member_company_id, member_company_name):
 
     division = get_division_for_subportal(portal.id, member_company_id)
 
-    company_users = g.db().query(User).all()
+    company_users = member_company.employees
 
     return render_template('front/bird/subportal_contacts.html',
                            subportal=True,
-                           company_users = {u.id:u.get_client_side_dict() for u in company_users},
+                           company_users={u.id:u.get_client_side_dict() for u in company_users},
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
                            current_subportal_division=False,

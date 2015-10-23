@@ -103,7 +103,7 @@ def uploader(company_id=None):
     return render_template('file_uploader.html', company_id=company_id)
 
 
-@filemanager_bp.route('/send/<string:company_id>', methods=['POST'])
+@filemanager_bp.route('/send/<string:company_id>/', methods=['POST'])
 def send(company_id):
     """ YOU SHOULD SEND PROPERTY NAME, DESCRIPTION, ROOT_FOLDER AND FOLDER.
     NOW THIS VALUES GET FROM DB. HARDCODE!!! """

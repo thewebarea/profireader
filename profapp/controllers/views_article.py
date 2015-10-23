@@ -8,18 +8,43 @@ from .blueprints import article_bp
 from .request_wrapers import ok, object_to_dict
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 # import os
+from .pagination import pagination
+from config import Config
 
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
-    return render_template('article/list.html')
+    return render_template(
+        'article/list.html',
+        angular_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
 
 
 @article_bp.route('/list/', methods=['POST'])
 @ok
 def load_mine(json):
-    return {'articles': [a.get_client_side_dict()
-                         for a in Article.get_articles_for_user(g.user.id)]}
+
+    current_page = json.get('pages')['current_page'] if json.get('pages') else 1
+    chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
+    subquery = ArticleCompany.subquery_user_articles(search_text=json.get('search_text'),
+                                                     user_id=g.user_dict['id'],
+                                                     company_id=chosen_company_id)\
+        if chosen_company_id else ArticleCompany.\
+        subquery_user_articles(search_text=json.get('search_text'), user_id=g.user_dict['id'])
+    articles, pages, current_page = pagination(subquery,
+                                               current_page,
+                                               items_per_page=5)
+    companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
+
+    return {'articles': [{'article': a.get_client_side_dict(),
+                          'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
+                         for a in articles],
+            'companies': companies,
+            'search_text': json.get('search_text') or '',
+            'original_search_text': json.get('search_text') or '',
+            'chosen_company': json.get('chosen_company') or companies[0],
+            'pages': {'total': pages,
+                      'current_page': current_page,
+                      'page_buttons': Config.PAGINATION_BUTTONS}}
 
 
 @article_bp.route('/create/', methods=['GET'])
