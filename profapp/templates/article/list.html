@@ -56,9 +56,9 @@
               }]);
 
     </script>
- {% raw %}
-    <div ng-init="loadData()" ng-controller="article_list">
 
+    <div ng-init="loadData()" ng-controller="article_list">
+ {% raw %}
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
             <h2><a href="{{ url_create_article() }}">Create article</a></h2>
@@ -106,13 +106,9 @@
                     <input type="submit" hidden>
                 </form>
 
-    <uib-pagination boundary-links="true" total-items="data.pages.total" items-per-page="1" ng-model="data.pages.current_page" ng-change="page_changed()"
-                    class="pagination-sm"
-                    previous-text="&lsaquo;" next-text="&rsaquo;"
-                    first-text="&laquo;"
-                    last-text="&raquo;"></uib-pagination>
+ {% endraw %}
 
-    </div>
-        {% endraw %}
 
+{% include 'article/pager.html' %}
+</div>
 {% endblock portal_content %}
