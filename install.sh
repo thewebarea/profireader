@@ -66,7 +66,7 @@ function down {
     if [[ "$3" != '' ]]; then
 	echo "  mv $filetoget $filetobak"
     fi
-    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://ntaxa.com/profireader/$filetoget
+    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://x.d.ntaxa.com/profireader/$filetoget
 if [[ \"\$?\" == \"0\" ]]; then"
     if [[ "$3" != '' ]]; then
 	command="$command
@@ -254,7 +254,6 @@ ALTER USER $psqluser WITH PASSWORD '$psqlpass';" compare_local_makarony
     }
 
 makaronyaddress='d.ntaxa.com/profireader/54321'
-makaronyaddress='a.ntaxa.com/profireader/54111'
 localaddress='localhost/profireader/5432'
 artekaddress='a.ntaxa.com/profireader/54321'
 
