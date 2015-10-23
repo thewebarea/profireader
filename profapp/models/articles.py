@@ -129,11 +129,14 @@ class ArticleCompany(Base, PRBase):
 
     @staticmethod
     def get_companies_where_user_send_article(user_id):
-        companies = [{'name': 'All', 'id': 0}]
+        all = {'name': 'All', 'id': 0}
+        companies = []
+        companies.append(all)
+
         for article in db(Article, author_user_id=user_id).all():
             for comp in article.submitted_versions:
                 companies.append(comp.company.to_dict('id, name'))
-        return [dict(comp) for comp in set([tuple(c.items()) for c in companies])]
+        return all, [dict(comp) for comp in set([tuple(c.items()) for c in companies])]
 
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
