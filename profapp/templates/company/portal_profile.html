@@ -14,7 +14,7 @@
     {% endblock company_base %}<br/>
 
     <script>
-        module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
+        module.controller('PortalProfileController', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_portal_profile_edit = {{ raw_url_for('portal.profile_edit')|safe }};
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
 {#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
@@ -118,7 +118,7 @@
 
     </script>
     {% raw %}
- <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="portal_list">
+ <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="PortalProfileController">
 
     <!-- !!!{{ data.PortalDivisionTagsName }}<br/><br/> -->
     <!-- {{ loadPortalDivisionTags2() }} -->

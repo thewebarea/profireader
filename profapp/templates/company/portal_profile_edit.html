@@ -14,11 +14,10 @@
     {% endblock company_base %}<br/>
 
     <script>
-        module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
+        module.controller('PortalProfileEditController', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
             $scope.url_portal_profile = {{ raw_url_for('portal.profile')|safe }};
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
             $scope.url_confirm_profile_edit = {{ raw_url_for('portal.confirm_profile_edit')|safe }};
-{#            $scope.url_portal_profile_edit = {{ raw_url_for('portal.profile_edit')|safe }}; // this page#}
             $scope.url_after_save = {{ raw_url_for('portal.profile_edit')|safe }}; // this page
 
             $scope.newTag = '';
@@ -192,10 +191,10 @@
             };
 
             $scope.getData = function () {
-                var binded_to_por_div_tags, tags, i, j, port_divs, portal_tag, divisions;
-{#                var tag_binding_indication, unbinded_tags;#}
+                var binded_to_port_div_tags, tags, i, j, port_divs, portal_tag, divisions;
+                var tag_binding_indication, unbinded_tags;
                 binded_to_port_div_tags = [];
-{#                unbinded_tags = [];#}
+                unbinded_tags = [];
                 tags = Object.keys($scope.data.PortalDivisionTags4);
                 divisions = $scope.data.portal.divisions;
                 port_divs = [];
@@ -205,20 +204,20 @@
                 for (i = 0; i < tags.length; i++){
                     portal_tag = {};
                     portal_tag.tag_name = tags[i];
-{#                    tag_binding_indication = false;#}
+                    tag_binding_indication = false;
                     for (j = 0; j < port_divs.length; j++){
                         if ($scope.data.PortalDivisionTags4[tags[i]][port_divs[j]]){
-{#                            tag_binding_indication = true;#}
+                            tag_binding_indication = true;
                             portal_tag.portal_division_id = port_divs[j];
                             binded_to_port_div_tags.push($.extend(true, {}, portal_tag));
                         }
                     }
-{#                    if (!tag_binding_indication){#}
-{#                        unbinded_tags.push(tags[i])#}
-{#                    }#}
+                    if (!tag_binding_indication){
+                        unbinded_tags.push(tags[i])
+                    }
                 }
-{#                return {'binded_tags': binded_to_por_div_tags, 'unbinded_tags': unbinded_tags};#}
-                return binded_to_port_div_tags
+                console.log({'binded_tags': binded_to_port_div_tags, 'unbinded_tags': unbinded_tags});
+                return {'binded_tags': binded_to_port_div_tags, 'unbinded_tags': unbinded_tags};
             };
 
             $scope.afterSave = function (resp) {  // TODO: do we need resp here?
@@ -231,7 +230,7 @@
 
     </script>
     {% raw %}
- <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="portal_list">
+ <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="PortalProfileEditController">
 
     <!-- !!!{{ data.PortalDivisionTagsName }}<br/><br/> -->
     <!-- {{ loadPortalDivisionTags2() }} -->
@@ -278,6 +277,8 @@
             </tr>
         </table>
         <br/>
+
+     {{ url_confirm_profile_edit({portal_id: data.portal.id}) }}
 
     <form ng-ok ng-onsuccess="afterSave"
           ng-onsubmit="getData"
