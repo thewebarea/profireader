@@ -30,7 +30,6 @@ def search_to_submit_article(json):
 @login_required
 # @check_rights(simple_permissions([]))
 def show():
-    print(session)
     return render_template('company/companies.html')
 
 
