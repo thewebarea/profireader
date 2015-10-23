@@ -133,15 +133,24 @@
             }
         };
 
-        $scope.take_action = function(item, action) {
-            if ($scope.file_manager_on_action[action]) {
+        $scope.take_action = function(item, actionname) {
+            if ($scope.file_manager_on_action[actionname]) {
                 try {
-                    eval($scope.file_manager_on_action[action] + '(item);');
+                    eval($scope.file_manager_on_action[actionname] + '(item);');
                 }
                 catch(e) {
 
                 }
             }
+        }
+
+	$scope.can_action = function(item, actionnamem defaultpermited) {
+	    if (actionname === 'paste') {
+		if (defaultpermited === true) {
+		    return ($scope.copied_files.length > 0)
+		    }
+		}
+	    return defaultpermited
         }
 
         $scope.uploadFiles = function() {
