@@ -38,9 +38,11 @@ def show():
 # @check_rights(simple_permissions([]))
 @ok
 def load_companies(json):
-
-    return {'companies': [employer.get_client_side_dict()
-                          for employer in current_user.employers]}
+    user_companies = [user_comp for user_comp in current_user.employer_assoc]
+    return {'companies': [usr_cmp.employer.get_client_side_dict() for usr_cmp in user_companies
+                          if usr_cmp.status == STATUS.ACTIVE()],
+            'non_active_status': [usr_cmp.employer.get_client_side_dict() for usr_cmp in
+                                  user_companies if usr_cmp.status != STATUS.ACTIVE()]}
 
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
