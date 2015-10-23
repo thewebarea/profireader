@@ -56,7 +56,7 @@
               }]);
 
     </script>
-
+{% include 'pager.html' %}
     <div ng-init="loadData()" ng-controller="article_list">
  {% raw %}
         <div ng-if="loading">Loading...</div>
@@ -105,10 +105,10 @@
                 ng-action="url_search_article">
                     <input type="submit" hidden>
                 </form>
-
+<div ng-include="'pagination.html'"></div>
  {% endraw %}
 
 
-{% include 'article/pager.html' %}
+
 </div>
 {% endblock portal_content %}

@@ -28,6 +28,7 @@ def load_database(db_config):
     def load_db():
         from sqlalchemy import create_engine
         from sqlalchemy.orm import scoped_session, sessionmaker
+        print(db_config)
 
         engine = create_engine(db_config)
         db_session = scoped_session(sessionmaker(autocommit=False,

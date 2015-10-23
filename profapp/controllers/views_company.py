@@ -16,7 +16,7 @@ from collections import OrderedDict
 # from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
-
+from flask import session
 
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
@@ -30,6 +30,7 @@ def search_to_submit_article(json):
 @login_required
 # @check_rights(simple_permissions([]))
 def show():
+    print(session)
     return render_template('company/companies.html')
 
 
