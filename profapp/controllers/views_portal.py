@@ -12,6 +12,7 @@ from ..models.rights import Right
 from profapp.models.rights import RIGHTS
 from ..controllers import errors
 from ..models.files import File, FileContent
+import copy
 
 
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
@@ -129,29 +130,61 @@ def profile_edit(portal_id):
 def profile_edit_load(json, portal_id):
     portal = db(Portal, id=portal_id).one()
 
+    if 'profile_tags_edit' in json.keys():  # here all changes with tags in db will be done
+        def strip_new_tags(json):
+            """ Strips tags have gotten from input prameter json
+            :param json: {'bound_tags' [{'portal_division_id': '....', 'tag_name': '  sun  '}, ...],
+                'notbound_tags': [{'portal_division_id': '....', 'tag_name': '  moon  '}, ...], 'confirm_profile_edit': True}
+            :return:     {'bound_tags' [{'portal_division_id': '....', 'tag_name': 'sun'}, ...],
+                'notbound_tags': [{'portal_division_id': '....', 'tag_name': 'moon'}, ...], 'confirm_profile_edit': True}
+            I guess this function is redundant as client does't allow to add tag with trailed blanks.
+            """
+
+            def stripping(json_new_value):
+                new_list = []
+                for elem in json_new_value:
+                    new_elem = copy.deepcopy(elem)
+                    new_elem['tag_name'] = new_elem['tag_name'].strip()
+                    new_list.append(new_elem)
+                return new_list
+
+            json_new = {'bound_tags': [], 'notbound_tags': []}
+
+            key = 'bound_tags'
+            json_new[key] = stripping(json[key])
+
+            key = 'notbound_tags'
+            json_new[key] = stripping(json[key])
+
+            return json_new
+
+        json_new = strip_new_tags(json)
+
+        current_portal_tags = portal.portal_tags
+
+        new_bound_tags = json_new['bound_tags']  # we should add new tags and delete unnecessary tags in Tag table
+        new_bound_tag_names = set(map(lambda x: x['tag_name'], new_bound_tags))
+
+        current_tags = set(map(lambda x: getattr(getattr(x, 'tag'), 'name'), current_portal_tags))
+
+        deleted_tags = current_tags - new_bound_tag_names
+        added_tags = new_bound_tag_names - (new_bound_tag_names & current_tags)
+
+        actually_deleted_tags = set()
+        for tag_name in deleted_tags:
+            # g.db.query(Portal).filter(id=user_object).first()
+            # user = g.db.query(User).filter(User.profireader_email == result_user.email).first()
+
+            g.db.query(Portal).filter(Portal.portal_tags.tag.name!=tag_name).first()
+            #new_tagselem.tag.name
+
+        tag0_name = current_portal_tags[0].tag.name
+        y = list(current_portal_tags)         # Operations with portal_tags...
+        flash('Portal tags successfully updated')
+
+
     tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
     tags_dict = {tag.id: tag.name for tag in tags}
-    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
-            'portal_id': portal_id,
-            'tag': tags_dict}
-
-
-@portal_bp.route('/confirm_profile_edit/<string:portal_id>/', methods=['POST'])
-@login_required
-# @check_rights(simple_permissions([]))
-@ok
-def confirm_profile_edit(portal_tags, portal_id):
-
-    portal = db(Portal, id=portal_id).one()
-
-    # portal_tags.unbinded_tags
-
-    # Operations with portal_tags...
-
-    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
-    tags_dict = {tag.id: tag.name for tag in tags}
-
-    flash('Portal tags successfully updated')
     return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
             'portal_id': portal_id,
             'tag': tags_dict}

@@ -13,7 +13,7 @@ from .pr_base import PRBase, Base
 class Tag(Base, PRBase):
     __tablename__ = 'tag'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
-    name = Column(TABLE_TYPES['short_name'], unique=True)
+    name = Column(TABLE_TYPES['short_name'], index=True, unique=True)
 
     portal_divisions_assoc = relationship('TagPortalDivision', back_populates='tag')
 
