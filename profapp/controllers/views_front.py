@@ -156,7 +156,8 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
 
     sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                     portal_division_id=subportal_division.id).\
-        filter(db(ArticleCompany, company_id=member_company_id, id=ArticlePortal.article_company_id).exists())
+        filter(db(ArticleCompany,
+                  company_id=member_company_id, id=ArticlePortal.article_company_id).exists())
         # filter(Company.id == member_company_id)
     articles, pages, page = pagination(query=sub_query, page=page)
 

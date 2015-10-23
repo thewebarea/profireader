@@ -56,9 +56,9 @@
               }]);
 
     </script>
- {% raw %}
+{% include 'pager.html' %}
     <div ng-init="loadData()" ng-controller="article_list">
-
+ {% raw %}
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
             <h2><a href="{{ url_create_article() }}">Create article</a></h2>
@@ -75,7 +75,7 @@
 
 
                     <tr><td></td><td><input type="text" placeholder="Search" ng-model="data.search_text"></td><td>
-                        <select ng-model="data.chosen_company" ng-options="comp.name for comp in data.companies | orderBy:'comp.id' track by comp.id"></select>
+                        <select ng-model="data.chosen_company" ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
                     </td><td></td></tr>
 
                   <tr><td width="400px">&nbsp;&nbsp;Date</td><td width="120px">&nbsp;&nbsp;&nbsp;Title</td><td width="120px">Campanies</td><td><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Status</p></td></tr></table>
@@ -105,14 +105,10 @@
                 ng-action="url_search_article">
                     <input type="submit" hidden>
                 </form>
+<div ng-include="'pagination.html'"></div>
+ {% endraw %}
 
-    <uib-pagination boundary-links="true" total-items="data.pages.total" items-per-page="1" ng-model="data.pages.current_page" ng-change="page_changed()"
-                    class="pagination-sm"
-                    previous-text="&lsaquo;" next-text="&rsaquo;"
-                    first-text="&laquo;"
-                    last-text="&raquo;"></uib-pagination>
 
-    </div>
-        {% endraw %}
 
+</div>
 {% endblock portal_content %}
