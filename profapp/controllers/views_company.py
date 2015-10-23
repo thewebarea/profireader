@@ -41,8 +41,10 @@ def load_companies(json):
     user_companies = [user_comp for user_comp in current_user.employer_assoc]
     return {'companies': [usr_cmp.employer.get_client_side_dict() for usr_cmp in user_companies
                           if usr_cmp.status == STATUS.ACTIVE()],
-            'non_active_status': [usr_cmp.employer.get_client_side_dict() for usr_cmp in
-                                  user_companies if usr_cmp.status != STATUS.ACTIVE()]}
+            'non_active_user_company_status': [usr_cmp.employer.get_client_side_dict() for
+                                               usr_cmp in user_companies if usr_cmp.status
+                                               != STATUS.ACTIVE()],
+            'user_id': g.user_dict['id']}
 
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])

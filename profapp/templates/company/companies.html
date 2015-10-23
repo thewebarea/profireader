@@ -82,10 +82,14 @@
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
             <div ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">
+                <div ng-if="my_emploer.author_user_id==data.user_id">
+                <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{ _('Company name is `%(name)s` - YOUR OWN COMPANY',
+                    my_emploer) }}</a><br/></div>
+                <div ng-if="my_emploer.author_user_id!=data.user_id">
                 <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{ _('Company name is `%(name)s`',
-                    my_emploer) }}</a><br/>
+                    my_emploer) }}</a><br/></div>
             </div>
-            <div ng-repeat="non_active_employer in data.non_active_status" id="joined_company_{{ non_active_employer.id }}">
+            <div ng-repeat="non_active_employer in data.non_active_user_company_status" id="joined_company_{{ non_active_employer.id }}">
                 <a href="{{ url_company_profile({company_id: non_active_employer.id}) }}">{{ _('Company name is `%(name)s` - NON ACTIVE',
                     non_active_employer) }}</a><br/>
             </div>
