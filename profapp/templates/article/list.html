@@ -10,7 +10,7 @@
 
             $scope.url_details = {{ raw_url_for('article.details')|safe }};
             $scope.url_create_article = {{ raw_url_for('article.show_form_create')|safe }};
-{#            $scope.data = {};#}
+            {#            $scope.data = {};#}
             $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
             $scope.url_search_article = '{{ url_for('article.load_mine')|safe }}';
             $scope.get_colored_title = function (text_to_change) {
@@ -37,42 +37,52 @@
 
 
             $scope.getCompanies = [];
-            $scope.getCompaniesFunc = function(submitted_viersions){
-{#                var array = {};#}
-{#              for(c in submitted_viersions){#}
-{#                  array[c.company.name] = c.company.status#}
-{#              }#}
+            $scope.getCompaniesFunc = function (submitted_viersions) {
+                {#                var array = {};#}
+                {#              for(c in submitted_viersions){#}
+                {#                  array[c.company.name] = c.company.status#}
+                {#              }#}
                 $scope.getCompanies = submitted_viersions
             };
 
-            $scope.change_text_color = function(full_text, search_text, id){
+            $scope.change_text_color = function (full_text, search_text, id) {
                 var new_tag = document.createElement("P");
 
                 var re = new RegExp(search_text, "g");
-{#                full_text = full_text.replace(/#/g, '');#}
-{#                full_text = full_text.replace(re, '#');#}
+                {#                full_text = full_text.replace(/#/g, '');#}
+                {#                full_text = full_text.replace(re, '#');#}
 
-                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">'  + search_text + '</span>'));}
-              }]);
+                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
+            }
+        }]);
 
     </script>
- {% raw %}
+    {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
             <h2><a href="{{ url_create_article() }}">Create article</a></h2>
-                            <form
-                ng-ok
-                ng-onsuccess="afterSave"
-                ng-onsubmit="getData"
-                ng-action="url_search_article">
-                    <input type="submit" onclick="data.pages.current_page=1" value="search">
-                </form>
-
-            <table style="width:114%">
 
 
+            <table style="width:100%">
+                <tr>
+                    <td></td>
+                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
+                    <td>
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
+                                ng-options="comp.name for comp in data.companies track by comp.id"></select>
+                    </td>
+                    <td>
+                        <form
+                                ng-ok
+                                ng-onsuccess="afterSave"
+                                ng-onsubmit="getData"
+                                ng-action="url_search_article">
+                            <input type="submit" onclick="data.pages.current_page=1" value="search">
+                        </form>
+                    </td>
+                </tr>
                 <tr>
                     <th width="250px">Date</th>
                     <th width="250px">Title</th>
@@ -83,16 +93,27 @@
             <table style="width:100%" ng-repeat="article_dict in data.articles">
 
                 <tr ng-if="article_dict.company_count>1">
-                    <td rowspan="{{ article_dict.company_count }}" width="300px">{{ article_dict.article.mine_version.md_tm }}</td>
-                   <td rowspan="{{ article_dict.company_count }}" width="200px"><a href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}" ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text, article_dict.article.id)">
-                       </a></td>
+                    <td rowspan="{{ article_dict.company_count }}" width="250px">{{
+                        article_dict.article.mine_version.md_tm }}
+                    </td>
+                    <td rowspan="{{ article_dict.company_count }}" width="250px"><a
+                            href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}"
+                            ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text, article_dict.article.id)">
+                    </a></td>
                 </tr>
-                <tr ng-if="article_dict.company_count>1" ng-repeat="companies in article_dict.article.submitted_versions">
-                    <td width="200px">{{ companies.company.name }}</td><td width="150px">{{ companies.status }}</td></tr>
-                <tr ng-if="article_dict.company_count==1"><td  width="300px">{{ article_dict.article.mine_version.md_tm }}</td>
-                    <td  width="200px"><a href="/articles/details/{{ article_dict.article.id }}"  id="{{ article_dict.article.id }}"
-                                          ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text, article_dict.article.id)"></a></td>
-                    <td width="200px">Not sent to any company yet</td><td width="150px">Not sent</td>
+                <tr ng-if="article_dict.company_count>1"
+                    ng-repeat="companies in article_dict.article.submitted_versions">
+                    <td width="250px">{{ companies.company.name }}</td>
+                    <td>{{ companies.status }}</td>
+                </tr>
+                <tr ng-if="article_dict.company_count==1">
+                    <td width="250px">{{ article_dict.article.mine_version.md_tm }}</td>
+                    <td width="250px"><a href="/articles/details/{{ article_dict.article.id }}"
+                                         id="{{ article_dict.article.id }}"
+                                         ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text, article_dict.article.id)"></a>
+                    </td>
+                    <td width="250px">Not sent to any company yet</td>
+                    <td>Not sent</td>
                 </tr>
 
 
@@ -101,19 +122,20 @@
         </div>
         <form id="pagerform"
               ng-ok
-                ng-onsuccess="afterSave"
-                ng-onsubmit="getData"
-                ng-action="url_search_article">
-                    <input type="submit" hidden>
-                </form>
+              ng-onsuccess="afterSave"
+              ng-onsubmit="getData"
+              ng-action="url_search_article">
+            <input type="submit" hidden>
+        </form>
 
-    <uib-pagination boundary-links="true" total-items="data.pages.total" items-per-page="1" ng-model="data.pages.current_page" ng-change="page_changed()"
-                    class="pagination-sm"
-                    previous-text="&lsaquo;" next-text="&rsaquo;"
-                    first-text="&laquo;"
-                    last-text="&raquo;"></uib-pagination>
+        <uib-pagination boundary-links="true" total-items="data.pages.total" items-per-page="1"
+                        ng-model="data.pages.current_page" ng-change="page_changed()"
+                        class="pagination-sm"
+                        previous-text="&lsaquo;" next-text="&rsaquo;"
+                        first-text="&laquo;"
+                        last-text="&raquo;"></uib-pagination>
 
     </div>
-        {% endraw %}
+    {% endraw %}
 
 {% endblock portal_content %}
