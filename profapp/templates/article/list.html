@@ -28,11 +28,20 @@
                 return false;
             };
             $scope.getData = function () {
+                $scope.loading = true;
                 return $scope.data;
             };
+
+            $scope.setFirstPage= function () {
+                $scope.data.pages.current_page=1
+                return $scope.getData();
+            };
+
+
+
             $scope.afterSave = function (resp) {
                 $scope.data = resp;
-
+                $scope.loading = false;
             };
 
 
@@ -60,10 +69,10 @@
     {% include 'pager.html' %}
     {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
-
+        <h2><a href="{{ url_create_article() }}">Create article</a></h2>
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
-            <h2><a href="{{ url_create_article() }}">Create article</a></h2>
+
 
 
             <table style="width:100%">
@@ -72,15 +81,15 @@
                     <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
                     <td>
                         <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
-                                ng-options="comp.name for comp in data.companies track by comp.id"></select>
+                                ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
                     </td>
                     <td>
                         <form
                                 ng-ok
                                 ng-onsuccess="afterSave"
-                                ng-onsubmit="getData"
+                                ng-onsubmit="setFirstPage"
                                 ng-action="url_search_article">
-                            <input type="submit" onclick="data.pages.current_page=1" value="search">
+                            <input type="submit" value="search">
                         </form>
                     </td>
                 </tr>
@@ -129,12 +138,7 @@
             <input type="submit" hidden>
         </form>
 
-        <uib-pagination boundary-links="true" total-items="data.pages.total" items-per-page="1"
-                        ng-model="data.pages.current_page" ng-change="page_changed()"
-                        class="pagination-sm"
-                        previous-text="&lsaquo;" next-text="&rsaquo;"
-                        first-text="&laquo;"
-                        last-text="&raquo;"></uib-pagination>
+        <div ng-include="'pagination.html'"></div>
 
     </div>
     {% endraw %}

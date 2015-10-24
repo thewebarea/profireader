@@ -32,7 +32,7 @@ def load_mine(json):
         subquery_user_articles(search_text=json.get('search_text'), user_id=g.user_dict['id'])
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
-                                               items_per_page=5)
+                                               items_per_page=2)
     all, companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
 
     return {'articles': [{'article': a.get_client_side_dict(),
