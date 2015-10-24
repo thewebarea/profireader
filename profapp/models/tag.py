@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship, backref
 from ..controllers import errors
 from flask import g
 from utils.db_utils import db
-from .company import Company
 #from .portal import Portal
 # from .articles import ArticlePortal
 from .pr_base import PRBase, Base
@@ -31,21 +30,18 @@ class Tag(Base, PRBase):
         pass
 
 
-class TagCompany(Base, PRBase):
-    __tablename__ = 'tag_company'
+class TagPortal(Base, PRBase):
+    """ This table contains ONLY portal tag not bound to any division """
+    __tablename__ = 'tag_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     tag_id = Column(TABLE_TYPES['id_profireader'],
                     ForeignKey(Tag.id, onupdate='CASCADE', ondelete='CASCADE'),
                     nullable=False)
-    company_id = Column(TABLE_TYPES['id_profireader'],
-                        ForeignKey(Company.id, onupdate='CASCADE', ondelete='CASCADE'),
-                        nullable=False)
-    position = Column(TABLE_TYPES['int'],
-                      CheckConstraint('position >= 1', name='cc_position'),
-                      nullable=False)
+    portal_id = Column(TABLE_TYPES['id_profireader'],
+                       ForeignKey('portal.id', onupdate='CASCADE', ondelete='CASCADE'),
+                       nullable=False)
 
-    UniqueConstraint('tag_id', 'company_id', name='uc_tag_id_company_id')
-    UniqueConstraint('position', 'company_id', name='uc_position_company_id')
+    UniqueConstraint('tag_id', 'portal_id', name='uc_tag_id_company_id')
 
 
 class TagPortalDivision(Base, PRBase):

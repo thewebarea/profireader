@@ -170,7 +170,7 @@ def profile_edit_load(json, portal_id):
                                current_bound_portal_tags))
 
         deleted_bound_tags = current_bound_tags - new_bound_tag_names
-        added_tags = new_bound_tag_names - (new_bound_tag_names & current_bound_tags)
+        added_bound_tags = new_bound_tag_names - (new_bound_tag_names & current_bound_tags)
 
         actually_deleted_bound_tags = set()
         for tag_name in deleted_bound_tags:
