@@ -41,7 +41,7 @@ class Portal(Base, PRBase):
     # see: http://docs.sqlalchemy.org/en/rel_0_9/orm/join_conditions.html#creating-custom-foreign-conditions
     # see!!!: http://docs.sqlalchemy.org/en/rel_0_8/orm/relationships.html#association-object
     # see comment: http://stackoverflow.com/questions/17473117/sqlalchemy-relationship-error-object-has-no-attribute-c
-    portal_tags = relationship('TagPortalDivision',
+    portal_bound_tags = relationship('TagPortalDivision',
                                secondary='tag_portal_division',
                                # secondary='join(Portal, PortalDivision, Portal.id == PortalDivision.portal_id).'
                                # 'join(TagPortalDivision, TagPortalDivision.id == PortalDivision.portal_id)',
@@ -50,6 +50,8 @@ class Portal(Base, PRBase):
                                # secondaryjoin='PortalDivision.tags_assoc == TagPortalDivision.id',
                                # secondaryjoin='PortalDivision.portal_division_tags == TagPortalDivision.id',
                                viewonly=True)
+
+    # TODO (AA to AA): add portal_not_bound_tags = relationship('TagPortal', ...)
 
     # d = relationship("D",
     #             secondary="join(B, D, B.d_id == D.id)."

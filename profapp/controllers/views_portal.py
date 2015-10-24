@@ -109,9 +109,9 @@ def profile(portal_id):
 def profile_load(json, portal_id):
     portal = db(Portal, id=portal_id).one()
 
-    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
+    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_bound_tags)
     tags_dict = {tag.id: tag.name for tag in tags}
-    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_bound_tags.*'),
             'portal_id': portal_id,
             'tag': tags_dict}
 
@@ -161,20 +161,20 @@ def profile_edit_load(json, portal_id):
 
         json_new = strip_new_tags(json)
 
-        current_bound_portal_tags = portal.portal_tags
+        current_portal_bound_tags = portal.portal_bound_tags
 
         new_bound_tags = json_new['bound_tags']  # we should add new tags and delete unnecessary tags in Tag table
         new_bound_tag_names = set(map(lambda x: x['tag_name'], new_bound_tags))
 
         current_bound_tags = set(map(lambda x: getattr(getattr(x, 'tag'), 'name'),
-                               current_bound_portal_tags))
+                                     current_portal_bound_tags))
 
         deleted_bound_tags = current_bound_tags - new_bound_tag_names
         added_bound_tags = new_bound_tag_names - (new_bound_tag_names & current_bound_tags)
 
         actually_deleted_bound_tags = set()
         for tag_name in deleted_bound_tags:
-            # x = g.db.query(Portal.id).join(Portal.portal_tags).\
+            # x = g.db.query(Portal.id).join(Portal.portal_bound_tags).\
             #     filter(TagPortalDivision.id=='aa')
             # y = x.all()
 
@@ -191,14 +191,13 @@ def profile_edit_load(json, portal_id):
         # TODO (AA to AA): Now we have to check whether actually_deleted_bound_tags
         # TODO contains entirely deleted tags
 
-        # tag0_name = current_bound_portal_tags[0].tag.name
-        # y = list(current_bound_portal_tags)         # Operations with portal_tags...
+        # tag0_name = current_portal_bound_tags[0].tag.name
+        # y = list(current_portal_bound_tags)         # Operations with portal_bound_tags...
         flash('Portal tags successfully updated')
 
-
-    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_tags)
+    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_bound_tags)
     tags_dict = {tag.id: tag.name for tag in tags}
-    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_tags.*'),
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_bound_tags.*'),
             'portal_id': portal_id,
             'tag': tags_dict}
 

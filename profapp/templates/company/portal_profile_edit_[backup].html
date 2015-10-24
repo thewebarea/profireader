@@ -46,7 +46,7 @@
 
             $scope.loadPortalDivisionTagsID = function(bool){
                 if ($scope.data){
-                    $scope.PortalDivisionTagsID = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', bool)
+                    $scope.PortalDivisionTagsID = objectTransformation.getValues1($scope.data.portal.portal_bound_tags, 'tag_id', bool)
                 }
             };
 
@@ -76,14 +76,14 @@
 
             $scope.loadPortalDivisionTags2 = function(){
                 if ($scope.data){
-                    $scope.data.PortalDivisionTags2 = objectTransformation.getValues2($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id')
+                    $scope.data.PortalDivisionTags2 = objectTransformation.getValues2($scope.data.portal.portal_bound_tags, 'portal_division_id', 'tag_id')
                 }
             };
 
             $scope.loadPortalDivisionTags3 = function(list){
                 var i, objIn, objOut, keys;
                 if ($scope.data){
-                    $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
+                    $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_bound_tags, 'portal_division_id', 'tag_id', list);
                     keys = Object.keys($scope.data.PortalDivisionTags3);
                     for (i = 0; i < keys.length; i++){
                         objIn = $scope.data.PortalDivisionTags3[keys[i]];
@@ -101,7 +101,7 @@
                     $scope.loadPortalDivisionIDs();
                     $scope.PortDivCheckboxLoad($scope.PortalDivisionIDs);
                     $scope.tagCheckboxLoad($scope.PortalDivisionTagsName);
-                    res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', $scope.PortalDivisionTagsID);
+                    res = objectTransformation.getValues4($scope.data.portal.portal_bound_tags, 'portal_division_id', 'tag_id', $scope.PortalDivisionTagsID);
                     $scope.data.PortalDivisionTags4 = objectTransformation.subsInKey(res, $scope.data.tag);
                     $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
 

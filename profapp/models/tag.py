@@ -31,10 +31,10 @@ class Tag(Base, PRBase):
 
 
 # TODO (AA to AA): First of all make transform TagCompany -> TagPortal
+# TODO (AA to AA): We have to add a trigger that check the intersection of tags from
+# TODO (AA to AA) TagPortal and TagPrtalDivision. This intersection must be empty.
 class TagPortal(Base, PRBase):
-    """ This table contains ONLY portal tag not bound to any division
-    Also we have to add a trigger that check the intersection of tags from
-    TagPortal and TagPrtalDivision. This intersection must be empty."""
+    """ This table contains ONLY portal tag not bound to any division"""
     __tablename__ = 'tag_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     tag_id = Column(TABLE_TYPES['id_profireader'],
@@ -84,9 +84,9 @@ class TagPortalDivision(Base, PRBase):
     #     if tag_name == '':
     #         ret['errors']['name'] = 'empty tag is not allowed'
     #
-    #     portal_tags = db(Portal, id=self.portal_division.portal_id).portal_tags
-    #     portal_tag_names = map(lambda obj: getattr(obj, 'name'), portal_tags)
-    #     if tag_name in portal_tag_names:
+    #     portal_bound_tags = db(Portal, id=self.portal_division.portal_id).portal_bound_tags
+    #     portal_bound_tag_names = map(lambda obj: getattr(obj, 'name'), portal_bound_tags)
+    #     if tag_name in portal_bound_tag_names:
     #         ret['errors']['name'] = 'this portal tag already exists'
     #
     #     return ret
