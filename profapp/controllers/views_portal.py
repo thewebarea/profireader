@@ -5,6 +5,7 @@ from flask.ext.login import current_user, login_required
 from ..models.portal import PortalDivisionType
 from utils.db_utils import db
 from ..models.portal import CompanyPortal, Portal, PortalLayout, PortalDivision
+from ..models.tag import Tag, TagPortalDivision
 from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
 from ..models.company import simple_permissions
@@ -160,26 +161,38 @@ def profile_edit_load(json, portal_id):
 
         json_new = strip_new_tags(json)
 
-        current_portal_tags = portal.portal_tags
+        current_bound_portal_tags = portal.portal_tags
 
         new_bound_tags = json_new['bound_tags']  # we should add new tags and delete unnecessary tags in Tag table
         new_bound_tag_names = set(map(lambda x: x['tag_name'], new_bound_tags))
 
-        current_tags = set(map(lambda x: getattr(getattr(x, 'tag'), 'name'), current_portal_tags))
+        current_bound_tags = set(map(lambda x: getattr(getattr(x, 'tag'), 'name'),
+                               current_bound_portal_tags))
 
-        deleted_tags = current_tags - new_bound_tag_names
-        added_tags = new_bound_tag_names - (new_bound_tag_names & current_tags)
+        deleted_bound_tags = current_bound_tags - new_bound_tag_names
+        added_tags = new_bound_tag_names - (new_bound_tag_names & current_bound_tags)
 
-        actually_deleted_tags = set()
-        for tag_name in deleted_tags:
-            # g.db.query(Portal).filter(id=user_object).first()
-            # user = g.db.query(User).filter(User.profireader_email == result_user.email).first()
+        actually_deleted_bound_tags = set()
+        for tag_name in deleted_bound_tags:
+            # x = g.db.query(Portal.id).join(Portal.portal_tags).\
+            #     filter(TagPortalDivision.id=='aa')
+            # y = x.all()
 
-            g.db.query(Portal).filter(Portal.portal_tags.tag.name!=tag_name).first()
-            #new_tagselem.tag.name
+            portal = g.db.query(Portal.id).filter(Portal.id!=portal_id).\
+                join(PortalDivision).\
+                join(TagPortalDivision).\
+                join(Tag).\
+                filter(Tag.name==tag_name).first()
 
-        tag0_name = current_portal_tags[0].tag.name
-        y = list(current_portal_tags)         # Operations with portal_tags...
+            # if portal is None:
+            if not portal:
+                actually_deleted_bound_tags.add(tag_name)
+
+        # TODO (AA to AA): Now we have to check whether actually_deleted_bound_tags
+        # TODO contains entirely deleted tags
+
+        # tag0_name = current_bound_portal_tags[0].tag.name
+        # y = list(current_bound_portal_tags)         # Operations with portal_tags...
         flash('Portal tags successfully updated')
 
 
