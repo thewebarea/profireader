@@ -82,8 +82,9 @@
     {% raw %}
     <script type="text/ng-template" id="customTemplate.html">
         <a class="typeahead-item" href="#">
-            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
-            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
+
+            <span ng-show="match.model.id" bind-html-unsafe=" | typeaheadHighlight:query">{{ match.model.name | typeaheadHighlight:query }}</span>
+            <em ng-show="!match.model.id" bind-html-unsafe="match.model.name"></em>
         </a>
     </script>
     <style>
