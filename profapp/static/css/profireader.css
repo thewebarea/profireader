@@ -156,7 +156,7 @@ hr {
 .widewrapper.footer h4,
 .widewrapper.footer h5 {
     /*color: #e6e6e6;*/
-    color: #77AE00;
+    color: #CD2027;
 }
 
 .widewrapper.copyright {
@@ -168,9 +168,12 @@ hr {
 }
 
 .widewrapper.copyright a {
-    color: #a5acb3;
+    color: #fff;
 }
 
+.widewrapper.copyright a:hover {
+    color: #CD2027;
+}
 /* Styles for the navigation, both mobile and desktop */
 /* Desktop version of the navigation */
 .tales-nav .nav-pills {
@@ -566,8 +569,8 @@ hr {
 
 /* Footer widgets */
 .footer-widget {
-    margin-top: 25px;
-    margin-bottom: 50px;
+    margin-top: 0px;
+    margin-bottom: 10px;
     line-height: 23px;
 }
 
@@ -1459,14 +1462,14 @@ fieldset[disabled] .btn-tales-two.active {
 
 .top-style-line {
     height: 3px;
-    background: #152d00; /* Old browsers */
-    background: -moz-linear-gradient(left, #152d00 0%, #97d800 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, right top, color-stop(0%, #152d00), color-stop(100%, #97d800)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(left, #152d00 0%, #97d800 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(left, #152d00 0%, #97d800 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(left, #152d00 0%, #97d800 100%); /* IE10+ */
-    background: linear-gradient(to right, #152d00 0%, #97d800 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#152d00', endColorstr='#97d800', GradientType=1); /* IE6-9 */
+    background: #481a1c; /* Old browsers */
+    background: -moz-linear-gradient(left, #481A1C 0%, #cd2027 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%, #481A1C), color-stop(100%, #cd2027)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left, #481A1C 0%, #cd2027 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left, #481A1C 0%, #cd2027 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left, #481A1C 0%, #cd2027 100%); /* IE10+ */
+    background: linear-gradient(to right, #481A1C 0%, #cd2027 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#481A1C', endColorstr='#cd2027', GradientType=1); /* IE6-9 */
 
 }
 
@@ -1566,11 +1569,11 @@ fieldset[disabled] .btn-tales-two.active {
 }
 
 a {
-    color: #72a300;
+    color: #b31f26;
 }
 
 a:hover {
-    color: #5fd400;
+    color: #fc222d;
 }
 
 input {
@@ -1590,16 +1593,46 @@ label {
 }
 
 form {
-    margin-bottom: 20px;
-    border: 1px rgba(95, 212, 0, 0.35) solid;
-    background: rgba(95, 212, 0, 0.05);
-    padding: 10px;
+    /*margin-bottom: 20px;*/
+    /*border: 1px rgba(95, 212, 0, 0.35) solid;*/
+    /*background: rgba(95, 212, 0, 0.05);*/
+    /*padding: 10px;*/
 }
 
 /* ---------------------------------------------------------------- */
 
+
+.topbar-menu-links{
+    display: block;
+    width: 100%;
+    background: #DDDDDD;
+    font-size: 0;
+}
+
+.topbar-menu-links div{
+    display: block;
+    line-height: 2;
+    height: 100%;
+}
+
+
+
+.topbar-menu-links a,
+.topbar-menu-links span{
+    font-size: 16px;
+    padding: 7px 15px;
+    border-right: 1px #fff dotted;
+
+    background: transparent;
+}
+
+.topbar-menu-links a:hover{
+    background: #CD2027;
+    color: #fff;
+}
+
 .user-profile .info,
-.form.info {
+.topbar-menu-links .info {
     position: relative;
     padding-left: 220px;
 }
@@ -1666,7 +1699,7 @@ form {
 
 .user-profile .info .item:hover,
 .form.info .item:hover {
-    background: rgba(200, 255, 200, 0.4);
+    background: rgba(205, 32, 39, 0.27);
 }
 
 .profile-thumbnail .control {
