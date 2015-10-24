@@ -64,8 +64,6 @@ class Company(Base, PRBase):
                                           backref='logo_owner_company',
                                           foreign_keys='Company.logo_file_id')
 
-    company_tags = relationship('TagCompany')
-
     # get all users in company : company.employees
     # get all users companies : user.employers
 
