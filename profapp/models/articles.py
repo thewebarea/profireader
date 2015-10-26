@@ -129,11 +129,14 @@ class ArticleCompany(Base, PRBase):
 
     @staticmethod
     def get_companies_where_user_send_article(user_id):
+        all = {'name': 'All', 'id': 0}
         companies = []
+        companies.append(all)
+
         for article in db(Article, author_user_id=user_id).all():
             for comp in article.submitted_versions:
                 companies.append(comp.company.to_dict('id, name'))
-        return companies
+        return all, [dict(comp) for comp in set([tuple(c.items()) for c in companies])]
 
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
@@ -305,7 +308,7 @@ class Article(Base, PRBase):
                 order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')). \
                 filter(or_(ArticlePortal.title.ilike("%" + search_text + "%"),
                            ArticlePortal.short.ilike("%" + search_text + "%"),
-                           ArticlePortal.long.ilike("%" + search_text + "%")))
+                           ArticlePortal.long_stripped.ilike("%" + search_text + "%")))
         return sub_query
 
     # @staticmethod

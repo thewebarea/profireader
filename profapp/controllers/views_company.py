@@ -16,7 +16,7 @@ from collections import OrderedDict
 # from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
-
+from flask import session
 
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
@@ -38,9 +38,13 @@ def show():
 # @check_rights(simple_permissions([]))
 @ok
 def load_companies(json):
-
-    return {'companies': [employer.get_client_side_dict()
-                          for employer in current_user.employers]}
+    user_companies = [user_comp for user_comp in current_user.employer_assoc]
+    return {'companies': [usr_cmp.employer.get_client_side_dict() for usr_cmp in user_companies
+                          if usr_cmp.status == STATUS.ACTIVE()],
+            'non_active_user_company_status': [usr_cmp.employer.get_client_side_dict() for
+                                               usr_cmp in user_companies if usr_cmp.status
+                                               != STATUS.ACTIVE()],
+            'user_id': g.user_dict['id']}
 
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
