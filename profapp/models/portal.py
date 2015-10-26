@@ -49,9 +49,9 @@ class Portal(Base, PRBase):
                                secondaryjoin='PortalDivision.id == remote(TagPortalDivision.portal_division_id)',
                                # secondaryjoin='PortalDivision.tags_assoc == TagPortalDivision.id',
                                # secondaryjoin='PortalDivision.portal_division_tags == TagPortalDivision.id',
-                               viewonly=True)
+                               viewonly=True, lazy='dynamic')
 
-    # TODO (AA to AA): add portal_not_bound_tags = relationship('TagPortal', ...)
+    portal_notbound_tags = relationship('TagPortal', lazy='dynamic')
 
     # d = relationship("D",
     #             secondary="join(B, D, B.d_id == D.id)."

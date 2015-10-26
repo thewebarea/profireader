@@ -5,7 +5,7 @@ from flask.ext.login import current_user, login_required
 from ..models.portal import PortalDivisionType
 from utils.db_utils import db
 from ..models.portal import CompanyPortal, Portal, PortalLayout, PortalDivision
-from ..models.tag import Tag, TagPortalDivision
+from ..models.tag import Tag, TagPortal, TagPortalDivision
 from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortal
 from ..models.company import simple_permissions
@@ -107,11 +107,13 @@ def profile(portal_id):
 # @check_rights(simple_permissions([]))
 @ok
 def profile_load(json, portal_id):
-    portal = db(Portal, id=portal_id).one()
 
-    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_bound_tags)
+    portal = db(Portal, id=portal_id).one()
+    portal_bound_tags = portal.portal_bound_tags.all()
+    tags = set(tag_portal_division.tag for tag_portal_division in portal_bound_tags)
     tags_dict = {tag.id: tag.name for tag in tags}
-    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_bound_tags.*'),
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_bound_tags.*',
+                                     'portal_notbound_tags.*'),
             'portal_id': portal_id,
             'tag': tags_dict}
 
@@ -161,35 +163,72 @@ def profile_edit_load(json, portal_id):
 
         json_new = strip_new_tags(json)
 
-        current_portal_bound_tags = portal.portal_bound_tags
+        current_portal_bound_tags = portal.portal_bound_tags.all()
+        current_portal_notbound_tags = portal.portal_notbound_tags.all()
+
+        current_portal_bound_tag_names = set(map(lambda x: getattr(getattr(x, 'tag'), 'name'),
+                                             current_portal_bound_tags))
+        current_portal_notbound_tag_names = set(map(lambda x: getattr(getattr(x, 'tag'), 'name'),
+                                                current_portal_notbound_tags))
 
         new_bound_tags = json_new['bound_tags']  # we should add new tags and delete unnecessary tags in Tag table
+        new_notbound_tags = json_new['notbound_tags']
+
         new_bound_tag_names = set(map(lambda x: x['tag_name'], new_bound_tags))
+        new_notbound_tag_names = set(map(lambda x: x['tag_name'], new_notbound_tags))
 
-        current_bound_tags = set(map(lambda x: getattr(getattr(x, 'tag'), 'name'),
-                                     current_portal_bound_tags))
+        current_tag_names = current_portal_bound_tag_names | current_portal_notbound_tag_names
+        new_tag_tames = new_bound_tag_names | new_notbound_tag_names
 
-        deleted_bound_tags = current_bound_tags - new_bound_tag_names
-        added_bound_tags = new_bound_tag_names - (new_bound_tag_names & current_bound_tags)
+        deleted_tag_names = current_tag_names - new_tag_tames
+        added_tag_names = new_tag_tames - (new_tag_tames & current_tag_names)
 
-        actually_deleted_bound_tags = set()
-        for tag_name in deleted_bound_tags:
-            # x = g.db.query(Portal.id).join(Portal.portal_bound_tags).\
-            #     filter(TagPortalDivision.id=='aa')
-            # y = x.all()
-
-            portal = g.db.query(Portal.id).filter(Portal.id!=portal_id).\
+        actually_deleted_tags = set()
+        for tag_name in deleted_tag_names:
+            other_portal_with_deleted_tags = g.db.query(Portal.id).filter(Portal.id!=portal_id).\
                 join(PortalDivision).\
                 join(TagPortalDivision).\
                 join(Tag).\
                 filter(Tag.name==tag_name).first()
 
-            # if portal is None:
-            if not portal:
-                actually_deleted_bound_tags.add(tag_name)
+            if not other_portal_with_deleted_tags:
+                other_portal_with_deleted_tags = g.db.query(Portal.id).\
+                    filter(Portal.id!=portal_id).\
+                    join(TagPortal).\
+                    join(Tag).\
+                    filter(Tag.name==tag_name).first()
 
-        # TODO (AA to AA): Now we have to check whether actually_deleted_bound_tags
-        # TODO contains entirely deleted tags
+                if not other_portal_with_deleted_tags:
+                    actually_deleted_tags.add(tag_name)
+
+        actually_added_tags = set()
+        for tag_name in added_tag_names:
+            other_portal_with_added_tags = g.db.query(Portal.id).filter(Portal.id!=portal_id).\
+                join(PortalDivision).\
+                join(TagPortalDivision).\
+                join(Tag).\
+                filter(Tag.name==tag_name).first()
+
+            if not other_portal_with_added_tags:
+                other_portal_with_added_tags = g.db.query(Portal.id).\
+                    filter(Portal.id!=portal_id).\
+                    join(TagPortal).\
+                    join(Tag).\
+                    filter(Tag.name==tag_name).first()
+
+                if not other_portal_with_added_tags:
+                    actually_added_tags.add(tag_name)
+
+        # TODO (AA to AA): Now we have actually_deleted_tags and actually_added_tags
+
+        to_delete_from_bound_tags = set()
+        deleted_bound_tag_names = current_portal_bound_tag_names - new_bound_tag_names
+
+
+        # added_bound_tag_names = new_bound_tag_names - (new_bound_tag_names & current_portal_bound_tag_names)
+
+        # deleted_notbound_tag_names = current_portal_notbound_tag_names - new_notbound_tag_names
+        # added_notbound_tag_names = new_notbound_tag_names - (new_notbound_tag_names & current_portal_notbound_tag_names)
 
         # tag0_name = current_portal_bound_tags[0].tag.name
         # y = list(current_portal_bound_tags)         # Operations with portal_bound_tags...

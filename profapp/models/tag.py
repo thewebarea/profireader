@@ -30,11 +30,11 @@ class Tag(Base, PRBase):
         pass
 
 
-# TODO (AA to AA): First of all make transform TagCompany -> TagPortal
+# TODO (AA to AA): First of all make transform TagCompany -> TagPortal in real DB
 # TODO (AA to AA): We have to add a trigger that check the intersection of tags from
-# TODO (AA to AA) TagPortal and TagPrtalDivision. This intersection must be empty.
+# TODO (AA to AA) TagPortal and TagPortalDivision. This intersection must be empty.
 class TagPortal(Base, PRBase):
-    """ This table contains ONLY portal tag not bound to any division"""
+    """ This table contains ONLY portal tags not bound to any division"""
     __tablename__ = 'tag_portal'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     tag_id = Column(TABLE_TYPES['id_profireader'],
@@ -43,6 +43,8 @@ class TagPortal(Base, PRBase):
     portal_id = Column(TABLE_TYPES['id_profireader'],
                        ForeignKey('portal.id', onupdate='CASCADE', ondelete='CASCADE'),
                        nullable=False)
+
+    tag = relationship('Tag')
 
     UniqueConstraint('tag_id', 'portal_id', name='uc_tag_id_company_id')
 
