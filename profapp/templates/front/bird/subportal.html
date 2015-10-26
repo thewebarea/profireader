@@ -1,10 +1,6 @@
-{% extends 'front/bird/layout.html' %}
-
+{% extends 'front/bird/layoutfw.html' %}
 {% block content %}
-
-    <br/><br/>
     <h2>{{ member_company['name'] }}</h2>
-    <h3>{{ member_company['about']|safe }}</h3>
-    <br/>
+    {{ member_company['about']|safe }}
 
 {% endblock content %}

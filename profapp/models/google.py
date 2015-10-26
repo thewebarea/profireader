@@ -110,16 +110,9 @@ class GoogleAuthorize(object):
 
     @staticmethod
     def check_admins():
-        """ This method check if current user is profireader admin. Return True or False """
+        """ This method check if current user is profireader admin. Return True or False.
+         If you will change dg, you should to change id admins in db """
         return True if session.get('user_id') in Config.PROFIREADER_ADMINS else False
-
-    # def service_build(self):
-    #     """ This method is helpful when you want to use google_api_client.
-    #         Return authorized service """
-    #     http = GoogleToken.get_authorize_http()
-    #     service = discovery.build(self.google_service_name, self.google_service_version,
-    #                               http=http)
-    #     return service
 
 class YoutubeApi(GoogleAuthorize):
     """ Use this class for upload videos, get videos, create channels.
@@ -191,14 +184,10 @@ class YoutubeApi(GoogleAuthorize):
         url = self.make_encoded_url_for_upload(body.keys())
         body = json.dumps(body).encode('utf8')
         headers = self.make_headers_for_start_upload(sys.getsizeof(body))
-        try:
-            r = req.Request(url=url, headers=headers,  method='POST')
-            response = req.urlopen(r, data=body)
-            session['video_id'] = response.headers.get('X-Goog-Correlation-Id')
-            session['url'] = response.headers.get('Location')
-        except response_code as e:
-            print(e.headers)
-            print(e.code)
+        r = req.Request(url=url, headers=headers,  method='POST')
+        response = req.urlopen(r, data=body)
+        session['video_id'] = response.headers.get('X-Goog-Correlation-Id')
+        session['url'] = response.headers.get('Location')
 
     def make_headers_for_upload(self):
         """ This method make headers for upload videos. Second  step to start upload """
@@ -210,7 +199,7 @@ class YoutubeApi(GoogleAuthorize):
         return headers
 
     def make_headers_for_resumable_upload(self):
-        """ This method make headers for resumable upload videos. Thirst  step to start upload """
+        """ This method make headers for resumable upload videos. Thirst step to start upload """
         video = db(YoutubeVideo, id=session['video_id']).one()
         last_byte = self.chunk_info.get('chunk_size') + video.size - 1
         last_byte = self.chunk_info.get('total_size') - 1 if (self.chunk_info.get(
@@ -239,8 +228,9 @@ class YoutubeApi(GoogleAuthorize):
     def upload(self):
 
         """ Use this method for upload videos. If video_id you can get from session['video_id'].
-          If except error 308 - video has not yet been uploaded, pass next chunk.
-          If chunk > 0 run resumable_upload method. If video was uploaded return success """
+          If except error 308 - video has not yet been uploaded, call resumable_upload().
+          If chunk > 0 run resumable_upload method. If video was uploaded return 200 or 201 code:
+          success """
         chunk_number = self.chunk_info.get('chunk_number')
         if not chunk_number:
             self.set_youtube_upload_service_url_to_session()
@@ -396,15 +386,11 @@ class YoutubePlaylist(Base, PRBase):
         url = self.make_encoded_url_for_playlists()
         body = json.dumps(body).encode('utf8')
         headers = self.make_headers_to_get_playlists(sys.getsizeof(body))
-        try:
-            r = req.Request(url=url, headers=headers,  method='POST')
-            response = req.urlopen(r, data=body)
-            response_str_from_bytes = response.readall().decode('utf-8')
-            fields = json.loads(response_str_from_bytes)
-            return fields
-        except response_code as e:
-            print(e.headers)
-            print(e.code)
+        r = req.Request(url=url, headers=headers,  method='POST')
+        response = req.urlopen(r, data=body)
+        response_str_from_bytes = response.readall().decode('utf-8')
+        fields = json.loads(response_str_from_bytes)
+        return fields
 
     def make_body_to_get_playlist_url(self):
         """ make body to create playlist """
@@ -415,7 +401,7 @@ class YoutubePlaylist(Base, PRBase):
 
     def make_encoded_url_for_playlists(self):
         """ This method make values of header url encoded.
-         body_keys are values which you want to return from youtube server """
+         part are values which you want to send to youtube server """
         values = parse.urlencode(dict(part='snippet,status'))
         url_encoded = Config.YOUTUBE_API['CREATE_PLAYLIST']['SEND_URI'] % values
         return url_encoded
@@ -432,6 +418,7 @@ class YoutubePlaylist(Base, PRBase):
 
     @staticmethod
     def get_not_full_company_playlist(company_id):
+        """ Return not full company playlist. Pass company id. """
         playlist = db(YoutubePlaylist, company_id=company_id).order_by(
             desc(YoutubePlaylist.md_tm)).first()
         return playlist

@@ -66,7 +66,7 @@ function down {
     if [[ "$3" != '' ]]; then
 	echo "  mv $filetoget $filetobak"
     fi
-    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://ntaxa.com/profireader/$filetoget
+    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://x.d.ntaxa.com/profireader/$filetoget
 if [[ \"\$?\" == \"0\" ]]; then"
     if [[ "$3" != '' ]]; then
 	command="$command
@@ -232,7 +232,7 @@ function menu_modules {
     conf_comm "
 cd `pwd`
 source $destdir/bin/activate
-pip3 install -r $req" nosudo port
+pip3 install -r $req" nosudo bower_components_dev
     }
 
 function menu_port {
@@ -253,9 +253,16 @@ function menu_db_user_pass {
 ALTER USER $psqluser WITH PASSWORD '$psqlpass';" compare_local_makarony
     }
 
-makaronyaddress='d.ntaxa.com/profireader/54217'
+makaronyaddress='d.ntaxa.com/profireader/54321'
 localaddress='localhost/profireader/5432'
 artekaddress='a.ntaxa.com/profireader/54321'
+
+function menu_bower_components_dev {
+    conf_comm "cd profapp/static/bower_components_dev
+git clone git@github.com:kakabomba/angular-filemanager.git
+cd angular-filemanager
+git checkout ids" nosudo db_user_pass
+    }
 
 function menu_compare_local_makarony {
     conf_comm "./postgres.dump_and_compare_structure.sh $makaronyaddress $localaddress" nosudo compare_local_artek
@@ -342,7 +349,7 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "python_3" "install python 3" \
 "venv" "create virtual environment" \
 "modules" "install required python modules (via pip)" \
-"port" "redirect port at localhost 80->8080" \
+"bower_components_dev" "get bower components (development version)" \
 "db_user_pass" "create postgres user/password" \
 "db_rename" "rename database (create backup)" \
 "db_create" "create empty database" \
