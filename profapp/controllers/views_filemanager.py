@@ -78,14 +78,19 @@ def upload(json):
     ret = {}
     for uploaded_file_name in request.files:
         uploaded_file = request.files[uploaded_file_name]
+        uploaded_file.seek(0, os.SEEK_END)
+        size = uploaded_file.tell()
+        uploaded_file.seek(0, os.SEEK_SET)
+        uploaded_file.tell()
         file = File(parent_id=parent_id,
                     root_folder_id=root_id,
                     name=uploaded_file.filename,
-                    mime=uploaded_file.content_type)
+                    mime=uploaded_file.content_type,
+                    size=size
+                    )
         uploaded = file.upload(content=uploaded_file.stream.read(-1))
         ret[uploaded.id] = True
     return ret
-
 
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST'])
 @filemanager_bp.route('/uploader/<string:company_id>', methods=['GET', 'POST'])
