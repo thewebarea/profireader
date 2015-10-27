@@ -8,7 +8,7 @@ from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
-from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
+from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany, ArticlePortal
 from utils.db_utils import db
@@ -64,14 +64,18 @@ def materials_load(json, company_id):
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_portal_id = json.get('chosen_portal')['id'] if json.get('chosen_portal') else 0
     params = {'search_text': json.get('search_text'), 'company_id': company_id}
+
     if chosen_portal_id:
         params['portal_id'] = chosen_portal_id
+    if json.get('chosen_status') and json.get('chosen_status') != 'All':
+        params['status'] = json.get('chosen_status')
     subquery = ArticleCompany.subquery_company_articles(**params)
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
                                                items_per_page=5)
     all, portals = ArticlePortal.get_portals_where_company_send_article(company_id)
-    print(portals)
+    statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
+    statuses['All'] = 'All'
 
     return {'articles': [{'article': a.get_client_side_dict(),
                           'portals_count': len(a.get_client_side_dict()['portal_article'])+1}
@@ -83,7 +87,9 @@ def materials_load(json, company_id):
             'pages': {'total': pages,
                       'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS},
-            'company_id': company_id}
+            'company_id': company_id,
+            'chosen_status': json.get('chosen_status') or statuses['All'],
+            'statuses': statuses}
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required

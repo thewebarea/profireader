@@ -76,21 +76,28 @@
 
             <table style="width:100%">
                 <tr>
-                    <td></td>
-                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
-                    <td>
-                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
-                                ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
-                    </td>
                     <td>
                         <form
                                 ng-ok
                                 ng-onsuccess="afterSave"
                                 ng-onsubmit="setFirstPage"
                                 ng-action="url_search_article">
-                            <input type="submit" value="search">
+                            <input type="submit" value="search" style="width: 75%;">
                         </form>
                     </td>
+                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
+                    <td>
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
+                                ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
+                    </td>
+                                  <td>
+
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_status"
+                               >
+                            <option ng-repeat="status in data.statuses">{{ status }}</option>
+                        </select>
+                    </td>
+
                 </tr>
                 <tr>
                     <th width="250px">Date</th>

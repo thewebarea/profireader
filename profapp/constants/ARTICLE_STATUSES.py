@@ -2,9 +2,11 @@ from profapp.models.rights import RIGHTS
 
 
 class ARTICLE_STATUS_IN_COMPANY:
+
     submitted = 'submitted'
     accepted = 'accepted'
     declined = 'declined'
+    all = [submitted, accepted, declined]
 
     @classmethod
     def can_user_change_status_to(cls, from_status):
@@ -25,3 +27,4 @@ class ARTICLE_STATUS_IN_PORTAL:
     published = 'published'
     not_published = 'not_published'
     declined = 'declined'
+    all = [published, not_published, declined]

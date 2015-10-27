@@ -170,15 +170,16 @@ class ArticleCompany(Base, PRBase):
         return db(Article, author_user_id=user_id).filter(article_filter.exists())
 
     @staticmethod
-    def subquery_company_articles(search_text=None, company_id=None, portal_id=None):
+    def subquery_company_articles(search_text=None, company_id=None, **kwargs):
 
         sub_query = db(ArticleCompany, company_id=company_id)
         if search_text:
             sub_query = db(ArticleCompany, company_id=company_id).\
                 filter(ArticleCompany.title.ilike("%" + search_text + "%"))
-        if portal_id:
+        if kwargs.get('portal_id') or kwargs.get('status'):
             sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
-                                            portal_id=portal_id).exists())
+                                            **kwargs).exists())
+
 
         return sub_query
 

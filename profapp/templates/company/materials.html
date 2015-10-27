@@ -66,21 +66,28 @@
 
             <table style="width:100%">
                 <tr>
-                    <td></td>
+                                        <td>
+                        <form
+                                ng-ok
+                                ng-onsuccess="afterSave"
+                                ng-onsubmit="setFirstPage"
+                                ng-action="url_search_article({company_id:data.company_id})">
+                            <input type="submit" value="search" style="width: 75%;">
+                        </form>
+                    </td>
                     <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
                     <td>
                         <select style="width: 100%; padding: 5px;" ng-model="data.chosen_portal"
                                 ng-options="port.name for port in data.portals | orderBy:'id' track by port.id"></select>
                     </td>
                     <td>
-                        <form
-                                ng-ok
-                                ng-onsuccess="afterSave"
-                                ng-onsubmit="setFirstPage"
-                                ng-action="url_search_article({company_id:data.company_id})">
-                            <input type="submit" value="search">
-                        </form>
+
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_status"
+                               >
+                            <option ng-repeat="status in data.statuses">{{ status }}</option>
+                        </select>
                     </td>
+
                 </tr>
                 <tr>
                     <th width="250px">Date</th>
