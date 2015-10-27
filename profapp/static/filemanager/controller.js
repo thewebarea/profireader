@@ -13,6 +13,7 @@
         $scope.fileUploader = fileUploader;
         $scope.uploadFileList = [];
         $scope.viewTemplate = $cookies.viewTemplate || 'main-table.html';
+        $scope.error = error;
         $scope.rootdirs = library;
         $scope.file_manager_called_for = file_manager_called_for;
         $scope.file_manager_on_action = file_manager_on_action;
@@ -142,16 +143,16 @@
 
                 }
             }
-        }
+        };
 
-	$scope.can_action = function(item, actionnamem, defaultpermited) {
-	    if (actionname === 'paste') {
-		if (defaultpermited === true) {
-		    return ($scope.copied_files.length > 0)
-		    }
-		}
-	    return defaultpermited
-        }
+        $scope.can_action = function(item, actionname, defaultpermited) {
+            if (actionname === 'paste') {
+            if (defaultpermited === true) {
+                return ($scope.copied_files.length > 0)
+                }
+            }
+            return defaultpermited
+            };
 
         $scope.uploadFiles = function() {
             $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath,
@@ -175,8 +176,29 @@
             });
             return found;
         };
+        $scope.dis = "cursor: default;pointer-events: none;color: gainsboro;"
+        $scope.isDisable = function(){
+          return $scope.fileManagerConfig.disabled;
+        };
 
-        $scope.changeRoot(_.keys($scope.rootdirs)[0], _.values($scope.rootdirs)[0]['name']);
+        $scope.err = function(){
+            if ($scope.error == 'False' && $scope.rootdirs.length != 0){
+                return false;
+            }else{
+                return true;
+            }
+        };
+
+        $scope.changeRoots = function(){
+            if(error == 'False'){
+                $scope.changeRoot(_.keys($scope.rootdirs)[0], _.values($scope.rootdirs)[0]['name'])
+            }else{
+                $scope.changeRoot('','')
+            }
+        };
+
+        $scope.errMsg = "You do not belong to any company!";
+        $scope.changeRoots();//(_.keys($scope.rootdirs)[0], _.values($scope.rootdirs)[0]['name']);
         $scope.isWindows = $scope.getQueryParam('server') === 'Windows';
         $scope.fileNavigator.refresh();
 

@@ -1,7 +1,7 @@
 import os
 from flask import render_template, g
 from flask.ext.login import current_user
-from profapp.models.files import File
+from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
@@ -13,6 +13,7 @@ from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
 from utils.db_utils import db
 from ..models.company import Company
+from flask import make_response
 
 def parent_folder(func):
     @wraps(func)
@@ -46,8 +47,9 @@ def filemanager():
 
     file_manager_called_for = request.args['file_manager_called_for'] if 'file_manager_called_for' in request.args else ''
     file_manager_on_action = jsonmodule.loads(request.args['file_manager_on_action']) if 'file_manager_on_action' in request.args else {}
-
-    return render_template('filemanager.html', library=library,
+    #library = {}
+    err = True if len(library) == 0 else False
+    return render_template('filemanager.html', library=library,err=err,
                            file_manager_called_for=file_manager_called_for,
                            file_manager_on_action = file_manager_on_action)
 
@@ -68,6 +70,27 @@ def createdir(json, parent_id=None):
                           root_folder_id=request.json['params']['root_id'],
                           parent_id=request.json['params']['folder_id'])
 
+@filemanager_bp.route('/test/', methods=['GET','POST'])
+def test():
+    File.remmove('562e23eb-1784-4001-b69a-4bed9cea7855')
+    file = FileContent.get('562e23eb-1784-4001-b69a-4bed9cea7855')
+    return render_template('tmp-test.html', file=file)
+
+@filemanager_bp.route('/rename/', methods=['POST'])
+@ok
+def rename(json):
+    file = File.get(request.json['params']['id'],)
+    return File.rename(file, request.json['params']['name'])
+
+@filemanager_bp.route('/copy/', methods=['POST'])
+@ok
+def copy(json):
+    file = request.json['params']['self']
+    return File.copy_file(file, request.json['params']['parent_id'])
+
+@filemanager_bp.route('/remove/<string:file_id>', methods=['POST'])
+def remove(file_id):
+    return File.remove(file_id)
 
 @filemanager_bp.route('/upload/', methods=['POST'])
 @ok
@@ -82,9 +105,10 @@ def upload(json):
         size = uploaded_file.tell()
         uploaded_file.seek(0, os.SEEK_SET)
         uploaded_file.tell()
+        name = File.get_unique_name(uploaded_file.filename, uploaded_file.content_type, parent_id)
         file = File(parent_id=parent_id,
                     root_folder_id=root_id,
-                    name=uploaded_file.filename,
+                    name=name,
                     mime=uploaded_file.content_type,
                     size=size
                     )

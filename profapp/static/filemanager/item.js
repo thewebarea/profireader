@@ -91,6 +91,8 @@
         Item.prototype.rename = function(success, error) {
             var self = this;
             var data = {params: {
+                "id" : self.model.id,
+                "name": self.tempModel.name.trim(),
                 "mode": "rename",
                 "path": self.model.fullPath(),
                 "newPath": self.tempModel.fullPath()
@@ -114,6 +116,7 @@
         Item.prototype.copy = function(success, error) {
             var self = this;
             var data = {params: {
+                self: self.model,
                 mode: "copy",
                 path: self.model.fullPath(),
                 newPath: self.tempModel.fullPath()
@@ -182,12 +185,13 @@
 
         Item.prototype.download = function(preview) {
             var self = this;
-            var data = {
-                mode: "download",
-                preview: preview,
-                path: self.model.fullPath()
-            };
-            var url = [fileManagerConfig.downloadFileUrl, $.param(data)].join('?');
+            //var data = {
+            //    mode: "download",
+            //    preview: preview,
+            //    path: self.model.fullPath()
+            //};
+            //var url = [fileManagerConfig.downloadFileUrl, $.param(data)].join('?');
+            var url = fileManagerConfig.downloadFileUrl+self.model.id+'?d';
             if (self.model.type !== 'dir') {
                 window.open(url, '_blank', '');
             }
@@ -231,7 +235,7 @@
             }};
             self.inprocess = true;
             self.error = '';
-            return $http.post(fileManagerConfig.removeUrl, data).success(function(data) {
+            return $http.post(fileManagerConfig.removeUrl+self.model.id, data).success(function(data) {
                 self.defineCallback(data, success, error);
             }).error(function(data) {
                 self.error = data.result && data.result.error ?

@@ -33,6 +33,10 @@ class PRBase:
     def __init__(self):
         self.query = g.db.query_property()
 
+    def delfile(self):
+        g.db.delete(self)
+        g.db.commit()
+
     def save(self):
         g.db.add(self)
         g.db.flush()

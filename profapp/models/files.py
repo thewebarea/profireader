@@ -37,7 +37,8 @@ class File(Base, PRBase):
 
     owner = relationship('User',
                          backref=backref('files', lazy='dynamic'),
-                         foreign_keys='File.author_user_id')
+                         foreign_keys='File.author_user_id',
+                         cascade='save-update, delete')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
@@ -82,16 +83,13 @@ class File(Base, PRBase):
             nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
         return ret[::-1]
 
-
     @staticmethod
     def list(parent_id=None, file_manager_called_for = ''):
 
         default_actions = {}
         # default_actions['choose'] = lambda file: None
         default_actions['download'] = lambda file: None if ((file.mime == 'directory') or (file.mime == 'root')) else True
-
         actions = {act: default_actions[act] for act in default_actions}
-
         show = lambda file: True
 
         if file_manager_called_for == 'file_browse_image':
@@ -256,27 +254,30 @@ class File(Base, PRBase):
         c = c[::-1]
         return c
 
-    def if_copy(self):
-        ext = File.ext(self.name)
-        if ext and re.search('\(\d+\)'+ext, self.name):
-            return File.get_name(self.name)[0:-3]
-        elif re.search('\(\d+\)$', self.name):
-            return self.name[0:-3]
+    @staticmethod
+    def if_copy(name):
+        ext = File.ext(name)
+        if len(ext)>0 and re.search('\(\d+\)'+ext, name):
+            return File.get_name(name)[0:-3]
+        elif re.search('\(\d+\)$', name):
+            return name[0:-3]
         else:
-            return self.name
+            return name[0:-len(ext)]
 
-    def is_name(self,parent_id):
-        if [file for file in db(File,parent_id = parent_id, mime=self.mime,name=self.name)]:
+    @staticmethod
+    def is_name(name, mime, parent_id):
+        if [file for file in db(File,parent_id=parent_id, mime=mime, name=name)]:
             return True
         else:
             return False
 
-    def get_unique_name(self,parent_id):
-        if File.is_name(self,parent_id):
-            ext = File.ext(self.name)
-            name = File.if_copy(self)
+    @staticmethod
+    def get_unique_name(name, mime, parent_id):
+        if File.is_name(name, mime, parent_id):
+            ext = File.ext(name)
+            name = File.if_copy(name)
             list = []
-            for n in db(File,parent_id = parent_id, mime=self.mime):
+            for n in db(File,parent_id = parent_id, mime=mime):
                 if re.match(name+'\(\d+\)'+ext, n.name):
                     pos = (len(n.name) - 2) - len(ext)
                     list.append(int(n.name[pos:pos+1]))
@@ -287,7 +288,24 @@ class File(Base, PRBase):
                 index = list[-1] + 1
                 return name+'('+str(index)+')'+ext
         else:
-            return self.name
+            return name
+
+    def rename(self, name):
+        if File.is_name(name, self.mime, self.parent_id):
+            return False
+        else:
+            self.updates({'name': name})
+            return True
+
+    @staticmethod
+    def remove(file_id):
+        file = File.get(file_id)
+        if file.mime == 'directory':
+            b = File.delfile(file)
+        else:
+            b = File.delfile(FileContent.get(file_id))
+        resp = (False if File.get(file_id) else "Success")
+        return resp
 
     def copy_file(self, parent_id, **kwargs):
         id = self.id
@@ -296,7 +314,7 @@ class File(Base, PRBase):
         if folder.root_folder_id == None:
             root = folder.id
         attr = {f:kwargs[f] for f in kwargs}
-        attr['name'] = File.get_unique_name(self,parent_id)
+        attr['name'] = File.get_unique_name(self.name, self.mime, parent_id)
         attr['parent_id'] = parent_id
         attr['root_folder_id'] = root
         copy_file = self.detach().attr(attr)
@@ -316,7 +334,7 @@ class File(Base, PRBase):
         if folder.root_folder_id == None:
             root = folder.id
         attr = {f:kwargs[f] for f in kwargs}
-        attr['name'] = File.get_unique_name(self,parent_id)
+        attr['name'] = File.get_unique_name(self.name, self.mime, parent_id)
         attr['parent_id'] = parent_id
         attr['root_folder_id'] = root
         self.updates(attr)
@@ -349,7 +367,8 @@ class FileContent(Base, PRBase):
     content = Column(Binary, nullable=False)
     file = relationship('File',
                                 uselist=False,
-                                backref='file_content')
+                                backref='file_content',
+                                cascade='save-update,delete')
 
     def __init__(self, file=None, content=None):
         self.file = file

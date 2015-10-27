@@ -6,6 +6,17 @@ from ..models.articles import Article, ArticlePortal
 from ..models.portal import CompanyPortal, PortalDivision, Portal
 from config import Config
 
+@file_bp.route('<string:file_id>')
+def download(file_id):
+    file = file_query(file_id,File)
+    file_c = file_query(file_id,FileContent)
+    content = file_c.content
+    response = make_response(content)
+    response.headers['Content-Type'] = "application/octet-stream"
+    response.headers['Content-Disposition'] = 'attachment; filename=%s' % file.name
+    return response
+
+
 
 @file_bp.route('<string:file_id>/')
 def get(file_id):

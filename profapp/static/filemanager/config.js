@@ -8,22 +8,23 @@
 
             listUrl: "/filemanager/list/",
             uploadUrl: "/filemanager/upload/",
-            renameUrl: "bridges/php/handler.php",
-            copyUrl: "bridges/php/handler.php",
-            removeUrl: "bridges/php/handler.php",
+            renameUrl: "/filemanager/rename/",
+            copyUrl: "/filemanager/copy/",
+            removeUrl: "/filemanager/remove/",
             editUrl: "bridges/php/handler.php",
             getContentUrl: "bridges/php/handler.php",
             createFolderUrl: "/filemanager/createdir/",
-            downloadFileUrl: "bridges/php/handler.php",
+            downloadFileUrl: "http://file001.profi.ntaxa.com/",
             compressUrl: "bridges/php/handler.php",
             extractUrl: "bridges/php/handler.php",
             permissionsUrl: "bridges/php/handler.php",
 
+            disabled: "cursor: default;pointer-events: none;color: gainsboro;",
             sidebar: true,
             breadcrumb: true,
             allowedActions: {
-                rename: !true,
-                copy: !true,
+                rename: true,
+                copy: true,
                 edit: !true,
                 changePermissions: !true,
                 compress: !true,
@@ -32,7 +33,7 @@
                 download: true,
                 preview: !true,
                 choose: true,
-                remove: !true
+                remove: true
             },
 
             enablePermissionsRecursive: true,
