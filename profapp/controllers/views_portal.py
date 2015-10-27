@@ -201,28 +201,6 @@ def publications_load(json, company_id):
             'original_chosen_status': original_chosen_status,
             'user_rights': list(g.user.user_rights_in_company(company_id))}
 
-# @portal_bp.route('/publications/<string:company_id>/', methods=['POST'])
-# @login_required
-# @check_rights(simple_permissions([]))
-# @ok
-# def publications_load(json, company_id):
-#     portal = db(Company, id=company_id).one().own_portal
-#     if portal:
-#         if not portal.divisions[0]:
-#             return {'divisions': [{'name': '',
-#                                    'article_portal': []}]}
-#         portal = [port.to_dict('name|id|portal_id,article_portal.'
-#                                'status|md_tm|cr_tm|title|long|short|id,'
-#                                'article_portal.'
-#                                'company_article.company.id|'
-#                                'name|short_description|email|phone') for
-#                   port in portal.divisions if port.article_portal]
-#
-#     user_rights = list(g.user.user_rights_in_company(company_id))
-#
-#     return {'portal': portal, 'new_status': '',
-#             'company_id': company_id, 'user_rights': user_rights}
-
 @portal_bp.route('/publication_details/<string:article_id>/<string:company_id>', methods=['GET'])
 @login_required
 def publication_details(article_id, company_id):
