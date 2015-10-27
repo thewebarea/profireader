@@ -51,7 +51,18 @@ class Portal(Base, PRBase):
                                # secondaryjoin='PortalDivision.portal_division_tags == TagPortalDivision.id',
                                viewonly=True, lazy='dynamic')
 
+    portal_bound_tags_noload = relationship('TagPortalDivision',
+                               secondary='tag_portal_division',
+                               # secondary='join(Portal, PortalDivision, Portal.id == PortalDivision.portal_id).'
+                               # 'join(TagPortalDivision, TagPortalDivision.id == PortalDivision.portal_id)',
+                               primaryjoin='Portal.id == remote(PortalDivision.portal_id)',
+                               secondaryjoin='PortalDivision.id == remote(TagPortalDivision.portal_division_id)',
+                               # secondaryjoin='PortalDivision.tags_assoc == TagPortalDivision.id',
+                               # secondaryjoin='PortalDivision.portal_division_tags == TagPortalDivision.id',
+                               viewonly=True, lazy='noload')
+
     portal_notbound_tags = relationship('TagPortal', lazy='dynamic')
+    portal_notbound_tags_noload = relationship('TagPortal', lazy='noload')
 
     # d = relationship("D",
     #             secondary="join(B, D, B.d_id == D.id)."

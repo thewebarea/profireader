@@ -9,6 +9,7 @@ from utils.db_utils import db
 from .pr_base import PRBase, Base
 
 
+# TODO (AA to AA): Add constraint: name shouldn't start or end with blank
 class Tag(Base, PRBase):
     __tablename__ = 'tag'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
@@ -49,15 +50,13 @@ class TagPortal(Base, PRBase):
     UniqueConstraint('tag_id', 'portal_id', name='uc_tag_id_company_id')
 
 
+#  TODO (AA to AA): delete Position in TagPortalDivision
 class TagPortalDivision(Base, PRBase):
     __tablename__ = 'tag_portal_division'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     tag_id = Column(TABLE_TYPES['id_profireader'],
                     ForeignKey(Tag.id, onupdate='CASCADE', ondelete='CASCADE'),
                     nullable=False)
-    position = Column(TABLE_TYPES['int'],
-                      CheckConstraint('position >= 1', name='cc_position'),
-                      nullable=False)
     portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                 ForeignKey('portal_division.id',
                                            onupdate='CASCADE',
@@ -65,7 +64,7 @@ class TagPortalDivision(Base, PRBase):
                                 nullable=False)
 
     UniqueConstraint('tag_id', 'portal_division_id', name='uc_tag_id_portal_division_id')
-    UniqueConstraint('position', 'portal_division_id', name='uc_position_portal_division_id')
+    # UniqueConstraint('position', 'portal_division_id', name='uc_position_portal_division_id')
     # there is an additional constraint implemented in DB via trigger:
     # tag position have to be unique within portal.
 
@@ -74,9 +73,8 @@ class TagPortalDivision(Base, PRBase):
     articles = relationship('ArticlePortal', secondary='tag_portal_division_article',
                             back_populates='article_portal_tags', lazy='dynamic')
 
-    def __init__(self, tag_id=None, portal_division_id=None, position=1):
+    def __init__(self, tag_id=None, portal_division_id=None):
         super(TagPortalDivision, self).__init__()
-        self.position = position
         self.tag_id = tag_id
         self.portal_division_id = portal_division_id
 
