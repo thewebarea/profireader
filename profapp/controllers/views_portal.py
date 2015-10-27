@@ -165,6 +165,8 @@ def publications(company_id):
 @ok
 def publications_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
+    if not portal:
+        return dict(portal_not_exist=True)
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
     params = {'search_text': json.get('search_text'), 'portal_id': portal.id}

@@ -67,9 +67,9 @@
     {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
 
-        <div ng-if="loading">Loading...</div>
+        <div ng-if="loading">Loading...</div><div ng-if="myRights('publish')&&!data.portal_not_exist">
         <div ng-if="!loading">
-            <div ng-if="myRights('publish')">
+
             <table style="width:100%">
                 <tr>
                                         <td>
@@ -132,6 +132,7 @@
 
         <div ng-include="'pagination.html'"></div>
         </div>
+    <div ng-if="data.portal_not_exist"><h1>There is no portal in this company</h1></div>
 
     </div>
     {% endraw %}
