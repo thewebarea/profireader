@@ -1,22 +1,57 @@
-{% extends "index_layout.html" %}
-{% block title %}Profireader{% endblock title %}
-{% block head %}
-    {{ super() }}
-{% endblock head %}
 
-{% block portal_base %}
-    {% include 'partials/portal_base_Profireader.html' %}
-{% endblock portal_base %}
+
+{% extends "index_lazy_layout.html" %}
+
+{% block title %}Profireader - Articles{% endblock title %}
+
 {% block portal_content %}
-    {% block company_base %}
-        {% include 'company/company_base_angular.html' %}
-    {% endblock company_base %}
+
+
     <script>
-        module.controller('publication', ['$scope', function ($scope) {
-            $scope.publications = {{ raw_url_for('portal.publications')|safe }};
-            $scope.url_update_status = '{{ url_for('portal.update_article_portal')|safe }}';
-            $scope.getData = function () {return $scope.data;};
-            $scope.afterSave = function (resp) {window.location.href = $scope.publications({company_id: resp.company_id})};
+        module.controller('article_list', ['$scope', '$ok', '$sce', function ($scope, $ok, $sce) {
+
+            $scope.url_details = {{ raw_url_for('portal.publication_details')|safe }};
+            $scope.url_search_article = {{ raw_url_for('portal.publications_load')|safe }};
+            $scope.get_colored_title = function (text_to_change) {
+                return text_to_change
+            };
+
+
+            $scope.page_changed = function () {
+                $scope.data.search_text = $scope.data.original_search_text;
+                $('#pagerform').trigger('submit');
+                return false;
+            };
+
+            $scope.cancel = function () {
+                window.location.href = $scope.url_back();
+                return false;
+            };
+            $scope.getData = function () {
+                $scope.loading = true;
+                return $scope.data;
+            };
+
+            $scope.setFirstPage= function () {
+                $scope.data.pages.current_page=1;
+                return $scope.getData();
+            };
+
+
+
+            $scope.afterSave = function (resp) {
+                $scope.data = resp;
+                $scope.loading = false;
+            };
+
+            $scope.change_text_color = function(full_text, search_text){
+
+
+                var re = new RegExp(search_text, "g");
+{#                full_text = full_text.replace(/#/g, '');#}
+{#                full_text = full_text.replace(re, '#');#}
+
+                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">'  + search_text + '</span>'));}
             $scope.myRights = function(){
                 for (var i = 0; i < arguments.length; i++) {
                      if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
@@ -25,58 +60,79 @@
                 }
                 return true;
             };
-        }]);
+              }]);
+
     </script>
+{% include 'company/company_base_angular.html' %}
     {% raw %}
-    <div ng-init="loadData()" ng-controller="publication">
-    <div ng-if="myRights('publish')">
-        <form  ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
-            <div ng-repeat="dat in data.portal">
-                <div ng-repeat="article in dat.article_portal">
+    <div ng-init="loadData()" ng-controller="article_list">
 
-                    <div ng-if="article.status!='published'">
-                        <input type="hidden" ng-model="data.not_published">
-                        Your portal rejected materials: {{ article.title }} from company
-                        <span ng-repeat="company in article.company_article">
-                            {{ company.name }}
-                        </span>
-                        Change status to :
-                        <select ng-model="data.new_status">
-                            <option value="{{ article.id }}/published">published</option>
-                            <option value="{{ article.id }}/declined">declined</option>
+        <div ng-if="loading">Loading...</div>
+        <div ng-if="!loading">
+            <div ng-if="myRights('publish')">
+            <table style="width:100%">
+                <tr>
+                                        <td>
+                        <form
+                                ng-ok
+                                ng-onsuccess="afterSave"
+                                ng-onsubmit="setFirstPage"
+                                ng-action="url_search_article({company_id:data.company_id})">
+                            <input type="submit" value="search" style="width: 75%;">
+                        </form>
+                    </td>
+                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
+                    <td>
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
+                                ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
+                    </td>
+                    <td>
+
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_status"
+                               >
+                            <option ng-repeat="status in data.statuses">{{ status }}</option>
                         </select>
-                        <input type="submit" ng-if="data.new_status" value="Accept">
-                        <input type="submit" ng-if="!data.new_status" value="Accept" disabled>
-                    </div>
-                </div>
-            </div>
+                    </td>
+
+                </tr>
+                <tr>
+                    <th width="250px">Date</th>
+                    <th width="250px">Title</th>
+                    <th width="250px">Companies</th>
+                    <th><p>Status</p></th>
+                </tr>
+            </table>
+            <table style="width:100%" ng-repeat="article_dict in data.articles">
+
+                <tr>
+                    <td rowspan="2" width="250px">{{
+                        article_dict.publishing_tm }}
+                    </td>
+                    <td rowspan="2" width="250px"><a
+                            href="{{ url_details({company_id:data.company_id, article_id:article_dict.id}) }}"
+                            ng-bind-html="change_text_color(article_dict.title, data.original_search_text)">
+                    </a></td>
+                </tr>
+                <tr>
+                    <td width="250px" ng-if="article_dict.status==data.original_chosen_status||!data.original_chosen_status">{{ article_dict.company.name }}</td>
+                    <td ng-if="article_dict.status==data.original_chosen_status||!data.original_chosen_status">{{ article_dict.status }}</td>
+                </tr>
+
+
+            </table>
+
+        </div>
+        <form id="pagerform"
+              ng-ok
+              ng-onsuccess="afterSave"
+              ng-onsubmit="getData"
+              ng-action="url_search_article({company_id:data.company_id})">
+            <input type="submit" hidden>
         </form>
-        </div>
-        <h4>Published materials :</h4>
-        <div ng-repeat="dat in data.portal">
-            <div ng-repeat="article in dat.article_portal">
-                <span ng-if="article.status=='published'">
 
-                         -----------------------------------------------------
-                    <form ng-ok ng-onsuccess="afterSave" ng-onsubmit="getData" ng-action="url_update_status">
-                    <h5>
-                        {{ article.title }}
-                    </h5>
-                        was published at <h6>{{ article.md_tm }}<br></h6>
-                        <div ng-if="myRights('publish')">
-                        Change status to :
-                        <select ng-model="data.new_status">
-                            <option value="{{ article.id }}/not_published">reject</option>
-                        </select>
-                        </div>
-                        <input type="submit" ng-if="data.new_status" value="Accept">
-                        <input type="submit" ng-if="!data.new_status" value="Accept" disabled><br>
-                         -----------------------------------------------------
-                    </form>
-
-                </span>
-            </div>
+        <div ng-include="'pagination.html'"></div>
         </div>
+
     </div>
     {% endraw %}
 

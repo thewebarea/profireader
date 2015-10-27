@@ -109,8 +109,8 @@
                 </tr>
                 <tr ng-if="article_dict.portals_count>1"
                     ng-repeat="portal in article_dict.article.portal_article">
-                    <td width="250px">{{ portal.portal.name }}</td>
-                    <td>{{ portal.status }}</td>
+                    <td width="250px" ng-if="portal.status==data.original_chosen_status||!data.original_chosen_status">{{ portal.portal.name }}</td>
+                    <td ng-if="portal.status==data.original_chosen_status||!data.original_chosen_status">{{ portal.status }}</td>
                 </tr>
                 <tr ng-if="article_dict.portals_count==1">
                     <td width="250px">{{ article_dict.article.md_tm }}</td>

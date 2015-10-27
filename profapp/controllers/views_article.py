@@ -16,7 +16,7 @@ from config import Config
 def show_mine():
     return render_template(
         'article/list.html',
-        angular_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
+        angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
 
 
 @article_bp.route('/list/', methods=['POST'])

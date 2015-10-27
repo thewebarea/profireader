@@ -83,7 +83,8 @@ class ArticlePortal(Base, PRBase):
     def get_client_side_dict(self, fields='id|image_file_id|title|short|image_file_id|'
                                           'long|keywords|cr_tm|md_tm|'
                                           'status|publishing_tm, '
-                                          'company.id|name, division.id|name'):
+                                          'company.id|name, division.id|name,'
+                                          'company_article.*'):
         return self.to_dict(fields)
 
     @staticmethod
@@ -101,10 +102,29 @@ class ArticlePortal(Base, PRBase):
                 portals.append(port.portal.to_dict('id,name'))
         return all, [dict(port) for port in set([tuple(p.items()) for p in portals])]
 
+    @staticmethod
+    def get_companies_which_send_article_to_portal(portal_id):
+
+        all = {'name': 'All', 'id': 0}
+        companies = []
+        companies.append(all)
+        for article in db(ArticlePortal, portal_id=portal_id).all():
+            companies.append(article.company.to_dict('id,name'))
+        return all, [dict(port) for port in set([tuple(p.items()) for p in companies])]
+
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
                                    'status': ARTICLE_STATUS_IN_COMPANY.
                                   submitted})
+
+    @staticmethod
+    def subquery_portal_articles(search_text=None, portal_id=None, **kwargs):
+
+        sub_query = db(ArticlePortal, portal_id=portal_id, **kwargs)
+        if search_text:
+            sub_query = sub_query.filter(ArticlePortal.title.ilike("%" + search_text + "%"))
+
+        return sub_query
 
 
 class ArticleCompany(Base, PRBase):
@@ -174,8 +194,7 @@ class ArticleCompany(Base, PRBase):
 
         sub_query = db(ArticleCompany, company_id=company_id)
         if search_text:
-            sub_query = db(ArticleCompany, company_id=company_id).\
-                filter(ArticleCompany.title.ilike("%" + search_text + "%"))
+            sub_query = sub_query.filter(ArticleCompany.title.ilike("%" + search_text + "%"))
         if kwargs.get('portal_id') or kwargs.get('status'):
             sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
                                             **kwargs).exists())

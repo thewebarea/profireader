@@ -52,9 +52,9 @@ def load_companies(json):
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
 @login_required
 def materials(company_id):
-    return render_template('company/materials.html',
-                           company_id=company_id,
-                           angular_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
+    return render_template(
+        'company/materials.html', company_id=company_id,
+        angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
 
 
 @company_bp.route('/materials/<string:company_id>/', methods=['POST'])
@@ -64,11 +64,13 @@ def materials_load(json, company_id):
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_portal_id = json.get('chosen_portal')['id'] if json.get('chosen_portal') else 0
     params = {'search_text': json.get('search_text'), 'company_id': company_id}
+    article_status = json.get('chosen_status')
+    original_chosen_status = None
 
     if chosen_portal_id:
         params['portal_id'] = chosen_portal_id
-    if json.get('chosen_status') and json.get('chosen_status') != 'All':
-        params['status'] = json.get('chosen_status')
+    if article_status and article_status != 'All':
+        params['status'] = original_chosen_status = article_status
     subquery = ArticleCompany.subquery_company_articles(**params)
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
@@ -88,8 +90,9 @@ def materials_load(json, company_id):
                       'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS},
             'company_id': company_id,
-            'chosen_status': json.get('chosen_status') or statuses['All'],
-            'statuses': statuses}
+            'chosen_status': article_status or statuses['All'],
+            'statuses': statuses,
+            'original_chosen_status': original_chosen_status}
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
