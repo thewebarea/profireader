@@ -26,15 +26,21 @@ def load_mine(json):
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
     params = {'search_text': json.get('search_text'), 'user_id': g.user_dict['id']}
+    original_chosen_status = None
+    article_status = json.get('chosen_status')
     if chosen_company_id:
         params['company_id'] = chosen_company_id
+    if article_status and article_status != 'All':
+        params['status'] = original_chosen_status = article_status
     subquery = ArticleCompany.subquery_user_articles(**params)
 
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
-                                               items_per_page=2)
+                                               items_per_page=5)
 
     all, companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
+    statuses = {status: status for status in ARTICLE_STATUS_IN_COMPANY.all}
+    statuses['All'] = 'All'
 
     return {'articles': [{'article': a.get_client_side_dict(),
                           'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
@@ -45,7 +51,10 @@ def load_mine(json):
             'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
-                      'page_buttons': Config.PAGINATION_BUTTONS}}
+                      'page_buttons': Config.PAGINATION_BUTTONS},
+            'chosen_status': json.get('chosen_status') or statuses['All'],
+            'original_chosen_status': original_chosen_status,
+            'statuses': statuses}
 
 
 @article_bp.route('/create/', methods=['GET'])

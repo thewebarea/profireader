@@ -119,8 +119,9 @@
                 </tr>
                 <tr ng-if="article_dict.company_count>1"
                     ng-repeat="companies in article_dict.article.submitted_versions">
-                    <td width="250px">{{ companies.company.name }}</td>
-                    <td>{{ companies.status }}</td>
+
+                    <td width="250px" ng-if="companies.status==data.original_chosen_status||!data.original_chosen_status">{{ companies.company.name }}</td>
+                    <td ng-if="companies.status==data.original_chosen_status||!data.original_chosen_status">{{ companies.status }}</td>
                 </tr>
                 <tr ng-if="article_dict.company_count==1">
                     <td width="250px">{{ article_dict.article.mine_version.md_tm }}</td>

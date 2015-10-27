@@ -180,7 +180,6 @@ class ArticleCompany(Base, PRBase):
             sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
                                             **kwargs).exists())
 
-
         return sub_query
 
         # self.portal_devision_id = portal_devision_id
