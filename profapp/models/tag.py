@@ -49,6 +49,11 @@ class TagPortal(Base, PRBase):
 
     UniqueConstraint('tag_id', 'portal_id', name='uc_tag_id_company_id')
 
+    def __init__(self, tag_id=None, portal_id=None):
+        super(TagPortal, self).__init__()
+        self.tag_id = tag_id
+        self.portal_id = portal_id
+
 
 #  TODO (AA to AA): delete Position in TagPortalDivision
 class TagPortalDivision(Base, PRBase):
