@@ -67,17 +67,37 @@
             });
         };
 
-        $scope.copy = function(item) {
-            var samePath = item.tempModel.path.join() === item.model.path.join();
-            if (samePath && $scope.fileNavigator.fileNameExists(item.tempModel.name)) {
-                item.error = $translate.instant('error_invalid_filename');
-                return false;
-            }
-            item.copy(function() {
-                $scope.fileNavigator.refresh();
-                $('#copy').modal('hide');
-            });
+        $scope.copy = function(item){
+              $scope.copy_file_id = $cookies.copy_file_id = 'item.model.id';
         };
+
+        $scope.paste = function(item) {
+            $scope.copy_file_id = $cookies.copy_file_id = '';
+        };
+        //$scope.paste = function(copy_file) {
+        //    var samePath = item.tempModel.path.join() === item.model.path.join();
+        //    if (samePath && $scope.fileNavigator.fileNameExists(item.tempModel.name)) {
+        //        item.error = $translate.instant('error_invalid_filename');
+        //        return false;
+        //    }
+        //    item.paste(function() {
+        //        $scope.fileNavigator.refresh();
+        //        $scope.copy_file = {};
+        //        $('#paste').modal('hide');
+        //    });
+        //};
+
+        //$scope.paste = function(item) {
+        //    var samePath = item.tempModel.path.join() === item.model.path.join();
+        //    if (samePath && $scope.fileNavigator.fileNameExists(item.tempModel.name)) {
+        //        item.error = $translate.instant('error_invalid_filename');
+        //        return false;
+        //    }
+        //    item.copy(function() {
+        //        $scope.fileNavigator.refresh();
+        //        $('#copy').modal('hide');
+        //    });
+        //};
 
         $scope.compress = function(item) {
             item.compress(function() {
@@ -176,16 +196,19 @@
             });
             return found;
         };
-        $scope.dis = "cursor: default;pointer-events: none;color: gainsboro;"
         $scope.isDisable = function(){
-          return $scope.fileManagerConfig.disabled;
+            if($scope.copy_file_id.length == 0 ){
+                return 'cursor: default;pointer-events: none;color: gainsboro;'
+            }else{
+                return $scope.copy_file_id
+            }
         };
 
         $scope.err = function(){
-            if ($scope.error == 'False' && $scope.rootdirs.length != 0){
-                return false;
+            if($scope.error == 'False' && $scope.rootdirs.length != 0){
+                return false
             }else{
-                return true;
+                return true
             }
         };
 

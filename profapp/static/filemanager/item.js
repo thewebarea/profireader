@@ -1,6 +1,6 @@
 (function(window, angular, $) {
     "use strict";
-    angular.module('FileManagerApp').factory('item', ['$http', '$translate', 'fileManagerConfig', 'chmod', function($http, $translate, fileManagerConfig, Chmod) {
+    angular.module('FileManagerApp').factory('item', ['$http', '$translate','$cookies', 'fileManagerConfig', 'chmod', function($http, $cookies, $translate, fileManagerConfig, Chmod) {
 
         var Item = function(model, path) {
             var rawModel = {
@@ -113,11 +113,10 @@
             }
         };
 
-        Item.prototype.copy = function(success, error) {
+        Item.prototype.paste = function(success, error) {
             var self = this;
             var data = {params: {
-                self: self.model,
-                mode: "copy",
+                mode: "paste",
                 path: self.model.fullPath(),
                 newPath: self.tempModel.fullPath()
             }};
@@ -183,7 +182,7 @@
             });
         };
 
-        Item.prototype.download = function(preview) {
+        Item.prototype.download = function() {
             var self = this;
             //var data = {
             //    mode: "download",

@@ -13,7 +13,6 @@ from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
 from utils.db_utils import db
 from ..models.company import Company
-from flask import make_response
 
 def parent_folder(func):
     @wraps(func)
@@ -85,7 +84,7 @@ def rename(json):
 @filemanager_bp.route('/copy/', methods=['POST'])
 @ok
 def copy(json):
-    file = request.json['params']['self']
+    file = File.get(request.json['params']['id'],)
     return File.copy_file(file, request.json['params']['parent_id'])
 
 @filemanager_bp.route('/remove/<string:file_id>', methods=['POST'])

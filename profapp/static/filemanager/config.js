@@ -19,7 +19,6 @@
             extractUrl: "bridges/php/handler.php",
             permissionsUrl: "bridges/php/handler.php",
 
-            disabled: "cursor: default;pointer-events: none;color: gainsboro;",
             sidebar: true,
             breadcrumb: true,
             allowedActions: {
