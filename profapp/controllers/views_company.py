@@ -8,15 +8,17 @@ from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
-from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY
+from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import CompanyPortal
-from ..models.articles import ArticleCompany
+from ..models.articles import ArticleCompany, ArticlePortal
 from utils.db_utils import db
 from collections import OrderedDict
 # from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
 from flask import session
+from .pagination import pagination
+from config import Config
 
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
@@ -49,15 +51,48 @@ def load_companies(json):
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
 @login_required
-# @check_rights(simple_permissions([]))
 def materials(company_id):
-    return render_template('company/materials.html',
-                           company_id=company_id,
-                           articles=[art.to_dict(
-                               'id, title') for art in Article.
-                               get_articles_submitted_to_company(
-                                   company_id)])
+    return render_template(
+        'company/materials.html', company_id=company_id,
+        angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
 
+
+@company_bp.route('/materials/<string:company_id>/', methods=['POST'])
+@login_required
+@ok
+def materials_load(json, company_id):
+    current_page = json.get('pages')['current_page'] if json.get('pages') else 1
+    chosen_portal_id = json.get('chosen_portal')['id'] if json.get('chosen_portal') else 0
+    params = {'search_text': json.get('search_text'), 'company_id': company_id}
+    article_status = json.get('chosen_status')
+    original_chosen_status = None
+
+    if chosen_portal_id:
+        params['portal_id'] = chosen_portal_id
+    if article_status and article_status != 'All':
+        params['status'] = original_chosen_status = article_status
+    subquery = ArticleCompany.subquery_company_articles(**params)
+    articles, pages, current_page = pagination(subquery,
+                                               page=current_page,
+                                               items_per_page=5)
+    all, portals = ArticlePortal.get_portals_where_company_send_article(company_id)
+    statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
+    statuses['All'] = 'All'
+
+    return {'articles': [{'article': a.get_client_side_dict(),
+                          'portals_count': len(a.get_client_side_dict()['portal_article'])+1}
+                         for a in articles],
+            'portals': portals,
+            'search_text': json.get('search_text') or '',
+            'original_search_text': json.get('search_text') or '',
+            'chosen_portal': json.get('chosen_portal') or all,
+            'pages': {'total': pages,
+                      'current_page': current_page,
+                      'page_buttons': Config.PAGINATION_BUTTONS},
+            'company_id': company_id,
+            'chosen_status': article_status or statuses['All'],
+            'statuses': statuses,
+            'original_chosen_status': original_chosen_status}
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
