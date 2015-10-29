@@ -113,27 +113,24 @@
             }
         };
 
+        Item.prototype.copy = function(success, error){
+            var self = this;
+            var id = $cookies.copy_file_id = self.model.id;
+        };
+
         Item.prototype.paste = function(success, error) {
             var self = this;
             var data = {params: {
+                id: self.tempModel.id,
                 mode: "paste",
                 path: self.model.fullPath(),
-                newPath: self.tempModel.fullPath()
+                folder_id: self.tempModel.folder_id
             }};
-            if (self.tempModel.name.trim()) {
                 self.inprocess = true;
                 self.error = '';
                 return $http.post(fileManagerConfig.copyUrl, data).success(function(data) {
                     self.defineCallback(data, success, error);
-                }).error(function(data) {
-                    self.error = data.result && data.result.error ?
-                        data.result.error:
-                        $translate.instant('error_copying');
-                    typeof error === 'function' && error(data);
-                })['finally'](function() {
-                    self.inprocess = false;
-                });
-            }
+                })
         };
 
         Item.prototype.compress = function(success, error) {

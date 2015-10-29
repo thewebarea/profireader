@@ -19,6 +19,7 @@
         $scope.file_manager_on_action = file_manager_on_action;
         $scope.root_id = '';
         $scope.root_name = '';
+        $scope.copy_file_id = '';
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
@@ -68,12 +69,22 @@
         };
 
         $scope.copy = function(item){
-              $scope.copy_file_id = $cookies.copy_file_id = 'item.model.id';
+            $scope.copy_file_id = $cookies.copy_file_id = item.model.id;
+            item.copy(function() {
+                $scope.fileNavigator.refresh();
+                $('#copy').modal('hide');
+            });
+        };
+        $scope.paste = function(item) {
+            item.tempModel.id = $scope.copy_file_id;
+            item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
+            item.paste(function() {
+                    $scope.fileNavigator.refresh();
+                    $scope.copy_file_id = $cookies.copy_file_id = '';
+                });
         };
 
-        $scope.paste = function(item) {
-            $scope.copy_file_id = $cookies.copy_file_id = '';
-        };
+
         //$scope.paste = function(copy_file) {
         //    var samePath = item.tempModel.path.join() === item.model.path.join();
         //    if (samePath && $scope.fileNavigator.fileNameExists(item.tempModel.name)) {
@@ -136,6 +147,7 @@
             });
         };
 
+
         $scope.createFolder = function(item) {
             var name = item.tempModel.name && item.tempModel.name.trim();
             item.tempModel.type = 'dir';
@@ -197,10 +209,10 @@
             return found;
         };
         $scope.isDisable = function(){
-            if($scope.copy_file_id.length == 0 ){
+            if($scope.copy_file_id == ''){
                 return 'cursor: default;pointer-events: none;color: gainsboro;'
             }else{
-                return $scope.copy_file_id
+                return ''
             }
         };
 

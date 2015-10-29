@@ -71,9 +71,9 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    File.remmove('562e23eb-1784-4001-b69a-4bed9cea7855')
-    file = FileContent.get('562e23eb-1784-4001-b69a-4bed9cea7855')
-    return render_template('tmp-test.html', file=file)
+    file = File.get('5630be2a-1721-4001-ab4e-cfce6901e3eb')
+    name = File.get_unique_name(file.name,file.mime,file.parent_id)
+    return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/rename/', methods=['POST'])
 @ok
@@ -84,8 +84,8 @@ def rename(json):
 @filemanager_bp.route('/copy/', methods=['POST'])
 @ok
 def copy(json):
-    file = File.get(request.json['params']['id'],)
-    return File.copy_file(file, request.json['params']['parent_id'])
+    file = File.get(request.json['params']['id'])
+    return File.copy_file(file, request.json['params']['folder_id'])
 
 @filemanager_bp.route('/remove/<string:file_id>', methods=['POST'])
 def remove(file_id):

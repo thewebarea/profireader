@@ -262,7 +262,8 @@ class File(Base, PRBase):
         elif re.search('\(\d+\)$', name):
             return name[0:-3]
         else:
-            return name[0:-len(ext)]
+            name = name if len(ext) == 0 else name[0:-len(ext)]
+            return name
 
     @staticmethod
     def is_name(name, mime, parent_id):
@@ -326,7 +327,7 @@ class File(Base, PRBase):
             file_content = FileContent.get(id).detach()
             file_content.id = copy_file.id
             copy_file.file_content = [file_content]
-        return copy_file
+        return copy_file.id
 
     def move_to(self, parent_id, **kwargs):
         folder = File.get(parent_id)
