@@ -10,6 +10,7 @@
             uploadUrl: "/filemanager/upload/",
             renameUrl: "/filemanager/rename/",
             copyUrl: "/filemanager/copy/",
+            cutUrl: "/filemanager/cut/",
             removeUrl: "/filemanager/remove/",
             editUrl: "bridges/php/handler.php",
             getContentUrl: "bridges/php/handler.php",

@@ -1,8 +1,8 @@
 (function(window, angular, $) {
     "use strict";
     angular.module('FileManagerApp').controller('FileManagerCtrl', [
-    '$scope', '$translate', '$cookies', 'fileManagerConfig', 'item', 'fileNavigator', 'fileUploader',
-    function($scope, $translate, $cookies, fileManagerConfig, Item, FileNavigator, fileUploader) {
+    '$scope', '$translate', '$cookies', 'fileManagerConfig', 'item', 'Upload', 'fileNavigator', 'fileUploader',
+    function($scope, $translate, $cookies, fileManagerConfig, Item, Upload, FileNavigator, fileUploader) {
 
         $scope.config = fileManagerConfig;
         $scope.appName = fileManagerConfig.appName;
@@ -20,6 +20,7 @@
         $scope.root_id = '';
         $scope.root_name = '';
         $scope.copy_file_id = '';
+        $scope.cut_file_id = '';
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
@@ -68,20 +69,41 @@
             });
         };
 
-        $scope.copy = function(item){
-            $scope.copy_file_id = $cookies.copy_file_id = item.model.id;
-            item.copy(function() {
+        $scope.cut = function(item){
+            $scope.cut_file_id = $cookies.cut_file_id = item.model.id;
+            $scope.copy_file_id = $cookies.copy_file_id = '';
+            item.cut(function() {
                 $scope.fileNavigator.refresh();
-                $('#copy').modal('hide');
             });
         };
+
+        $scope.copy = function(item){
+            $scope.copy_file_id = $cookies.copy_file_id = item.model.id;
+            $scope.cut_file_id = $cookies.cut_file_id = '';
+            item.copy(function() {
+                $scope.fileNavigator.refresh();
+            });
+        };
+
         $scope.paste = function(item) {
-            item.tempModel.id = $scope.copy_file_id;
-            item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
-            item.paste(function() {
+            if($scope.copy_file_id != '' && $scope.cut_file_id == ''){
+                item.tempModel.mode = 'copy';
+                item.tempModel.id = $scope.copy_file_id;
+                item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
+                item.paste(function() {
                     $scope.fileNavigator.refresh();
                     $scope.copy_file_id = $cookies.copy_file_id = '';
                 });
+            }else if($scope.copy_file_id == '' && $scope.cut_file_id != ''){
+                item.tempModel.mode = 'cut';
+                item.tempModel.id = $scope.cut_file_id;
+                item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
+                item.paste(function() {
+                    $scope.fileNavigator.refresh();
+                    $scope.cut_file_id = $cookies.cut_file_id = '';
+                });
+            }
+
         };
 
 
@@ -186,15 +208,36 @@
             return defaultpermited
             };
 
+        $scope.name = '';
+        $scope.chunkSize = '20480KB';
+        $scope.uploadUsingUpload=function(file) {
+            $scope.f = file;
+            console.log(file);
+            file.upload = Upload.upload({
+                url: 'http://profi.ntaxa.com/filemanager/send/{{ company_id }}/',
+                data : $scope.name,
+                resumeSizeUrl: 'http://profi.ntaxa.com/filemanager/resumeopload/',
+                resumeChunkSize: $scope.chunkSize,
+                headers: {
+                    'optional-header': 'header-value'
+                },
+                fields: {username: $scope.username},
+                file: file});
+                        file.upload.progress(function (evt) {
+                        file.progress = Math.min(100, parseInt(100.0 *
+                                                               evt.loaded / evt.total));
+                    });
+        };
+
         $scope.uploadFiles = function() {
-            $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath,
-                $scope.fileNavigator.root_id, $scope.fileNavigator.getCurrentFolder()).success(function() {
-                $scope.fileNavigator.refresh();
-                $('#uploadfile').modal('hide');
-            }).error(function(data) {
-                var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
-                $scope.temp.error = errorMsg;
-            });
+                $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath,
+                    $scope.fileNavigator.root_id, $scope.fileNavigator.getCurrentFolder()).success(function () {
+                        $scope.fileNavigator.refresh();
+                        $('#uploadfile').modal('hide');
+                    }).error(function (data) {
+                        var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
+                        $scope.temp.error = errorMsg;
+                    });
         };
 
 
@@ -209,7 +252,7 @@
             return found;
         };
         $scope.isDisable = function(){
-            if($scope.copy_file_id == ''){
+            if($scope.copy_file_id == '' && $scope.cut_file_id == ''){
                 return 'cursor: default;pointer-events: none;color: gainsboro;'
             }else{
                 return ''

@@ -113,6 +113,11 @@
             }
         };
 
+        Item.prototype.cut = function(success, error){
+            var self = this;
+            var id = $cookies.cut_file_id = self.model.id;
+        };
+
         Item.prototype.copy = function(success, error){
             var self = this;
             var id = $cookies.copy_file_id = self.model.id;
@@ -120,17 +125,28 @@
 
         Item.prototype.paste = function(success, error) {
             var self = this;
+            if (self.isFolder()){
+                var parent_id = self.model.id;
+            }else{
+                var parent_id =  self.tempModel.folder_id;
+            }
             var data = {params: {
                 id: self.tempModel.id,
                 mode: "paste",
                 path: self.model.fullPath(),
-                folder_id: self.tempModel.folder_id
+                folder_id: parent_id
             }};
-                self.inprocess = true;
-                self.error = '';
-                return $http.post(fileManagerConfig.copyUrl, data).success(function(data) {
+            self.inprocess = true;
+            self.error = '';
+            if(self.tempModel.mode == 'copy') {
+                return $http.post(fileManagerConfig.copyUrl, data).success(function (data) {
                     self.defineCallback(data, success, error);
-                })
+                });
+            }else{
+                return $http.post(fileManagerConfig.cutUrl, data).success(function (data) {
+                    self.defineCallback(data, success, error);
+                });
+            }
         };
 
         Item.prototype.compress = function(success, error) {

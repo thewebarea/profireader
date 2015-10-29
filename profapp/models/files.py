@@ -330,6 +330,8 @@ class File(Base, PRBase):
         return copy_file.id
 
     def move_to(self, parent_id, **kwargs):
+        if self.parent_id == parent_id:
+            return self.id
         folder = File.get(parent_id)
         root = folder.root_folder_id
         if folder.root_folder_id == None:
@@ -341,7 +343,7 @@ class File(Base, PRBase):
         self.updates(attr)
         if self.mime == 'directory':
             b = File.update_all(self.id,attr)
-        return self
+        return self.id
 
     # def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
     #     file_content = FileContent.get(self.id).detach()

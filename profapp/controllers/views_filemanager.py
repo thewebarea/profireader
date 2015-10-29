@@ -87,6 +87,12 @@ def copy(json):
     file = File.get(request.json['params']['id'])
     return File.copy_file(file, request.json['params']['folder_id'])
 
+@filemanager_bp.route('/cut/', methods=['POST'])
+@ok
+def cut(json):
+    file = File.get(request.json['params']['id'])
+    return File.move_to(file, request.json['params']['folder_id'])
+
 @filemanager_bp.route('/remove/<string:file_id>', methods=['POST'])
 def remove(file_id):
     return File.remove(file_id)
