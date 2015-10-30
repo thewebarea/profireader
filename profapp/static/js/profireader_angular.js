@@ -578,8 +578,12 @@ function angularControllerFunction(controller_attr, function_name) {
 
 }
 
-function fileUrl(id) {
+function fileUrl(id, down) {
     if (!id) return '';
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
-    return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
+    if (down){
+        return 'http://file' + server + '.profi.ntaxa.com/' + id + '?d'
+    }else {
+        return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
+    }
 }

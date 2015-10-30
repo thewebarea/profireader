@@ -125,10 +125,11 @@
 
         Item.prototype.paste = function(success, error) {
             var self = this;
-            if (self.isFolder()){
-                var parent_id = self.model.id;
+            var parent_id = '';
+            if (self.isFolder() && self.tempModel.len !== 0){
+                parent_id = self.model.id;
             }else{
-                var parent_id =  self.tempModel.folder_id;
+                parent_id =  self.tempModel.folder_id;
             }
             var data = {params: {
                 id: self.tempModel.id,
@@ -197,15 +198,19 @@
 
         Item.prototype.download = function() {
             var self = this;
-            //var data = {
-            //    mode: "download",
-            //    preview: preview,
-            //    path: self.model.fullPath()
-            //};
-            //var url = [fileManagerConfig.downloadFileUrl, $.param(data)].join('?');
-            var url = fileManagerConfig.downloadFileUrl+self.model.id+'?d';
+            var url = self.fileUrl(self.model.id, true);
             if (self.model.type !== 'dir') {
                 window.open(url, '_blank', '');
+            }
+        };
+
+        Item.prototype.fileUrl = function(id, down){
+            if (!id) return '';
+            var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
+            if (down === true){
+                return 'http://file' + server + '.profi.ntaxa.com/' + id + '?d'
+            }else{
+                return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
             }
         };
 
@@ -302,6 +307,17 @@
             })['finally'](function() {
                 self.inprocess = false;
             });
+        };
+
+        Item.prototype.canPaste = function(id, folder_id){
+            var data = {params: {
+                perms: self.tempModel.perms.toOctal(),
+                permsCode: self.tempModel.perms.toCode(),
+                recursive: self.tempModel.recursive
+            }};
+            return $http.post(fileManagerConfig.can_paste, data).success(function(data) {
+                self.defineCallback(data, success, error);
+            })
         };
 
         Item.prototype.isFolder = function() {

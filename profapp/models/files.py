@@ -84,6 +84,18 @@ class File(Base, PRBase):
         return ret[::-1]
 
     @staticmethod
+    def can_paste_in_dir(id_file, id_folder):
+        if id_file == id_folder:
+            return False
+        folder = File.get(id_folder)
+        dirs_in_dir = [file for file in db(File, parent_id = id_file, mime='directory')]
+        for dir in dirs_in_dir:
+            dirs_in_dir.append(dir)
+            if dir.parent_id == id_file:
+                return False
+        return True
+
+    @staticmethod
     def list(parent_id=None, file_manager_called_for = ''):
 
         default_actions = {}
@@ -91,6 +103,11 @@ class File(Base, PRBase):
         default_actions['download'] = lambda file: None if ((file.mime == 'directory') or (file.mime == 'root')) else True
         actions = {act: default_actions[act] for act in default_actions}
         show = lambda file: True
+        actions['rename'] = lambda file: None if file.mime == "root" else True
+        actions['remove'] = lambda file: None if file.mime == "root" else True
+        actions['copy'] = lambda file: None if file.mime == "root" else True
+        actions['paste'] = lambda file: None if file.mime == 'root' else True
+        actions['cut'] = lambda file: None if file.mime == "root" else True
 
         if file_manager_called_for == 'file_browse_image':
             actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
@@ -330,6 +347,8 @@ class File(Base, PRBase):
         return copy_file.id
 
     def move_to(self, parent_id, **kwargs):
+        if File.can_paste_in_dir(self.id, parent_id) == False and self.mime == 'directory':
+            return False
         if self.parent_id == parent_id:
             return self.id
         folder = File.get(parent_id)

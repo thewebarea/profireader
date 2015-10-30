@@ -86,7 +86,7 @@
         };
 
         $scope.paste = function(item) {
-            if($scope.copy_file_id != '' && $scope.cut_file_id == ''){
+            if($scope.copy_file_id !== '' && $scope.cut_file_id === ''){
                 item.tempModel.mode = 'copy';
                 item.tempModel.id = $scope.copy_file_id;
                 item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
@@ -97,6 +97,7 @@
             }else if($scope.copy_file_id == '' && $scope.cut_file_id != ''){
                 item.tempModel.mode = 'cut';
                 item.tempModel.id = $scope.cut_file_id;
+                item.tempModel.len = $scope.fileNavigator.fileList.length;
                 item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
                 item.paste(function() {
                     $scope.fileNavigator.refresh();
@@ -189,20 +190,23 @@
         };
 
         $scope.take_action = function(item, actionname) {
-            if ($scope.file_manager_on_action[actionname]) {
+            $scope.modal = '';
+            if ($scope.file_manager_on_action[actionname] !== '' &&  actionname === 'download') {
                 try {
-                    eval($scope.file_manager_on_action[actionname] + '(item);');
+                    eval('item'+'.'+actionname+'();');//$scope.file_manager_on_action[actionname] + '(item);');
                 }
                 catch(e) {
 
                 }
+            }else if($scope.file_manager_on_action[actionname] !== ''){
+                eval('$scope.' + actionname.toString()+'(item)');//$scope.file_manager_on_action[actionname] + '(item);');
             }
         };
 
         $scope.can_action = function(item, actionname, defaultpermited) {
             if (actionname === 'paste') {
-            if (defaultpermited === true) {
-                return ($scope.copied_files.length > 0)
+                if (defaultpermited === true) {
+                    return ($scope.copied_files.length > 0)
                 }
             }
             return defaultpermited
@@ -251,12 +255,22 @@
             });
             return found;
         };
-        $scope.isDisable = function(){
-            if($scope.copy_file_id == '' && $scope.cut_file_id == ''){
+        $scope.isDisable = function(actionname){
+            if(actionname === 'paste' && ($scope.copy_file_id == '' && $scope.cut_file_id == '')){
                 return 'cursor: default;pointer-events: none;color: gainsboro;'
             }else{
                 return ''
             }
+        };
+
+        $scope.glyph = function(actionname){
+          if(actionname == 'rename'){
+              return 'edit'
+          }else if(actionname == 'cut'){
+              return 'scissors'
+          }else{
+              return actionname
+          }
         };
 
         $scope.err = function(){
