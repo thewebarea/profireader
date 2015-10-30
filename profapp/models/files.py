@@ -82,7 +82,6 @@ class File(Base, PRBase):
             nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
         return ret[::-1]
 
-
     @staticmethod
     def list(parent_id=None, file_manager_called_for = ''):
 

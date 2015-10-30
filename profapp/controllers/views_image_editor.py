@@ -9,6 +9,7 @@ from io import BytesIO
 from time import gmtime, strftime
 import sys
 from ..models.files import File
+from .views_file import file_query
 
 @image_editor_bp.route('/<string:img_id>', methods=['GET', 'POST'])
 def image_editor(img_id):
@@ -22,14 +23,9 @@ def image_editor(img_id):
     data = request.form
 
     if request.method != 'GET':
-        image_query = file_query(image_id, File)
-        image_content = file_query(image_id, FileContent)
+        image_query = file_query(File, image_id)
+        image_content = file_query(FileContent, FileContent)
         image = Image.open(BytesIO(image_content.content))
-
-# area = [int(y) for x, y in sorted(zip(request.form.keys(),
-# request.form.values()))
-#   if int(y) in range(0, max(image.size)) and x != "5rotate"
-# and x != "6name"]
         area = [int(a) for a in (data['1x'], data['2y'], data['3width'],
                                  data['4height'])
                 if int(a) in range(0, max(image.size))]
@@ -64,6 +60,7 @@ def image_editor(img_id):
             g.db.rollback()
             raise BadCoordinates
     file = db(File, id=image_id).one()
+    print(file.url())
 
     return render_template('image_editor.html',
                            ratio=ratio,
@@ -74,5 +71,10 @@ def image_editor(img_id):
 @image_editor_bp.route('/cropped/<string:id>')
 def cropped(id):
     return render_template('cropped_image.html',
-                           image=File.get(id).url()
+                           image=file_query(File, id).url()
                            )
+
+@image_editor_bp.route('/get_file')
+def get_file():
+    print(db(File, mime='image/jpeg').first().url())
+    return 'http://file001.profi.ntaxa.com/560baa85-31eb-4001-9685-d807fa6b6807/'
