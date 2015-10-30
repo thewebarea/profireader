@@ -89,8 +89,8 @@ class TagPortalDivision(Base, PRBase):
     #     if tag_name == '':
     #         ret['errors']['name'] = 'empty tag is not allowed'
     #
-    #     portal_bound_tags = db(Portal, id=self.portal_division.portal_id).portal_bound_tags
-    #     portal_bound_tag_names = map(lambda obj: getattr(obj, 'name'), portal_bound_tags)
+    #     portal_bound_tags_dynamic = db(Portal, id=self.portal_division.portal_id).portal_bound_tags_dynamic
+    #     portal_bound_tag_names = map(lambda obj: getattr(obj, 'name'), portal_bound_tags_dynamic)
     #     if tag_name in portal_bound_tag_names:
     #         ret['errors']['name'] = 'this portal tag already exists'
     #

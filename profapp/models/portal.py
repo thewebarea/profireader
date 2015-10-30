@@ -55,7 +55,7 @@ class Portal(Base, PRBase):
             # all()
     #portal_bound_tags_load_new = property(_get_portal_bound_tags_load_func)
 
-    portal_bound_tags = relationship('TagPortalDivision',
+    portal_bound_tags_dynamic = relationship('TagPortalDivision',
                                secondary='portal_division',
                                # secondary='join(Portal, PortalDivision, Portal.id == PortalDivision.portal_id).'
                                # 'join(TagPortalDivision, TagPortalDivision.id == PortalDivision.portal_id)',
@@ -77,7 +77,7 @@ class Portal(Base, PRBase):
                                # viewonly=True,
                                lazy='noload')
 
-    portal_bound_tags_load = relationship('TagPortalDivision',
+    portal_bound_tags_select = relationship('TagPortalDivision',
                                secondary='portal_division',
                                # secondary='join(Portal, PortalDivision, Portal.id == PortalDivision.portal_id).'
                                # 'join(TagPortalDivision, TagPortalDivision.id == PortalDivision.portal_id)',
@@ -88,7 +88,8 @@ class Portal(Base, PRBase):
                                # viewonly=True,
                                )
 
-    portal_notbound_tags = relationship('TagPortal', lazy='dynamic')
+    portal_notbound_tags_select = relationship('TagPortal')
+    portal_notbound_tags_dynamic = relationship('TagPortal', lazy='dynamic')
     portal_notbound_tags_noload = relationship('TagPortal', lazy='noload')
 
     # d = relationship("D",

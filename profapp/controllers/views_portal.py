@@ -110,11 +110,11 @@ def profile(portal_id):
 def profile_load(json, portal_id):
 
     portal = db(Portal, id=portal_id).one()
-    portal_bound_tags = portal.portal_bound_tags.all()
+    portal_bound_tags = portal.portal_bound_tags_select
     tags = set(tag_portal_division.tag for tag_portal_division in portal_bound_tags)
     tags_dict = {tag.id: tag.name for tag in tags}
-    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_bound_tags.*',
-                                     'portal_notbound_tags.*'),
+    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_bound_tags_select.*',
+                                     'portal_notbound_tags_select.*'),
             'portal_id': portal_id,
             'tag': tags_dict}
 
@@ -164,20 +164,12 @@ def profile_edit_load(json, portal_id):
 
         json_new = strip_new_tags(json)
 
-        curr_portal_bound_tag_port_div_objects = portal.portal_bound_tags.all()
+        curr_portal_bound_tag_port_div_objects = portal.portal_bound_tags_select
         curr_portal_bound_tags = set(map(lambda x: x.tag, curr_portal_bound_tag_port_div_objects))
         curr_portal_bound_tag_names = set(map(lambda x: x.name, curr_portal_bound_tags))
         curr_portal_bound_tags_dict = {}
         for elem in curr_portal_bound_tags:
             curr_portal_bound_tags_dict[elem.name] = elem
-        # curr_portal_bound_port_div_id_tag_name_object_dict = []
-        # for elem in curr_portal_bound_tag_port_div_objects:
-        #     curr_portal_bound_port_div_id_tag_name_object_dict.append(
-        #         [{'portal_division_id': elem.portal_division_id,
-        #          'tag_name': elem.tag.name},
-        #          elem]
-        #     )
-
         curr_portal_bound_port_div_id_tag_name_object_dict = {}
         for elem in curr_portal_bound_tag_port_div_objects:
             curr_portal_bound_port_div_id_tag_name_object_dict[
@@ -185,12 +177,15 @@ def profile_edit_load(json, portal_id):
                            ('tag_name', elem.tag.name)})
             ] = elem
 
-        curr_portal_notbound_tag_port_objects = portal.portal_notbound_tags.all()
+        curr_portal_notbound_tag_port_objects = portal.portal_notbound_tags_select
         curr_portal_notbound_tags = set(map(lambda x: x.tag, curr_portal_notbound_tag_port_objects))
         curr_portal_notbound_tag_names = set(map(lambda x: x.name, curr_portal_notbound_tags))
         curr_portal_notbound_tags_dict = {}
         for elem in curr_portal_notbound_tags:
             curr_portal_notbound_tags_dict[elem.name] = elem
+        curr_portal_notbound_tag_name_object_dict = {}
+        for elem in curr_portal_notbound_tag_port_objects:
+            curr_portal_notbound_tag_name_object_dict[elem.tag.name] = elem
 
         new_bound_tags = json_new['bound_tags']
         new_notbound_tags = json_new['notbound_tags']
@@ -276,91 +271,76 @@ def profile_edit_load(json, portal_id):
         #     )
 
         keys = list(map(dict, curr_portal_bound_port_div_id_tag_name_object_dict.keys()))
-        new_tag_portal_div_list = []
+        add_tag_portal_bound_list = []
         for elem in json_new['bound_tags']:
-            if elem in keys:
-                key = frozenset(elem.items())
-                new_tag_portal_div_list.append(
-                    curr_portal_bound_port_div_id_tag_name_object_dict[key]
-                )
-            else:
-                new_tag_port_div = TagPortalDivision()
+            if elem not in keys:
+                new_tag_port_div = TagPortalDivision(portal_division_id=elem['portal_division_id'])
                 new_tag_port_div.tag = new_tags_dict[elem['tag_name']]
-                new_tag_port_div.portal_division = portal.divisions_lazy_dynamic.filter_by(id=elem['portal_division_id']).one()
-                new_tag_portal_div_list.append(new_tag_port_div)
+                add_tag_portal_bound_list.append(new_tag_port_div)
 
-        portal.portal_bound_tags_load.extend(new_tag_portal_div_list)
-        g.db.add(portal)
+        delete_tag_portal_bound_list = []
+        for elem in keys:
+            if elem not in json_new['bound_tags']:
+                delete_tag_portal_bound_list.append(
+                    curr_portal_bound_port_div_id_tag_name_object_dict[frozenset(elem.items())]
+                )
+
+        add_tag_portal_notbound_list = []
+        for elem in json_new['notbound_tags']:
+            if elem not in curr_portal_notbound_tags:
+                new_tag_port = TagPortal(portal_id=elem['portal_id'])
+                new_tag_port.tag = new_tags_dict[elem['tag_name']]
+                add_tag_portal_notbound_list.append(new_tag_port)
+
+        delete_tag_portal_notbound_list = []
+        for elem in curr_portal_notbound_tags:
+            if elem not in json_new['notbound_tags']:
+                delete_tag_portal_notbound_list.append(
+                    curr_portal_notbound_tag_name_object_dict[elem.name]
+                )
+
+        g.db.add_all(add_tag_portal_bound_list + add_tag_portal_notbound_list)
+        # read this: http://stackoverflow.com/questions/7892618/sqlalchemy-delete-subquery
+        g.db.query(TagPortalDivision).\
+            filter(TagPortalDivision.id.in_([x.id for x in delete_tag_portal_bound_list])).\
+            delete(synchronize_session=False)
+        g.db.query(TagPortal).\
+            filter(TagPortal.id.in_([x.id for x in delete_tag_portal_notbound_list])).\
+            delete(synchronize_session=False)
+        g.db.expire_all()
+
+
+        # TODO: not to forget to delete unused tags... New tags well be added.
+
+        # for elem in delete_tag_portal_bound_list:
+        #     g.db.delete(elem)
         g.db.commit()
 
         print('+++++++++++++++++++')
 
-        # new_tags = g.db(Tag).filter(name=tag_name).all()
-        # curr_portal_bound_tag_port_div_objects
-
-        # g.db.add(portal)
-        # db(Portal, id=portal_id).update({'a': 0})
-        # g.db.flush()
-        # g.db.commit()
-
-        # deleted_bound_tag_names = curr_portal_bound_tag_names - new_bound_tag_names
-        # to_remove_tag_port_div_objects = \
-        #     [tag_port_div_object
-        #      for tag_port_div_object in curr_portal_bound_tag_port_div_objects
-        #      if tag_port_div_object.tag.name in deleted_bound_tag_names]
-        # for tag_port_div_object in to_remove_tag_port_div_objects:
-        #     portal.portal_bound_tags_load.remove(tag_port_div_object)
-
-        # deleted_notbound_tag_names = curr_portal_notbound_tag_names - new_notbound_tag_names
-        # to_remove_tag_port_objects = \
-        #     [tag_port_object for tag_port_object in curr_portal_notbound_tag_port_objects
-        #      if tag_port_object.tag.name in deleted_notbound_tag_names]
-        # for tag_port_object in to_remove_tag_port_objects:
-        #     portal.portal_notbound_tags_load.remove(tag_port_object)
-
-        new_portal_bound_tags = []
-        for elem in json_new['bound_tags']:
-            tag_name = elem['tag_name']
-
-            # TODO (AA to AA): there is no need always to create additional TagPortalDivision object
-
-            # curr_portal_bound_tag_port_div_objects
-            # curr_portal_bound_tags
-            # curr_portal_bound_tag_names
-            # curr_portal_bound_tags_dict
-
-            new_tag_port_div = \
-                TagPortalDivision(tag_id=None, portal_division_id=elem['portal_division_id'])
-
-            new_tag_port_div.tag = new_tags_dict[tag_name]
-            new_portal_bound_tags.append(new_tag_port_div)
-        portal.portal_bound_tags_noload.extend(new_portal_bound_tags)
-
-        new_portal_notbound_tags = []
-        for tag_name in json_new['notbound_tags']:
-            new_tag_port = \
-                TagPortal(tag_id=None, portal_id=portal_id)
-
-            new_tag_port.tag = new_tags_dict[tag_name]
-            new_portal_notbound_tags.append(new_tag_port)
-        portal.portal_notbound_tags_noload.extend(new_portal_notbound_tags)
-
-        g.db.add(portal)
-        g.db.commit()
-
-        #portal.portal_bound_tags = ...
-        #portal.portal_notbound_tags = ...
+        #portal.portal_bound_tags_dynamic = ...
+        #portal.portal_notbound_tags_dynamic = ...
 
         # added_bound_tag_names = new_bound_tag_names - (new_bound_tag_names & curr_portal_bound_tag_names)
         # added_notbound_tag_names = new_notbound_tag_names - (new_notbound_tag_names & curr_portal_notbound_tag_names)
 
         # tag0_name = curr_portal_bound_tag_port_div_objects[0].tag.name
-        # y = list(curr_portal_bound_tag_port_div_objects)         # Operations with portal_bound_tags...
+        # y = list(curr_portal_bound_tag_port_div_objects)         # Operations with portal_bound_tags_dynamic...
         flash('Portal tags successfully updated')
 
-    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_bound_tags)
+    tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_bound_tags_select)
     tags_dict = {tag.id: tag.name for tag in tags}
-    return {'portal': portal.to_dict('*, divisions.*, own_company.*, portal_bound_tags.*'),
+
+    x = portal.to_dict(
+                   'portal_notbound_tags_select.*',
+                   # 'portal_notbound_tags_select.*'
+                   ),
+    return {'portal': portal.to_dict('*, '
+                                     'divisions.*, '
+                                     'own_company.*, '
+                                     'portal_bound_tags_select.*',
+                                     # 'portal_notbound_tags_select.*'
+                                     ),
             'portal_id': portal_id,
             'tag': tags_dict}
 
