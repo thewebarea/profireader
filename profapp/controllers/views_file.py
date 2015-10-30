@@ -15,6 +15,7 @@ def get(file_id):
     response.headers['Content-Type'] = image_query.mime
     response.headers['Content-Disposition'] = 'filename=%s' % \
                                               image_query.name
+    response.headers['Access-Control-Allow-Origin'] = "http://profi.ntaxa.com"
     return send_file(BytesIO(image_query_content.content),
                      mimetype=image_query.mime, as_attachment=False)
 

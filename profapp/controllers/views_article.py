@@ -65,7 +65,7 @@ def show_form_create():
 @article_bp.route('/create/', methods=['POST'])
 @ok
 def load_form_create(json):
-    return {'id': '', 'title': '', 'short': '', 'long': ''}
+    return {'id': '', 'title': '', 'short': '', 'long': '', 'image_file_url': ''}
 
 
 @article_bp.route('/confirm_create/', methods=['POST'])
