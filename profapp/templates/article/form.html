@@ -112,7 +112,7 @@
         <!-- <h3 class="page-header">Demo:</h3> -->
 
         <div class="img-container">
-          <img src="{{ image_file_url }}">
+          <img src="../../static/images/PZf5Q.png">
         </div>
       </div>
       <div class="col-md-3">
@@ -122,16 +122,14 @@
         <div>
 
         </div>
-
-
-          <form class="send coordinates" action="/image_editor/{{ img_id }}" onsubmit="return AjaxPost()" id="crop" method="post">
         <!-- <h3 class="page-header">Data:</h3> -->
             <div class="docs-data">
           <div class="input-group">
-            <input class="form-control" id="dataX" type="hidden" name="1x" placeholder="x">
+            <input class="form-control" id="dataX" name="1x" placeholder="x">
+
           </div>
           <div class="input-group">
-            <input class="form-control" id="dataY" type="hidden" name="2y" placeholder="y">
+            <input class="form-control" id="dataY" name="2y" placeholder="y">
           </div>
           <div class="input-group">
             <input class="form-control" id="dataWidth" type="hidden" name="3width" placeholder="width">
@@ -148,8 +146,6 @@
             <input id="new_name" type="text" name="6name" placeholder="new_name">
           </div>
 
-            <input type="submit" value="submit">
-              </form>
       </div>
 
 

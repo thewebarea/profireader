@@ -60,7 +60,6 @@ def image_editor(img_id):
             g.db.rollback()
             raise BadCoordinates
     file = db(File, id=image_id).one()
-    print(file.url())
 
     return render_template('image_editor.html',
                            ratio=ratio,
@@ -76,5 +75,4 @@ def cropped(id):
 
 @image_editor_bp.route('/get_file')
 def get_file():
-    print(db(File, mime='image/jpeg').first().url())
     return 'http://file001.profi.ntaxa.com/560baa85-31eb-4001-9685-d807fa6b6807/'

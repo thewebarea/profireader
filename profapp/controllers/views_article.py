@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, g
+from flask import render_template, redirect, url_for, request, g, make_response
 from profapp.forms.article import ArticleForm
 from profapp.models.articles import Article, ArticleCompany
 from profapp.models.users import User
@@ -65,12 +65,13 @@ def show_form_create():
 @article_bp.route('/create/', methods=['POST'])
 @ok
 def load_form_create(json):
-    return {'id': '', 'title': '', 'short': '', 'long': '', 'image_file_url': ''}
+    return {'id': '', 'title': '', 'short': '', 'long': '', 'x1': '12344444444444'}
 
 
 @article_bp.route('/confirm_create/', methods=['POST'])
 @ok
 def confirm_create(json):
+    print(json)
     return Article.save_new_article(g.user_dict['id'], **json).save().get_client_side_dict()
 
 
