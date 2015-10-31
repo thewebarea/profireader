@@ -21,8 +21,13 @@ import copy
 @login_required
 # @check_rights(simple_permissions([]))
 def create(company_id):
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
+
     return render_template('company/portal_create.html',
-                           company_id=company_id)
+                           company_id=company_id,
+                           company_logo=company_logo)
 
 
 @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
@@ -99,8 +104,13 @@ def apply_company(json):
 @login_required
 # @check_rights(simple_permissions([]))
 def profile(portal_id):
-    company_id = db(Portal, id=portal_id).one().company_owner_id
-    return render_template('company/portal_profile.html', company_id=company_id)
+    portal = db(Portal, id=portal_id).one()
+    company = portal.own_company
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
+    return render_template('company/portal_profile.html',
+                           company_id=company.id,
+                           company_logo=company_logo)
 
 
 @portal_bp.route('/profile/<string:portal_id>/', methods=['POST'])
@@ -123,8 +133,15 @@ def profile_load(json, portal_id):
 @login_required
 # @check_rights(simple_permissions([]))
 def profile_edit(portal_id):
-    company_id = db(Portal, id=portal_id).one().company_owner_id
-    return render_template('company/portal_profile_edit.html', company_id=company_id)
+    portal = db(Portal, id=portal_id).one()
+    company = portal.own_company
+    # company_id = portal.company_owner_id
+
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
+    return render_template('company/portal_profile_edit.html',
+                           company_id=company.id,
+                           company_logo=company_logo)
 
 
 @portal_bp.route('/profile_edit/<string:portal_id>/', methods=['POST'])
@@ -335,12 +352,16 @@ def profile_edit_load(json, portal_id):
                    'portal_notbound_tags_select.*',
                    # 'portal_notbound_tags_select.*'
                    ),
+    company = portal.own_company
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
     return {'portal': portal.to_dict('*, '
                                      'divisions.*, '
                                      'own_company.*, '
                                      'portal_bound_tags_select.*',
                                      # 'portal_notbound_tags_select.*'
                                      ),
+            'company_logo': company_logo,
             'portal_id': portal_id,
             'tag': tags_dict}
 
@@ -385,7 +406,12 @@ def search_for_portal_to_join(json):
 @login_required
 # @check_rights(simple_permissions([]))
 def publications(company_id):
-    return render_template('company/portal_publications.html', company_id=company_id)
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
+    return render_template('company/portal_publications.html',
+                           company_id=company_id,
+                           company_logo=company_logo)
 
 
 @portal_bp.route('/publications/<string:company_id>/', methods=['POST'])

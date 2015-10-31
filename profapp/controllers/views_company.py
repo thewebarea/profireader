@@ -47,21 +47,29 @@ def load_companies(json):
 @login_required
 # @check_rights(simple_permissions([]))
 def materials(company_id):
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
     return render_template('company/materials.html',
                            company_id=company_id,
                            articles=[art.to_dict(
                                'id, title') for art in Article.
                                get_articles_submitted_to_company(
-                                   company_id)])
+                                   company_id)],
+                           company_logo=company_logo)
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
 # @check_rights(simple_permissions([]))
 def material_details(company_id, article_id):
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
     return render_template('company/material_details.html',
                            company_id=company_id,
-                           article_id=article_id)
+                           article_id=article_id,
+                           company_logo=company_logo)
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
@@ -86,6 +94,10 @@ def load_material_details(json, company_id, article_id):
     status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
     user_rights = list(g.user.user_rights_in_company(company_id))
 
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
+
     return {'article': article,
             'status': status,
             'portals': portals,
@@ -97,7 +109,8 @@ def load_material_details(json, company_id, article_id):
             # TODO: when all works with rights are finished
             'user_rights': user_rights,
             'send_to_user': {},
-            'joined_portals': joined_portals}
+            'joined_portals': joined_portals,
+            'company_logo': company_logo}
 
 
 @company_bp.route('/update_article/', methods=['POST'])
@@ -154,14 +167,14 @@ def confirm_create(json):
 def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = list(g.user.user_rights_in_company(company_id))
-    # image = File.get(company.logo_file).url() \
+    # company_logo = File.get(company.logo_file).url() \
     #     if company.logo_file else '/static/img/company_no_logo.png'
-    image = company.logo_file_relationship.url() \
+    company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
     return render_template('company/company_profile.html',
                            company=company.to_dict('*, own_portal.*'),
                            user_rights=user_rights,
-                           image=image,
+                           company_logo=company_logo,
                            company_id=company_id
                            )
 
@@ -186,13 +199,17 @@ def employees(company_id):
     curr_user = {user_id: company_user_rights[user_id]}
     current_company = db(Company, id=company_id).one()
 
+    company_logo = current_company.logo_file_relationship.url() \
+        if current_company.logo_file_id else '/static/img/company_no_logo.png'
+
     return render_template('company/company_employees.html',
                            company=current_company,
                            company_id=company_id,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
                            Right=Right,
-                           RightHumnReadible=RightHumnReadible
+                           RightHumnReadible=RightHumnReadible,
+                           company_logo=company_logo
                            )
 
 

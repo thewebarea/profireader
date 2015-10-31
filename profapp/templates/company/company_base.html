@@ -1,5 +1,6 @@
 <span ng-controller="UserLoginController" class="topbar-menu-links">
     <span ng-cloak ng-show="user.id">
+        <a class="navbar-brand" href="{{ url_for('company.profile', company_id = company_id) }}"><img src="{{ company_logo }}" height="100" width="100" /></a> |
         <a href="{{ url_for('company.materials', company_id = company_id) }}">Materials</a> |
         <a href="{{ url_for('portal.publications', company_id = company_id) }}">Publications</a> |
         Readers |
@@ -9,4 +10,3 @@
         <a href="{{ url_for('company.profile', company_id = company_id) }}">Profile</a>
     </span>
 </span>
-
