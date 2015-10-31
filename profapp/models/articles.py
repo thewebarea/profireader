@@ -83,12 +83,48 @@ class ArticlePortal(Base, PRBase):
     def get_client_side_dict(self, fields='id|image_file_id|title|short|image_file_id|'
                                           'long|keywords|cr_tm|md_tm|'
                                           'status|publishing_tm, '
-                                          'company.id|name, division.id|name'):
+                                          'company.id|name, division.id|name,'
+                                          'company_article.*'):
         return self.to_dict(fields)
 
     @staticmethod
     def update_article_portal(article_portal_id, **kwargs):
         db(ArticlePortal, id=article_portal_id).update(kwargs)
+
+    @staticmethod
+    def get_portals_where_company_send_article(company_id):
+
+        all = {'name': 'All', 'id': 0}
+        portals = []
+        portals.append(all)
+        for article in db(ArticleCompany, company_id=company_id).all():
+            for port in article.portal_article:
+                portals.append(port.portal.to_dict('id,name'))
+        return all, [dict(port) for port in set([tuple(p.items()) for p in portals])]
+
+    @staticmethod
+    def get_companies_which_send_article_to_portal(portal_id):
+
+        all = {'name': 'All', 'id': 0}
+        companies = []
+        companies.append(all)
+        for article in db(ArticlePortal, portal_id=portal_id).all():
+            companies.append(article.company.to_dict('id,name'))
+        return all, [dict(port) for port in set([tuple(p.items()) for p in companies])]
+
+    def clone_for_company(self, company_id):
+        return self.detach().attr({'company_id': company_id,
+                                   'status': ARTICLE_STATUS_IN_COMPANY.
+                                  submitted})
+
+    @staticmethod
+    def subquery_portal_articles(search_text=None, portal_id=None, **kwargs):
+
+        sub_query = db(ArticlePortal, portal_id=portal_id, **kwargs)
+        if search_text:
+            sub_query = sub_query.filter(ArticlePortal.title.ilike("%" + search_text + "%"))
+
+        return sub_query
 
 
 class ArticleCompany(Base, PRBase):
@@ -124,13 +160,46 @@ class ArticleCompany(Base, PRBase):
     def get_client_side_dict(self, fields='id|title|short|'
                                           'long|keywords|cr_tm|md_tm|company_id|'
                                           'article_id|image_file_id|'
-                                          'status, company.name'):
+                                          'status, company.name, portal_article.status,'
+                                          'portal_article.portal.name'):
         return self.to_dict(fields)
+
+    @staticmethod
+    def get_companies_where_user_send_article(user_id):
+        all = {'name': 'All', 'id': 0}
+        companies = []
+        companies.append(all)
+
+        for article in db(Article, author_user_id=user_id).all():
+            for comp in article.submitted_versions:
+                companies.append(comp.company.to_dict('id, name'))
+        return all, [dict(comp) for comp in set([tuple(c.items()) for c in companies])]
 
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
                                    'status': ARTICLE_STATUS_IN_COMPANY.
                                   submitted})
+
+    @staticmethod
+    def subquery_user_articles(search_text=None, user_id=None, **kwargs):
+        article_filter = db(ArticleCompany, article_id=Article.id, **kwargs)
+        if search_text:
+            article_filter = article_filter.filter(ArticleCompany.title.ilike(
+                "%" + search_text + "%"))
+
+        return db(Article, author_user_id=user_id).filter(article_filter.exists())
+
+    @staticmethod
+    def subquery_company_articles(search_text=None, company_id=None, **kwargs):
+
+        sub_query = db(ArticleCompany, company_id=company_id)
+        if search_text:
+            sub_query = sub_query.filter(ArticleCompany.title.ilike("%" + search_text + "%"))
+        if kwargs.get('portal_id') or kwargs.get('status'):
+            sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
+                                            **kwargs).exists())
+
+        return sub_query
 
         # self.portal_devision_id = portal_devision_id
         # self.article_company_id = article_company_id
@@ -230,16 +299,20 @@ class Article(Base, PRBase):
                                                    **kwargs),
                        author_user_id=user_id)
 
+    def get_article_with_html_tag(self, text_into_html):
+        article = self.get_client_side_dict()
+        article['mine_version']['title'] = article['mine_version']['title'].replace(text_into_html, '<span class=colored>%s</span>' % text_into_html)
+        return article
+
     @staticmethod
     def search_for_company_to_submit(user_id, article_id, searchtext):
         # TODO: AA by OZ:    .filter(user_id has to be employee in company and
         # TODO: must have rights to submit article to this company)
-        return [x.to_dict('id,name') for x in db(Company)
-            .filter(~db(ArticleCompany).
-                    filter_by(company_id=Company.id,
-                              article_id=article_id).exists())
-            .filter(Company.name.ilike(
-            "%" + searchtext + "%")).all()]
+        return [x.to_dict('id,name') for x in db(Company).filter(~db(ArticleCompany).
+                                                                 filter_by(company_id=Company.id,
+                                                                           article_id=article_id).
+                                                                 exists()).filter(
+            Company.name.ilike("%" + searchtext + "%")).all()]
 
     @staticmethod
     def save_edited_version(user_id, article_company_id, **kwargs):
@@ -278,10 +351,9 @@ class Article(Base, PRBase):
         else:
             sub_query = db(ArticlePortal, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
                 order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')). \
-                filter(or_(
-                ArticlePortal.title.ilike("%" + search_text + "%"),
-                ArticlePortal.short.ilike("%" + search_text + "%"),
-                ArticlePortal.long.ilike("%" + search_text + "%")))
+                filter(or_(ArticlePortal.title.ilike("%" + search_text + "%"),
+                           ArticlePortal.short.ilike("%" + search_text + "%"),
+                           ArticlePortal.long_stripped.ilike("%" + search_text + "%")))
         return sub_query
 
     # @staticmethod
@@ -340,6 +412,7 @@ class ArticleCompanyHistory(Base, PRBase):
     def __init__(self, editor_user_id=None, company_id=None, name=None,
                  short=None, long=None, article_company_id=None,
                  article_id=None):
+        super(ArticleCompanyHistory, self).__init__()
         self.editor_user_id = editor_user_id
         self.company_id = company_id
         self.name = name

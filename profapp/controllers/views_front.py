@@ -1,8 +1,9 @@
 from .blueprints import front_bp
 from flask import render_template, request, url_for, redirect, g, current_app
-from ..models.articles import Article, ArticlePortal
+from ..models.articles import Article, ArticlePortal, ArticleCompany
 from ..models.portal import CompanyPortal, PortalDivision, Portal, Company, \
     PortalDivisionSettings_company_subportal
+from utils.db_utils import db
 from ..models.users import User
 from config import Config
 # from profapp import
@@ -40,7 +41,8 @@ def portal_and_settings(portal):
     newd = []
     for di in ret['divisions']:
         if di['portal_division_type_id'] == 'company_subportal':
-            pdset = g.db().query(PortalDivisionSettings_company_subportal).filter_by(portal_division_id=di['id']).one()
+            pdset = g.db().query(PortalDivisionSettings_company_subportal).\
+                filter_by(portal_division_id=di['id']).one()
             com_port = g.db().query(CompanyPortal).get(pdset.company_portal_id)
             di['member_company'] = Company.get(com_port.company_id)
         newd.append(di)
@@ -79,7 +81,6 @@ def division(division_name, search_text, page=1):
         sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                         portal_division_id=division.id)
         articles, pages, page = pagination(query=sub_query, page=page)
-
 
         return render_template('front/bird/division.html',
                                articles={a.id: a.get_client_side_dict() for
@@ -154,8 +155,10 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
                                                                 name=division_name).one()
 
     sub_query = Article.subquery_articles_at_portal(search_text=search_text,
-                                                    portal_division_id=subportal_division.id).filter(
-        Company.id == member_company_id)
+                                                    portal_division_id=subportal_division.id).\
+        filter(db(ArticleCompany,
+                  company_id=member_company_id, id=ArticlePortal.article_company_id).exists())
+        # filter(Company.id == member_company_id)
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/subportal_division.html',
@@ -227,11 +230,11 @@ def subportal_contacts(member_company_id, member_company_name):
 
     division = get_division_for_subportal(portal.id, member_company_id)
 
-    company_users = g.db().query(User).all()
+    company_users = member_company.employees
 
     return render_template('front/bird/subportal_contacts.html',
                            subportal=True,
-                           company_users = {u.id:u.get_client_side_dict() for u in company_users},
+                           company_users={u.id:u.get_client_side_dict() for u in company_users},
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
                            current_subportal_division=False,

@@ -139,7 +139,7 @@ class Company(Base, PRBase):
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 
-    def get_client_side_dict(self, fields='id,name,country,region,address,phone,phone2,email,short_description,logo_file_id,about'):
+    def get_client_side_dict(self, fields='id,name,author_user_id,country,region,address,phone,phone2,email,short_description,logo_file_id,about'):
         """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 
