@@ -71,7 +71,8 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    name = File.can_paste_in_dir('56335c7c-e0e8-4001-b7ea-5cdab792c641','563388c5-1659-4001-b1e7-23296263eef8')
+    file = File.get('56362d4e-17c1-4001-b568-1957975c302d')
+    name = File.copy_file(file,'56362d46-136b-4001-b1d2-9bcb2fe9c13c')
     return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/can_paste/', methods=['POST'])

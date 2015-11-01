@@ -90,8 +90,9 @@ class File(Base, PRBase):
         folder = File.get(id_folder)
         dirs_in_dir = [file for file in db(File, parent_id = id_file, mime='directory')]
         for dir in dirs_in_dir:
-            dirs_in_dir.append(dir)
-            if dir.parent_id == id_file:
+            for f in db(File, parent_id = dir.id, mime='directory'):
+                dirs_in_dir.append(f)
+            if dir.id == id_folder:
                 return False
         return True
 
@@ -166,9 +167,9 @@ class File(Base, PRBase):
         return files
 
     @staticmethod
-    def save_all_in_dir(id, attr, new_id):
-        lists = [file for file in db(File, parent_id = id) if file.mime == 'directory']
-        files = [file for file in db(File, parent_id = id) if file.mime != 'directory']
+    def save_all_in_dir(id_f, attr, new_id):
+        lists = [file for file in db(File, parent_id=id_f) if file.mime == 'directory']
+        files = [file for file in db(File, parent_id=id_f) if file.mime != 'directory']
         f = File.save_files(files, new_id, attr)
         count_first_list = len(lists)
         c = 1
@@ -181,13 +182,13 @@ class File(Base, PRBase):
                 list.save()
                 new_list.append(list)
             for file in db(File,parent_id = list.id):
-                if len(file) > 0 and file.mime == 'directory':
+                if file.mime == 'directory':
                         lists.append(file)
                         attr['parent_id'] = new_list[c_new].id
                         file.detach().attr(attr)
                         file.save()
                         new_list.append(file)
-                elif len(file) > 0 and file.mime != 'directory':
+                elif file.mime != 'directory':
                     file_content = FileContent.get(file.id).detach()
                     attr['parent_id'] = new_list[c_new].id
                     file.detach().attr(attr)
@@ -199,15 +200,15 @@ class File(Base, PRBase):
         return lists
 
     @staticmethod
-    def save_all(copy_dir_id, attr,files_in_parent):
+    def save_all(copy_dir_id, attr, files_in_parent):
         del attr['name']
         for fil in files_in_parent:
             if fil.mime == 'directory':
-                id_f = {'id':fil.id}
+                id_f = fil.id
                 attr['parent_id'] = copy_dir_id
                 copy_directory = fil.detach().attr(attr)
                 copy_directory.save()
-                save_all_dir = File.save_all_in_dir(id_f['id'],attr,copy_directory.id)
+                save_all_dir = File.save_all_in_dir(id_f, attr, copy_directory.id)
             else:
                 file_content = FileContent.get(fil.id).detach()
                 attr['parent_id'] = copy_dir_id
@@ -216,11 +217,13 @@ class File(Base, PRBase):
                 file_content.id = f.id
                 f.file_content = [file_content]
         return files_in_parent
+
     @staticmethod
     def update_files(files,attr):
         for file in files:
             file.updates(attr)
         return files
+
     @staticmethod
     def update_all_in_dir(id, attr):
         lists = [file for file in db(File, parent_id = id) if file.mime == 'directory']
@@ -234,11 +237,11 @@ class File(Base, PRBase):
                 list.updates(attr)
                 new_list.append(list)
             for file in db(File,parent_id = list.id):
-                if len(file) > 0 and file.mime == 'directory':
+                if file.mime == 'directory':
                         lists.append(file)
                         file.updates(attr)
                         new_list.append(file)
-                elif len(file) > 0 and file.mime != 'directory':
+                elif file.mime != 'directory':
                     file.updates(attr)
             c_ += 1
         return lists
@@ -254,6 +257,16 @@ class File(Base, PRBase):
                 update_all_dir = File.update_all_in_dir(fil.id, attr)
             else:
                 fil.updates(attr)
+        return files_in_parent
+
+    @staticmethod
+    def get_all_in_dir_rev(id):
+        files_in_parent = [file for file in db(File, parent_id = id)]
+        for file in files_in_parent:
+            if file.mime == 'directory':
+                for fil in db(File, parent_id = file.id):
+                    files_in_parent.append(fil)
+        files_in_parent = files_in_parent[::-1]
         return files_in_parent
 
     @staticmethod
@@ -319,6 +332,12 @@ class File(Base, PRBase):
     def remove(file_id):
         file = File.get(file_id)
         if file.mime == 'directory':
+            list = File.get_all_in_dir_rev(file_id)
+            for f in list:
+                if f.mime == 'directory':
+                    File.delfile(f)
+                else:
+                    File.delfile(FileContent.get(f.id))
             b = File.delfile(file)
         else:
             b = File.delfile(FileContent.get(file_id))

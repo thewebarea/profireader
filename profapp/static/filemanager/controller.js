@@ -90,6 +90,7 @@
                 item.tempModel.mode = 'copy';
                 item.tempModel.id = $scope.copy_file_id;
                 item.tempModel.folder_id = $scope.fileNavigator.getCurrentFolder();
+                item.tempModel.len = $scope.fileNavigator.fileList.length;
                 item.paste(function() {
                     $scope.fileNavigator.refresh();
                     $scope.copy_file_id = $cookies.copy_file_id = '';
@@ -154,7 +155,7 @@
         $scope.remove = function(item) {
             item.remove(function() {
                 $scope.fileNavigator.refresh();
-                $('#delete').modal('hide');
+                $('#remove').modal('hide');
             });
         };
 
@@ -255,12 +256,22 @@
             });
             return found;
         };
-        $scope.isDisable = function(actionname){
-            if(actionname === 'paste' && ($scope.copy_file_id == '' && $scope.cut_file_id == '')){
+        $scope.isDisable = function(actionname,len){
+            if(($scope.copy_file_id == '' && $scope.cut_file_id == '') && len < 1 ){
+                return 'cursor: default;pointer-events: none;color: gainsboro;'
+            }else if((actionname !== 'paste' && ($scope.copy_file_id != '' || $scope.cut_file_id != '')) && len < 1 ) {
+                return 'cursor: default;pointer-events: none;color: gainsboro;'
+            }else if(actionname === 'paste' && ($scope.copy_file_id == '' && $scope.cut_file_id == '')){
                 return 'cursor: default;pointer-events: none;color: gainsboro;'
             }else{
                 return ''
             }
+        };
+
+        $scope.isModal = function(actionname){
+          if (actionname === 'rename' || actionname === 'remove' ){
+              return true
+          }
         };
 
         $scope.glyph = function(actionname){

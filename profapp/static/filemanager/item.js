@@ -126,7 +126,9 @@
         Item.prototype.paste = function(success, error) {
             var self = this;
             var parent_id = '';
-            if (self.isFolder() && self.tempModel.len !== 0){
+            if(self.model.id === self.tempModel.id){
+                parent_id = self.tempModel.folder_id;
+            }else if(self.isFolder() && self.tempModel.len !== 0){
                 parent_id = self.model.id;
             }else{
                 parent_id =  self.tempModel.folder_id;
