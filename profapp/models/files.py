@@ -38,11 +38,12 @@ class File(Base, PRBase):
     owner = relationship('User',
                          backref=backref('files', lazy='dynamic'),
                          foreign_keys='File.author_user_id')
+    image_croped = relationship('ImageCroped', back_populates='image', uselist=False)
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
-                 root_folder_id=None, youtube_id = None,
-                 company_id=None, author_user_id=None):
+                 root_folder_id=None, youtube_id=None,
+                 company_id=None, author_user_id=None, image_croped=None):
         super(File, self).__init__()
         self.parent_id = parent_id
         self.name = name
@@ -56,6 +57,7 @@ class File(Base, PRBase):
         self.author_user_id = author_user_id
         self.company_id = company_id
         self.youtube_id = youtube_id
+        self.image_croped = image_croped
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
@@ -83,7 +85,7 @@ class File(Base, PRBase):
         return ret[::-1]
 
     @staticmethod
-    def list(parent_id=None, file_manager_called_for = ''):
+    def list(parent_id=None, file_manager_called_for=''):
 
         default_actions = {}
         # default_actions['choose'] = lambda file: None
@@ -164,9 +166,7 @@ class FileContent(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file = relationship('File',
-                                uselist=False,
-                                backref='file_content')
+    file = relationship('File', uselist=False, backref=backref('file_content', uselist=False))
 
     def __init__(self, file=None, content=None):
         self.file = file
@@ -203,3 +203,25 @@ class FileContent(Base, PRBase):
         #
         # return result
         # return True
+
+class ImageCroped(Base, PRBase):
+    __tablename__ = 'image_croped'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, unique=True, primary_key=True)
+    image_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    x = Column(TABLE_TYPES['int'], nullable=False)
+    y = Column(TABLE_TYPES['int'], nullable=False)
+    width = Column(TABLE_TYPES['int'], nullable=False)
+    height = Column(TABLE_TYPES['int'], nullable=False)
+    rotate = Column(TABLE_TYPES['int'], nullable=False)
+    image = relationship('File', back_populates='image_croped', uselist=False)
+
+    def __init__(self, image_id=None, x=None, y=None, width=None, height=None, rotate=None,
+                 image=None):
+        super(ImageCroped, self).__init__()
+        self.image_id = image_id
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.rotate = rotate
+        self.image = image

@@ -60,6 +60,7 @@ def image_editor(img_id):
             g.db.rollback()
             raise BadCoordinates
     file = db(File, id=image_id).one()
+    print(file.url())
 
     return render_template('image_editor.html',
                            ratio=ratio,

@@ -15,6 +15,15 @@
         };
 
         $scope.getData = function () {
+
+            var x = document.getElementById("dataX");
+            var y = document.getElementById("dataY");
+            var width = document.getElementById("dataWidth");
+            var height = document.getElementById("dataHeight");
+            var rotate = document.getElementById("dataRotate");
+            $scope.data.coordinates={'x': angular.element(x).val(), 'y': angular.element(y).val(),
+                'width': angular.element(width).val(), 'height': angular.element(height).val(),
+                'rotate': angular.element(rotate).val()};
             return $scope.data;
         };
 
@@ -125,27 +134,23 @@
         <!-- <h3 class="page-header">Data:</h3> -->
             <div class="docs-data">
           <div class="input-group">
-            <input class="form-control" id="dataX" name="1x" placeholder="x">
+            <input class="form-control" id="dataX" name="x" type="hidden" placeholder="x">
 
           </div>
           <div class="input-group">
-            <input class="form-control" id="dataY" name="2y" placeholder="y">
+            <input class="form-control" id="dataY" name="y" type="hidden" placeholder="y">
           </div>
           <div class="input-group">
-            <input class="form-control" id="dataWidth" type="hidden" name="3width" placeholder="width">
+            <input class="form-control" id="dataWidth" type="hidden" name="width" placeholder="width">
           </div>
           <div class="input-group">
-            <input class="form-control" id="dataHeight" type="hidden" name="4height" placeholder="height">
+            <input class="form-control" id="dataHeight" type="hidden" name="height" placeholder="height">
           </div>
           <div class="input-group">
-            <input class="form-control" id="dataRotate" type="hidden" name="5rotate" placeholder="rotate">
+            <input class="form-control" id="dataRotate" type="hidden" name="rotate" placeholder="rotate">
           </div>
 
             </div>
-            <div class="input-group">
-            <input id="new_name" type="text" name="6name" placeholder="new_name">
-          </div>
-
       </div>
 
 
@@ -230,9 +235,9 @@
 
         <!-- <h3 class="page-header">Toggles:</h3> -->
         <div class="btn-group btn-group-justified" data-toggle="buttons">
-          <label data-method="setAspectRatio" data-option="{{ ratio }}" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio1" name="aspestRatio" value="{{ ratio }}" type="hidden">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, {{ ratio }})">
+          <label data-method="setAspectRatio" data-option="{{ data.ratio }}" title="Set Aspect Ratio">
+            <input class="sr-only" id="aspestRatio1" name="aspestRatio" value="{{ data.ratio }}" type="hidden">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, {{ data.ratio }})">
             </span>
           </label>
         </div>
@@ -245,7 +250,9 @@
   <!-- Scripts -->
              <script src="../../static/image_editor/dist/cropper.js"></script>
  <script src="../../static/image_editor/demo/js/main.js"></script>
-<script type="text/javascript">$(document).ready(function(){$("#aspestRatio1").click();});</script></div>
+     <script type="text/javascript">$(document).ready(function(){$("#aspestRatio1").click();});</script>
+
+</div>
 
 
 

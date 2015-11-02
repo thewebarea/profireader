@@ -10,6 +10,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STAT
 # import os
 from .pagination import pagination
 from config import Config
+from .views_file import crop_image
 
 
 @article_bp.route('/list/', methods=['GET'])
@@ -65,13 +66,19 @@ def show_form_create():
 @article_bp.route('/create/', methods=['POST'])
 @ok
 def load_form_create(json):
-    return {'id': '', 'title': '', 'short': '', 'long': '', 'x1': '12344444444444'}
+    return {'id': '', 'title': '', 'short': '', 'long': '', 'coordinates': '',
+            'ratio': Config.IMAGE_EDITOR_RATIO}
 
 
 @article_bp.route('/confirm_create/', methods=['POST'])
 @ok
 def confirm_create(json):
+    image_id = json.get('image_file_id')
+    if image_id:
+        crop_image(image_id, json.get('coordinates'))
     print(json)
+    del json['coordinates'], json['ratio']
+
     return Article.save_new_article(g.user_dict['id'], **json).save().get_client_side_dict()
 
 
