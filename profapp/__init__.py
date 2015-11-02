@@ -226,7 +226,6 @@ class AnonymousUser(AnonymousUserMixin):
 
 login_manager.anonymous_user = AnonymousUser
 
-
 def create_app(config='config.ProductionDevelopmentConfig',
                front='n',
                host='localhost'):
@@ -245,7 +244,6 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     app.before_request(load_user)
     app.before_request(setup_authomatic(app))
-
     if front == 'y':
         register_blueprints_front(app)
         my_loader = jinja2.ChoiceLoader([
