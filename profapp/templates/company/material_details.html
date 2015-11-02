@@ -306,13 +306,13 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
                     Publish this material to portal
                     <span ng-if="statuses=='accepted'"  >
                     <select ng-model="data.selected_division">
-                    <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
-                        <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}"  ng-selected="selected">
-                            {{ division.name }} {{ division.portal_division_type_id }}
-                        </option>
-                    </optgroup>
-                    <option disabled>---Below materials sent---</option>
-                    <optgroup ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
+                        <option disabled>---Below materials sent---</option>
+                        <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
+                            <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}"  ng-selected="selected">
+                                {{ division.name }} {{ division.portal_division_type_id }}
+                            </option>
+                        </optgroup>
+                        <optgroup ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
                         <option ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
                             {{ division.name }}
                         </option>
@@ -348,7 +348,6 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
 
     <h1>Multi Selection Demos</h1>
 
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-sanitize.js"></script>
 
     <div ng-controller="SelectTagsCtrl">
     <hr>
