@@ -41,9 +41,6 @@
     </script>
     <![endif]-->
 
-    <!-- ui-select files -->
-    <script src="/static/js/select.js"></script>
-
     <script>
     /**
  * AngularJS default filter with the following expression:
@@ -81,7 +78,7 @@ module.filter('propsFilter', function() {
         return out;
     };
 });
-module.controller('SelectTagsCtrl', function($scope) {
+module.controller('SelectTagsCtrl', ['$scope', function($scope) {
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
 
@@ -127,7 +124,7 @@ module.controller('SelectTagsCtrl', function($scope) {
     $scope.multipleDemo.selectedPeopleWithGroupBy = [$scope.people[8], $scope.people[6]];
     $scope.multipleDemo.selectedPeopleSimple = ['samantha@email.com','wladimir@email.com'];
 
-});
+}]);
         module.controller('materials_articles', ['$scope','$ok', function ($scope,$ok) {
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
@@ -351,6 +348,7 @@ module.controller('SelectTagsCtrl', function($scope) {
 
     <h1>Multi Selection Demos</h1>
 
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-sanitize.js"></script>
 
     <div ng-controller="SelectTagsCtrl">
     <hr>

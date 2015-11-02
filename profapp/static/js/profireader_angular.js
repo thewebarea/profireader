@@ -438,6 +438,7 @@ function file_choose(selectedfile) {
     top.tinymce.activeEditor.windowManager.close();
 }
 
+// 'ui.select' uses "/static/js/select.js" included in index_layout.html
 module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select']);
 
 module.config(function ($provide) {
