@@ -393,8 +393,8 @@
       $this.removeClass(CLASS_HIDDEN);
 
       $cropper.css((this.container = {
-        width: max($container.width(), num(options.minContainerWidth) || 200),
-        height: max($container.height(), num(options.minContainerHeight) || 100)
+        width: 320,
+        height: 250
       }));
 
       $this.addClass(CLASS_HIDDEN);
@@ -433,8 +433,8 @@
       var options = this.options,
           strict = options.strict,
           container = this.container,
-          containerWidth = container.width,
-          containerHeight = container.height,
+          containerWidth = 320,
+          containerHeight = 250,
           canvas = this.canvas,
           aspectRatio = canvas.aspectRatio,
           cropBox = this.cropBox,
