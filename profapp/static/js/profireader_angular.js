@@ -612,8 +612,9 @@ module.run(function ($rootScope, $ok) {
 
         tinymceImageOptions: {
             inline: false,
-            plugins: 'advlist autolink link image lists charmap print preview',
+            plugins: 'advlist autolink link image lists charmap print preview paste',
             skin: 'lightgray',
+            paste_as_text: false,
             width: '100%',
             height: '100%',
             theme: 'modern',
@@ -638,31 +639,85 @@ module.run(function ($rootScope, $ok) {
                 )
                 ;
             },
+            //valid_elements: Config['article_html_valid_elements'],
+            valid_elements: 'a[class],img[class|width|height],p[class],table[class|width|height],th[class|width|height],tr[class],td[class|width|height],span[class],div[class],ul[class],ol[class],li[class]',
+            content_css: "/static/front/bird/css/article.css",
             style_formats: [
-                {title: 'Bold text', inline: 'b'},
-                {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
-                {title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+                {title: 'HEAD1', block: 'div', classes: 'h1'},
+                {title: 'HEAD2', block: 'div', classes: 'h2'},
+                {title: 'HEAD3', block: 'div', classes: 'h3'},
+                {title: 'BIG', inline: 'span', classes: 'big'},
+                {title: 'BIGGER', inline: 'span', classes: 'bigger'},
+                {title: 'NORMAL', inline: 'span', classes: 'small'},
+                {title: 'SMALLER', inline: 'span', classes: 'smaller'},
+                {title: 'SMALL', inline: 'span', classes: 'small'}
+            ],
 
-                {
-                    title: 'Image Left',
-                    selector: 'img',
-                    styles: {
-                        'float': 'left',
-                        'margin': '0 10px 0 10px'
-                    }
-                },
-                {
-                    title: 'Image Right',
-                    selector: 'img',
-                    styles: {
-                        'float': 'right',
-                        'margin': '0 0 10px 10px'
-                    }
-                }
-            ]
+
+            //paste_auto_cleanup_on_paste : true,
+            //paste_remove_styles: true,
+            //paste_remove_styles_if_webkit: true,
+            //paste_strip_class_attributes: "all",
+
+            //style_formats: [
+            //    {title: 'Bold text', inline: 'b'},
+            //    {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
+            //    {title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+            //
+            //    {
+            //        title: 'Image Left',
+            //        selector: 'img',
+            //        styles: {
+            //            'float': 'left',
+            //            'margin': '0 10px 0 10px'
+            //        }
+            //    },
+            //    {
+            //        title: 'Image Right',
+            //        selector: 'img',
+            //        styles: {
+            //            'float': 'right',
+            //            'margin': '0 0 10px 10px'
+            //        }
+            //    }
+            //]
         }
     });
 });
+
+function normalize_html(html) {
+    normaltags = '^(span|a|br|div|table)$'
+    common_attributes = {
+        whattr: {'^(width|height)$': '^([\d]+(.[\d]*)?)(em|px|%)$'}
+    }
+
+    allowed_tags = {
+        '^table$': {allow: '^(tr)$', attributes: {whattr: true}},
+        '^tr$': {allow: '^(td|th)$', attributes: {}},
+        '^td$': {allow: normaltags, attributes: {whattr: true}},
+        '^a$': {allow: '^(span)$', attributes: {'^href$': '.*'}},
+        '^img$': {allow: false, attributes: {'^src$': '.*'}},
+        '^br$': {allow: false, attributes: {}},
+        '^div$': {allow: normaltags, attributes: {}}
+    }
+
+    $.each(allowed_tags, function (tag, properties) {
+        var attributes = properties.attributes ? properties.attributes : {}
+        $.each(attributes, function (attrname, allowedvalus) {
+            if (allowedvalus === true) {
+                allowed_tags[tag].attributes[attrname] = common_attributes[attrname] ? common_attributes[attrname] : '.*';
+            }
+        });
+    });
+
+    var tags = html.split(/<[^>]*>/)
+
+    $.each(tags, function (tagindex, tag) {
+        console.log(tagindex, tag);
+        })
+
+    return html;
+}
 
 
 None = null;
@@ -705,3 +760,7 @@ function fileUrl(id) {
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
     return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
 }
+
+
+
+

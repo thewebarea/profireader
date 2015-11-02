@@ -27,8 +27,10 @@
             closeFileManager();
         }
 
-        $scope.setImageUrl = function () {
+        $scope.setImageUrl = function (data) {
+            console.log('loaded', data);
             $scope.image_file_url = fileUrl($scope.data.image_file_id);
+
         }
 
 
