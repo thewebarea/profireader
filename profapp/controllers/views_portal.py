@@ -27,7 +27,7 @@ def create(company_id):
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
 
-    return render_template('company/portal_create.html',
+    return render_template('portal/portal_create.html',
                            company_id=company_id,
                            company_logo=company_logo)
 
@@ -116,7 +116,7 @@ def profile(portal_id):
     company = portal.own_company
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
-    return render_template('company/portal_profile.html',
+    return render_template('portal/portal_profile.html',
                            company_id=company.id,
                            company_logo=company_logo)
 
@@ -146,7 +146,7 @@ def profile_edit(portal_id):
 
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
-    return render_template('company/portal_profile_edit.html',
+    return render_template('portal/portal_profile_edit.html',
                            company_id=company.id,
                            company_logo=company_logo)
 
@@ -418,7 +418,7 @@ def publications(company_id):
         if company.logo_file_id else '/static/img/company_no_logo.png'
 
     return render_template(
-        'company/portal_publications.html', 
+        'portal/portal_publications.html',
         company_id=company_id,
         angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js',
         company_logo=company_logo

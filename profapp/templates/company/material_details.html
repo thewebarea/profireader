@@ -125,7 +125,7 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
     $scope.multipleDemo.selectedPeopleSimple = ['samantha@email.com','wladimir@email.com'];
 
 }]);
-        module.controller('materials_articles', ['$scope','$ok', function ($scope,$ok) {
+        module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
             $scope.selectedUser = null;
@@ -227,6 +227,8 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
         }
     </style>
     <div ng-init="loadData()" ng-controller="materials_articles">
+    <!-- <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="materials_articles"> -->
+
 
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
@@ -296,8 +298,6 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
                     Article "{{ data.article.title }}" was successfully sent to user {{
                     data_resp_user.user.profireader_name }}
                 </div>
-
-
 
             </div>
             <div ng-if="myRights('publish')">
