@@ -38,7 +38,6 @@ class File(Base, PRBase):
     owner = relationship('User',
                          backref=backref('files', lazy='dynamic'),
                          foreign_keys='File.author_user_id')
-    image_croped = relationship('ImageCroped', back_populates='image', uselist=False)
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
@@ -157,7 +156,7 @@ class File(Base, PRBase):
         new_file = self.detach().attr(attr)
         new_file.save()
         file_content.id = new_file.id
-        new_file.file_content = [file_content]
+        new_file.file_content = file_content
         return new_file
 
 
@@ -207,21 +206,22 @@ class FileContent(Base, PRBase):
 class ImageCroped(Base, PRBase):
     __tablename__ = 'image_croped'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, unique=True, primary_key=True)
-    image_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    original_image_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    croped_image_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
     x = Column(TABLE_TYPES['int'], nullable=False)
     y = Column(TABLE_TYPES['int'], nullable=False)
     width = Column(TABLE_TYPES['int'], nullable=False)
     height = Column(TABLE_TYPES['int'], nullable=False)
     rotate = Column(TABLE_TYPES['int'], nullable=False)
-    image = relationship('File', back_populates='image_croped', uselist=False)
 
-    def __init__(self, image_id=None, x=None, y=None, width=None, height=None, rotate=None,
-                 image=None):
+    def __init__(self, original_image_id=None, x=None, y=None, width=None, height=None, rotate=None,
+                 croped_image_id=None):
         super(ImageCroped, self).__init__()
-        self.image_id = image_id
+        self.original_image_id = original_image_id
+        self.croped_image_id = croped_image_id
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.rotate = rotate
-        self.image = image
+

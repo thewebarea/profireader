@@ -75,8 +75,7 @@ def load_form_create(json):
 def confirm_create(json):
     image_id = json.get('image_file_id')
     if image_id:
-        crop_image(image_id, json.get('coordinates'))
-    print(json)
+        json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
     del json['coordinates'], json['ratio']
 
     return Article.save_new_article(g.user_dict['id'], **json).save().get_client_side_dict()
