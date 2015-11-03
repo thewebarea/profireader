@@ -1,5 +1,5 @@
 import os
-from flask import render_template, g
+from flask import render_template, g, make_response
 from flask.ext.login import current_user
 from profapp.models.files import File
 from .blueprints import filemanager_bp
