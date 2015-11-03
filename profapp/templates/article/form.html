@@ -27,16 +27,29 @@
             return $scope.data;
         };
 
+    $scope.change_picture_in_croper = function (image_file_url) {
+
+         var $image = $('.img-container > img');
+
+  $image.cropper('replace', image_file_url);};
+
+
+
 
         $scope.articleImageSelected = function (item) {
             $scope.data.image_file_id = item.id;
             $scope.setImageUrl();
-            closeFileManager();
+                closeFileManager();
+{#            $('#replace-toggle').click();#}
+
         }
 
         $scope.setImageUrl = function () {
             $scope.image_file_url = fileUrl($scope.data.image_file_id);
-        }
+            var image = $scope.image_file_url;
+            $scope.change_picture_in_croper(image);
+
+        };
 
 
         $scope.chooseImage = function () {
@@ -52,16 +65,10 @@
                         return {
                             choose: "parent.angularControllerFunction('article_edit', 'articleImageSelected')"
                         }
-
                     }
-
                 }
             });
-
-
         };
-
-
     }]);
 </script>
 {% include 'croper.html' %}
@@ -99,18 +106,9 @@
                           ng-model="data.long"></textarea>
             </div>
 
-            <div ng-click="chooseImage()"
-                 style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
-                        background-size: cover; background-image:url({{ image_file_url }});">
-                {{ _('Select main article image') }}
-            </div>
-
- <div ng-if="data.image_file_id">
-
 
   <script src="../../static/image_editor/assets/js/jquery.min.js"></script>
     <script src="../../static/image_editor/assets/js/bootstrap.min.js"></script>
-
                 <link href="../../static/image_editor/assets/css/bootstrap.min.css" rel="stylesheet">
   <link href="../../static/image_editor/dist/cropper.css" rel="stylesheet">
   <link href="../../static/image_editor/demo/css/main.css" rel="stylesheet">
@@ -149,7 +147,6 @@
           <div class="input-group">
             <input class="form-control" id="dataRotate" type="hidden" name="rotate" placeholder="rotate">
           </div>
-
             </div>
       </div>
 
@@ -180,36 +177,11 @@
               <span class="icon icon-rotate-right"></span>
             </span>
           </button>
+            <span class="docs-tooltip" data-toggle="tooltip" title="Chose image">
+             <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"  ng-click="chooseImage()">Chose image</button>
+        </span>
         </div>
 
-        <div class="btn-group">
-          <button class="btn btn-primary" data-method="crop" type="button" title="Enable crop">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;crop&quot;)">
-              <span class="icon icon-ok"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="clear" type="button" title="Disable crop">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;clear&quot;)">
-              <span class="icon icon-remove"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="disable" type="button" title="Lock">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;disable&quot;)">
-              <span class="icon icon-lock"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="enable" type="button" title="Unlock">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;enable&quot;)">
-              <span class="icon icon-unlock"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="reset" type="button" title="Reset">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;reset&quot;)">
-              <span class="icon icon-refresh"></span>
-            </span>
-          </button>
-
-        </div>
 
         <!-- Show the cropped image in modal -->
         <div class="modal fade docs-cropped" id="getCroppedCanvasModal" aria-hidden="true" aria-labelledby="getCroppedCanvasTitle" role="dialog" tabindex="-1">
@@ -240,9 +212,9 @@
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, {{ data.ratio }})">
             </span>
           </label>
-        </div>
 
-      </div><!-- /.docs-toggles -->
+
+<!-- /.docs-toggles -->
     </div>
   </div>
   <!-- Alert -->
@@ -251,8 +223,6 @@
              <script src="../../static/image_editor/dist/cropper.js"></script>
  <script src="../../static/image_editor/demo/js/main.js"></script>
      <script type="text/javascript">$(document).ready(function(){$("#aspestRatio1").click();});</script>
-
-</div>
 
 
 
@@ -276,7 +246,7 @@
 
 
 
-
+</div></div>
 
         </form>
     </div>

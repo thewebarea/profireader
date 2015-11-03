@@ -73,6 +73,7 @@ def load_form_create(json):
 @article_bp.route('/confirm_create/', methods=['POST'])
 @ok
 def confirm_create(json):
+    print(json)
     image_id = json.get('image_file_id')
     if image_id:
         json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
