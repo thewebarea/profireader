@@ -304,7 +304,7 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
                 <div ng-if="!data_resp_portal.portal">
                     <form ng-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal">
                     Publish this material to portal
-                    <span ng-if="statuses=='accepted'"  >
+                    <span ng-if="statuses=='accepted'">
                     <select ng-model="data.selected_division">
                         <option disabled>---Below materials sent---</option>
                         <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
@@ -319,16 +319,18 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
                     </optgroup>
                     </select>
                     <br/>
-                    Add tags:
-
+                    <div ng-controller="SelectTagsCtrl">
+                    <h3>Add tags:</h3>
                     <select>
                         <option>Hello!</option>
                         <option ng-selected="selected">Greetings!</option>
                     </select>
-                <span>
-                    <input type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
-                </span>
-            </span>
+                    </div>
+                    <br/>
+                    <span>
+                        <input type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
+                    </span>
+                    </span>
                     <span ng-if="statuses!='accepted'">
                 <select disabled>
                     <optgroup label="Change article status to accepted first">
@@ -346,10 +348,8 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
         </div>
     </div>
 
+    <!-- <div ng-controller="SelectTagsCtrl">
     <h1>Multi Selection Demos</h1>
-
-
-    <div ng-controller="SelectTagsCtrl">
     <hr>
     <h3>Array of objects with single property binding</h3>
     <ui-select multiple ng-model="multipleDemo.selectedPeopleSimple" theme="select2" ng-disabled="disabled" style="width: 800px;">
@@ -366,7 +366,7 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
 
 
     <div style="height:500px"></div>
-    </div>
+    </div> -->
 
     {% endraw %}
 
