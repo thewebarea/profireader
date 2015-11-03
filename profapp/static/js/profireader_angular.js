@@ -618,6 +618,24 @@ module.run(function ($rootScope, $ok) {
             width: '100%',
             height: '100%',
             theme: 'modern',
+            //paste_postprocess1: function (plugin, args) {
+            //    console.log('paste_postprocess', args);
+            //},
+            setup: function (editor) {
+                console.log('setup', editor);
+                editor.on('PreInit', function (event) {
+                    editor.parser.addNodeFilter('img,p', function (nodes, name) {
+                        console.log('addNodeFilter', nodes, name);
+                        });
+                    //editor.parser.addAttributeFilter('src,href', function (nodes, name) {
+                    //    console.log('addAttributeFilter', nodes, name);
+                    //    debugger;
+                    //    });
+                });
+            },
+            //init_instance_callback1: function () {
+            //    console.log('init_instance_callback', arguments);
+            //},
             file_browser_callback: function (field_name, url, type, win) {
                 var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
                     '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
@@ -640,7 +658,7 @@ module.run(function ($rootScope, $ok) {
                 ;
             },
             //valid_elements: Config['article_html_valid_elements'],
-            valid_elements: 'a[class],img[class|width|height],p[class],table[class|width|height],th[class|width|height],tr[class],td[class|width|height],span[class],div[class],ul[class],ol[class],li[class]',
+            //valid_elements: 'a[class],img[class|width|height],p[class],table[class|width|height],th[class|width|height],tr[class],td[class|width|height],span[class],div[class],ul[class],ol[class],li[class]',
             content_css: "/static/front/bird/css/article.css",
             style_formats: [
                 {title: 'HEAD1', block: 'div', classes: 'h1'},
@@ -685,7 +703,7 @@ module.run(function ($rootScope, $ok) {
     });
 });
 
-function normalize_html(html) {
+function cleanup_html(html) {
     normaltags = '^(span|a|br|div|table)$'
     common_attributes = {
         whattr: {'^(width|height)$': '^([\d]+(.[\d]*)?)(em|px|%)$'}
@@ -714,7 +732,7 @@ function normalize_html(html) {
 
     $.each(tags, function (tagindex, tag) {
         console.log(tagindex, tag);
-        })
+    })
 
     return html;
 }

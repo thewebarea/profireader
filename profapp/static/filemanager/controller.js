@@ -144,7 +144,7 @@
             }
         }
 
-	$scope.can_action = function(item, actionnamem, defaultpermited) {
+	$scope.can_action = function(item, actionnamem defaultpermited) {
 	    if (actionname === 'paste') {
 		if (defaultpermited === true) {
 		    return ($scope.copied_files.length > 0)

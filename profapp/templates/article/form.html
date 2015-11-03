@@ -36,10 +36,13 @@
             closeFileManager();
         }
 
-        $scope.setImageUrl = function (data) {
-            console.log('loaded', data);
-            $scope.image_file_url = fileUrl($scope.data.image_file_id);
+        $scope.cleanUpHtml = function (data) {
+            data.long = cleanup_html(data.long);
+            return data;
+        }
 
+        $scope.setImageUrl = function () {
+            $scope.image_file_url = fileUrl($scope.data.image_file_id);
         }
 
 
@@ -71,7 +74,24 @@
 {% include 'croper.html' %}
 {% raw %}
 
-<div ng-init="loadData(null, {}, null, setImageUrl)" ng-controller="article_edit">
+<div
+        ng-ajax-form
+
+
+
+        ng-before-load="getData"
+        ng-after-load="getData"
+
+        ng-before-save="getData"
+        ng-after-save="getData"
+
+        ng-before-validate="getData"
+        ng-after-validate="getData"
+
+
+        ng-action="save_article"
+
+        ang-init="loadData(null, {}, cleanUpHtml, setImageUrl)" ng-controller="article_edit">
     <div ng-if="!data">Loading...</div>
     <div ng-if="data">
 
@@ -87,7 +107,7 @@
                 maybe layout selector is apporpriate here-->
 
         <form
-                ng-ajax-form
+                ang-ajax-form
                 ng-onsuccess="afterSave"
                 ng-onsubmit="getData"
                 ng-action="save_article">
@@ -108,7 +128,8 @@
                         background-size: cover; background-image:url({{ image_file_url }});">
                 {{ _('Select main article image') }}
             </div>
-
+{% endraw %}
+            {#
  <div ng-if="data.image_file_id">
 
 
@@ -257,6 +278,7 @@
      <script type="text/javascript">$(document).ready(function(){$("#aspestRatio1").click();});</script>
 
 </div>
+             #}{% raw %}
 
 
 
