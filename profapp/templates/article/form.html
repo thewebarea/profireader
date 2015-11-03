@@ -9,7 +9,9 @@
             $scope.save_article = '{{ url_for('article.confirm_create')|safe }}';
         {% endif %}
 
-
+ $scope.afterSave = function (resp) {
+            window.location.href = $scope.details_article({article_id: resp['id']})
+        };
 
         $scope.getData = function () {
 
