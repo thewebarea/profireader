@@ -148,7 +148,7 @@ class File(Base, PRBase):
         if company_id:
             attr['company_id'] = company_id
         if parent_folder_id:
-            attr['parent_folder_id'] = parent_folder_id
+            attr['parent_id'] = parent_folder_id
         if article_portal_id:
             attr['article_portal_id'] = article_portal_id
         if root_folder_id:
