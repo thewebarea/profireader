@@ -10,8 +10,9 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STAT
 # import os
 from .pagination import pagination
 from config import Config
-from .views_file import crop_image
-
+from .views_file import crop_image, update_croped_image
+from ..models.files import ImageCroped
+from utils.db_utils import db
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
@@ -90,13 +91,25 @@ def show_form_update(article_company_id):
 @article_bp.route('/update/<string:article_company_id>/', methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
-    return ArticleCompany.get(article_company_id).get_client_side_dict()
+    article = ArticleCompany.get(article_company_id).get_client_side_dict()
+    image_id = article.get('image_file_id')
+    coordinates = ImageCroped.get_coordinates(image_id)
+    article.update(coordinates, ratio=Config.IMAGE_EDITOR_RATIO)
+    return article
 
 
 @article_bp.route('/save/<string:article_company_id>/', methods=['POST'])
 @ok
 def save(json, article_company_id):
     json.pop('company')
+    image_id = json.get('image_file_id')
+    article = db(ArticleCompany, id=article_company_id).one()
+    if image_id:
+        if image_id == article.image_file_id:
+            update_croped_image(image_id, json.get('coordinates'))
+        else:
+            json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
+    del json['coordinates'], json['ratio']
     ret = Article.save_edited_version(g.user.id, article_company_id, **json).save().article
     return ret.get_client_side_dict()
 

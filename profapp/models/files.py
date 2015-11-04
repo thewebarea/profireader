@@ -225,3 +225,11 @@ class ImageCroped(Base, PRBase):
         self.height = height
         self.rotate = rotate
 
+    def get_client_side_dict(self, fields='x,y,width,height,rotate'):
+        """This method make dictionary from portal object with fields have written above"""
+        return self.to_dict(fields)
+
+    @staticmethod
+    def get_coordinates(original_image_id):
+        return {'coordinates': db(ImageCroped, original_image_id=original_image_id).one(
+        ).get_client_side_dict()}

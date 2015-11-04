@@ -30,12 +30,12 @@ $(function () {
         $dataWidth = $('#dataWidth'),
         $dataRotate = $('#dataRotate'),
         options = {
-          // data: {
-          //   x: 420,
-          //   y: 60,
-          //   width: 640,
-          //   height: 360
-          // },
+           //data: {
+           //  x: 32,
+           //  y: 0,
+           //  width: 106,
+           //  height: 80
+           //},
           // strict: false,
           // responsive: false,
           // checkImageOrigin: false
@@ -83,16 +83,14 @@ $(function () {
             $dataRotate.val(Math.round(data.rotate));
           }
         };
-    var coordinates = $('#coordinates').val();
-    if(coordinates){
-
-      options.data = {x: coordinates.x,
-             y: coordinates.y,
-             width: coordinates.width,
-             height: coordinates.height,
-             rotate: coordinates.rotate
-           };
-    }
+if($('#default_image').val()=='false'){
+options.data =  {
+             x: parseInt($('#coordinate_x').val()),
+             y: parseInt($('#coordinate_y').val()),
+             width: parseInt($('#coordinate_width').val()),
+             height: parseInt($('#coordinate_height').val()),
+             rotate: parseInt($('#coordinate_rotate').val())
+           };}
     $image.on({
       'build.cropper': function (e) {
         console.log(e.type);
