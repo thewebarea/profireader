@@ -44,7 +44,7 @@
     <script>
     /**
  * AngularJS default filter with the following expression:
- * "person in people | filter: {name: $select.search, age: $select.search}"
+ * "tag in tags | filter: {name: $select.search, age: $select.search}"
  * performs a AND between 'name: $select.search' and 'age: $select.search'.
  * We want to perform a OR.
  */
@@ -78,7 +78,7 @@ module.filter('propsFilter', function() {
         return out;
     };
 });
-module.controller('SelectTagsCtrl', ['$scope', function($scope) {
+module.controller('SelectTagsCtrl', function($scope) {
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
 
@@ -98,33 +98,32 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
         $scope.searchEnabled = false;
     };
 
-    $scope.clear = function() {
-        $scope.person.selected = undefined;
-        $scope.address.selected = undefined;
-        $scope.country.selected = undefined;
-    };
+    //$scope.clear = function() {
+    //    $scope.tag.selected = undefined;
+    //    $scope.address.selected = undefined;
+    //    $scope.country.selected = undefined;
+    //};
 
-    $scope.person = {};
-    $scope.people = [
-        { name: 'Adam',      email: 'adam@email.com',      age: 12, country: 'United States' },
-        { name: 'Amalie',    email: 'amalie@email.com',    age: 12, country: 'Argentina' },
-        { name: 'Estefanía', email: 'estefania@email.com', age: 21, country: 'Argentina' },
-        { name: 'Adrian',    email: 'adrian@email.com',    age: 21, country: 'Ecuador' },
-        { name: 'Wladimir',  email: 'wladimir@email.com',  age: 30, country: 'Ecuador' },
-        { name: 'Samantha',  email: 'samantha@email.com',  age: 30, country: 'United States' },
-        { name: 'Nicole',    email: 'nicole@email.com',    age: 43, country: 'Colombia' },
-        { name: 'Natasha',   email: 'natasha@email.com',   age: 54, country: 'Ecuador' },
-        { name: 'Michael',   email: 'michael@email.com',   age: 15, country: 'Colombia' },
-        { name: 'Nicolás',   email: 'nicolas@email.com',    age: 43, country: 'Colombia' }
+    $scope.tag = {};
+    $scope.tags = [
+        { name: 'Adam',      email: 'adam@email.com' },
+        { name: 'Amalie',    email: 'amalie@email.com' },
+        { name: 'Estefanía', email: 'estefania@email.com' },
+        { name: 'Adrian',    email: 'adrian@email.com' },
+        { name: 'Wladimir',  email: 'wladimir@email.com' },
+        { name: 'Samantha',  email: 'samantha@email.com' },
+        { name: 'Nicole',    email: 'nicole@email.com' },
+        { name: 'Natasha',   email: 'natasha@email.com' },
+        { name: 'Michael',   email: 'michael@email.com' },
+        { name: 'Nicolás',   email: 'nicolas@email.com' }
     ];
 
 
-    $scope.multipleDemo = {};
-    $scope.multipleDemo.selectedPeople = [$scope.people[5], $scope.people[4]];
-    $scope.multipleDemo.selectedPeopleWithGroupBy = [$scope.people[8], $scope.people[6]];
-    $scope.multipleDemo.selectedPeopleSimple = ['samantha@email.com','wladimir@email.com'];
+    $scope.selectedTagsCombined = {};
+    $scope.selectedTagsCombined.selectedTags = [$scope.tags[5], $scope.tags[4]];
+    $scope.selectedTagsCombined.selectedTagNames = ['Samantha','Wladimir'];
 
-}]);
+});
         module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
@@ -295,8 +294,8 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
 
                 </div>
                 <div ng-if="data_resp_user.user">
-                    Article "{{ data.article.title }}" was successfully sent to user {{
-                    data_resp_user.user.profireader_name }}
+                    Article "{{ data.article.title }}" was successfully sent to user
+                    {{ data_resp_user.user.profireader_name }}
                 </div>
 
             </div>
@@ -319,12 +318,16 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
                     </optgroup>
                     </select>
                     <br/>
+                    <hr>
                     <div ng-controller="SelectTagsCtrl">
-                    <h3>Add tags:</h3>
-                    <select>
-                        <option>Hello!</option>
-                        <option ng-selected="selected">Greetings!</option>
-                    </select>
+                        <h3>Add tags:</h3>
+                        <ui-select multiple ng-model="selectedTagsCombined.selectedTagNames" theme="select2" ng-disabled="disabled" style="width: 800px;">
+                            <ui-select-match placeholder="Select tag...">{{$item.name}}</ui-select-match>
+                            <ui-select-choices repeat="tag.name as tag in tags | propsFilter: {name: $select.search}">
+                                <div ng-bind-html="tag.name | highlight: $select.search"></div>
+                            </ui-select-choices>
+                        </ui-select>
+                        <p>Selected: {{selectedTagsCombined.selectedTagNames}}</p>
                     </div>
                     <br/>
                     <span>
@@ -348,25 +351,24 @@ module.controller('SelectTagsCtrl', ['$scope', function($scope) {
         </div>
     </div>
 
-    <!-- <div ng-controller="SelectTagsCtrl">
-    <h1>Multi Selection Demos</h1>
-    <hr>
-    <h3>Array of objects with single property binding</h3>
-    <ui-select multiple ng-model="multipleDemo.selectedPeopleSimple" theme="select2" ng-disabled="disabled" style="width: 800px;">
-        <ui-select-match placeholder="Select person...">{{$item.name}} &lt;{{$item.email}}&gt;</ui-select-match>
-        <ui-select-choices repeat="person.email as person in people | propsFilter: {name: $select.search, age: $select.search}">
-            <div ng-bind-html="person.name | highlight: $select.search"></div>
-            <small>
-                email: {{person.email}}
-                age: <span ng-bind-html="''+person.age | highlight: $select.search"></span>
-            </small>
-        </ui-select-choices>
-    </ui-select>
-    <p>Selected: {{multipleDemo.selectedPeopleSimple}}</p>
+    <div ng-controller="SelectTagsCtrl">
+    <button class="btn btn-default btn-xs" ng-click="enable()">Enable ui-select</button>
+<button class="btn btn-default btn-xs" ng-click="disable()">Disable ui-select</button>
+<!--<button class="btn btn-default btn-xs" ng-click="clear()">Clear ng-model</button>-->
+
+<hr>
+<h3>Array of objects with single property binding</h3>
+<ui-select multiple ng-model="selectedTagsCombined.selectedTagNames" theme="select2" ng-disabled="disabled" style="width: 800px;">
+    <ui-select-match placeholder="Select tag...">{{$item.name}}</ui-select-match>
+    <ui-select-choices repeat="tag.name as tag in tags | propsFilter: {name: $select.search}">
+        <div ng-bind-html="tag.name | highlight: $select.search"></div>
+    </ui-select-choices>
+</ui-select>
+<p>Selected: {{selectedTagsCombined.selectedTagNames}}</p>
 
 
     <div style="height:500px"></div>
-    </div> -->
+    </div>
 
     {% endraw %}
 
