@@ -59,8 +59,7 @@ def index(page=1):
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/index.html',
-                           articles={a.id:
-                                         dict(list(a.get_client_side_dict().items()) +
+                           articles={a.id: dict(list(a.get_client_side_dict().items()) +
                                               list({'main_tags': {'foo': 'one_tag'}}.items()))
                                      for a in articles},
                            portal=portal_and_settings(portal),

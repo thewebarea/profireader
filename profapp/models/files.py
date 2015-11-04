@@ -230,6 +230,6 @@ class ImageCroped(Base, PRBase):
         return self.to_dict(fields)
 
     @staticmethod
-    def get_coordinates(original_image_id):
-        return {'coordinates': db(ImageCroped, original_image_id=original_image_id).one(
-        ).get_client_side_dict()}
+    def get_coordinates_and_original_img(croped_image_id):
+        coor_img = db(ImageCroped, croped_image_id=croped_image_id).one()
+        return coor_img.original_image_id, {'coordinates': coor_img.get_client_side_dict()}

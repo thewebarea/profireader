@@ -11,7 +11,7 @@ from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STAT
 from .pagination import pagination
 from config import Config
 from .views_file import crop_image, update_croped_image
-from ..models.files import ImageCroped
+from ..models.files import ImageCroped, File
 from utils.db_utils import db
 
 @article_bp.route('/list/', methods=['GET'])
@@ -93,7 +93,7 @@ def show_form_update(article_company_id):
 def load_form_update(json, article_company_id):
     article = ArticleCompany.get(article_company_id).get_client_side_dict()
     image_id = article.get('image_file_id')
-    coordinates = ImageCroped.get_coordinates(image_id)
+    article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
     article.update(coordinates, ratio=Config.IMAGE_EDITOR_RATIO)
     return article
 
@@ -103,10 +103,10 @@ def load_form_update(json, article_company_id):
 def save(json, article_company_id):
     json.pop('company')
     image_id = json.get('image_file_id')
-    article = db(ArticleCompany, id=article_company_id).one()
     if image_id:
-        if image_id == article.image_file_id:
+        if db(ImageCroped, original_image_id=image_id).count():
             update_croped_image(image_id, json.get('coordinates'))
+            del json['image_file_id']
         else:
             json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
     del json['coordinates'], json['ratio']

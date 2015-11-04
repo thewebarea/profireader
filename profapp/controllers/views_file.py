@@ -235,7 +235,7 @@ def crop_image(image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
                     x=coordinates['x'], y=coordinates['y'], width=coordinates['width'],
                     height=coordinates['height'], rotate=coordinates['rotate']).save()
 
-        return copy_original_image_to_system_folder.id
+        return croped.id
 
     else:
         g.db.rollback()
@@ -269,10 +269,8 @@ def update_croped_image(original_image_id, coordinates, ratio=Config.IMAGE_EDITO
         image_croped_assoc.width = coordinates['width']
         image_croped_assoc.height = coordinates['height']
         image_croped_assoc.rotate = coordinates['rotate']
-        g.db.add_all([croped, image_croped_assoc])
-        g.db.commit()
 
-        return image_query.id
+        return croped.id
 
     else:
         g.db.rollback()
