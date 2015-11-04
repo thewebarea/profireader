@@ -79,9 +79,37 @@ module.filter('propsFilter', function() {
     };
 });
 
-module.controller('SelectTagsCtrl', function($scope) {
+module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, $http, $ok) {
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
+
+    $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
+
+    $scope.$watch("data.selected_division", function(newValue, oldValue) {
+        if ($scope.data && (newValue !== oldValue)){
+            console.log($scope.data.selected_division);
+            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+            console.log($scope.url_get_tags);
+
+            res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
+		    res.success(function(data, status, headers, config) {
+			    $scope.message = data;
+		    });
+		    res.error(function(data, status, headers, config) {
+			    alert( "failure message: " + JSON.stringify({data: data}));
+		    });
+        }
+    });
+
+    $scope.getData = function () {
+        $scope.loading = true;
+    };
+
+    $scope.respData = function () {
+        $scope.loading = false;
+        console.log('???????????????');
+        return true;
+    };
 
     $scope.enable = function() {
         $scope.disabled = false;
@@ -125,7 +153,7 @@ module.controller('SelectTagsCtrl', function($scope) {
 
     $scope.availableColors = ['Red','Green','Blue','Yellow','Magenta','Maroon','Umbra','Turquoise'];
 
-});
+}]);
         module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
@@ -141,6 +169,7 @@ module.controller('SelectTagsCtrl', function($scope) {
             $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
             $scope.statuses = '';
+
             $scope.porals_divisions = function (portals) {
                 var divisions = {};
                 $.each(portals, function (k, v) {
@@ -228,9 +257,6 @@ module.controller('SelectTagsCtrl', function($scope) {
         }
     </style>
     <div ng-init="loadData()" ng-controller="materials_articles">
-    <!-- <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="materials_articles"> -->
-
-
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
             <h3>{{data.article.title}}</h3>
@@ -245,8 +271,7 @@ module.controller('SelectTagsCtrl', function($scope) {
                 data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(original_data.article.status) }}</span>
                 <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
 
-                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData"
-                      ng-action="url_update_status">
+                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData" ng-action="url_update_status">
                     <div ng-if="!data_resp.status">
                         Change material status to
                         <select ng-init="data.article.status = data.status[0]"
@@ -322,7 +347,15 @@ module.controller('SelectTagsCtrl', function($scope) {
                     <br/>
                     <hr>
                     <div ng-controller="SelectTagsCtrl">
+                        <form ng-ok
+                              ng-onsubmit="getData"
+                              ng-onsuccess="respData"
+                              ng-action="url_get_tags">
+                            <input type="submit" hidden>
+                        </form>
+                        <!-- <h3 ng-model="data.selected_division">Add tags:</h3> -->
                         <h3>Add tags:</h3>
+                        {{ data.selected_division }}
                         <ui-select multiple ng-model="selectedTagsCombined.selectedTagNames" theme="select2" ng-disabled="disabled" style="width: 800px;">
                             <ui-select-match placeholder="Select tag...">{{$item.name}}</ui-select-match>
                             <ui-select-choices repeat="tag.name as tag in tags | propsFilter: {name: $select.search}">

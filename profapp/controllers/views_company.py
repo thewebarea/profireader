@@ -105,6 +105,7 @@ def materials_load(json, company_id):
             'original_chosen_status': original_chosen_status,
             'company_logo': company_logo}
 
+
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
 # @check_rights(simple_permissions([]))
@@ -157,6 +158,15 @@ def load_material_details(json, company_id, article_id):
             'send_to_user': {},
             'joined_portals': joined_portals,
             'company_logo': company_logo}
+
+
+@company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([]))
+@ok
+def get_tags(json, portal_division_id):
+    print('STOP!!!')
+    return {'tags': 'currently passed just portal_division_id:' + portal_division_id}
 
 
 @company_bp.route('/update_article/', methods=['POST'])
