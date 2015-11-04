@@ -73,7 +73,7 @@ $(function () {
           // zoomin: null,
           // zoomout: null,
 
-          aspectRatio: 16 / 9,
+          aspectRatio: $('#dataRatio').val(),
           preview: '.img-preview',
           crop: function (data) {
             $dataX.val(Math.round(data.x));
@@ -83,7 +83,16 @@ $(function () {
             $dataRotate.val(Math.round(data.rotate));
           }
         };
+    var coordinates = $('#coordinates').val();
+    if(coordinates){
 
+      options.data = {x: coordinates.x,
+             y: coordinates.y,
+             width: coordinates.width,
+             height: coordinates.height,
+             rotate: coordinates.rotate
+           };
+    }
     $image.on({
       'build.cropper': function (e) {
         console.log(e.type);

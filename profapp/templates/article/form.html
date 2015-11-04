@@ -29,9 +29,9 @@
     $scope.change_picture_in_croper = function (image_file_url) {
 
          var $image = $('.img-container > img');
+  $image.cropper('replace', image_file_url);
 
-  $image.cropper('replace', image_file_url);};
-
+};
 
 
 
@@ -110,11 +110,11 @@
             </div>
 
 
-  <script src="../../static/image_editor/assets/js/jquery.min.js"></script>
-    <script src="../../static/image_editor/assets/js/bootstrap.min.js"></script>
-                <link href="../../static/image_editor/assets/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../../static/image_editor/dist/cropper.css" rel="stylesheet">
-  <link href="../../static/image_editor/demo/css/main.css" rel="stylesheet">
+  <script src="/static/image_editor/assets/js/jquery.min.js"></script>
+    <script src="/static/image_editor/assets/js/bootstrap.min.js"></script>
+                <link href="/static/image_editor/assets/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/image_editor/dist/cropper.css" rel="stylesheet">
+  <link href="/static/image_editor/demo/css/main.css" rel="stylesheet">
 <div class="container" style="float: left; margin-left: 50px; width: 320px; height: 250px; border: 0 solid #aaa;
                         background-size: cover;">
     <div class="row">
@@ -123,7 +123,7 @@
 
 
         <div class="img-container">
-          <img src="{{ image_file_url }}">
+          <img src="{{ image_file_url }}" alt="Picture">
         </div>
       </div>
       <div class="col-md-3">
@@ -211,8 +211,8 @@
              <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"  ng-click="chooseImage()">Chose image</button>
         </span>
         </div>
-
-
+          <input type="hidden" id="dataRatio" value="{{ data.ratio }}">
+          <input type="hidden" id="coordinates" value="{{ data.coordinates }}">
         <!-- Show the cropped image in modal -->
         <div class="modal fade docs-cropped" id="getCroppedCanvasModal" aria-hidden="true" aria-labelledby="getCroppedCanvasTitle" role="dialog" tabindex="-1">
           <div class="modal-dialog">
@@ -235,24 +235,13 @@
       <div class="col-md-3 docs-toggles">
 
 
-        <!-- <h3 class="page-header">Toggles:</h3> -->
-        <div class="btn-group btn-group-justified" data-toggle="buttons">
-          <label data-method="setAspectRatio" data-option="{{ data.ratio }}" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio1" name="aspestRatio" value="{{ data.ratio }}" type="hidden">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, {{ data.ratio }})">
-            </span>
-          </label>
 
-
-<!-- /.docs-toggles -->
-    </div>
   </div>
   <!-- Alert -->
   <div class="docs-alert"><span class="warning message"></span></div>
   <!-- Scripts -->
-             <script src="../../static/image_editor/dist/cropper.js"></script>
- <script src="../../static/image_editor/demo/js/main.js"></script>
-     <script type="text/javascript">$(document).ready(function(){$("#aspestRatio1").click();});</script>
+             <script src="/static/image_editor/dist/cropper.js"></script>
+ <script src="/static/image_editor/demo/js/main.js"></script>
 
 
 

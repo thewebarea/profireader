@@ -235,7 +235,7 @@ def crop_image(image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
                     x=coordinates['x'], y=coordinates['y'], width=coordinates['width'],
                     height=coordinates['height'], rotate=coordinates['rotate']).save()
 
-        return croped.id
+        return copy_original_image_to_system_folder.id
 
     else:
         g.db.rollback()
