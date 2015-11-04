@@ -92,9 +92,11 @@ def show_form_update(article_company_id):
 @ok
 def load_form_update(json, article_company_id):
     article = ArticleCompany.get(article_company_id).get_client_side_dict()
+    article.update(ratio=Config.IMAGE_EDITOR_RATIO)
     image_id = article.get('image_file_id')
-    article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
-    article.update(coordinates, ratio=Config.IMAGE_EDITOR_RATIO)
+    if image_id:
+        article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
+        article.update(coordinates)
     return article
 
 
