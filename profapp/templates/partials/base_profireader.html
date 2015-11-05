@@ -30,7 +30,8 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('general.index') }}"><img src="/static/front/img/profi.png" /></a>
+                <a class="navbar-brand" href="{{ url_for('general.index') }}"><img
+                        src="/static/front/img/profi.png"/></a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -47,8 +48,7 @@
                             <li class="dropdown">
                                 <a href="#" data-toggle="dropdown">
                                     {#                        <img src="{{ current_user.profireader_small_avatar_url }}" style="width:18px;border:0">#}
-                                    <img src="{{ current_user.profireader_small_avatar_url }}"
-                                         style="width:18px;height:18px;border:0">
+                                    <img class="person-small-cover" src="{{ current_user.profireader_small_avatar_url }}">
                                     {{ '{{' }} user.name {{ '}}' }}
                                     <b class="caret"></b>
                                 </a>
@@ -72,6 +72,16 @@
                         </ul>
                     </li>
 
+
+                </ul>
+                <ul class="top-menu">
+                    <li><a class="messages_btn" href="#" title="All Messages"><span class="tooltip">All Messages<span></a></li>
+                    <li><a class="company_btn" href="{{ url_for('company.show') }}" title="Company"><span class="tooltip">Company</span></a>
+                    </li>
+                    <li><a class="article_btn" href="{{ url_for('article.show_mine') }}" title="My articles"><span class="tooltip">My articles</span></a>
+                    </li>
+                    <li><a class="filemanager_btn" href="#" ng-click="open_filemanager()" title="File manager"><span class="tooltip">File manager</span></a>
+                    </li>
 
                 </ul>
             </div>
