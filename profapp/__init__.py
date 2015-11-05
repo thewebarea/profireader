@@ -1,5 +1,4 @@
-from flask import Flask, session, g, request, redirect
-from authomatic.providers import oauth2
+from flask import Flask, g, request
 from authomatic import Authomatic
 from profapp.controllers.blueprints import register as register_blueprints
 from profapp.controllers.blueprints import register_front as register_blueprints_front
@@ -194,7 +193,6 @@ class AnonymousUser(AnonymousUserMixin):
 
 login_manager.anonymous_user = AnonymousUser
 
-
 def create_app(config='config.ProductionDevelopmentConfig',
                front='n',
                host='localhost'):
@@ -212,7 +210,6 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     app.before_request(load_user)
     app.before_request(setup_authomatic(app))
-
     if front == 'y':
         register_blueprints_front(app)
         my_loader = jinja2.ChoiceLoader([

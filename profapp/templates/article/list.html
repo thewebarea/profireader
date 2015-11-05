@@ -10,6 +10,7 @@
 
             $scope.url_details = {{ raw_url_for('article.details')|safe }};
             $scope.url_create_article = {{ raw_url_for('article.show_form_create')|safe }};
+
 {#            $scope.data = {};#}
             $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
             $scope.url_search_article = '{{ url_for('article.load_mine')|safe }}';
@@ -54,8 +55,8 @@
                 $scope.getCompanies = submitted_viersions
             };
 
-            $scope.change_text_color = function(full_text, search_text, id){
-                var new_tag = document.createElement("P");
+            $scope.change_text_color = function(full_text, search_text){
+
 
                 var re = new RegExp(search_text, "g");
 {#                full_text = full_text.replace(/#/g, '');#}
@@ -65,8 +66,6 @@
               }]);
 
     </script>
-{#TODO: VK by OZ: Move this template to separatre js file (take look at filemanager templates)#}
-    {% include 'pager.html' %}
     {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
         <h2><a href="{{ url_create_article() }}">Create article</a></h2>
@@ -77,21 +76,28 @@
 
             <table style="width:100%">
                 <tr>
-                    <td></td>
-                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
-                    <td>
-                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
-                                ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
-                    </td>
                     <td>
                         <form
                                 ng-ok
                                 ng-onsuccess="afterSave"
                                 ng-onsubmit="setFirstPage"
                                 ng-action="url_search_article">
-                            <input type="submit" value="search">
+                            <input type="submit" value="search" style="width: 75%;">
                         </form>
                     </td>
+                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
+                    <td>
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
+                                ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
+                    </td>
+                                  <td>
+
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_status"
+                               >
+                            <option ng-repeat="status in data.statuses">{{ status }}</option>
+                        </select>
+                    </td>
+
                 </tr>
                 <tr>
                     <th width="250px">Date</th>
@@ -107,20 +113,21 @@
                         article_dict.article.mine_version.md_tm }}
                     </td>
                     <td rowspan="{{ article_dict.company_count }}" width="250px"><a
-                            href="http://profi.ntaxa.com/articles/details/{{ article_dict.article.id }}"
-                            ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text, article_dict.article.id)">
+                            href="{{ url_details({company_id:'0',article_id:article_dict.article.id}) }}"
+                            ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text)">
                     </a></td>
                 </tr>
                 <tr ng-if="article_dict.company_count>1"
                     ng-repeat="companies in article_dict.article.submitted_versions">
-                    <td width="250px">{{ companies.company.name }}</td>
-                    <td>{{ companies.status }}</td>
+
+                    <td width="250px" ng-if="companies.status==data.original_chosen_status||!data.original_chosen_status">{{ companies.company.name }}</td>
+                    <td ng-if="companies.status==data.original_chosen_status||!data.original_chosen_status">{{ companies.status }}</td>
                 </tr>
                 <tr ng-if="article_dict.company_count==1">
                     <td width="250px">{{ article_dict.article.mine_version.md_tm }}</td>
-                    <td width="250px"><a href="/articles/details/{{ article_dict.article.id }}"
+                    <td width="250px"><a href="{{ url_details({company_id:'0',article_id:article_dict.article.id}) }}"
                                          id="{{ article_dict.article.id }}"
-                                         ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text, article_dict.article.id)"></a>
+                                         ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text)"></a>
                     </td>
                     <td width="250px">Not sent to any company yet</td>
                     <td>Not sent</td>
@@ -130,6 +137,7 @@
             </table>
 
         </div>
+<!--  TODO: OZ by VK: remove this form and create possibility to send data cia code (without form, maybe through ng-watch) -->
         <form id="pagerform"
               ng-ok
               ng-onsuccess="afterSave"
@@ -137,7 +145,6 @@
               ng-action="url_search_article">
             <input type="submit" hidden>
         </form>
-
         <div ng-include="'pagination.html'"></div>
 
     </div>
