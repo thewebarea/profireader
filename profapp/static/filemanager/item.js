@@ -7,6 +7,7 @@
                 name: model && model.name || '',
                 author_name: model && model.author_name || '',
                 description: model && model.description || '',
+                add_all: model && model.add_all || '',
                 path: path || [],
                 type: model && model.type || 'file',
                 size: model && model.size || 0,

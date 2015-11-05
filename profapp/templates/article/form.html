@@ -27,6 +27,8 @@
             return $scope.data;
         };
 
+        $scope.tinymceImageOptions['height'] = '450px';
+
 
         $scope.articleImageSelected = function (item) {
             $scope.data.image_file_id = item.id;
@@ -34,8 +36,10 @@
             closeFileManager();
         }
 
-        $scope.setImageUrl = function () {
+        $scope.setImageUrl = function (data) {
+            console.log('loaded', data);
             $scope.image_file_url = fileUrl($scope.data.image_file_id);
+
         }
 
 
@@ -73,7 +77,8 @@
 
         <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
-        <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
+        <h2 ng-show="data.id && company">{{ _('update version of article for company
+            `%(company.name)s`', company)
             }}</h2>
 
         <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
@@ -82,7 +87,7 @@
                 maybe layout selector is apporpriate here-->
 
         <form
-                ng-ok
+                ng-ajax-form
                 ng-onsuccess="afterSave"
                 ng-onsubmit="getData"
                 ng-action="save_article">
@@ -95,8 +100,7 @@
                 {{ _('KeyWords') }}
                 <input style="width: 100%" ng-model="data.keywords"/>
                 {{ _('Full text') }}
-                <textarea ui-tinymce="tinymceImageOptions" placeholder="text"
-                          ng-model="data.long"></textarea>
+
             </div>
 
             <div ng-click="chooseImage()"
@@ -260,7 +264,13 @@
 
             <div style="clear: both"></div>
             <br/>
+
             <input type="hidden" ng-model="data.image_file_id">
+
+            <div class="profi-tiny-mce-birdy-wraper">
+            <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
+                      ng-model="data.long"></textarea>
+            </div>
             <input style="clear: both;" type="submit"
                    value="{{ data.id ? 'save' : 'create' }}"/>
 

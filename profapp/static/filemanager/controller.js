@@ -236,10 +236,12 @@
             });
             return found;
         };
-        $scope.isDisable = function(actionname,len){
-            if(($scope.copy_file_id == '' && $scope.cut_file_id == '') && len < 1 ){
+        $scope.isDisable = function(actionname,len, type){
+            if(actionname === 'paste' && ($scope.copy_file_id != '' || $scope.cut_file_id != '') && type === 'parent'){
+                return ''
+            }else if(($scope.copy_file_id == '' && $scope.cut_file_id == '') && len < 1){
                 return 'cursor: default;pointer-events: none;color: gainsboro;'
-            }else if((actionname !== 'paste' && ($scope.copy_file_id != '' || $scope.cut_file_id != '')) && len < 1 ) {
+            }else if((actionname !== 'paste' && ($scope.copy_file_id != '' || $scope.cut_file_id != '')) && len < 1 || type === 'parent') {
                 return 'cursor: default;pointer-events: none;color: gainsboro;'
             }else if(actionname === 'paste' && ($scope.copy_file_id == '' && $scope.cut_file_id == '')){
                 return 'cursor: default;pointer-events: none;color: gainsboro;'

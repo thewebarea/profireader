@@ -129,9 +129,11 @@ class File(Base, PRBase):
         show = lambda file: True
         actions['remove'] = lambda file: None if file.mime == "root" else True
         actions['copy'] = lambda file: None if file.mime == "root" else True
-        actions['paste'] = lambda file: None if file.mime == 'root' else True
+        actions['paste'] = lambda file: None if file == None else True
         actions['cut'] = lambda file: None if file.mime == "root" else True
         actions['properties'] = lambda file: None if file.mime == "root" else True
+
+        parent = File.get(parent_id)
 
         if file_manager_called_for == 'file_browse_image':
             actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
@@ -144,9 +146,17 @@ class File(Base, PRBase):
                     'url': file.url(),
                     'author_name': file.copyright_author_name,
                     'description': file.description,
-                    'actions': {action: actions[action](file) for action in actions}
+                    'actions': {action: actions[action](file) for action in actions},
                     }
                                         for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
+        ret.append({'name': parent.name, 'id': parent.id, 'parent_id': parent.parent_id,
+                                'type': 'parent',
+                                'date': str(parent.md_tm).split('.')[0],
+                    'url': parent.url(),
+                    'author_name': parent.copyright_author_name,
+                    'description': parent.description,
+                    'actions': {action: actions[action](parent) for action in actions},
+                    })
 
         return ret
 

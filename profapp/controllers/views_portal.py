@@ -16,19 +16,22 @@ from .pagination import pagination
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_PORTAL
 from config import Config
 
+
 @portal_bp.route('/create/<string:company_id>/', methods=['GET'])
 @login_required
-# @check_rights(simple_permissions([]))
-def create(company_id):
-    return render_template('company/portal_create.html',
-                           company_id=company_id)
+def create_template(company_id):
+    return render_template('company/portal_create.html', company_id=company_id)
 
 
-@portal_bp.route('/create/<string:company_id>/', methods=['POST'])
+
+
+
+@portal_bp.route('/<any(create,update):action>/<any(validate,save):state>/<string:company_id>/',
+                 methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
 @ok
-def create_load(json, company_id):
+def create_save(json, action, state, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
     types = {x.id: x.get_client_side_dict() for x in
              PortalDivisionType.get_division_types()}
@@ -78,6 +81,29 @@ def confirm_create(json, company_id):
             parent_folder_id=company_owner.system_folder_file_id,
             article_portal_id=None).save().id
         return {'company_id': company_id}
+
+    ret = {
+        'company_id': company_id,
+        'layouts': layouts,
+        'division_types': {x.id: x.get_client_side_dict() for x in
+                           PortalDivisionType.get_division_types()}
+    }
+
+    if action == 'create':
+        ret['portal'] = {'company_id': company_id, 'name': '', 'host': '',
+                         'portal_layout_id': layouts[0]['id'],
+                         'divisions': [
+                             {'name': 'index page', 'portal_division_type_id': 'index'},
+                             {'name': 'news', 'portal_division_type_id': 'news'},
+                             {'name': 'events', 'portal_division_type_id': 'events'},
+                             {'name': 'catalog', 'portal_division_type_id': 'catalog'},
+                             {'name': 'about', 'portal_division_type_id': 'about'},
+                         ]}
+    else:
+        ret['portal'] = {}
+
+    return ret
+
 
 
 @portal_bp.route('/', methods=['POST'])

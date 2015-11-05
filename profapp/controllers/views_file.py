@@ -26,13 +26,14 @@ except ImportError:
 
 @file_bp.route('<string:file_id>')
 def download(file_id):
-    file = file_query(file_id, File)
-    file_c = file_query(file_id, FileContent)
+    file = file_query(File, file_id)
+    file_c = file_query(FileContent, file_id)
     content = file_c.content
     response = make_response(content)
     response.headers['Content-Type'] = "application/octet-stream"
     response.headers['Content-Disposition'] = 'attachment; filename=%s' % file.name
     return response
+
 def send_file(filename_or_fp, mimetype=None, as_attachment=False,
               attachment_filename=None, add_etags=True,
               cache_timeout=None, conditional=False, headers={}):
