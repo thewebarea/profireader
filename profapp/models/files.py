@@ -5,7 +5,7 @@ from utils.db_utils import db
 from sqlalchemy.orm import relationship, backref
 from flask import url_for, g
 from .pr_base import PRBase, Base
-
+from flask import make_response
 
 class File(Base, PRBase):
     __tablename__ = 'file'
@@ -41,8 +41,8 @@ class File(Base, PRBase):
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
-                 root_folder_id=None, youtube_id = None,
-                 company_id=None, author_user_id=None):
+                 root_folder_id=None, youtube_id=None,
+                 company_id=None, author_user_id=None, image_croped=None):
         super(File, self).__init__()
         self.parent_id = parent_id
         self.name = name
@@ -56,6 +56,7 @@ class File(Base, PRBase):
         self.author_user_id = author_user_id
         self.company_id = company_id
         self.youtube_id = youtube_id
+        self.image_croped = image_croped
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
@@ -82,9 +83,8 @@ class File(Base, PRBase):
             nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
         return ret[::-1]
 
-
     @staticmethod
-    def list(parent_id=None, file_manager_called_for = ''):
+    def list(parent_id=None, file_manager_called_for=''):
 
         default_actions = {}
         # default_actions['choose'] = lambda file: None
@@ -148,7 +148,7 @@ class File(Base, PRBase):
         if company_id:
             attr['company_id'] = company_id
         if parent_folder_id:
-            attr['parent_folder_id'] = parent_folder_id
+            attr['parent_id'] = parent_folder_id
         if article_portal_id:
             attr['article_portal_id'] = article_portal_id
         if root_folder_id:
@@ -156,7 +156,7 @@ class File(Base, PRBase):
         new_file = self.detach().attr(attr)
         new_file.save()
         file_content.id = new_file.id
-        new_file.file_content = [file_content]
+        new_file.file_content = file_content
         return new_file
 
 
@@ -165,9 +165,7 @@ class FileContent(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file = relationship('File',
-                                uselist=False,
-                                backref='file_content')
+    file = relationship('File', uselist=False, backref=backref('file_content', uselist=False))
 
     def __init__(self, file=None, content=None):
         self.file = file
@@ -204,3 +202,34 @@ class FileContent(Base, PRBase):
         #
         # return result
         # return True
+
+class ImageCroped(Base, PRBase):
+    __tablename__ = 'image_croped'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, unique=True, primary_key=True)
+    original_image_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    croped_image_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    x = Column(TABLE_TYPES['int'], nullable=False)
+    y = Column(TABLE_TYPES['int'], nullable=False)
+    width = Column(TABLE_TYPES['int'], nullable=False)
+    height = Column(TABLE_TYPES['int'], nullable=False)
+    rotate = Column(TABLE_TYPES['int'], nullable=False)
+
+    def __init__(self, original_image_id=None, x=None, y=None, width=None, height=None, rotate=None,
+                 croped_image_id=None):
+        super(ImageCroped, self).__init__()
+        self.original_image_id = original_image_id
+        self.croped_image_id = croped_image_id
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.rotate = rotate
+
+    def get_client_side_dict(self, fields='x,y,width,height,rotate'):
+        """This method make dictionary from portal object with fields have written above"""
+        return self.to_dict(fields)
+
+    @staticmethod
+    def get_coordinates_and_original_img(croped_image_id):
+        coor_img = db(ImageCroped, croped_image_id=croped_image_id).one()
+        return coor_img.original_image_id, {'coordinates': coor_img.get_client_side_dict()}

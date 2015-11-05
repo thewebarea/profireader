@@ -181,24 +181,24 @@ body {
 .img-preview {
   background-color: #f7f7f7;
   overflow: hidden;
-  width: 100%;
+  width: 320px;
   text-align: center;
 }
 
 .img-container {
-  min-height: 200px;
-  max-height: 466px;
+  min-height: 250px;
+  max-height: 250px;
   margin-bottom: 20px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 320px) {
   .img-container {
-    min-height: 466px;
+    min-height: 250px;
   }
 }
 
 .img-container > img {
-  max-width: 100%;
+  max-width: 320px;
 }
 
 .docs-preview {

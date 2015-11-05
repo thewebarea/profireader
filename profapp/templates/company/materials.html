@@ -1,27 +1,142 @@
-{% extends "index_layout.html" %}
 
-{% block title %}Profireader - Company materials{% endblock title %}
+
+{% extends "index_lazy_layout.html" %}
+
+{% block title %}Profireader - Articles{% endblock title %}
 
 {% block portal_content %}
-    {% block company_base %}
-        {% include 'company/company_base_angular.html' %}
-    {% endblock company_base %}
+
+
     <script>
-        module.controller('materials_articles', ['$scope', function ($scope) {
-            $scope.articles = {{ articles|safe }};
-            $scope.company_id = '{{ company_id|safe }}';
-            $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
+        module.controller('article_list', ['$scope', '$ok', '$sce', function ($scope, $ok, $sce) {
 
-        }]);
+            $scope.url_details = {{ raw_url_for('company.material_details')|safe }};
+            $scope.url_search_article = {{ raw_url_for('company.materials_load')|safe }};
+            $scope.get_colored_title = function (text_to_change) {
+                return text_to_change
+            };
+
+
+            $scope.page_changed = function () {
+                $scope.data.search_text = $scope.data.original_search_text;
+                $('#pagerform').trigger('submit');
+                return false;
+            };
+
+            $scope.cancel = function () {
+                window.location.href = $scope.url_back();
+                return false;
+            };
+            $scope.getData = function () {
+                $scope.loading = true;
+                return $scope.data;
+            };
+
+            $scope.setFirstPage= function () {
+                $scope.data.pages.current_page=1;
+                return $scope.getData();
+            };
+
+
+
+            $scope.afterSave = function (resp) {
+                $scope.data = resp;
+                $scope.loading = false;
+            };
+
+            $scope.change_text_color = function(full_text, search_text){
+
+
+                var re = new RegExp(search_text, "g");
+{#                full_text = full_text.replace(/#/g, '');#}
+{#                full_text = full_text.replace(re, '#');#}
+
+                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">'  + search_text + '</span>'));}
+              }]);
+
     </script>
+{#TODO: VK by OZ: Move this template to separatre js file (take look at filemanager templates)#}
+{% include 'company/company_base_angular.html' %}
     {% raw %}
-    <div ng-controller="materials_articles">
+    <div ng-init="loadData()" ng-controller="article_list">
+        <div ng-if="loading">Loading...</div>
+        <div ng-if="!loading">
 
-    <span ng-repeat="article in articles">
-    <a href="{{ url_article_details({company_id: company_id, article_id: article.id}) }}">{{ article.title }}</a><br/>
-        </span>
+
+
+            <table style="width:100%">
+                <tr>
+                                        <td>
+                        <form
+                                ng-ok
+                                ng-onsuccess="afterSave"
+                                ng-onsubmit="setFirstPage"
+                                ng-action="url_search_article({company_id:data.company_id})">
+                            <input type="submit" value="search" style="width: 75%;">
+                        </form>
+                    </td>
+                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
+                    <td>
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_portal"
+                                ng-options="port.name for port in data.portals | orderBy:'id' track by port.id"></select>
+                    </td>
+                    <td>
+
+                        <select style="width: 100%; padding: 5px;" ng-model="data.chosen_status"
+                               >
+                            <option ng-repeat="status in data.statuses">{{ status }}</option>
+                        </select>
+                    </td>
+
+                </tr>
+                <tr>
+                    <th width="250px">Date</th>
+                    <th width="250px">Title</th>
+                    <th width="250px">Portals</th>
+                    <th><p>Status</p></th>
+                </tr>
+            </table>
+            <table style="width:100%" ng-repeat="article_dict in data.articles">
+
+                <tr ng-if="article_dict.portals_count>1">
+                    <td rowspan="{{ article_dict.portals_count }}" width="250px">{{
+                        article_dict.article.md_tm }}
+                    </td>
+                    <td rowspan="{{ article_dict.portals_count }}" width="250px"><a
+                            href="{{ url_details({company_id:data.company_id, article_id:article_dict.article.id}) }}"
+                            ng-bind-html="change_text_color(article_dict.article.title, data.original_search_text)">
+                    </a></td>
+                </tr>
+                <tr ng-if="article_dict.portals_count>1"
+                    ng-repeat="portal in article_dict.article.portal_article">
+                    <td width="250px" ng-if="portal.status==data.original_chosen_status||!data.original_chosen_status">{{ portal.portal.name }}</td>
+                    <td ng-if="portal.status==data.original_chosen_status||!data.original_chosen_status">{{ portal.status }}</td>
+                </tr>
+                <tr ng-if="article_dict.portals_count==1">
+                    <td width="250px">{{ article_dict.article.md_tm }}</td>
+                    <td width="250px"><a href="{{ url_details({company_id:data.company_id,article_id:article_dict.article.id}) }}"
+                                         id="{{ article_dict.article.id }}"
+                                         ng-bind-html="change_text_color(article_dict.article.title, data.original_search_text)"></a>
+                    </td>
+                    <td width="250px">Not sent to any portal yet</td>
+                    <td>Not sent</td>
+                </tr>
+
+
+            </table>
+
+        </div>
+        <form id="pagerform"
+              ng-ok
+              ng-onsuccess="afterSave"
+              ng-onsubmit="getData"
+              ng-action="url_search_article({company_id:data.company_id})">
+            <input type="submit" hidden>
+        </form>
+
+        <div ng-include="'pagination.html'"></div>
+
     </div>
     {% endraw %}
 
 {% endblock portal_content %}
-
