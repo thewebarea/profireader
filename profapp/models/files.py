@@ -140,7 +140,7 @@ class File(Base, PRBase):
 
     def url(self):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
-        return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
+        return 'http://file' + server + '.profireader.com/' + self.id + '/'
 
     def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
         file_content = FileContent.get(self.id).detach()
@@ -148,7 +148,7 @@ class File(Base, PRBase):
         if company_id:
             attr['company_id'] = company_id
         if parent_folder_id:
-            attr['parent_folder_id'] = parent_folder_id
+            attr['parent_id'] = parent_folder_id
         if article_portal_id:
             attr['article_portal_id'] = article_portal_id
         if root_folder_id:
@@ -225,3 +225,11 @@ class ImageCroped(Base, PRBase):
         self.height = height
         self.rotate = rotate
 
+    def get_client_side_dict(self, fields='x,y,width,height,rotate'):
+        """This method make dictionary from portal object with fields have written above"""
+        return self.to_dict(fields)
+
+    @staticmethod
+    def get_coordinates_and_original_img(croped_image_id):
+        coor_img = db(ImageCroped, croped_image_id=croped_image_id).one()
+        return coor_img.original_image_id, {'coordinates': coor_img.get_client_side_dict()}

@@ -22,7 +22,7 @@ class Config(object):
     # to /etc/hosts
 
     #SERVER_NAME = 'aprofi.a.ntaxa.com'
-    SERVER_NAME = 'profi.ntaxa.com'
+    SERVER_NAME = 'profireader.com'
     #SERVER_NAME = 'aprofi.d.ntaxa.com'
     #SERVER_NAME = 'profireader.a:8080'
     #SERVER_NAME = 'profireader.net:8080'
@@ -69,7 +69,7 @@ class Config(object):
     GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY
     GOOGLE_API_SECRET_JSON = secret_data.GOOGLE_API_SECRET_JSON
     YOUTUBE_API = dict(SCOPE="https://www.googleapis.com/auth/youtube",
-                       UPLOAD=dict(REDIRECT_URI="http://profi.ntaxa.com/filemanager/uploader/",
+                       UPLOAD=dict(REDIRECT_URI="http://profireader.com/filemanager/uploader/",
                                    SEND_URI="https://www.googleapis.com/upload/youtube/v3/"
                                             "videos?%s"),
                        CREATE_PLAYLIST=dict(SEND_URI="https://www.googleapis.com/youtube/v3/"

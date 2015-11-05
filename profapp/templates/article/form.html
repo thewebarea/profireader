@@ -9,7 +9,6 @@
             $scope.save_article = '{{ url_for('article.confirm_create')|safe }}';
         {% endif %}
 
-
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
         };
@@ -21,20 +20,32 @@
             var width = document.getElementById("dataWidth");
             var height = document.getElementById("dataHeight");
             var rotate = document.getElementById("dataRotate");
-            $scope.data.coordinates={'x': angular.element(x).val(), 'y': angular.element(y).val(),
+            $scope.data.coordinates = {
+                'x': angular.element(x).val(), 'y': angular.element(y).val(),
                 'width': angular.element(width).val(), 'height': angular.element(height).val(),
-                'rotate': angular.element(rotate).val()};
+                'rotate': angular.element(rotate).val()
+            };
             return $scope.data;
         };
 
         $scope.tinymceImageOptions['height'] = '450px';
+        $scope.change_picture_in_croper = function (image_file_url) {
+
+            var $image = $('.img-container > img');
+
+            $image.cropper('replace', image_file_url);
+
+        };
 
 
         $scope.articleImageSelected = function (item) {
             $scope.data.image_file_id = item.id;
             $scope.setImageUrl();
             closeFileManager();
-        }
+            {#            $('#replace-toggle').click();#}
+
+        };
+        $scope.default_image = true;
 
         $scope.cleanUpHtml = function (data) {
             data.long = cleanup_html(data.long);
@@ -42,8 +53,14 @@
         }
 
         $scope.setImageUrl = function () {
-            $scope.image_file_url = fileUrl($scope.data.image_file_id);
-        }
+            $scope.image_file_url = fileUrl($scope.data.image_file_id) || "{{ url_for('static', filename='images/choose_image.jpg') }}";
+            var image = $scope.image_file_url;
+            if (image != "{{ url_for('static', filename='images/choose_image.jpg') }}") {
+                $scope.default_image = false;
+            }
+            $scope.change_picture_in_croper(image);
+
+        };
 
 
         $scope.chooseImage = function () {
@@ -59,16 +76,10 @@
                         return {
                             choose: "parent.angularControllerFunction('article_edit', 'articleImageSelected')"
                         }
-
                     }
-
                 }
             });
-
-
         };
-
-
     }]);
 </script>
 {% include 'croper.html' %}
@@ -119,7 +130,7 @@
         <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
                 maybe layout selector is apporpriate here-->
 
-        <form
+        <div
                 ang-ajax-form
                 ng-onsuccess="afterSave"
                 ng-onsubmit="getData"
@@ -141,193 +152,189 @@
                         background-size: cover; background-image:url({{ image_file_url }});">
                 {{ _('Select main article image') }}
             </div>
-{% endraw %}
-            {#
- <div ng-if="data.image_file_id">
 
 
-  <script src="../../static/image_editor/assets/js/jquery.min.js"></script>
-    <script src="../../static/image_editor/assets/js/bootstrap.min.js"></script>
+            <div ng-if="data.image_file_id">
 
-                <link href="../../static/image_editor/assets/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../../static/image_editor/dist/cropper.css" rel="stylesheet">
-  <link href="../../static/image_editor/demo/css/main.css" rel="stylesheet">
-<div class="container" style="float: left; margin-left: 50px; width: 320px; height: 250px; border: 0 solid #aaa;
+                <script src="/static/image_editor/assets/js/jquery.min.js"></script>
+                <script src="/static/image_editor/assets/js/bootstrap.min.js"></script>
+                <link href="/static/image_editor/assets/css/bootstrap.min.css" rel="stylesheet">
+                <link href="/static/image_editor/dist/cropper.css" rel="stylesheet">
+                <link href="/static/image_editor/demo/css/main.css" rel="stylesheet">
+                <div class="container" style="float: left; margin-left: 50px; width: 320px; height: 250px; border: 0 solid #aaa;
                         background-size: cover;">
-    <div class="row">
-      <div class="col-md-9">
-        <!-- <h3 class="page-header">Demo:</h3> -->
-
-        <div class="img-container">
-          <img src="{{ image_file_url }}">
-        </div>
-      </div>
-      <div class="col-md-3">
-        <!-- <h3 class="page-header">Preview:</h3> -->
+                    <div class="row">
+                        <div class="col-md-9">
+                            <!-- <h3 class="page-header">Demo:</h3> -->
 
 
-        <div>
-
-        </div>
-        <!-- <h3 class="page-header">Data:</h3> -->
-            <div class="docs-data">
-          <div class="input-group">
-            <input class="form-control" id="dataX" name="x" type="hidden" placeholder="x">
-
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataY" name="y" type="hidden" placeholder="y">
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataWidth" type="hidden" name="width" placeholder="width">
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataHeight" type="hidden" name="height" placeholder="height">
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataRotate" type="hidden" name="rotate" placeholder="rotate">
-          </div>
-
-            </div>
-      </div>
+                            <div class="img-container">
+                                <img src="{{ image_file_url }}" alt="Picture">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <!-- <h3 class="page-header">Preview:</h3> -->
 
 
+                            <div>
 
-    </div>
-    <div class="row">
-      <div class="col-md-9 docs-buttons">
-        <!-- <h3 class="page-header">Toolbar:</h3> -->
-        <div class="btn-group">
-          <button class="btn btn-primary" data-method="zoom" data-option="0.1" type="button" title="Zoom In">
+                            </div>
+                            <!-- <h3 class="page-header">Data:</h3> -->
+                            <div class="docs-data">
+                                <div class="input-group">
+                                    <input class="form-control" id="dataX" name="x" type="hidden" placeholder="x">
+
+                                </div>
+                                <div class="input-group">
+                                    <input class="form-control" id="dataY" name="y" type="hidden" placeholder="y">
+                                </div>
+                                <div class="input-group">
+                                    <input class="form-control" id="dataWidth" type="hidden" name="width"
+                                           placeholder="width">
+                                </div>
+                                <div class="input-group">
+                                    <input class="form-control" id="dataHeight" type="hidden" name="height"
+                                           placeholder="height">
+                                </div>
+                                <div class="input-group">
+                                    <input class="form-control" id="dataRotate" type="hidden" name="rotate"
+                                           placeholder="rotate">
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-9 docs-buttons">
+                            <!-- <h3 class="page-header">Toolbar:</h3> -->
+                            <div class="btn-group" ng-if="default_image">
+                                <button class="btn btn-primary" data-method="zoom" data-option="0.1" type="button"
+                                        disabled title="Zoom In">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, 0.1)">
               <span class="icon icon-zoom-in"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="zoom" data-option="-0.1" type="button" title="Zoom Out">
+                                </button>
+                                <button class="btn btn-primary" data-method="zoom" data-option="-0.1" type="button"
+                                        disabled title="Zoom Out">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, -0.1)">
               <span class="icon icon-zoom-out"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="rotate" data-option="-90" type="button" title="Rotate Left">
+                                </button>
+                                <button class="btn btn-primary" data-method="rotate" data-option="-90" type="button"
+                                        disabled title="Rotate Left">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, -90)">
               <span class="icon icon-rotate-left"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="rotate" data-option="90" type="button" title="Rotate Right">
+                                </button>
+                                <button class="btn btn-primary" data-method="rotate" data-option="90" type="button"
+                                        disabled title="Rotate Right">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, 90)">
               <span class="icon icon-rotate-right"></span>
             </span>
-          </button>
-        </div>
+                                </button>
+            <span class="docs-tooltip" data-toggle="tooltip" title="Chose image">
+             <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
+                     ng-click="chooseImage()">Chose image
+             </button>
+        </span>
+                            </div>
 
-        <div class="btn-group">
-          <button class="btn btn-primary" data-method="crop" type="button" title="Enable crop">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;crop&quot;)">
-              <span class="icon icon-ok"></span>
+                            <div class="btn-group" ng-if="!default_image">
+                                <button class="btn btn-primary" data-method="zoom" data-option="0.1" type="button"
+                                        title="Zoom In">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, 0.1)">
+              <span class="icon icon-zoom-in"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="clear" type="button" title="Disable crop">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;clear&quot;)">
-              <span class="icon icon-remove"></span>
+                                </button>
+                                <button class="btn btn-primary" data-method="zoom" data-option="-0.1" type="button"
+                                        title="Zoom Out">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, -0.1)">
+              <span class="icon icon-zoom-out"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="disable" type="button" title="Lock">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;disable&quot;)">
-              <span class="icon icon-lock"></span>
+                                </button>
+                                <button class="btn btn-primary" data-method="rotate" data-option="-90" type="button"
+                                        title="Rotate Left">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, -90)">
+              <span class="icon icon-rotate-left"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="enable" type="button" title="Unlock">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;enable&quot;)">
-              <span class="icon icon-unlock"></span>
+                                </button>
+                                <button class="btn btn-primary" data-method="rotate" data-option="90" type="button"
+                                        title="Rotate Right">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, 90)">
+              <span class="icon icon-rotate-right"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="reset" type="button" title="Reset">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;reset&quot;)">
-              <span class="icon icon-refresh"></span>
-            </span>
-          </button>
-
-        </div>
-
-        <!-- Show the cropped image in modal -->
-        <div class="modal fade docs-cropped" id="getCroppedCanvasModal" aria-hidden="true" aria-labelledby="getCroppedCanvasTitle" role="dialog" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button class="close" data-dismiss="modal" type="button" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="getCroppedCanvasTitle">Cropped</h4>
-              </div>
-              <div class="modal-body"></div>
-              <!-- <div class="modal-footer">
-                <button class="btn btn-primary" data-dismiss="modal" type="button">Close</button>
-              </div> -->
-            </div>
-          </div>
-        </div><!-- /.modal -->
-
-
-      </div><!-- /.docs-buttons -->
-
-      <div class="col-md-3 docs-toggles">
-
-
-        <!-- <h3 class="page-header">Toggles:</h3> -->
-        <div class="btn-group btn-group-justified" data-toggle="buttons">
-          <label data-method="setAspectRatio" data-option="{{ data.ratio }}" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio1" name="aspestRatio" value="{{ data.ratio }}" type="hidden">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, {{ data.ratio }})">
-            </span>
-          </label>
-        </div>
-
-      </div><!-- /.docs-toggles -->
-    </div>
-  </div>
-  <!-- Alert -->
-  <div class="docs-alert"><span class="warning message"></span></div>
-  <!-- Scripts -->
-             <script src="../../static/image_editor/dist/cropper.js"></script>
- <script src="../../static/image_editor/demo/js/main.js"></script>
-     <script type="text/javascript">$(document).ready(function(){$("#aspestRatio1").click();});</script>
-
-</div>
-             #}{% raw %}
+                                </button>
+            <span class="docs-tooltip" data-toggle="tooltip" title="Chose image">
+             <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
+                     ng-click="chooseImage()">Chose image
+             </button>
+        </span>
+                            </div>
+                            <input type="hidden" id="dataRatio" value="{{ data.ratio }}">
+                            <input type="hidden" id="coordinate_x" value="{{ data.coordinates.x }}">
+                            <input type="hidden" id="coordinate_y" value="{{ data.coordinates.y }}">
+                            <input type="hidden" id="coordinate_width" value="{{ data.coordinates.width }}">
+                            <input type="hidden" id="coordinate_height" value="{{ data.coordinates.height }}">
+                            <input type="hidden" id="coordinate_rotate" value="{{ data.coordinates.rotate }}">
+                            <input type="hidden" id="default_image" value="{{ default_image }}">
+                            <!-- Show the cropped image in modal -->
+                            <div class="modal fade docs-cropped" id="getCroppedCanvasModal" aria-hidden="true"
+                                 aria-labelledby="getCroppedCanvasTitle" role="dialog" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button class="close" data-dismiss="modal" type="button"
+                                                    aria-hidden="true">&times;</button>
+                                            <h4 class="modal-title" id="getCroppedCanvasTitle">Cropped</h4>
+                                        </div>
+                                        <div class="modal-body"></div>
+                                        <!-- <div class="modal-footer">
+                                          <button class="btn btn-primary" data-dismiss="modal" type="button">Close</button>
+                                        </div> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.modal -->
 
 
+                        </div>
+                        <!-- /.docs-buttons -->
+
+                        <div class="col-md-3 docs-toggles">
 
 
+                        </div>
+                        <!-- Alert -->
+                        <div class="docs-alert"><span class="warning message"></span></div>
+                        <!-- Scripts -->
+                        <script src="/static/image_editor/dist/cropper.js"></script>
+                        <script src="/static/image_editor/demo/js/main.js"></script>
 
-            <div style="clear: both"></div>
-            <br/>
 
-            <input type="hidden" ng-model="data.image_file_id">
+                        <div style="clear: both"></div>
+                        <br/>
 
-            <div class="profi-tiny-mce-birdy-wraper">
+                        <input type="hidden" ng-model="data.image_file_id">
+
+                        <div class="profi-tiny-mce-birdy-wraper">
             <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
                       ng-model="data.long"></textarea>
+                        </div>
+
+
+                        <input style="clear: both;" type="submit" ng-disabled="state !== 'clean'" ng-click="save()"
+                               value="{{ data.id ? 'save' : 'create' }}"/>
+                        {{ state }}
+
+
+                    </div>
+                </div>
+
             </div>
-
-
-            <input style="clear: both;" type="submit" ng-disabled="state !== 'clean'" ng-click="save()"
-                   value="{{ data.id ? 'save' : 'create' }}"/>
-            {{ state }}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        </form>
+        </div>
     </div>
-</div>
 
-{% endraw %}
+    {% endraw %}
+
+</div>

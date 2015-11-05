@@ -784,7 +784,7 @@ function angularControllerFunction(controller_attr, function_name) {
 function fileUrl(id) {
     if (!id) return '';
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
-    return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
+    return 'http://file' + server + '.profireader.com/' + id + '/'
 }
 
 
@@ -792,3 +792,4 @@ function fileUrl(id) {
 function cloneObject(o) {
     return (o === null || typeof o !== 'object')?o: $.extend(true, {}, o);
 }
+

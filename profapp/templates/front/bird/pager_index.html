@@ -37,7 +37,7 @@
     <li class="next">
         {% if current_page != pages %}
         <a href="{{ url_for('front.index', page=current_page + 1) }}"></a>
-        {% else %} Newer &rarr;
+        {% else %}
         {% endif %}
     </li>
 {% endif %}

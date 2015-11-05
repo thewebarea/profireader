@@ -145,7 +145,7 @@ def file_url(id):
     if not id:
         return ''
     server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', id)
-    return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
+    return 'http://file' + server + '.profireader.com/' + id + '/'
 
 
 def config_variables():
