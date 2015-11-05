@@ -8,6 +8,7 @@ from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
+from ..models.portal import PortalDivision
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany, ArticlePortal
@@ -62,6 +63,7 @@ def materials(company_id):
         angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js',
         company_logo=company_logo
     )
+
 
 @company_bp.route('/materials/<string:company_id>/', methods=['POST'])
 @login_required
@@ -165,8 +167,11 @@ def load_material_details(json, company_id, article_id):
 # @check_rights(simple_permissions([]))
 @ok
 def get_tags(json, portal_division_id):
+# def get_tags(portal_division_id):
     print('STOP!!!')
-    return {'tags': 'currently passed just portal_division_id:' + portal_division_id}
+    available_tags = g.db.query(PortalDivision).get(portal_division_id).portal_division_tags
+    available_tag_names = list(map(lambda x: getattr(x, 'name'), available_tags))
+    return {'availableTags': available_tag_names}
 
 
 @company_bp.route('/update_article/', methods=['POST'])

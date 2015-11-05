@@ -82,18 +82,14 @@ module.filter('propsFilter', function() {
 module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, $http, $ok) {
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
-
     $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
 
     $scope.$watch("data.selected_division", function(newValue, oldValue) {
         if ($scope.data && (newValue !== oldValue)){
-            console.log($scope.data.selected_division);
-            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-            console.log($scope.url_get_tags);
-
             res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
 		    res.success(function(data, status, headers, config) {
-			    $scope.message = data;
+			    $scope.availableTags = data.data.availableTags;
+                $scope.availableColors = data.data.availableTags;
 		    });
 		    res.error(function(data, status, headers, config) {
 			    alert( "failure message: " + JSON.stringify({data: data}));
@@ -133,25 +129,33 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
     //    $scope.country.selected = undefined;
     //};
 
-    $scope.tag = {};
-    $scope.tags = [
-        { name: 'Adam',      email: 'adam@email.com' },
-        { name: 'Amalie',    email: 'amalie@email.com' },
-        { name: 'Estefanía', email: 'estefania@email.com' },
-        { name: 'Adrian',    email: 'adrian@email.com' },
-        { name: 'Wladimir',  email: 'wladimir@email.com' },
-        { name: 'Samantha',  email: 'samantha@email.com' },
-        { name: 'Nicole',    email: 'nicole@email.com' },
-        { name: 'Natasha',   email: 'natasha@email.com' },
-        { name: 'Michael',   email: 'michael@email.com' },
-        { name: 'Nicolás',   email: 'nicolas@email.com' }
-    ];
+{#    $scope.tag = {};#}
+{#    $scope.tags = [#}
+{#        { name: 'Adam',      email: 'adam@email.com' },#}
+{#        { name: 'Amalie',    email: 'amalie@email.com' },#}
+{#        { name: 'Estefanía', email: 'estefania@email.com' },#}
+{#        { name: 'Adrian',    email: 'adrian@email.com' },#}
+{#        { name: 'Wladimir',  email: 'wladimir@email.com' },#}
+{#        { name: 'Samantha',  email: 'samantha@email.com' },#}
+{#        { name: 'Nicole',    email: 'nicole@email.com' },#}
+{#        { name: 'Natasha',   email: 'natasha@email.com' },#}
+{#        { name: 'Michael',   email: 'michael@email.com' },#}
+{#        { name: 'Nicolás',   email: 'nicolas@email.com' }#}
+{#    ];#}
 
-    $scope.selectedTagsCombined = {};
-    $scope.selectedTagsCombined.selectedTags = [$scope.tags[5], $scope.tags[4]];
-    $scope.selectedTagsCombined.selectedTagNames = ['Samantha','Wladimir'];
+{#    $scope.selectedTagsCombined = {};#}
+{#    $scope.selectedTagsCombined.selectedTags = [$scope.tags[5], $scope.tags[4]];#}
+{#    $scope.selectedTagsCombined.selectedTagNames = ['Samantha','Wladimir'];#}
 
-    $scope.availableColors = ['Red','Green','Blue','Yellow','Magenta','Maroon','Umbra','Turquoise'];
+    $scope.availableTags = [];
+    $scope.selectedTags = [];
+
+{#    $scope.availableColors = ['Red','Green','Blue','Yellow','Magenta','Maroon','Umbra','Turquoise'];#}
+    $scope.availableColors = [];
+
+    $scope.tagsObject = {};
+{#    $scope.tagsObject.tags = ['Blue','Red'];#}
+    $scope.tagsObject.tags = [];
 
 }]);
         module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
@@ -257,6 +261,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
         }
     </style>
     <div ng-init="loadData()" ng-controller="materials_articles">
+
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
             <h3>{{data.article.title}}</h3>
@@ -347,22 +352,15 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     <br/>
                     <hr>
                     <div ng-controller="SelectTagsCtrl">
-                        <form ng-ok
-                              ng-onsubmit="getData"
-                              ng-onsuccess="respData"
-                              ng-action="url_get_tags">
-                            <input type="submit" hidden>
-                        </form>
-                        <!-- <h3 ng-model="data.selected_division">Add tags:</h3> -->
                         <h3>Add tags:</h3>
-                        {{ data.selected_division }}
-                        <ui-select multiple ng-model="selectedTagsCombined.selectedTagNames" theme="select2" ng-disabled="disabled" style="width: 800px;">
-                            <ui-select-match placeholder="Select tag...">{{$item.name}}</ui-select-match>
-                            <ui-select-choices repeat="tag.name as tag in tags | propsFilter: {name: $select.search}">
-                                <div ng-bind-html="tag.name | highlight: $select.search"></div>
+                        <ui-select multiple ng-model="tagsObject.tags" theme="select2" ng-disabled="disabled" style="width: 300px;">
+                            <ui-select-match placeholder="Select tags...">{{$item}}</ui-select-match>
+                            <ui-select-choices repeat="tag in availableColors | filter:$select.search">
+                                {{tag}}
                             </ui-select-choices>
                         </ui-select>
-                        <p>Selected: {{selectedTagsCombined.selectedTagNames}}</p>
+                        <p>Selected: {{tagsObject.tags}}</p>
+
                     </div>
                     <br/>
                     <span>
@@ -385,20 +383,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             </div>
         </div>
     </div>
-
-    <div ng-controller="SelectTagsCtrl">
-
-
-<h3>Array of strings</h3>
-<ui-select multiple ng-model="multipleColors.colors" theme="select2" ng-disabled="disabled" style="width: 300px;">
-    <ui-select-match placeholder="Select colors...">{{$item}}</ui-select-match>
-    <ui-select-choices repeat="color in availableColors | filter:$select.search">
-        {{color}}
-    </ui-select-choices>
-</ui-select>
-<p>Selected: {{multipleDemo.colors}}</p>
-</div>
-
 
     {% endraw %}
 

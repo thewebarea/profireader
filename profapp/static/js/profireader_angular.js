@@ -60,7 +60,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 else {
                     alert(result);
                 }
-            };
+            }
 
             return $http.post(url, data).then(
                 function (resp) {
