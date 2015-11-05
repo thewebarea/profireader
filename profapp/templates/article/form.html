@@ -75,23 +75,36 @@
 {% raw %}
 
 <div
-        ng-ajax-form
+        ng-ajax-validator
+
+        ang-model="data"
+
+        ang-validate-url=""
+        ang-validate-requesting='validating'
+        ang-validate-responsed='validated'
+        ang-validate-response='validation'
+        ang-validate-before=""
+        ang-validate-after=""
+        ang-validate-watch=""
+        ang-validate-debounce="500"
+
+        ang-load-url=""
+        ang-load-requesting='loading'
+        ang-load-responded=''
+        ang-load-response='original_data'
+        ang-load-before=""
+        ang-load-after=""
+
+        ang-save-url=""
+        ang-save-requesting='saving'
+        ang-save-responded='saved'
+        ang-save-response=''
+        ang-save-before=""
+        ang-save-after=""
 
 
-
-        ng-before-load="getData"
-        ng-after-load="getData"
-
-        ng-before-save="getData"
-        ng-after-save="getData"
-
-        ng-before-validate="getData"
-        ng-after-validate="getData"
-
-
-        ng-action="save_article"
-
-        ang-init="loadData(null, {}, cleanUpHtml, setImageUrl)" ng-controller="article_edit">
+        ang-init="loadData(null, {}, cleanUpHtml, setImageUrl)" ng-controller="article_edit"
+        >
     <div ng-if="!data">Loading...</div>
     <div ng-if="data">
 
@@ -293,8 +306,11 @@
             <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
                       ng-model="data.long"></textarea>
             </div>
-            <input style="clear: both;" type="submit"
+
+
+            <input style="clear: both;" type="submit" ng-disabled="state !== 'clean'" ng-click="save()"
                    value="{{ data.id ? 'save' : 'create' }}"/>
+            {{ state }}
 
 
 

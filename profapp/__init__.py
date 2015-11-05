@@ -23,6 +23,19 @@ from flask.ext.babel import Babel, gettext
 import jinja2
 from .models.users import User
 from .models.config import Config
+from profapp.controllers.errors import BadDataProvided
+
+
+def req(name, allowed=None, default=None, exception=True):
+    ret = request.args.get(name)
+    if allowed and ret in allowed:
+        return ret
+    elif default is None:
+        return default
+    elif exception:
+        raise BadDataProvided
+    else:
+        return None
 
 
 def load_database(db_config):
@@ -35,6 +48,7 @@ def load_database(db_config):
                                                  autoflush=False,
                                                  bind=engine))
         g.db = db_session
+        g.req = req
 
     return load_db
 
@@ -145,7 +159,8 @@ def config_variables():
             ret[var_id] = 'false' if int(variable.value) == 0 else 'true'
         else:
             ret[var_id] = '\'' + variable.value + '\''
-    return "<script>\nConfig = {};\n" + ''.join([("Config['%s']=%s;\n" % (var_id, ret[var_id])) for var_id in ret]) + '</script>'
+    return "<script>\nConfig = {};\n" + ''.join(
+        [("Config['%s']=%s;\n" % (var_id, ret[var_id])) for var_id in ret]) + '</script>'
 
 
 # TODO: OZ by OZ: add kwargs just like in url_for
@@ -225,6 +240,7 @@ class AnonymousUser(AnonymousUserMixin):
 
 
 login_manager.anonymous_user = AnonymousUser
+
 
 def create_app(config='config.ProductionDevelopmentConfig',
                front='n',

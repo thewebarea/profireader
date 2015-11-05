@@ -243,38 +243,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             link: function (scope, iElement, iAttrs, ngModelCtrl) {
 
 
-                var enableSubmit = function (enablesubmit, enableinput) {
-                    if (enablesubmit) {
-                        $('*[ng-model]', $(iElement)).prop('disabled', false);
-                    }
-                    else {
-                        $('*[ng-model]', $(iElement)).prop('disabled', true);
-                    }
-                }
 
-                scope.$parent.$parent.__validation = false;
-                scope.$parent.$parent.__validated = false;
-
-                var sendValidation = _.debounce(function () {
-                    if (scope.$parent.$parent.__validation) {
-                        return false;
-                    }
-                    var dataToSend = scope['ngOnsubmit']()();
-                    if (dataToSend) {
-                        scope.$parent.$parent.__validation = dataToSend;
-                        $ok(scope['ngAction'], $.extend({__validation: true}, dataToSend), function (resp) {
-                            scope.$parent.$parent.__validated = resp;
-                        }, function (resp) {
-                            scope.$parent.$parent.__validated = false;
-                        }).finally(function () {
-                            scope.$parent.$parent.__validation = false;
-                        });
-                    }
-                }, 500);
-
-                if (scope['ngWatch']) {
-                    scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
-                }
 
 
                 //if (iAttrs['ngValidationResult']) {
@@ -301,29 +270,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 //    s.on_success_url = value;
                 //    });
 
-                if (scope['ngOnsubmit']) {
-                    $(iElement).on('submit',
-                        function () {
-                            if (scope.$parent.$parent.__validation) {
-                                return false;
-                            }
-                            enableSubmit(false);
-                            scope.$apply(function () {
-                                var dataToSend = scope['ngOnsubmit']()();
-                                console.log(dataToSend);
-                                if (dataToSend) {
-                                    $ok(scope['ngAction'], dataToSend, function (resp) {
-                                        if (scope.ngOnsuccess) {
-                                            scope.ngOnsuccess()(resp)
-                                        }
-                                    }).finally(function () {
-                                        enableSubmit(true);
-                                    });
-                                }
-                            });
-                            return false;
-                        });
-                }
+
 
 
                 //$.each($('[name]', $(iElement)), function (ind, el) {
@@ -454,6 +401,43 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
                 };
 
+
+                var enableSubmit = function (enablesubmit, enableinput) {
+                    if (enablesubmit) {
+                        $('*[ng-model]', $(iElement)).prop('disabled', false);
+                    }
+                    else {
+                        $('*[ng-model]', $(iElement)).prop('disabled', true);
+                    }
+                }
+
+                scope.$parent.$parent.__validation = false;
+                scope.$parent.$parent.__validated = false;
+
+                var sendValidation = _.debounce(function () {
+                    if (scope.$parent.$parent.__validation) {
+                        return false;
+                    }
+                    var dataToSend = scope['ngOnsubmit']()();
+                    if (dataToSend) {
+                        scope.$parent.$parent.__validation = dataToSend;
+                        $ok(scope['ngAction'], $.extend({__validation: true}, dataToSend), function (resp) {
+                            scope.$parent.$parent.__validated = resp;
+                        }, function (resp) {
+                            scope.$parent.$parent.__validated = false;
+                        }).finally(function () {
+                            scope.$parent.$parent.__validation = false;
+                        });
+                    }
+                }, 500);
+
+                if (scope['ngWatch']) {
+                    scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
+                };
+
+
+
+
                 var parameters = $.extend(defaultparameters, {
                     ngData: scope['ngData'],
                     ngBefore: scope['ngBefore'],
@@ -491,6 +475,30 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     parentscope.$watch(parameters['ngData'], _.debounce(function () {
                         sendfunction(true);
                     }, 500), true);
+                }
+
+                if (scope['ngOnsubmit']) {
+                    $(iElement).on('submit',
+                        function () {
+                            if (scope.$parent.$parent.__validation) {
+                                return false;
+                            }
+                            enableSubmit(false);
+                            scope.$apply(function () {
+                                var dataToSend = scope['ngOnsubmit']()();
+                                console.log(dataToSend);
+                                if (dataToSend) {
+                                    $ok(scope['ngAction'], dataToSend, function (resp) {
+                                        if (scope.ngOnsuccess) {
+                                            scope.ngOnsuccess()(resp)
+                                        }
+                                    }).finally(function () {
+                                        enableSubmit(true);
+                                    });
+                                }
+                            });
+                            return false;
+                        });
                 }
 
                 $(iElement).on('submit',
@@ -532,7 +540,7 @@ function file_choose(selectedfile) {
     top.tinymce.activeEditor.windowManager.close();
 }
 
-module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce']);
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ajaxValidator']);
 
 module.config(function ($provide) {
     $provide.decorator('$controller', function ($delegate) {
@@ -781,4 +789,6 @@ function fileUrl(id) {
 
 
 
-
+function cloneObject(o) {
+    return (o === null || typeof o !== 'object')?o: $.extend(true, {}, o);
+}
