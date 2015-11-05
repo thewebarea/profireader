@@ -130,12 +130,12 @@ def details(article_portal_id):
     return render_template('front/bird/article_details.html',
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
-                           articles_related={a.id: a.to_dict('id, title, cr_tm, company.name') for a
+                           articles_related={a.id: a.to_dict('id, title, cr_tm, company.name|id') for a
                                              in related_articles},
                            article=article.to_dict('id, title,short, cr_tm, md_tm, '
                                                    'publishing_tm, status, long, image_file_id,'
                                                    'division.name, division.portal.id,'
-                                                   'company.name'))
+                                                   'company.name|id'))
 
 
 @front_bp.route(
