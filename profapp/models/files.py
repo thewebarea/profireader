@@ -258,6 +258,22 @@ class File(Base, PRBase):
         g.db.commit()
         return self
 
+    @staticmethod
+    def search(name, roots):
+        files = []
+        prop = []
+        name = name.lower()
+        prog = re.compile(r'.*'+name+'.*')
+        for root in roots:
+            for file in db(File, root_folder_id=root):
+                if re.match(r'^'+name+'.*',file.name.lower()):
+                    prop.append(file)
+                elif re.match(r'.*'+name+'.*',file.name.lower()):
+                    files.append(file)
+        prop.extend(files)
+        return prop
+
+
     def set_properties(self, add_all,**kwargs):
         if self == None:
             return False

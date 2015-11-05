@@ -59,6 +59,11 @@ def list(json):
     ancestors = File.ancestors(json['params']['folder_id'])
     return {'list': list, 'ancestors': ancestors}
 
+@filemanager_bp.route('/search/', methods=['POST'])
+@ok
+def search_list(json):
+    list = File.search(json['params']['search_name'], json['params']['roots'])
+    return list
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @ok
@@ -69,11 +74,7 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    # lists = File.get_all_dir('5638d243-2d0e-4001-8804-c39e1fc035b7')
-    # file = File.get('5638d680-335f-4001-9c04-385f60595a1e')
-    # name = File.get_index(file,lists)
-    # file = File.get('5638d243-2d0e-4001-8804-c39e1fc035b7')
-    name = File.get_unique_name('main1)',mime='directory', parent_id='562a24a7-175e-4001-ad9c-7d99095b5774')
+    name = File.search('f', ['5629030e-d4f8-4001-8a3a-f5cfdffc8647'])
     return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/properties/', methods=['POST'])

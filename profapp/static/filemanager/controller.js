@@ -22,6 +22,7 @@
         $scope.copy_file_id = '';
         $scope.cut_file_id = '';
         $scope.timer = false;
+        $scope.search_all = false;
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
@@ -69,6 +70,15 @@
                 $('#changepermissions').modal('hide');
             });
         };
+
+        $scope.search = function(item){
+            $scope.copy_file_id = $cookies.copy_file_id = item.model.id;
+            $scope.cut_file_id = $cookies.cut_file_id = '';
+            item.copy(function() {
+                $scope.fileNavigator.refresh();
+            });
+        };
+
 
         $scope.cut = function(item){
             $scope.cut_file_id = $cookies.cut_file_id = item.model.id;
