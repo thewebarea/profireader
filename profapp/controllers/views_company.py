@@ -168,7 +168,6 @@ def load_material_details(json, company_id, article_id):
 @ok
 def get_tags(json, portal_division_id):
 # def get_tags(portal_division_id):
-    print('STOP!!!')
     available_tags = g.db.query(PortalDivision).get(portal_division_id).portal_division_tags
     available_tag_names = list(map(lambda x: getattr(x, 'name'), available_tags))
     return {'availableTags': available_tag_names}
@@ -192,7 +191,7 @@ def update_article(json):
 # @check_rights(simple_permissions([]))
 @ok
 def submit_to_portal(json):
-
+    # here we have json['tags'] in form: json['tags'] = ['money', 'sex', 'rock and roll']
     article = ArticleCompany.get(json['article']['id'])
     article_portal = article.clone_for_portal(json['selected_division'])
     article.save()

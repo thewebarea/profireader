@@ -103,7 +103,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
 
     $scope.respData = function () {
         $scope.loading = false;
-        console.log('???????????????');
         return true;
     };
 
@@ -123,39 +122,10 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
         $scope.searchEnabled = false;
     };
 
-    //$scope.clear = function() {
-    //    $scope.tag.selected = undefined;
-    //    $scope.address.selected = undefined;
-    //    $scope.country.selected = undefined;
-    //};
-
-{#    $scope.tag = {};#}
-{#    $scope.tags = [#}
-{#        { name: 'Adam',      email: 'adam@email.com' },#}
-{#        { name: 'Amalie',    email: 'amalie@email.com' },#}
-{#        { name: 'Estefanía', email: 'estefania@email.com' },#}
-{#        { name: 'Adrian',    email: 'adrian@email.com' },#}
-{#        { name: 'Wladimir',  email: 'wladimir@email.com' },#}
-{#        { name: 'Samantha',  email: 'samantha@email.com' },#}
-{#        { name: 'Nicole',    email: 'nicole@email.com' },#}
-{#        { name: 'Natasha',   email: 'natasha@email.com' },#}
-{#        { name: 'Michael',   email: 'michael@email.com' },#}
-{#        { name: 'Nicolás',   email: 'nicolas@email.com' }#}
-{#    ];#}
-
-{#    $scope.selectedTagsCombined = {};#}
-{#    $scope.selectedTagsCombined.selectedTags = [$scope.tags[5], $scope.tags[4]];#}
-{#    $scope.selectedTagsCombined.selectedTagNames = ['Samantha','Wladimir'];#}
-
     $scope.availableTags = [];
     $scope.selectedTags = [];
 
-{#    $scope.availableColors = ['Red','Green','Blue','Yellow','Magenta','Maroon','Umbra','Turquoise'];#}
     $scope.availableColors = [];
-
-    $scope.tagsObject = {};
-{#    $scope.tagsObject.tags = ['Blue','Red'];#}
-    $scope.tagsObject.tags = [];
 
 }]);
         module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
@@ -173,6 +143,9 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
             $scope.statuses = '';
+
+            $scope.tagsObject = {};
+            $scope.tagsObject.tags = [];
 
             $scope.porals_divisions = function (portals) {
                 var divisions = {};
@@ -203,6 +176,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 return true;
             };
             $scope.getData = function () {
+                $scope.data.tags = $scope.tagsObject.tags;
                 return $scope.data;
             };
             $scope.cancel = function () {
