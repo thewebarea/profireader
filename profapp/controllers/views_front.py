@@ -71,8 +71,10 @@ def index(page=1):
 
 
 @front_bp.route('<string:division_name>/<string:search_text>', methods=['GET'])
-@front_bp.route('<string:division_name>/<int:page>/<string:search_text>', methods=['GET'])
-def division(division_name, search_text, page=1):
+@front_bp.route('<string:division_name>/<int:page>/', methods=['GET'])
+def division(division_name, page=1):
+    print(division_name)
+    
     search_text, portal, sub_query = get_params()
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, name=division_name).one()
     if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events':

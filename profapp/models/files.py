@@ -216,7 +216,9 @@ class ImageCroped(Base, PRBase):
 
     def __init__(self, original_image_id=None, x=None, y=None, width=None, height=None, rotate=None,
                  croped_image_id=None):
-        super(ImageCroped, self).__init__()
+        # super(Base, self).__init__()
+        # super(PRBase, self).__init__()
+        # self.__mro__
         self.original_image_id = original_image_id
         self.croped_image_id = croped_image_id
         self.x = x
