@@ -162,12 +162,12 @@ apt-get install libpq-dev python-dev libapache2-mod-wsgi" sudo hosts
 function menu_hosts {
     conf_comm "sed -i '/\(db\|web\|mail\).profi/d' /etc/hosts
 sed -i '/\(companyportal\|aprofi\).m.ntaxa.com/d' /etc/hosts
-sed -i '/profi.ntaxa.com/d' /etc/hosts
+sed -i '/profireader.com/d' /etc/hosts
 echo '' >> /etc/hosts
 echo '127.0.0.1 db.profi web.profi mail.profi' >> /etc/hosts
 echo '127.0.0.1 db.profi_test' >> /etc/hosts
-echo '127.0.0.1 profi.ntaxa.com oles.profi.ntaxa.com rodynnifirmy.profi.ntaxa.com derevoobrobka.profi.ntaxa.com viktor.profi.ntaxa.com aa.profi.ntaxa.com md.profi.ntaxa.com oleh.profi.ntaxa.com file001.profi.ntaxa.com fsm.profi.ntaxa.com' >> /etc/hosts
-echo '127.0.0.1 test.profi.ntaxa.com test1.profi.ntaxa.com test2.profi.ntaxa.com test3.profi.ntaxa.com test4.profi.ntaxa.com test5.profi.ntaxa.com test6.profi.ntaxa.com test7.profi.ntaxa.com test8.profi.ntaxa.com test9.profi.ntaxa.com' >> /etc/hosts
+echo '127.0.0.1 profireader.com oles.profireader.com rodynnifirmy.profireader.com derevoobrobka.profireader.com viktor.profireader.com aa.profireader.com md.profireader.com oleh.profireader.com file001.profireader.com fsm.profireader.com' >> /etc/hosts
+echo '127.0.0.1 test.profireader.com test1.profireader.com test2.profireader.com test3.profireader.com test4.profireader.com test5.profireader.com test6.profireader.com test7.profireader.com test8.profireader.com test9.profireader.com' >> /etc/hosts
 cat /etc/hosts" sudo haproxy
     }
 
