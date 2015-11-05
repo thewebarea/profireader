@@ -131,12 +131,11 @@ class ArticlePortalDivision(Base, PRBase):
 
     @staticmethod
     def subquery_portal_articles(search_text=None, portal_id=None, **kwargs):
-        sub_query = g.db.query(ArticlePortalDivision.id).\
+        sub_query = g.db.query(ArticlePortalDivision).\
             join(ArticlePortalDivision.division).\
             join(PortalDivision.portal).\
             filter(Portal.id==portal_id).\
             filter_by(**kwargs)
-        # sub_query = db(ArticlePortalDivision, portal_id=portal_id, **kwargs)
         if search_text:
             sub_query = sub_query.filter(ArticlePortalDivision.title.ilike("%" + search_text + "%"))
         return sub_query
