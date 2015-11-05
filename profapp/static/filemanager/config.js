@@ -9,13 +9,13 @@
             listUrl: "/filemanager/list/",
             uploadUrl: "/filemanager/upload/",
             renameUrl: "/filemanager/rename/",
+            set_properties: "/filemanager/properties/",
             copyUrl: "/filemanager/copy/",
             cutUrl: "/filemanager/cut/",
             removeUrl: "/filemanager/remove/",
             editUrl: "bridges/php/handler.php",
             getContentUrl: "bridges/php/handler.php",
             createFolderUrl: "/filemanager/createdir/",
-            downloadFileUrl: "http://file001.profi.ntaxa.com/",
             compressUrl: "bridges/php/handler.php",
             extractUrl: "bridges/php/handler.php",
             permissionsUrl: "bridges/php/handler.php",
@@ -23,7 +23,7 @@
             sidebar: true,
             breadcrumb: true,
             allowedActions: {
-                rename: true,
+                rename: !true,
                 copy: true,
                 edit: !true,
                 changePermissions: !true,
@@ -35,6 +35,8 @@
                 choose: true,
                 remove: true
             },
+
+            error_msg_exist:'file_is_not_exist',
 
             enablePermissionsRecursive: true,
 

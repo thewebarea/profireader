@@ -46,7 +46,7 @@ def filemanager():
 
     file_manager_called_for = request.args['file_manager_called_for'] if 'file_manager_called_for' in request.args else ''
     file_manager_on_action = jsonmodule.loads(request.args['file_manager_on_action']) if 'file_manager_on_action' in request.args else {}
-    #library = {}
+    # library = {}
     err = True if len(library) == 0 else False
     return render_template('filemanager.html', library=library,err=err,
                            file_manager_called_for=file_manager_called_for,
@@ -71,14 +71,18 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    file = File.get('56362d4e-17c1-4001-b568-1957975c302d')
-    name = File.copy_file(file,'56362d46-136b-4001-b1d2-9bcb2fe9c13c')
+    # lists = File.get_all_dir('5638d243-2d0e-4001-8804-c39e1fc035b7')
+    # file = File.get('5638d680-335f-4001-9c04-385f60595a1e')
+    # name = File.get_index(file,lists)
+    # file = File.get('5638d243-2d0e-4001-8804-c39e1fc035b7')
+    name = File.get_unique_name('main1)',mime='directory', parent_id='562a24a7-175e-4001-ad9c-7d99095b5774')
     return render_template('tmp-test.html', file=name)
 
-@filemanager_bp.route('/can_paste/', methods=['POST'])
+@filemanager_bp.route('/properties/', methods=['POST'])
 @ok
-def can_paste(json):
-    return File.can_paste_in_dir(request.json['params']['id'], request.json['params']['folder_id'])
+def set_properties(json):
+    file = File.get(request.json['params']['id'],)
+    return File.set_properties(file, request.json['params']['add_all'], name=request.json['params']['name'], copyright_author_name=request.json['params']['author_name'], description=request.json['params']['description'])
 
 @filemanager_bp.route('/rename/', methods=['POST'])
 @ok

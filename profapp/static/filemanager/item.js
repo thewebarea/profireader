@@ -5,6 +5,8 @@
         var Item = function(model, path) {
             var rawModel = {
                 name: model && model.name || '',
+                author_name: model && model.author_name || '',
+                description: model && model.description || '',
                 path: path || [],
                 type: model && model.type || 'file',
                 size: model && model.size || 0,
@@ -88,24 +90,27 @@
             }
         };
 
-        Item.prototype.rename = function(success, error) {
+        Item.prototype.set_properties = function(success, error) {
             var self = this;
             var data = {params: {
                 "id" : self.model.id,
-                "name": self.tempModel.name.trim(),
-                "mode": "rename",
+                'add_all': self.tempModel.add_all,
+                "name": self.tempModel.name.trim() === self.model.name.trim() ? 'None': self.tempModel.name.trim(),
+                "author_name":self.tempModel.author_name.trim(),
+                "description": self.tempModel.description,
+                "mode": "properties",
                 "path": self.model.fullPath(),
                 "newPath": self.tempModel.fullPath()
             }};
             if (self.tempModel.name.trim()) {
                 self.inprocess = true;
                 self.error = '';
-                return $http.post(fileManagerConfig.renameUrl, data).success(function(data) {
+                return $http.post(fileManagerConfig.set_properties, data).success(function(data) {
                     self.defineCallback(data, success, error);
                 }).error(function(data) {
                     self.error = data.result && data.result.error ?
                         data.result.error:
-                        $translate.instant('error_renaming');
+                        $translate.instant('error_set_properties');
                     typeof error === 'function' && error(data);
                 })['finally'](function() {
                     self.inprocess = false;
@@ -143,11 +148,29 @@
             self.error = '';
             if(self.tempModel.mode == 'copy') {
                 return $http.post(fileManagerConfig.copyUrl, data).success(function (data) {
+                    self.er = data.data === false ? self.tempModel.time_o: null;
+                    self.error = data.data === '' ? self.tempModel.error: null;
                     self.defineCallback(data, success, error);
+                }).error(function(data) {
+                    self.error = data.result && data.result.error ?
+                        data.result.error:
+                        $translate.instant('error_copy');
+                    typeof error === 'function' && error(data);
+                })['finally'](function() {
+                    self.inprocess = false;
                 });
             }else{
                 return $http.post(fileManagerConfig.cutUrl, data).success(function (data) {
+                    self.er = data.data === false ? self.tempModel.time_o: null;
+                    self.error = data.data === false ? self.tempModel.error: null;
                     self.defineCallback(data, success, error);
+                }).error(function(data) {
+                    self.error = data.result && data.result.error ?
+                        data.result.error:
+                        $translate.instant('error_cut');
+                    typeof error === 'function' && error(data);
+                })['finally'](function() {
+                    self.inprocess = false;
                 });
             }
         };
@@ -259,7 +282,7 @@
             }).error(function(data) {
                 self.error = data.result && data.result.error ?
                     data.result.error:
-                    $translate.instant('error_deleting');
+                    self.tempModel.error;
                 typeof error === 'function' && error(data);
             })['finally'](function() {
                 self.inprocess = false;
