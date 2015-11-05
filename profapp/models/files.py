@@ -7,6 +7,8 @@ from flask import url_for, g
 from .pr_base import PRBase, Base
 from flask import make_response
 
+
+# TODO: (AA to AA): change article_portal_division_id to article_portal_division_id in table
 class File(Base, PRBase):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -19,7 +21,7 @@ class File(Base, PRBase):
     company_id = Column(TABLE_TYPES['id_profireader'],
                         ForeignKey('company.id'),
                         nullable=False)
-    article_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_portal.id'))
+    article_portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_portal_division.id'))
     copyright_author_name = Column(TABLE_TYPES['name'],
                                    default='',
                                    nullable=False)
@@ -142,15 +144,15 @@ class File(Base, PRBase):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
         return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
 
-    def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
+    def copy_file(self, company_id=None, parent_folder_id=None, article_portal_division_id=None, root_folder_id=None):
         file_content = FileContent.get(self.id).detach()
         attr = {}
         if company_id:
             attr['company_id'] = company_id
         if parent_folder_id:
             attr['parent_folder_id'] = parent_folder_id
-        if article_portal_id:
-            attr['article_portal_id'] = article_portal_id
+        if article_portal_division_id:
+            attr['article_portal_division_id'] = article_portal_division_id
         if root_folder_id:
             attr['root_folder_id'] = root_folder_id
         new_file = self.detach().attr(attr)

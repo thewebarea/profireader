@@ -7,7 +7,7 @@ from utils.db_utils import db
 from ..models.portal import CompanyPortal, Portal, PortalLayout, PortalDivision
 from ..models.tag import Tag, TagPortal, TagPortalDivision
 from .request_wrapers import ok, check_rights
-from ..models.articles import ArticlePortal, ArticleCompany
+from ..models.articles import ArticlePortalDivision, ArticleCompany
 from ..models.company import simple_permissions
 from ..models.rights import Right
 from profapp.models.rights import RIGHTS
@@ -87,7 +87,7 @@ def confirm_create(json, company_id):
         portal.logo_file_id = File.get(json['logo_file_id']).copy_file(
             company_id=company_id, root_folder_id=company_owner.system_folder_file_id,
             parent_folder_id=company_owner.system_folder_file_id,
-            article_portal_id=None).save().id
+            article_portal_division_id=None).save().id
 
         company_logo = company_owner.logo_file_relationship.url() \
             if company_owner.logo_file_id else '/static/img/company_no_logo.png'
@@ -441,17 +441,20 @@ def publications_load(json, company_id):
 
     if article_status and article_status != 'All':
         params['status'] = original_chosen_status = article_status
-    subquery = ArticlePortal.subquery_portal_articles(**params)
+    subquery = ArticlePortalDivision.subquery_portal_articles(**params)
     if chosen_company_id:
         subquery = subquery.filter(db(ArticleCompany,
                                       company_id=chosen_company_id,
-                                      id=ArticlePortal.article_company_id).exists())
+                                      id=ArticlePortalDivision.article_company_id).exists())
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
                                                items_per_page=5)
-    all, companies = ArticlePortal.get_companies_which_send_article_to_portal(portal.id)
+    all, companies = ArticlePortalDivision.get_companies_which_send_article_to_portal(portal.id)
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
+
+    x = articles[0]
+    y = x.get_client_side_dict()
 
     return {'articles': [a.get_client_side_dict() for a in articles],
             'companies': companies,
@@ -467,6 +470,7 @@ def publications_load(json, company_id):
             'original_chosen_status': original_chosen_status,
             'user_rights': list(g.user.user_rights_in_company(company_id))}
 
+
 @portal_bp.route('/publication_details/<string:article_id>/<string:company_id>', methods=['GET'])
 @login_required
 def publication_details(article_id, company_id):
@@ -478,7 +482,7 @@ def publication_details(article_id, company_id):
 @ok
 def publication_details_load(json, article_id, company_id):
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
-    article = db(ArticlePortal, id=article_id).one().get_client_side_dict()
+    article = db(ArticlePortalDivision, id=article_id).one().get_client_side_dict()
     new_status = ARTICLE_STATUS_IN_PORTAL.published \
         if article['status'] != ARTICLE_STATUS_IN_PORTAL.published \
         else ARTICLE_STATUS_IN_PORTAL.declined
@@ -492,8 +496,7 @@ def publication_details_load(json, article_id, company_id):
 @login_required
 @ok
 def update_article_portal(json, article_id):
-
-    db(ArticlePortal, id=article_id).update({'status': json.get('new_status')})
+    db(ArticlePortalDivision, id=article_id).update({'status': json.get('new_status')})
     json['article']['status'] = json.get('new_status')
     json['new_status'] = ARTICLE_STATUS_IN_PORTAL.published \
         if json.get('new_status') != ARTICLE_STATUS_IN_PORTAL.published \

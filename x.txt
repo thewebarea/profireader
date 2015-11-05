@@ -1,3 +1,7 @@
+1) у табл file зробити колонку article_portal_division_id
+2) перейменувати article_portal на article_portal_division
+
+
 diff --git a/profapp/controllers/views_portal.py b/profapp/controllers/views_portal.py
 index 2babb10..86ff6c0 100644
 --- a/profapp/controllers/views_portal.py
@@ -287,7 +291,7 @@ index 9027e19..7c23609 100644
 -                                          lazy='dynamic')
 -
      own_company = relationship('Company', back_populates='own_portal', uselist=False)
-     article = relationship('ArticlePortal', backref='portal', uselist=False)
+     article = relationship('ArticlePortalDivision', backref='portal', uselist=False)
      companies = relationship('Company',
 @@ -46,47 +41,25 @@ class Portal(Base, PRBase):
      # see: http://docs.sqlalchemy.org/en/rel_0_9/orm/join_conditions.html#creating-custom-foreign-conditions

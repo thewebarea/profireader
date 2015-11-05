@@ -37,7 +37,15 @@ class Portal(Base, PRBase):
                                           lazy='dynamic')
 
     own_company = relationship('Company', back_populates='own_portal', uselist=False)
-    article = relationship('ArticlePortal', backref='portal', uselist=False)
+    # articles = relationship('ArticlePortalDivision',
+    #                         back_populates='portal',
+    #                         uselist=False)
+    articles = relationship('ArticlePortalDivision',
+                            secondary='portal_division',
+                            primaryjoin="Portal.id == PortalDivision.portal_id",
+                            secondaryjoin="PortalDivision.id == ArticlePortalDivision.portal_division_id",
+                            back_populates='portal',
+                            uselist=False)
     companies = relationship('Company',
                              secondary='company_portal',
                              back_populates='portal',
@@ -101,7 +109,7 @@ class Portal(Base, PRBase):
     # tags_assoc = relationship('TagPortalDivision', back_populates='portal_division')
 
     # company = relationship(Company, secondary='article_company',
-    #                        primaryjoin="ArticlePortal.article_company_id == ArticleCompany.id",
+    #                        primaryjoin="ArticlePortalDivision.article_company_id == ArticleCompany.id",
     #                        secondaryjoin="ArticleCompany.company_id == Company.id",
     #                        viewonly=True, uselist=False)
 
@@ -113,7 +121,7 @@ class Portal(Base, PRBase):
                  ):
         self.name = name
         self.company_owner_id = company_owner_id
-        self.article = article
+        self.articles = article
         self.host = host
         self.portal_layout_id = portal_layout_id
         self.divisions = divisions

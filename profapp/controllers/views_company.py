@@ -11,7 +11,7 @@ from ..models.articles import Article
 from ..models.portal import PortalDivision
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import CompanyPortal
-from ..models.articles import ArticleCompany, ArticlePortal
+from ..models.articles import ArticleCompany, ArticlePortalDivision
 from utils.db_utils import db
 from collections import OrderedDict
 # from ..models.rights import list_of_RightAtomic_attributes
@@ -87,7 +87,7 @@ def materials_load(json, company_id):
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
                                                items_per_page=5)
-    all, portals = ArticlePortal.get_portals_where_company_send_article(company_id)
+    all, portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
 

@@ -5,7 +5,7 @@ from ..controllers import errors
 from flask import g
 from utils.db_utils import db
 #from .portal import Portal
-# from .articles import ArticlePortal
+# from .articles import ArticlePortalDivision
 from .pr_base import PRBase, Base
 
 
@@ -55,7 +55,6 @@ class TagPortal(Base, PRBase):
         self.portal_id = portal_id
 
 
-#  TODO (AA to AA): delete Position in TagPortalDivision
 class TagPortalDivision(Base, PRBase):
     __tablename__ = 'tag_portal_division'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
@@ -75,8 +74,8 @@ class TagPortalDivision(Base, PRBase):
 
     tag = relationship('Tag', back_populates='portal_divisions_assoc')
     portal_division = relationship('PortalDivision', back_populates='tags_assoc')
-    articles = relationship('ArticlePortal', secondary='tag_portal_division_article',
-                            back_populates='article_portal_tags', lazy='dynamic')
+    articles = relationship('ArticlePortalDivision', secondary='tag_portal_division_article',
+                            back_populates='article_portal_division_tags', lazy='dynamic')
 
     def __init__(self, tag_id=None, portal_division_id=None):
         super(TagPortalDivision, self).__init__()
@@ -100,17 +99,17 @@ class TagPortalDivision(Base, PRBase):
 class TagPortalDivisionArticle(Base, PRBase):
     __tablename__ = 'tag_portal_division_article'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
-    article_portal_id = Column(TABLE_TYPES['id_profireader'],
-                               ForeignKey('article_portal.id'),
-                               nullable=False)
+    article_portal_division_id = Column(TABLE_TYPES['id_profireader'],
+                                        ForeignKey('article_portal_division.id'),
+                                        nullable=False)
     tag_portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                     ForeignKey('tag_portal_division.id'),
                                     nullable=False)
 
-    article_portal = relationship('ArticlePortal', backref=backref('tag_assoc', lazy='dynamic'))
+    article_portal_division = relationship('ArticlePortalDivision', backref=backref('tag_assoc', lazy='dynamic'))
     tag = relationship('TagPortalDivision', backref=backref('article_assoc', lazy='dynamic'))
 #     TODO: many to (many to many)...
-    UniqueConstraint('article_portal_id', 'tag_portal_division_id', name='uc_article_tag_id')
+    UniqueConstraint('article_portal_division_id', 'tag_portal_division_id', name='uc_article_tag_id')
 
 
 # class KeyWords(Base, PRBase):
