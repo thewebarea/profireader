@@ -1,4 +1,4 @@
-<span ng-controller="UserLoginController" class="topbar-menu-links">
+<div ng-controller="UserLoginController" class="topbar-menu-links">
     <div ng-cloak ng-show="user.id">
         <a class="navbar-brand" href="{{ url_for('company.profile', company_id = company_id) }}"><img src="{{ company_logo }}" height="50" width="50" /></a> |
         <a href="{{ url_for('company.materials', company_id = company_id) }}">Materials</a> |
@@ -8,5 +8,5 @@
         Comments |
         <a href="{{ url_for('company.employees', company_id = company_id) }}">Employees</a>
     </div>
-</span>
+</div>
 

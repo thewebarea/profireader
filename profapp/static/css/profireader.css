@@ -1,3 +1,24 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic);
+
+
+body{
+    background: #eee!important;
+}
+
+
+.navbar{
+    margin: 0;
+}
+
+.container.widewrapper{
+    background: #fff;
+}
+
+*, html, h1, h2, h3, h4, h5,h6
+{
+    font-family: 'Roboto', sans-serif!important;
+}
+
 /*
 TODO: OK by OZ:   this class `highlights` changed element (see js function highligh, its just add and remove this class).
 We have something similar in bootstrap? Can correct this class to look nicer?
@@ -14,11 +35,18 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 
 .navbar-brand{
     padding: 5px;
+    margin-left: px!important;
 }
 
 .navbar-brand img{
     height: 40px;
     width: auto;
+}
+
+.dropdown-menu{
+    width: 100%;
+    border-radius: 0;
+    margin: 0;
 }
 
 ul.dropdown-menu li a.typeahead-item strong {
@@ -302,6 +330,10 @@ hr {
         -webkit-border-radius: 6px;
         -moz-border-radius: 6px;
         border-radius: 6px;
+    }
+
+    .navbar.navbar-collapse{
+        padding: 0!important;
     }
 
     .tales-nav .navbar-collapse {
@@ -1453,12 +1485,18 @@ fieldset[disabled] .btn-tales-two.active {
 
 .nav > li > ul > li > a {
     display: inline-block;
-    padding: 12px 20px;
+    padding: 7px;
+    color: #ddd;
+    font-size: 18px;
+    text-transform: uppercase;
 }
 
 .nav > li > ul > li:hover > a {
-    background: #ffffff;
+    background: #777;
+    color: #fff!important;
 }
+
+
 
 .top-style-line {
     height: 3px;
@@ -1474,6 +1512,7 @@ fieldset[disabled] .btn-tales-two.active {
 }
 
 .navbar-default {
+    background: #464646;
     border: none;
 }
 
@@ -1601,11 +1640,89 @@ form {
 
 /* ---------------------------------------------------------------- */
 
+.navbar .container{
+    padding: 0;
+}
+
+
+.nav .open>a, .nav .open>a:focus, .nav .open>a:hover{
+    background-color: #222;
+}
+
+
+/*** TOP MENU ***/
+
+.top-menu{
+    display: inline-block;
+    position: relative;
+    float: right;
+    list-style: none;
+
+    font-size: 0;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+    margin-right: 10px;
+}
+
+
+.top-menu li{
+    display: inline-block;
+}
+
+.top-menu li a{
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    /*background: url("/profapp/static/front/img/ico/articles.png") center center no-repeat;*/
+    background: transparent center center no-repeat;
+    color: #fff;
+    font-size: 16px;
+    filter: alpha(opacity=50);
+    opacity: .5;
+}
+
+.top-menu .tooltip{
+    display: none;
+}
+
+.top-menu li a:hover{
+    background-color: #777;
+    filter: alpha(opacity=95);
+    opacity: 0.95;
+}
+
+
+.top-menu li a.messages_btn{
+    background-image: url("../../static/front/img/ico/messenger.png");
+}
+.top-menu li a.company_btn{
+    background-image: url("../../static/front/img/ico/companies.png");
+}
+.top-menu li a.article_btn{
+    background-image: url("../../static/front/img/ico/articles.png");
+}
+.top-menu li a.filemanager_btn{
+    background-image: url("../../static/front/img/ico/files.png");
+}
+
+
+.person-small-cover{
+    border-radius: 50%;
+    border: 3px #999 solid;
+    width:36px;height:36px;
+}
+
+
+
 
 .topbar-menu-links{
     display: block;
-    width: 100%;
-    background: #DDDDDD;
+    width: 1170px;
+    margin-left: -15px;
+    background: #fcc;
     font-size: 0;
 }
 
