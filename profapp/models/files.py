@@ -259,19 +259,26 @@ class File(Base, PRBase):
         return self
 
     @staticmethod
-    def search(name, roots):
-        files = []
-        prop = []
-        name = name.lower()
-        prog = re.compile(r'.*'+name+'.*')
-        for root in roots:
-            for file in db(File, root_folder_id=root):
-                if re.match(r'^'+name+'.*',file.name.lower()):
-                    prop.append(file)
-                elif re.match(r'.*'+name+'.*',file.name.lower()):
-                    files.append(file)
-        prop.extend(files)
-        return prop
+    def search(serch_text, folder_id):
+        # files = []
+        # prop = []
+        # name = name.lower()
+        # prog = re.compile(r'.*'+name+'.*')
+        # for root in roots:
+        #     for file in db(File, root_folder_id=root):
+        #         if re.match(r'^'+name+'.*',file.name.lower()):
+        #             prop.append(file)
+        #         elif re.match(r'.*'+name+'.*',file.name.lower()):
+        #             files.append(file)
+        # prop.extend(files)
+        sub_query = File.get_all_in_dir_rev(folder_id)
+        # if search_text:
+        #     sub_query = sub_query.filter(ArticleCompany.title.ilike("%" + search_text + "%"))
+        # if kwargs.get('portal_id') or kwargs.get('status'):
+        #     sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
+        #                                     **kwargs).exists())
+
+        return sub_query
 
 
     def set_properties(self, add_all,**kwargs):
@@ -287,23 +294,6 @@ class File(Base, PRBase):
             for file in files:
                 file.updates(attr)
         return check
-
-    def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
-        file_content = FileContent.get(self.id).detach()
-        attr = {}
-        if company_id:
-            attr['company_id'] = company_id
-        if parent_folder_id:
-            attr['parent_folder_id'] = parent_folder_id
-        if article_portal_id:
-            attr['article_portal_id'] = article_portal_id
-        if root_folder_id:
-            attr['root_folder_id'] = root_folder_id
-        new_file = self.detach().attr(attr)
-        new_file.save()
-        file_content.id = new_file.id
-        new_file.file_content = [file_content]
-        return new_file
 
     def rename(self, name):
         if self == None:
