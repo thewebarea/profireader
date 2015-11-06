@@ -11,7 +11,7 @@
         module.controller('article_list', ['$scope', '$ok', '$sce', function ($scope, $ok, $sce) {
 
             $scope.url_details = {{ raw_url_for('company.material_details')|safe }};
-            $scope.url_change_status = {{ raw_url_for('portal.update_article_portal_division')|safe }};
+            $scope.url_change_status = {{ raw_url_for('portal.update_article_portal')|safe }};
             $scope.get_colored_title = function (text_to_change) {
                 return text_to_change
             };

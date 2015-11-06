@@ -97,7 +97,7 @@ class ArticlePortalDivision(Base, PRBase):
         return self.to_dict(fields)
 
     @staticmethod
-    def update_article_portal_division(article_portal_division_id, **kwargs):
+    def update_article_portal(article_portal_division_id, **kwargs):
         db(ArticlePortalDivision, id=article_portal_division_id).update(kwargs)
 
     @staticmethod
