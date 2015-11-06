@@ -477,6 +477,7 @@ def publication_details(article_id, company_id):
     return render_template('company/publication_details.html',
                            company_id=company_id)
 
+
 @portal_bp.route('/publication_details/<string:article_id>/<string:company_id>', methods=['POST'])
 @login_required
 @ok
