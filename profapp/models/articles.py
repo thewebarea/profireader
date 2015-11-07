@@ -169,7 +169,7 @@ class ArticleCompany(PRBase, Base):
         ret = super().validate(action)
 
         if not re.match('[^\s]{3,}', self.title):
-            ret['errors']['name'] = 'pls enter title longer than 3 letters'
+            ret['errors']['title'] = 'pls enter title longer than 3 letters'
         if not re.match('\S+', self.keywords):
             ret['warnings']['keywords'] = 'pls enter at least one keyword'
         return ret

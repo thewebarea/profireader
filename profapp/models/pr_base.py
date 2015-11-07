@@ -43,7 +43,7 @@ class PRBase(object):
         return self
 
     def update(self, **kwargs):
-        self.update(**kwargs)
+        # self.update(**kwargs)
         return self
 
     def attr(self, dictionary):

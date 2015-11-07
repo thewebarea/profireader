@@ -3,329 +3,280 @@
     if (!angular) {
         throw 'No angular found';
     }
-    var directiveId = 'ngAjaxValidator',
 
-        AppendParameter = function (url, var_val) {
-            return url + (url.match(/\?/) ? '&' : '?') + var_val;
+    var AppendParameter = function (url, var_val) {
+        return url + (url.match(/\?/) ? '&' : '?') + var_val;
+    };
+
+    var cloneIfExists = function (cloneto, defaultparams, passed) {
+        $.each(defaultparams, function (ind, val) {
+            if (typeof passed[ind] === 'string') cloneto[ind] = passed[ind];
+            if (typeof passed[ind] === 'function') {
+                var ret = passed[ind]();
+                cloneto[ind] = ((typeof ret === 'undefined') ? val : ret);
+                };
+        });
+        return cloneto;
+    };
+
+    var SetIfEmpty = function (params, name, def, get_from_parent_scope) {
+        if (params[name] !== '' && get_from_parent_scope) {
+            params[name] = scope.$parent.$parent[name]
+            return;
+        }
+        if (params[name] === '')
+            params[name] = def;
+    };
+
+    // url builders
+    var defaultCallbacks = {
+        ngUrl: function (default_function) {
+            return window.location.href;
+        },
+        ngLoadUrl: function (default_function) {
+            return AppendParameter(params['ngUrl'](), 'action=load');
+        },
+        ngValidateUrl: function (default_function) {
+            return AppendParameter(params['ngUrl'](), 'action=validate');
+        },
+        ngSaveUrl: function (default_function) {
+            return AppendParameter(params['ngUrl'](), 'action=save');
         },
 
-        cloneIfExists = function (cloneto, defaultparams, params) {
-            $.each(defaultparams, function (ind, val) {
-                cloneto[ind] = ((typeof params['ind'] === 'undefined') ? val : params['ind']);
-            });
-            return cloneto;
+
+        ngLoadBefore: function (default_function) {
+            // return true if you need load model
+            return $scope.hasOwnProperty('data') ? false : {};
+        },
+        ngLoadAfter: function (resp, default_function) {
+            // save loaded model
+            $scope['data'] = cloneObject(resp);
+            $scope['original_data'] = cloneObject(resp);
+            return 'clean';
         },
 
-        SetIfEmpty = function (params, name, def, get_from_parent_scope) {
-            if (params[name] !== '' && get_from_parent_scope) {
-                params[name] = scope.$parent.$parent[name]
-                return;
-            }
-            if (params[name] === '')
-                params[name] = def;
+        ngValidateBefore: function (default_function) {
+            // return something != undefined if you need load model
+            return $scope['data'];
         },
 
-        setVariable = function (name, data) {
-            if (params[name]) {
-                $scope[params[name]] = data;
-            }
-        },
-        getVariable = function (name) {
-            return params[name] ? $scope[params[name]] : null;
+
+        ngValidateAfter: function (resp, default_function) {
+            if ($scope.state !== 'validating') return false;
+            $scope['validation'] = cloneObject(resp);
+            return (!resp || !$.isEmptyObject(resp['errors'])) ? 'invalid' : 'valid';
         },
 
-        ajaxValidator = function ($ok, $compile) {
-
-            return {
-                restrict: 'A',
-                //require: ['ngModel'],
-                //scope: {
-                //    //ngAjaxForm: '&',
-                //    //
-                //    //ngModel: '&',
-                //    //
-                //    //ngValidateUrl: "&",
-                //    //ngValidateRequesting: '&',
-                //    //ngValidateResponsed: '&',
-                //    //ngValidateResponse: 'validation',
-                //    //ngValidateBefore: '',
-                //    //ngValidateAfter: '',
-                //    //ngValidateWatch: ""
-                //    //ngValidate-debounce: "500"
-                //    //
-                //    //ngLoad-url: ""
-                //    //ngLoad-variable-requesting: 'loading'
-                //    //ngLoad-variable-responded: ''
-                //    //ngLoad-variable-response: 'original_data'
-                //    //ngLoad-before: ""
-                //    //ngLoad-after: ""
-                //    //
-                //    //ngLoad-url: ""
-                //    //ngSave-variable-requesting: 'saving'
-                //    //ngSave-variable-responded: 'saved'
-                //    //ngSave-variable-response: ''
-                //    //ngSave-before: ""
-                //    //ngSave-after: ""
-                //    //
-                //    //
-                //    //
-                //    //
-                //    //ngAfter: '&',
-                //    //ngBefore: '&',
-                //    //ngData: '@',
-                //    //ngState: '@'
-                //},
-                scope: true,
-                link: function (scope, el, attrs, ctrls) {
+        ngSaveBefore: function (default_function) {
+            return $scope['data'];
+        },
 
 
-                    var $scope = scope.$parent;
-                    var $data_var = 'data';
-
-                    var params = {};
-
-                    // variables! remove this!!! hardcode in default callbacks and pass default callbacks to REAL callbacks
-                    cloneIfExists(params, {
-                        //ngData: 'data',
-                        //ngLoadedData: 'loaded_data',
-                        //ngValidatedData: 'validated_data',
-                        //ngValidatedAnswer: 'validation',
-                        //ngSavedData: 'saved_data',
-                        //ngValidatedAnswer: 'validation',
-
-
-                        //ngLoadRequesting: 'loading',
-                        //ngLoadResponded: false,
-                        //ngLoadResponse: 'original_data',
-                        //
-                        //ngValidateRequesting: 'validating',
-                        //ngValidateResponsed: 'validated',
-                        //ngValidateResponse: 'validation',
-                        //
-                        //ngSaveRequesting: 'saving',
-                        //ngSaveResponded: 'saved',
-                        //ngSaveResponse: false
-                    }, attrs);
-
-                    // validation watch params
-                    cloneIfExists(params, {
-                        ngValidateWatch: '',
-                        ngValidateDebounce: '500'
-                    }, attrs);
-
-                    SetIfEmpty(params, 'ngValidateWatch', params['ngData']);
-                    params['ngValidateDebounce'] = parseInt(params['ngValidateDebounce']);
-
-
-                    // url builders
-                    var defaultCallbacks = {
-                        ngUrl: function (default_function) {
-                            return window.location.href;
-                        },
-                        ngLoadUrl: function (default_function) {
-                            return AppendParameter(params['ngUrl'](), 'action=load');
-                        },
-                        ngValidateUrl: function (default_function) {
-                            return AppendParameter(params['ngUrl'](), 'action=validate');
-                        },
-                        ngSaveUrl: function (default_function) {
-                            return AppendParameter(params['ngUrl'](), 'action=save');
-                        },
-                        ngLoadBefore: function (default_function) {
-                            // return true if you need load model
-                            return $scope.hasOwnProperty('data') ? false : {};
-                        },
-                        ngLoadAfter: function (resp, default_function) {
-                            // save loaded model
-                            $scope['data'] = cloneObject(resp);
-                            $scope['original_data'] = cloneObject(resp);
-                            console.log($scope);
-                            return true;
-                        },
-
-                        ngValidateBefore: function (default_function) {
-                            // return something != undefined if you need load model
-                            return $scope['data'];
-                        },
-
-
-                        ngValidateAfter: function (resp, default_function) {
-                            $scope['validation'] = cloneObject(resp);
-                            return resp;
-                        },
-
-                        ngSaveBefore: function (default_function) {
-                            return $scope['data'];
-                        },
-
-
-                        ngSaveAfter: function (resp, default_function) {
-                            return resp;
-                        }
-
-                        //ngBefore: function (data, validation, httpconfig, defaultfunc) {
-                        //    //httpconfig['url'] = http://someurl
-                        //    if (data) {
-                        //        if (typeof parentscope[params['ngState']] === 'string') {
-                        //            return false;
-                        //        }
-                        //        parentscope[params['ngState']] = validation ? 'validating' : 'sending';
-                        //    }
-                        //    else {
-                        //        return false;
-                        //    }
-                        //},
-                        //
-                        //ngAfter: function (response, validation, httpresp, defaultfunc) {
-                        //    if (!response) {
-                        //        return false;
-                        //    }
-                        //    if (!validation && response && httpresp && httpresp['headers']('Location')) {
-                        //        window.location.href = httpresp['headers']('Location');
-                        //    }
-                        //    return response;
-                        //},
-
-                    };
-                    cloneIfExists(params, defaultCallbacks, attrs);
-
-                    function callCallback() {
-                        var args = Array.prototype.slice.call(arguments);
-                        var callbackkey = args.shift();
-                        args.push(defaultCallbacks[callbackkey])
-                        return params[callbackkey].apply($scope, args);
-                        }
-
-                    var loadurl = callCallback('ngLoadUrl');
-                    var loaddata = callCallback('ngLoadBefore');
-                    if (loadurl, loaddata) {
-                        $scope['state'] = 'loading';
-                        $ok(loadurl, loaddata, function (resp) {
-                            $scope['state'] = 'clean';
-                            callCallback('ngLoadAfter', resp);
-                        });
-                    }
-
-
-                    //SetIfEmpty('ngUrl', window.location.href);
-                    //SetIfEmpty('ngLoadUrl', AppendParameter(params['ngUrl'], 'action=load'));
-                    //SetIfEmpty('ngValidateUrl', AppendParameter(params['ngUrl'], 'action=validate'));
-                    //SetIfEmpty('ngSaveUrl', AppendParameter(params['ngUrl'], 'action=save'));
-
-                    //SetIfEmpty('ngLoadBefore', function () {
-                    //    return {}
-                    //}, true);
-                    //SetIfEmpty('ngLoadResponded', null);
-
-                    //if (params['ngUrl'] === '') params['ngUrl']
-
-
-                    //var enableSubmit = function (enablesubmit, enableinput) {
-                    //    if (enablesubmit) {
-                    //        $('*[ng-model]', $(iElement)).prop('disabled', false);
-                    //    }
-                    //    else {
-                    //        $('*[ng-model]', $(iElement)).prop('disabled', true);
-                    //    }
-                    //}
-
-                    //$scope['state'] = false;
-                    //scope.$parent.$parent.__validated = false;
-
-                    var sendValidation = _.debounce(function () {
-                        if (scope.$parent.$parent.__validation) {
-                            return false;
-                        }
-                        var dataToSend = scope['ngOnsubmit']()();
-                        if (dataToSend) {
-                            scope.$parent.$parent.__validation = dataToSend;
-                            $ok(scope['ngAction'], $.extend({__validation: true}, dataToSend), function (resp) {
-                                scope.$parent.$parent.__validated = resp;
-                            }, function (resp) {
-                                scope.$parent.$parent.__validated = false;
-                            }).finally(function () {
-                                scope.$parent.$parent.__validation = false;
-                            });
-                        }
-                    }, 500);
-
-                    if (scope['ngWatch']) {
-                        scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
-                    }                    ;
-
-
-                    //var params = $.extend(defaultparams, {
-                    //    ngData: scope['ngData'],
-                    //    ngBefore: scope['ngBefore'],
-                    //    ngAfter: scope['ngAfter'],
-                    //    ngState: scope['ngState']
-                    //});
-
-                    var sendfunction = function () {
-                        var old_state = $scope['state'];
-
-                        var dataToSend = callCallback('ngSaveBefore');
-                        var url = callCallback('ngSaveUrl');
-                        if (!dataToSend || !url) {
-                            return false;
-                        }
-
-                        $scope['state'] = 'saving';
-                        $ok(url, dataToSend,
-                            function (resp, errorcode, httpresp) {
-                                callCallback('ngSaveAfter', resp);
-                                $scope['state'] = 'clean';
-                            },
-                            function (resp, errorcode, httpresp) {
-                                $scope['state'] = old_state;
-                            });
-                    }
-
-                    $scope.save = sendfunction;
-
-
-                    //if (params['ngData']) {
-                    //    parentscope.$watch(params['ngData'], _.debounce(function () {
-                    //        sendfunction(true);
-                    //    }, 500), true);
-                    //}
-
-                    //if (scope['ngOnsubmit']) {
-                    //    $(iElement).on('submit',
-                    //        function () {
-                    //            if (scope.$parent.$parent.__validation) {
-                    //                return false;
-                    //            }
-                    //            enableSubmit(false);
-                    //            scope.$apply(function () {
-                    //                var dataToSend = scope['ngOnsubmit']()();
-                    //                console.log(dataToSend);
-                    //                if (dataToSend) {
-                    //                    $ok(scope['ngAction'], dataToSend, function (resp) {
-                    //                        if (scope.ngOnsuccess) {
-                    //                            scope.ngOnsuccess()(resp)
-                    //                        }
-                    //                    }).finally(function () {
-                    //                        enableSubmit(true);
-                    //                    });
-                    //                }
-                    //            });
-                    //            return false;
-                    //        });
-                    //}
-                    //
-                    //$(iElement).on('submit',
-                    //    function () {
-                    //        sendfunction();
-                    //        return false;
-                    //    });
-                }
-            };
-
+        ngSaveAfter: function (resp, default_function) {
+            $scope['original_data'] = cloneObject(resp);
+            return resp ? 'clean' : 'saving_failed';
         }
 
-    angular.module('ajaxValidator', [])
-        //.constant('MODULE_VERSION', '##_version_##')
-        .directive(directiveId, ['$ok', '$compile', ajaxValidator]);
+    };
+
+
+    angular.module('ajaxFormModule', []).factory('$ajaxForm', ['$http', function ($http) {
+
+
+        var ret = {};
+        ret.save = function () {
+        };
+        ret.load = function () {
+        };
+        ret.validate = function () {
+        };
+        return ret;
+
+    }]).directive('ngAf', ['$ajaxForm', '$http', function ($ajaxForm, $http) {
+
+        return {
+            restrict: 'A',
+            //require: ['ngModel'],
+            //scope: {
+            //    //ngAjaxForm: '&',
+            //    //
+            //    //ngModel: '&',
+            //    //
+            //    //ngValidateUrl: "&",
+            //    //ngValidateRequesting: '&',
+            //    //ngValidateResponsed: '&',
+            //    //ngValidateResponse: 'validation',
+            //    //ngValidateBefore: '',
+            //    //ngValidateAfter: '',
+            //    //ngValidateWatch: ""
+            //    //ngValidate-debounce: "500"
+            //    //
+            //    //ngLoad-url: ""
+            //    //ngLoad-variable-requesting: 'loading'
+            //    //ngLoad-variable-responded: ''
+            //    //ngLoad-variable-response: 'original_data'
+            //    //ngLoad-before: ""
+            //    //ngLoad-after: ""
+            //    //
+            //    //ngLoad-url: ""
+            //    //ngSave-variable-requesting: 'saving'
+            //    //ngSave-variable-responded: 'saved'
+            //    //ngSave-variable-response: ''
+            //    //ngSave-before: ""
+            //    //ngSave-after: ""
+            //    //
+            //    //
+            //    //
+            //    //
+            //    //ngAfter: '&',
+            //    //ngBefore: '&',
+            //    //ngData: '@',
+            //    //ngState: '@'
+            //},
+            scope: {
+                ngAf: '&',
+                ngAfLoadUrl: '&',
+                ngAfValidateUrl: '&',
+                ngAfSaveUrl: '&'
+            },
+            require: ['ngModel'],
+            link: function (scope, el, attrsibutes, ngModelCtrl,aaa) {
+
+                console.log(scope, el, attrsibutes, ngModelCtrl,aaa);
+
+
+                var $scope = scope;
+                var $data_var = 'data';
+
+                var params = {};
+
+                // variables! remove this!!! hardcode in default callbacks and pass default callbacks to REAL callbacks
+
+
+        //        ng-af=""
+        //
+        //ng-af-load-url=""
+        //ng-af-save-url=""
+        //ng-af-validate-url=""
+        //
+        //ng-af-before-load=""
+        //ng-af-after-load=""
+        //
+        //ng-af-before-save=""
+        //ng-af-after-save=""
+        //
+        //ng-af-before-validation=""
+        //ng-af-after-validation=""
+        //
+        //ng-af-load-result="data_original"
+        //ng-af-validation-result="data_validation"
+        //ng-af-save-result="data_save"
+        //
+        //ng-af-watch=""
+        //ng-af-debounce=""
+
+                cloneIfExists(params, {ngAf: window.location.href}, scope);
+
+                cloneIfExists(params, {
+                    ngAfLoadUrl: AppendParameter(params['ngAf'], 'action=load'),
+                    ngAfValidateUrl: AppendParameter(params['ngAf'], 'action=validate'),
+                    ngAfSaveUrl: AppendParameter(params['ngAf'], 'action=save')
+                }, scope);
+
+                // validation watch params
+                cloneIfExists(params, {
+                    ngValidateWatch: '',
+                    ngValidateDebounce: '500'
+                }, attrs);
+
+                SetIfEmpty(params, 'ngValidateWatch', params['ngData']);
+                params['ngValidateDebounce'] = parseInt(params['ngValidateDebounce']);
+
+
+                cloneIfExists(params, defaultCallbacks, attrs);
+
+                function callCallback() {
+                    var args = Array.prototype.slice.call(arguments);
+                    var callbackkey = args.shift();
+                    args.push(defaultCallbacks[callbackkey]);
+                    return params[callbackkey].apply($scope, args);
+                }
+
+
+                var func1 = function (action, statebefore, stateonsuccess, stateonfail) {
+                    var old_state = $scope['state'];
+
+                    var dataToSend = callCallback('ng' + action + 'Before');
+                    var url = callCallback('ng' + action + 'Url');
+                    if (!dataToSend || !url) {
+                        return false;
+                    }
+
+                    $scope['state'] = statebefore;
+                    $ok(url, dataToSend,
+                        function (resp, errorcode, httpresp) {
+                            var ret = callCallback('ng' + action + 'After', resp);
+                            if (ret) {
+                                $scope['state'] = ret;
+                            }
+                            else {
+                                $scope['state'] = stateonfail ? stateonfail : old_state;
+                            }
+                        },
+                        function (resp, errorcode, httpresp) {
+                            $scope['state'] = stateonfail ? stateonfail : old_state;
+                        });
+
+                    return true;
+                }
+
+
+                $scope['state'] = 'init';
+
+                $scope.load = function () {
+                    if ($scope.isActionAllowed('load')) func1('Load', 'loading', 'clean', 'loading_failed')
+                };
+
+                $scope.validate = function () {
+                    if ($scope.isActionAllowed('validate')) func1('Validate', 'validating', 'valid', 'invalid')
+                };
+
+                $scope.save = function () {
+                    if ($scope.isActionAllowed('save')) func1('Save', 'saving', 'clean', 'saving_failed')
+                };
+
+                var save_states = ['init', 'clean', 'saving_failed', 'valid', 'loading_failed'];
+                var validate_or_load_states = save_states.slice(0);
+                validate_or_load_states.push('invalid', 'dirty')
+                $scope.isActionAllowed = function (action) {
+                    if (action === 'load') {
+                        return validate_or_load_states.indexOf($scope.state) !== -1
+                    }
+                    if (action === 'validate') {
+                        return validate_or_load_states.indexOf($scope.state) !== -1
+                    }
+                    if (action === 'save') {
+                        return save_states.indexOf($scope.state) !== -1
+                    }
+                }
+
+                $scope.load();
+
+                var debouncedvalidate = _.debounce(function () {
+                    $scope.validate();
+                }, 500);
+
+                $scope.$watch('data', function () {
+                    $scope['state'] = 'dirty';
+                    debouncedvalidate();
+                }, true);
+
+
+            }
+        };
+
+
+    }]);
+
 
 })(this.angular);

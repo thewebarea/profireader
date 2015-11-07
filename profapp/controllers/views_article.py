@@ -95,16 +95,18 @@ def load_form_update(json, article_company_id):
     if action == 'load':
         return article.get_client_side_dict()
     else:
-        article.attr({key: val for key, val in json.items() if key in ['keywords', 'title']})
+        article.attr({key: val for key, val in json.items() if key in ['keywords', 'title', 'short', 'long']})
         if action == 'save':
-            article.update(ratio=Config.IMAGE_EDITOR_RATIO)
-            image_id = article.get('image_file_id')
-            if image_id:
-                article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
-                article.update(coordinates)
+            pass
+            # article.update(ratio=Config.IMAGE_EDITOR_RATIO)
+            # image_id = article.get('image_file_id')
+            # if image_id:
+            #     article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
+            #     article.update(coordinates)
             return article.save().get_client_side_dict()
         else:
-            return article.validate()\
+            article.detach()
+            return article.validate('update')
 
 @article_bp.route('/save/<string:article_company_id>/', methods=['POST'])
 @ok

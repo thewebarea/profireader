@@ -50,7 +50,7 @@ function getObjectsDifference(a, b, setval, notstrict) {
 }
 
 
-angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
+angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip', 'ajaxFormModule'])
     .factory('$ok', ['$http', function ($http) {
         return function (url, data, ifok, iferror, config) {
             function error(result, error_code) {
@@ -271,8 +271,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 //    });
 
 
-
-
                 //$.each($('[name]', $(iElement)), function (ind, el) {
                 //$newel = $(el).clone();
                 //scope.data[$(el).attr('name')] = $(el).val();
@@ -356,7 +354,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
         }
 
     }])
-    .directive('ngAjaxForm', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+    .directive('ngAjaxFormOld', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',
             scope: {
@@ -433,9 +431,8 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
                 if (scope['ngWatch']) {
                     scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
-                };
-
-
+                }
+                ;
 
 
                 var parameters = $.extend(defaultparameters, {
@@ -540,7 +537,7 @@ function file_choose(selectedfile) {
     top.tinymce.activeEditor.windowManager.close();
 }
 
-module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ajaxValidator']);
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ajaxFormModule']);
 
 module.config(function ($provide) {
     $provide.decorator('$controller', function ($delegate) {
@@ -634,7 +631,7 @@ module.run(function ($rootScope, $ok) {
                 editor.on('PreInit', function (event) {
                     editor.parser.addNodeFilter('img,p', function (nodes, name) {
                         console.log('addNodeFilter', nodes, name);
-                        });
+                    });
                     //editor.parser.addAttributeFilter('src,href', function (nodes, name) {
                     //    console.log('addAttributeFilter', nodes, name);
                     //    debugger;
@@ -788,8 +785,7 @@ function fileUrl(id) {
 }
 
 
-
 function cloneObject(o) {
-    return (o === null || typeof o !== 'object')?o: $.extend(true, {}, o);
+    return (o === null || typeof o !== 'object') ? o : $.extend(true, {}, o);
 }
 
