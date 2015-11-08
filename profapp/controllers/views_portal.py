@@ -453,9 +453,6 @@ def publications_load(json, company_id):
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
 
-    x = articles[0]
-    y = x.get_client_side_dict()
-
     return {'articles': [a.get_client_side_dict() for a in articles],
             'companies': companies,
             'search_text': json.get('search_text') or '',

@@ -88,8 +88,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
         if ($scope.data && (newValue !== oldValue)){
             res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
 		    res.success(function(data, status, headers, config) {
-			    $scope.availableTags = data.data.availableTags;
-                $scope.availableColors = data.data.availableTags;
+                $scope.availableTags = data.data.availableTags;
 		    });
 		    res.error(function(data, status, headers, config) {
 			    alert( "failure message: " + JSON.stringify({data: data}));
@@ -124,8 +123,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
 
     $scope.availableTags = [];
     $scope.selectedTags = [];
-
-    $scope.availableColors = [];
 
 }]);
         module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
@@ -329,7 +326,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                         <h3>Add tags:</h3>
                         <ui-select multiple ng-model="tagsObject.tags" theme="select2" ng-disabled="disabled" style="width: 300px;">
                             <ui-select-match placeholder="Select tags...">{{$item}}</ui-select-match>
-                            <ui-select-choices repeat="tag in availableColors | filter:$select.search">
+                            <ui-select-choices repeat="tag in availableTags | filter:$select.search">
                                 {{tag}}
                             </ui-select-choices>
                         </ui-select>

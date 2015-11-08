@@ -9,6 +9,7 @@ from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
 from ..models.portal import PortalDivision
+from ..models.tag import TagPortalDivisionArticle
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import CompanyPortal
 from ..models.articles import ArticleCompany, ArticlePortalDivision
@@ -191,11 +192,14 @@ def update_article(json):
 # @check_rights(simple_permissions([]))
 @ok
 def submit_to_portal(json):
-    # here we have json['tags'] in form: json['tags'] = ['money', 'sex', 'rock and roll']
+    # json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
+
+    portal_division_id = json['selected_division']
+
     article = ArticleCompany.get(json['article']['id'])
-    article_portal = article.clone_for_portal(json['selected_division'])
+    article_portal = article.clone_for_portal(portal_division_id, json['tags'])
     article.save()
-    portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
+    portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
     return {'portal': portal.name}
 
 

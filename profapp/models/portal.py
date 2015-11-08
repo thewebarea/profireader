@@ -269,7 +269,7 @@ class PortalDivision(Base, PRBase):
                                      ForeignKey('portal_division_type.id'))
     portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     name = Column(TABLE_TYPES['short_name'], default='')
-    position = Column(TABLE_TYPES['position'])
+    position = Column(TABLE_TYPES['int'])
 
     portal_division_tags = relationship('Tag', secondary='tag_portal_division')
     tags_assoc = relationship('TagPortalDivision', back_populates='portal_division')

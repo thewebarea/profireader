@@ -6,6 +6,7 @@ from ..models.company import Company
 from ..models.portal import PortalDivision, Portal
 from ..models.users import User
 from ..models.files import File, FileContent
+from ..models.tag import Tag, TagPortalDivision, TagPortalDivisionArticle
 # from ..models.tag import Tag
 
 from utils.db_utils import db
@@ -65,9 +66,14 @@ class ArticlePortalDivision(Base, PRBase):
                            primaryjoin="ArticlePortalDivision.article_company_id == ArticleCompany.id",
                            secondaryjoin="ArticleCompany.company_id == Company.id",
                            viewonly=True, uselist=False)
-    article_portal_division_tags = relationship('TagPortalDivision',
-                                                secondary='tag_portal_division_article',
-                                                back_populates='articles', lazy='dynamic')
+
+    # portal_division_tags = relationship('TagPortalDivision',
+    #                                     secondary='tag_portal_division_article',
+    #                                     back_populates='articles')
+
+    tag_assoc_select = relationship('TagPortalDivisionArticle',
+                                    back_populates='article_portal_division_select')
+
     portal = relationship('Portal',
                           secondary='portal_division',
                           primaryjoin="ArticlePortalDivision.portal_division_id == PortalDivision.id",
@@ -228,22 +234,41 @@ class ArticleCompany(Base, PRBase):
     #     #     ret.append(self.image_file_id)
     #     return ret
 
-    def clone_for_portal(self, division_id):
-
+    def clone_for_portal(self, portal_division_id, tag_names):
         filesintext = {found[1]: True for found in
                        re.findall('(http://file001.profireader.com/([^/]*)/)', self.long)}
         if self.image_file_id:
             filesintext[self.image_file_id] = True
-        company = db(PortalDivision, id=division_id).one().portal.own_company
+        company = db(PortalDivision, id=portal_division_id).one().portal.own_company
 
         article_portal_division = \
             ArticlePortalDivision(
                 title=self.title, short=self.short, long=self.long,
-                portal_division_id=division_id,
+                portal_division_id=portal_division_id,
                 article_company_id=self.id,
                 keywords=self.keywords,
-                # portal_id=db(PortalDivision, id=division_id).one().portal_id
-            ).save()
+            )
+
+        # TODO (AA to AA): old  tag_portal_division_article should be deleted.
+        # TagPortalDivisionArticle(article_portal_division_id=None, tag_portal_division_id=None, position=None)
+
+        article_portal_division.portal_division_tags = []
+
+        tags_portal_division_article = []
+        for i in range(len(tag_names)):
+            tag_portal_division_article = TagPortalDivisionArticle(position=i+1)
+            tag_portal_division = \
+                g.db.query(TagPortalDivision).\
+                    select_from(TagPortalDivision).\
+                    join(Tag).\
+                    filter(TagPortalDivision.portal_division_id==portal_division_id).\
+                    filter(Tag.name==tag_names[i]).one()
+
+            tag_portal_division_article.tag_portal_division = tag_portal_division
+            tags_portal_division_article.append(tag_portal_division_article)
+        article_portal_division.tag_assoc_select = tags_portal_division_article
+
+        article_portal_division.save()
 
         for file_id in filesintext:
             filesintext[file_id] = \
@@ -262,9 +287,6 @@ class ArticleCompany(Base, PRBase):
                                           filesintext[old_image_id],))
 
         article_portal_division.long = long_text
-
-        # TODO (AA to AA): article_portal_division.tags_article_portal = []
-        # TODO (AA to AA): article_portal_division.tags.append()
 
         self.portal_article.append(article_portal_division)
 

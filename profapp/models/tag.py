@@ -1,12 +1,13 @@
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy import CheckConstraint
+from .pr_base import PRBase, Base
 from ..controllers import errors
 from flask import g
 from utils.db_utils import db
 #from .portal import Portal
 # from .articles import ArticlePortalDivision
-from .pr_base import PRBase, Base
 
 
 # TODO (AA to AA): Add constraint: name shouldn't start or end with blank
@@ -74,8 +75,8 @@ class TagPortalDivision(Base, PRBase):
 
     tag = relationship('Tag', back_populates='portal_divisions_assoc')
     portal_division = relationship('PortalDivision', back_populates='tags_assoc')
-    articles = relationship('ArticlePortalDivision', secondary='tag_portal_division_article',
-                            back_populates='article_portal_division_tags', lazy='dynamic')
+    # articles = relationship('ArticlePortalDivision', secondary='tag_portal_division_article',
+    #                         back_populates='portal_division_tags', lazy='dynamic')
 
     def __init__(self, tag_id=None, portal_division_id=None):
         super(TagPortalDivision, self).__init__()
@@ -96,6 +97,9 @@ class TagPortalDivision(Base, PRBase):
     #     return ret
 
 
+# TODO (AA to AA): create trigger for article_portal_division_id and article_portal_division_id:
+# they should refer the same portal_division_id
+# TODO (AA to AA): add a trigger t: position >= 1
 class TagPortalDivisionArticle(Base, PRBase):
     __tablename__ = 'tag_portal_division_article'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
@@ -105,11 +109,25 @@ class TagPortalDivisionArticle(Base, PRBase):
     tag_portal_division_id = Column(TABLE_TYPES['id_profireader'],
                                     ForeignKey('tag_portal_division.id'),
                                     nullable=False)
+    position = Column(TABLE_TYPES['int'],
+                      CheckConstraint('position >= 1', name='cc_position_ge_1'),
+                      nullable=False)
 
-    article_portal_division = relationship('ArticlePortalDivision', backref=backref('tag_assoc', lazy='dynamic'))
-    tag = relationship('TagPortalDivision', backref=backref('article_assoc', lazy='dynamic'))
+    # article_portal_division = relationship('ArticlePortalDivision', backref=backref('tag_assoc', lazy='dynamic'))
+    article_portal_division_select = relationship('ArticlePortalDivision',
+                                                  back_populates='tag_assoc_select')
+    tag_portal_division = relationship('TagPortalDivision',
+                                       backref=backref('article_assoc', lazy='dynamic'))
 #     TODO: many to (many to many)...
-    UniqueConstraint('article_portal_division_id', 'tag_portal_division_id', name='uc_article_tag_id')
+    UniqueConstraint('article_portal_division_id',
+                     'tag_portal_division_id',
+                     name='uc_article_tag_id')
+
+    def __init__(self, article_portal_division_id=None, tag_portal_division_id=None, position=None):
+        super(TagPortalDivisionArticle, self).__init__()
+        self.article_portal_division_id = article_portal_division_id
+        self.tag_portal_division_id = tag_portal_division_id
+        self.position = position
 
 
 # class KeyWords(Base, PRBase):
