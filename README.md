@@ -43,3 +43,9 @@ $sudo apt-get install nodejs
 $sudo apt-get install npm
 $ln -s /usr/bin/nodejs /usr/bin/node
 $npm install -g bower
+
+install solr:
+sudo apt-get -y install openjdk-7-jdk
+mkdir /usr/java
+ln -s /usr/lib/jvm/java-7-openjdk-amd64 /usr/java/default
+sudo apt-get -y install solr-tomcat
