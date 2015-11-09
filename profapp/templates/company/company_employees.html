@@ -20,24 +20,27 @@
         {% endfor %}
     </span>
 
+    <h3>"{{ company.name }}" company employees</h3>
+    <br/>
     {% for user_id in company_user_rights %}
         {% if company_user_rights[user_id]['status']=='active' or company_user_rights[user_id]['status']=='suspended' %}
-        <form class="add_rights" action="{{ url_for('company.update_rights') }}" method="post">
-        <input type="hidden" name="user_id" id="user_id" value="{{ user_id }}">
-        <input type="hidden" name="company_id" id="company_id" value="{{ company.id }}">
-              <dt>
-                <img src="{{ company_user_rights[user_id]['user'].profireader_small_avatar_url }}" style="width:100px;height:100px;border:0">
-                {{ company_user_rights[user_id]['name'] }} {% if g.user_dict['id']==user_id %} (you) {% endif %}{% if company_user_rights[user_id]['status']=='suspended' %} - Suspended<br>{% for c_user in curr_user %}{% if curr_user[c_user]['rights'][Right['suspend_employee']] %}<a href="{{ url_for('company.unsuspend', user_id=user_id, company_id=company_id) }}">Unsuspend</a>{% endif %}{% endfor %}{% endif %}<br>
-                Phone number : {{ company_user_rights[user_id]['user'].phone_number }}<br>
-                Email : {{ company_user_rights[user_id]['user'].show_email }}
-                Subscribed : {{ company_user_rights[user_id]['date'] }}
-            </dt>
-              {% for company in company_user_rights[user_id]['companies'] %}
-                  <dt> ALL COMPANIES :
-                    {% for c in company %}
-                        <a href="{{ url_for('company.profile', company_id=c.id)}}">{{ c.name }}</a>
-                    {% endfor %}</dt><br>
-                  {% if curr_user %}
+            <form class="add_rights" action="{{ url_for('company.update_rights') }}" method="post">
+                <input type="hidden" name="user_id" id="user_id" value="{{ user_id }}">
+                <input type="hidden" name="company_id" id="company_id" value="{{ company.id }}">
+                <dt>
+                    <img src="{{ company_user_rights[user_id]['user'].profireader_small_avatar_url }}" style="width:100px;height:100px;border:0">
+                    {{ company_user_rights[user_id]['name'] }} {% if g.user_dict['id']==user_id %} (you) {% endif %}{% if company_user_rights[user_id]['status']=='suspended' %} - Suspended<br>{% for c_user in curr_user %}{% if curr_user[c_user]['rights'][Right['suspend_employee']] %}<a href="{{ url_for('company.unsuspend', user_id=user_id, company_id=company_id) }}">Unsuspend</a>{% endif %}{% endfor %}{% endif %}<br>
+                    Phone number : {{ company_user_rights[user_id]['user'].phone_number }}<br>
+                    Email : {{ company_user_rights[user_id]['user'].show_email }}
+                    Subscribed : {{ company_user_rights[user_id]['date'] }}
+                </dt>
+                {% for company in company_user_rights[user_id]['companies'] %}
+                    <dt> ALL COMPANIES :
+                        {% for c in company %}
+                            <a href="{{ url_for('company.profile', company_id=c.id)}}">{{ c.name }}</a>
+                        {% endfor %}
+                    </dt><br/>
+                    {% if curr_user %}
                         {% for c_user in curr_user %}
                             {% if curr_user[c_user]['status']=='active' and (company_user_rights[user_id]['status']=='active' or company_user_rights[user_id]['status']=='suspended') %}
                             <dt> Rights in this company: </dt>
@@ -63,31 +66,32 @@
                                 {% endif %}
                             {% endif %}
                         {% endfor %}
-                 {% endif %}
-              {% endfor %}</form>
-    {% for c_user in curr_user %}
-        {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[user_id]['status']=='active' and c_user != user_id and curr_user[c_user]['status']=='active' %}
-        <form class="suspend_employee" action="{{ url_for('company.suspend_employee') }}" onsubmit="return AjaxPost()" method="post">
-        <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
-        <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
-        <input type="submit" value="Suspend {{ company_user_rights[user_id]['name'] }} from your company">
-        </form>
-        {% endif %}
-    {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </form>
+            {% for c_user in curr_user %}
+                {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[user_id]['status']=='active' and c_user != user_id and curr_user[c_user]['status']=='active' %}
+                    <form class="suspend_employee" action="{{ url_for('company.suspend_employee') }}" onsubmit="return AjaxPost()" method="post">
+                        <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
+                        <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
+                        <input type="submit" value="Suspend {{ company_user_rights[user_id]['name'] }} from your company">
+                    </form>
+                {% endif %}
+            {% endfor %}
 
-    {% for c_user in curr_user %}
-        {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[user_id]['status']=='active' and c_user != user_id and curr_user[c_user]['status']=='active' %}
-        <form class="suspend_employee" action="{{ url_for('company.fire_employee') }}" onsubmit="return AjaxPost()" method="post">
-        <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
-        <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
-        <input type="submit" value="Fire {{ company_user_rights[user_id]['name'] }} from your company">
-        </form>
+            {% for c_user in curr_user %}
+                {% if curr_user[c_user]['rights'][Right['suspend_employee']]==true and company_user_rights[user_id]['status']=='active' and c_user != user_id and curr_user[c_user]['status']=='active' %}
+                <form class="suspend_employee" action="{{ url_for('company.fire_employee') }}" onsubmit="return AjaxPost()" method="post">
+                    <input type="hidden" id='company_id' name="company_id" value="{{ company.id }}">
+                    <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
+                    <input type="submit" value="Fire {{ company_user_rights[user_id]['name'] }} from your company">
+                </form>
+                {% endif %}
+            {% endfor %}
+            <hr>
         {% endif %}
     {% endfor %}
-        {% endif %}
-
-    {% endfor %}
-      <script type="text/javascript">
+    <script type="text/javascript">
  function AjaxPost() {
   $.post('', {
              'company_id': $("#company_id").val(),
