@@ -17,9 +17,7 @@
             window.location.href = $scope.details_article({article_id: resp['id']})
         };
 
-        $scope.getData = function (model, defaultfunction) {
-
-            return true;
+        $scope.getData = function () {
 
             var x = document.getElementById("dataX");
             var y = document.getElementById("dataY");
@@ -94,9 +92,6 @@
 
 <div ng-controller="article_edit">
 
-    <input type="button" ng-click="af.save(data)" value="{{ data.id ? 'save' : 'create' }}"/>
-
-
 
     <div ang-init="loadData11(null, {}, cleanUpHtml, setImageUrl)"
 
@@ -108,25 +103,24 @@
          af-save-url=""
          af-validate-url=""
 
-         aaf-before-load="getData"
-         aaf-after-load=""
+         af-before-load=""
+         af-after-load=""
 
-         aaf-before-save=""
-         aaf-after-save=""
+         af-before-save=""
+         af-after-save=""
 
-         aaf-before-validate=""
-         aaf-after-validate=""
+         af-before-validation=""
+         af-after-validation=""
 
          af-load-result="data_original"
          af-validation-result="data_validation"
          af-save-result="data_save"
 
-         af-debounce="100"
+         af-watch=""
+         af-debounce=""
 
 
          ang-controller="article_edit">
-
-        <input type="button" ng-click="af.save(data)" value="{{ data.id ? 'save' : 'create' }}"/>
 
 
         <div ng-if="!data">Loading...</div>
@@ -152,9 +146,9 @@
                     {{ _('Article title') }} {{ validation.errors.title }}
                     <input style="width: 100%" type="text" ng-model="data.title">
                     {{ _('Short Description') }}
-                    <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>
+                    <textarea style="width: 100%" placeholder="short" ang-model="data.short"></textarea>
                     {{ _('KeyWords') }}
-                    <input style="width: 100%" ng-model="data.keywords"/>
+                    <input style="width: 100%" ang-model="data.keywords"/>
                     {{ _('Full text') }}
 
                 </div>
@@ -167,13 +161,15 @@
             </div>
 
             <div class="profi-tiny-mce-birdy-wraper">
-            <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
-                      ng-model="data.long"></textarea>
+            <textarea aui-tinymce="tinymceImageOptions" style="width: 400px;"
+                      ang-model="data.long"></textarea>
             </div>
 
             {{ data_state }}
             <input style="clear: both;" type="submit" ang-disabled="!isActionAllowed('save')" ng-click="af.save(data)"
                    value="{{ data.id ? 'save' : 'create' }}"/>
+            <input style="clear: both;" type="submit" ang-disabled="!isActionAllowed('save')" ng-click="data={'title': '1'}"
+                   value="sn"/>
 
         </div>
     </div>
