@@ -33,9 +33,18 @@ class PRBase:
     def __init__(self):
         self.query = g.db.query_property()
 
+    def delfile(self):
+        g.db.delete(self)
+        g.db.commit()
+
     def save(self):
         g.db.add(self)
         g.db.flush()
+        return self
+
+    def updates(self, dictionary):
+        for f in dictionary:
+            setattr(self, f, dictionary[f])
         return self
 
     def update(self, **kwargs):

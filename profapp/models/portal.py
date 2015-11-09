@@ -124,14 +124,11 @@ class Portal(Base, PRBase):
             if check_division.id not in grouped:
                 grouped[check_division.id] = 0
             if check_division.min > grouped[check_division.id]:
-                ret['errors']['add_division'] = 'you need at least %s `%s`' % (
-                    check_division.min, check_division.id)
+                ret['errors']['add_division'] = 'you need at least %s `%s`' % (check_division.min, check_division.id)
                 if grouped[check_division.id] == 0:
                     ret['errors']['add_division'] = 'add at least one `%s`' % (check_division.id,)
             if check_division.max < grouped[check_division.id]:
-                ret['errors']['add_division'] = 'you you can have only %s `%s`' % (
-                check_division.max, check_division.id)
-
+                ret['errors']['add_division'] = 'you you can have only %s `%s`' % (check_division.max, check_division.id)
         return ret
 
     def get_client_side_dict(self, fields='id|name, divisions.*, layout.*, logo_file_id'):

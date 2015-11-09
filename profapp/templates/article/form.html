@@ -1,20 +1,15 @@
 <script>
-
     module.controller('article_edit', ['$scope', '$modal', function ($scope, $modal) {
-
         $scope.details_article = {{ raw_url_for('article.details')|safe }};
         {% if article_company_id %}
             $scope.save_article = '{{ url_for('article.save', article_company_id = article_company_id)|safe }}';
         {% else %}
             $scope.save_article = '{{ url_for('article.confirm_create')|safe }}';
         {% endif %}
-
  $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
         };
-
         $scope.getData = function () {
-
             var x = document.getElementById("dataX");
             var y = document.getElementById("dataY");
             var width = document.getElementById("dataWidth");
@@ -25,26 +20,17 @@
                 'rotate': angular.element(rotate).val()};
             return $scope.data;
         };
-
     $scope.change_picture_in_croper = function (image_file_url) {
-
          var $image = $('.img-container > img');
-
   $image.cropper('replace', image_file_url);
-
 };
-
-
-
         $scope.articleImageSelected = function (item) {
             $scope.data.image_file_id = item.id;
             $scope.setImageUrl();
                 closeFileManager();
 {#            $('#replace-toggle').click();#}
-
         };
     $scope.default_image = true;
-
         $scope.setImageUrl = function () {
             $scope.image_file_url = fileUrl($scope.data.image_file_id)||"{{ url_for('static', filename='images/choose_image.jpg') }}";
             var image = $scope.image_file_url;
@@ -52,10 +38,7 @@
                 $scope.default_image=false;
             }
             $scope.change_picture_in_croper(image);
-
         };
-
-
         $scope.chooseImage = function () {
             $scope.filemanagerModal = $modal.open({
                 templateUrl: 'filemanager.html',
