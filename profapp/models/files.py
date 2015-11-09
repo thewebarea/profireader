@@ -37,7 +37,8 @@ class File(Base, PRBase):
 
     owner = relationship('User',
                          backref=backref('files', lazy='dynamic'),
-                         foreign_keys='File.author_user_id')
+                         foreign_keys='File.author_user_id',
+                         cascade='save-update, delete')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
@@ -62,6 +63,8 @@ class File(Base, PRBase):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
             self.name, self.mime, self.id, self.parent_id)
 
+    # CHECKING
+
     @staticmethod
     def is_directory(file_id):
         return db(File, id=file_id)[0].mime == 'directory'
@@ -75,6 +78,37 @@ class File(Base, PRBase):
         return re.match('^image/.*', file.mime)
 
     @staticmethod
+    def if_copy(name):
+        ext = File.ext(name)
+        if len(ext)>0 and re.search('\(\d+\)'+ext, name):
+            return File.get_name(name)[0:-3]
+        elif re.search('\(\d+\)$', name):
+            return name[0:-3]
+        else:
+            name = name if len(ext) == 0 else name[0:-len(ext)]
+            return name
+
+    @staticmethod
+    def is_name(name, mime, parent_id):
+        if [file for file in db(File,parent_id=parent_id, mime=mime, name=name)]:
+            return True
+        else:
+            return False
+
+    @staticmethod
+    def can_paste_in_dir(id_file, id_folder):
+        if id_file == id_folder:
+            return False
+        folder = File.get(id_folder)
+        dirs_in_dir = [file for file in db(File, parent_id = id_file, mime='directory')]
+        for dir in dirs_in_dir:
+            for f in db(File, parent_id = dir.id, mime='directory'):
+                dirs_in_dir.append(f)
+            if dir.id == id_folder:
+                return False
+        return True
+
+    @staticmethod
     def ancestors(folder_id=None):
         ret = []
         nextf = g.db.query(File).get(folder_id)
@@ -83,16 +117,23 @@ class File(Base, PRBase):
             nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
         return ret[::-1]
 
+    # GETTERS
+
     @staticmethod
     def list(parent_id=None, file_manager_called_for=''):
 
         default_actions = {}
         # default_actions['choose'] = lambda file: None
         default_actions['download'] = lambda file: None if ((file.mime == 'directory') or (file.mime == 'root')) else True
-
         actions = {act: default_actions[act] for act in default_actions}
-
         show = lambda file: True
+        actions['remove'] = lambda file: None if file.mime == "root" else True
+        actions['copy'] = lambda file: None if file.mime == "root" else True
+        actions['paste'] = lambda file: None if file == None else True
+        actions['cut'] = lambda file: None if file.mime == "root" else True
+        actions['properties'] = lambda file: None if file.mime == "root" else True
+
+        parent = File.get(parent_id)
 
         if file_manager_called_for == 'file_browse_image':
             actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
@@ -103,11 +144,90 @@ class File(Base, PRBase):
                                 'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0],
                     'url': file.url(),
-                    'actions': {action:actions[action](file) for action in actions}
+                    'author_name': file.copyright_author_name,
+                    'description': file.description,
+                    'actions': {action: actions[action](file) for action in actions},
                     }
                                         for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
+        ret.append({'name': parent.name, 'id': parent.id, 'parent_id': parent.parent_id,
+                                'type': 'parent',
+                                'date': str(parent.md_tm).split('.')[0],
+                    'url': parent.url(),
+                    'author_name': parent.copyright_author_name,
+                    'description': parent.description,
+                    'actions': {action: actions[action](parent) for action in actions},
+                    })
 
         return ret
+
+
+    def url(self):
+        server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
+        return 'http://file' + server + '.profireader.com/' + self.id + '/'
+
+    @staticmethod
+    def get_index(file, lists):
+        i = 0
+        for f in lists:
+            if file.id == f:
+                return i
+            i += 1
+        return False
+
+    @staticmethod
+    def get_all_in_dir_rev(id):
+        files_in_parent = [file for file in db(File, parent_id=id)]
+        for file in files_in_parent:
+            if file.mime == 'directory':
+                for fil in db(File, parent_id=file.id):
+                    files_in_parent.append(fil)
+        files_in_parent = files_in_parent[::-1]
+        return files_in_parent
+
+    @staticmethod
+    def get_all_dir(f_id, copy_id=None):
+        files_in_parent = [file for file in db(File, parent_id=f_id) if file.mime == 'directory' and file.id != copy_id]
+        for file in files_in_parent:
+            if file.mime == 'directory':
+                for fil in db(File, parent_id=file.id, mime='directory'):
+                    files_in_parent.append(fil) if fil.id != copy_id else None
+        return files_in_parent
+
+    @staticmethod
+    def get_name(oldname):
+        ex = File.ext(oldname)
+        l = len(ex)
+        name = oldname[:-l]
+        return  name
+
+    @staticmethod
+    def ext(oldname):
+        name = oldname[::-1]
+        b = name.find('.')
+        c = name[0:(b+1):1]
+        c = c[::-1]
+        return c
+
+    @staticmethod
+    def get_unique_name(name, mime, parent_id):
+        if File.is_name(name, mime, parent_id):
+            ext = File.ext(name)
+            name = File.if_copy(name)
+            list = []
+            for n in db(File,parent_id = parent_id, mime=mime):
+                if re.match(r'name'+'\(\d+\)'+'ext', n.name):
+                    pos = (len(n.name) - 2) - len(ext)
+                    list.append(int(n.name[pos:pos+1]))
+            if list == []:
+                return name+'(1)'+ext
+            else:
+                list.sort()
+                index = list[-1] + 1
+                return name+'('+str(index)+')'+ext
+        else:
+            return name
+
+    # ACTIONS
 
     @staticmethod
     def createdir(parent_id=None, name=None, author_user_id=None,
@@ -138,26 +258,193 @@ class File(Base, PRBase):
         g.db.commit()
         return self
 
-    def url(self):
-        server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
-        return 'http://file' + server + '.profireader.com/' + self.id + '/'
+    @staticmethod
+    def search(serch_text, folder_id):
+        # files = []
+        # prop = []
+        # name = name.lower()
+        # prog = re.compile(r'.*'+name+'.*')
+        # for root in roots:
+        #     for file in db(File, root_folder_id=root):
+        #         if re.match(r'^'+name+'.*',file.name.lower()):
+        #             prop.append(file)
+        #         elif re.match(r'.*'+name+'.*',file.name.lower()):
+        #             files.append(file)
+        # prop.extend(files)
+        sub_query = File.get_all_in_dir_rev(folder_id)
+        # if search_text:
+        #     sub_query = sub_query.filter(ArticleCompany.title.ilike("%" + search_text + "%"))
+        # if kwargs.get('portal_id') or kwargs.get('status'):
+        #     sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
+        #                                     **kwargs).exists())
 
-    def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
-        file_content = FileContent.get(self.id).detach()
-        attr = {}
-        if company_id:
-            attr['company_id'] = company_id
-        if parent_folder_id:
-            attr['parent_id'] = parent_folder_id
-        if article_portal_id:
-            attr['article_portal_id'] = article_portal_id
-        if root_folder_id:
-            attr['root_folder_id'] = root_folder_id
-        new_file = self.detach().attr(attr)
-        new_file.save()
-        file_content.id = new_file.id
-        new_file.file_content = file_content
-        return new_file
+        return sub_query
+
+
+    def set_properties(self, add_all,**kwargs):
+        if self == None:
+            return False
+        attr = {f:kwargs[f] for f in kwargs if kwargs[f] != ''}
+        check = File.is_name(attr['name'], self.mime, self.parent_id) if attr['name'] != 'None' else True
+        if attr['name'] == 'None':
+            del attr['name']
+        self.updates(attr)
+        if add_all:
+            files = File.get_all_in_dir_rev(self.id)
+            for file in files:
+                file.updates(attr)
+        return check
+
+    def rename(self, name):
+        if self == None:
+            return False
+        if File.is_name(name, self.mime, self.parent_id):
+            return False
+        else:
+            self.updates({'name': name})
+            return True
+
+    @staticmethod
+    def remove(file_id):
+        file = File.get(file_id)
+        if file == None:
+            return False
+        if file.mime == 'directory':
+            list = File.get_all_in_dir_rev(file_id)
+            for f in list:
+                if f.mime == 'directory':
+                    File.delfile(f)
+                else:
+                    File.delfile(FileContent.get(f.id))
+            b = File.delfile(file)
+        else:
+            b = File.delfile(FileContent.get(file_id))
+        resp = (False if File.get(file_id) else "Success")
+        return resp
+
+    @staticmethod
+    def save_files(files, new_id, attr):
+        for file in files:
+            file_content = FileContent.get(file.id).detach()
+            attr['parent_id'] = new_id
+            file.detach().attr(attr)
+            file.save()
+            file_content.id = file.id
+            file.file_content = file_content
+        return files
+
+    @staticmethod
+    def save_all(id_f, attr, new_id):
+        del attr['name']
+        lists = File.get_all_dir(id_f, new_id)
+        files = [file for file in db(File, parent_id=id_f) if file.mime != 'directory']
+        f = File.save_files(files, new_id, attr)
+        new_list = []
+        old_list = []
+        for dir in lists:
+            if dir.parent_id == id_f:
+                old_list.append(dir.id)
+                attr['parent_id'] = new_id
+                files = [file for file in db(File, parent_id=dir.id) if file.mime != 'directory']
+                dir.detach().attr(attr)
+                dir.save()
+                new_list.append(dir)
+                f = File.save_files(files, dir.id, attr)
+            else:
+                old_list.append(dir.id)
+                files = [file for file in db(File, parent_id=dir.id) if file.mime != 'directory']
+                parent = File.get(dir.parent_id)
+                index = File.get_index(parent, old_list)
+                attr['parent_id'] = new_list[index].id
+                dir.detach().attr(attr)
+                dir.save()
+                new_list.append(dir)
+                f = File.save_files(files, dir.id, attr)
+        return old_list,new_list
+
+    @staticmethod
+    def update_files(files,attr):
+        for file in files:
+            file.updates(attr)
+        return files
+
+    @staticmethod
+    def update_all_in_dir(id, attr):
+        lists = [file for file in db(File, parent_id = id) if file.mime == 'directory']
+        files = [file for file in db(File, parent_id = id) if file.mime != 'directory']
+        c = len(lists)
+        c_ = 1
+        f = File.update_files(files, attr)
+        new_list = []
+        for list in lists:
+            if c_ <= c:
+                list.updates(attr)
+                new_list.append(list)
+            for file in db(File,parent_id = list.id):
+                if file.mime == 'directory':
+                        lists.append(file)
+                        file.updates(attr)
+                        new_list.append(file)
+                elif file.mime != 'directory':
+                    file.updates(attr)
+            c_ += 1
+        return lists
+
+    @staticmethod
+    def update_all(id, attr):
+        files_in_parent = [file for file in db(File, parent_id = id)]
+        del attr['name']
+        del attr['parent_id']
+        for fil in files_in_parent:
+            if fil.mime == 'directory':
+                fil.updates(attr)
+                update_all_dir = File.update_all_in_dir(fil.id, attr)
+            else:
+                fil.updates(attr)
+        return files_in_parent
+
+    def copy_file(self, parent_id, **kwargs):
+        folder = File.get(parent_id)
+        if self == None or folder == None:
+            return False
+        id = self.id
+        root = folder.root_folder_id
+        if folder.root_folder_id == None:
+            root = folder.id
+        attr = {f:kwargs[f] for f in kwargs}
+        attr['name'] = File.get_unique_name(self.name, self.mime, parent_id)
+        attr['parent_id'] = parent_id
+        attr['root_folder_id'] = root
+        copy_file = self.detach().attr(attr)
+        copy_file.save()
+        if self.mime == 'directory':
+            all_in_dir = File.save_all(id, attr, copy_file.id)
+        else:
+            file_content = FileContent.get(id).detach()
+            file_content.id = copy_file.id
+            copy_file.file_content = file_content
+
+        return copy_file.id
+
+    def move_to(self, parent_id, **kwargs):
+        folder = File.get(parent_id)
+        if self == None or folder == None:
+            return False
+        if File.can_paste_in_dir(self.id, parent_id) == False and self.mime == 'directory':
+            return False
+        if self.parent_id == parent_id:
+            return self.id
+        root = folder.root_folder_id
+        if folder.root_folder_id == None:
+            root = folder.id
+        attr = {f:kwargs[f] for f in kwargs}
+        attr['name'] = File.get_unique_name(self.name, self.mime, parent_id)
+        attr['parent_id'] = parent_id
+        attr['root_folder_id'] = root
+        self.updates(attr)
+        if self.mime == 'directory':
+            b = File.update_all(self.id,attr)
+        return self.id
 
 
 class FileContent(Base, PRBase):
@@ -165,7 +452,10 @@ class FileContent(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file = relationship('File', uselist=False, backref=backref('file_content', uselist=False))
+    file = relationship('File',
+                                uselist=False,
+                                backref=backref('file_content', uselist=False),
+                                cascade='save-update,delete')
 
     def __init__(self, file=None, content=None):
         self.file = file
@@ -216,9 +506,7 @@ class ImageCroped(Base, PRBase):
 
     def __init__(self, original_image_id=None, x=None, y=None, width=None, height=None, rotate=None,
                  croped_image_id=None):
-        # super(Base, self).__init__()
-        # super(PRBase, self).__init__()
-        # self.__mro__
+        super(ImageCroped, self).__init__()
         self.original_image_id = original_image_id
         self.croped_image_id = croped_image_id
         self.x = x
