@@ -66,7 +66,7 @@ function down {
     if [[ "$3" != '' ]]; then
 	echo "  mv $filetoget $filetobak"
     fi
-    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://x.d.ntaxa.com/profireader/$filetoget
+    command="wget --user='$ntaxauser' --password='$ntaxapass' -O /tmp/tmpfile http://x.m.ntaxa.com/profireader/$filetoget
 if [[ \"\$?\" == \"0\" ]]; then"
     if [[ "$3" != '' ]]; then
 	command="$command
@@ -161,13 +161,13 @@ apt-get install libpq-dev python-dev libapache2-mod-wsgi" sudo hosts
 
 function menu_hosts {
     conf_comm "sed -i '/\(db\|web\|mail\).profi/d' /etc/hosts
-sed -i '/\(companyportal\|aprofi\).d.ntaxa.com/d' /etc/hosts
-sed -i '/profi.ntaxa.com/d' /etc/hosts
+sed -i '/\(companyportal\|aprofi\).m.ntaxa.com/d' /etc/hosts
+sed -i '/profireader.com/d' /etc/hosts
 echo '' >> /etc/hosts
 echo '127.0.0.1 db.profi web.profi mail.profi' >> /etc/hosts
 echo '127.0.0.1 db.profi_test' >> /etc/hosts
-echo '127.0.0.1 profi.ntaxa.com oles.profi.ntaxa.com rodynnifirmy.profi.ntaxa.com derevoobrobka.profi.ntaxa.com viktor.profi.ntaxa.com aa.profi.ntaxa.com md.profi.ntaxa.com oleh.profi.ntaxa.com file001.profi.ntaxa.com fsm.profi.ntaxa.com' >> /etc/hosts
-echo '127.0.0.1 test.profi.ntaxa.com test1.profi.ntaxa.com test2.profi.ntaxa.com test3.profi.ntaxa.com test4.profi.ntaxa.com test5.profi.ntaxa.com test6.profi.ntaxa.com test7.profi.ntaxa.com test8.profi.ntaxa.com test9.profi.ntaxa.com' >> /etc/hosts
+echo '127.0.0.1 profireader.com oles.profireader.com rodynnifirmy.profireader.com derevoobrobka.profireader.com viktor.profireader.com aa.profireader.com md.profireader.com oleh.profireader.com file001.profireader.com fsm.profireader.com' >> /etc/hosts
+echo '127.0.0.1 test.profireader.com test1.profireader.com test2.profireader.com test3.profireader.com test4.profireader.com test5.profireader.com test6.profireader.com test7.profireader.com test8.profireader.com test9.profireader.com' >> /etc/hosts
 cat /etc/hosts" sudo haproxy
     }
 
@@ -253,7 +253,7 @@ function menu_db_user_pass {
 ALTER USER $psqluser WITH PASSWORD '$psqlpass';" compare_local_makarony
     }
 
-makaronyaddress='d.ntaxa.com/profireader/54321'
+makaronyaddress='m.ntaxa.com/profireader/54321'
 localaddress='localhost/profireader/5432'
 artekaddress='a.ntaxa.com/profireader/54321'
 
@@ -354,10 +354,10 @@ dialog --title "profireader" --nocancel --default-item $next --menu "Choose an o
 "db_rename" "rename database (create backup)" \
 "db_create" "create empty database" \
 "db_save_minimal" "save initial database to file" \
-"db_download_minimal" "get minimal database from x.d.ntaxa.com" \
+"db_download_minimal" "get minimal database from x.m.ntaxa.com" \
 "db_load_minimal" "load minimal database from file" \
 "db_save_full" "save full database to file" \
-"db_download_full" "get full database from x.d.ntaxa.com" \
+"db_download_full" "get full database from x.m.ntaxa.com" \
 "db_load_full" "load full database from file" \
 "compare_local_makarony" "compare local database and dev version" \
 "compare_local_artek" "compare local database and production version" \

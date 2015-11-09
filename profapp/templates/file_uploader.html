@@ -28,9 +28,9 @@ app.controller('MyCtrl', ['$scope', 'Upload', '$timeout', function ($scope, Uplo
       console.log(file);
     file.upload = Upload.upload({
 
-      url: 'http://profi.ntaxa.com/filemanager/send/{{ company_id }}/',
+      url: 'http://profireader.com/filemanager/send/{{ company_id }}/',
         data : $scope.name,
-      resumeSizeUrl: 'http://profi.ntaxa.com/filemanager/resumeopload/',
+      resumeSizeUrl: 'http://profireader.com/filemanager/resumeopload/',
       resumeChunkSize: $scope.chunkSize,
       headers: {
         'optional-header': 'header-value'

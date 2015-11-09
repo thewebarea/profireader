@@ -175,8 +175,8 @@ def send_file(filename_or_fp, mimetype=None, as_attachment=False,
     return rv
 
 def allowed_referrers(domain):
-    return True if domain == 'http://profi.ntaxa.com' or \
-                   'http://rodynnifirmy.profi.ntaxa.com' else False
+    return True if domain == 'http://profireader.com' or \
+                   'http://rodynnifirmy.profireader.com' else False
 
 @file_bp.route('<string:file_id>/')
 def get(file_id):

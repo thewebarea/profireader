@@ -140,7 +140,7 @@ class File(Base, PRBase):
 
     def url(self):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
-        return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
+        return 'http://file' + server + '.profireader.com/' + self.id + '/'
 
     def copy_file(self, company_id = None, parent_folder_id = None, article_portal_id = None, root_folder_id = None):
         file_content = FileContent.get(self.id).detach()
