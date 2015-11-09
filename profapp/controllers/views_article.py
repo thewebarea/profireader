@@ -13,6 +13,7 @@ from config import Config
 from .views_file import crop_image, update_croped_image
 from ..models.files import ImageCroped, File
 from utils.db_utils import db
+from sqlalchemy.orm.exc import NoResultFound
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
@@ -95,8 +96,12 @@ def load_form_update(json, article_company_id):
     article.update(ratio=Config.IMAGE_EDITOR_RATIO)
     image_id = article.get('image_file_id')
     if image_id:
-        article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
-        article.update(coordinates)
+        try:
+            article['image_file_id'], coordinates = ImageCroped.\
+                get_coordinates_and_original_img(image_id)
+            article.update(coordinates)
+        except NoResultFound:
+            pass
     return article
 
 
