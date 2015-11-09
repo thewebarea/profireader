@@ -231,13 +231,7 @@
         };
 
         Item.prototype.fileUrl = function(id, down){
-            if (!id) return '';
-            var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
-            if (down === true){
-                return 'http://file' + server + '.profi.ntaxa.com/' + id + '?d'
-            }else{
-                return 'http://file' + server + '.profi.ntaxa.com/' + id + '/'
-            }
+            return fileUrl(id, down)
         };
 
         Item.prototype.choose = function() {

@@ -163,7 +163,7 @@ class File(Base, PRBase):
 
     def url(self):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
-        return 'http://file' + server + '.profi.ntaxa.com/' + self.id + '/'
+        return 'http://file' + server + '.profireader.com/' + self.id + '/'
 
     @staticmethod
     def get_index(file, lists):
@@ -423,6 +423,7 @@ class File(Base, PRBase):
             file_content = FileContent.get(id).detach()
             file_content.id = copy_file.id
             copy_file.file_content = file_content
+
         return copy_file.id
 
     def move_to(self, parent_id, **kwargs):
@@ -453,7 +454,7 @@ class FileContent(Base, PRBase):
     content = Column(Binary, nullable=False)
     file = relationship('File',
                                 uselist=False,
-                                backref=backref('file_content', uselist=True),
+                                backref=backref('file_content', uselist=False),
                                 cascade='save-update,delete')
 
     def __init__(self, file=None, content=None):
