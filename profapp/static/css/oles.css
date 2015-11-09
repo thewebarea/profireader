@@ -1,5 +1,7 @@
 
-
+*[disabled] {
+    color: #ccc;
+}
 /*#navigation_selected_division {*/
     /*color: red;*/
 /*}*/
@@ -76,4 +78,6 @@
 div.profi-tiny-mce-birdy-wraper {
     width: 713.5px;
     height: 600px;
+    position: absolute;
+    top: 450px;
 }
