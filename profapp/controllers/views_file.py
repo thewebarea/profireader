@@ -185,7 +185,8 @@ def send_file(filename_or_fp, mimetype=None, as_attachment=False,
     return rv
 
 def allowed_referrers(domain):
-    return True if domain == 'http://profi.ntaxa.com' else False
+    return True if domain == 'http://profireader.com' or \
+                   'http://rodynnifirmy.profireader.com' else False
 
 @file_bp.route('<string:file_id>/')
 def get(file_id):
@@ -244,6 +245,41 @@ def crop_image(image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
                     croped_image_id=croped.id,
                     x=coordinates['x'], y=coordinates['y'], width=coordinates['width'],
                     height=coordinates['height'], rotate=coordinates['rotate']).save()
+
+        return croped.id
+
+    else:
+        g.db.rollback()
+        raise BadCoordinates
+
+
+
+def update_croped_image(original_image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
+                        height=Config.HEIGHT_IMAGE):
+    image_croped_assoc = db(ImageCroped, original_image_id=original_image_id).one()
+    croped = db(File, id=image_croped_assoc.croped_image_id).one()
+    size = (int(ratio*height), height)
+    image_query = file_query(File, image_croped_assoc.original_image_id)
+    image = Image.open(BytesIO(image_query.file_content.content))
+    area = [int(a) for a in (coordinates['x'], coordinates['y'], coordinates['width'],
+                             coordinates['height'])
+            if int(a) in range(0, max(image.size))]
+
+    if area:
+        angle = int(coordinates["rotate"])*-1
+        area[2] = (area[0]+area[2])
+        area[3] = (area[1]+area[3])
+        rotated = image.rotate(angle)
+        cropped = rotated.crop(area).resize(size)
+        bytes_file = BytesIO()
+        cropped.save(bytes_file, image_query.mime.split('/')[-1].upper())
+        croped.size = sys.getsizeof(bytes_file.getvalue())
+        croped.file_content.content = bytes_file.getvalue()
+        image_croped_assoc.x = coordinates['x']
+        image_croped_assoc.y = coordinates['y']
+        image_croped_assoc.width = coordinates['width']
+        image_croped_assoc.height = coordinates['height']
+        image_croped_assoc.rotate = coordinates['rotate']
 
         return croped.id
 

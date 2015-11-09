@@ -236,7 +236,7 @@ class File(Base, PRBase):
         f = File(parent_id=parent_id, author_user_id=author_user_id,
                  root_folder_id = root_folder_id,
                  name=name, size=0, company_id=company_id, mime='directory')
-        # f = File(parent_id=parent_id, author_user_id=author_user_id,
+        # f = File(parent_id=parent_id, author_user_id=author_user_id, 
         #          name=name, size=0, company_id=company_id, copyright=copyright, mime='directory')
         g.db.add(f)
         g.db.commit()
@@ -330,7 +330,7 @@ class File(Base, PRBase):
             file.detach().attr(attr)
             file.save()
             file_content.id = file.id
-            file.file_content = [file_content]
+            file.file_content = file_content
         return files
 
     @staticmethod
@@ -422,7 +422,7 @@ class File(Base, PRBase):
         else:
             file_content = FileContent.get(id).detach()
             file_content.id = copy_file.id
-            copy_file.file_content = [file_content]
+            copy_file.file_content = file_content
         return copy_file.id
 
     def move_to(self, parent_id, **kwargs):
@@ -453,7 +453,7 @@ class FileContent(Base, PRBase):
     content = Column(Binary, nullable=False)
     file = relationship('File',
                                 uselist=False,
-                                backref='file_content',
+                                backref=backref('file_content', uselist=True),
                                 cascade='save-update,delete')
 
     def __init__(self, file=None, content=None):
@@ -514,3 +514,11 @@ class ImageCroped(Base, PRBase):
         self.height = height
         self.rotate = rotate
 
+    def get_client_side_dict(self, fields='x,y,width,height,rotate'):
+        """This method make dictionary from portal object with fields have written above"""
+        return self.to_dict(fields)
+
+    @staticmethod
+    def get_coordinates_and_original_img(croped_image_id):
+        coor_img = db(ImageCroped, croped_image_id=croped_image_id).one()
+        return coor_img.original_image_id, {'coordinates': coor_img.get_client_side_dict()}

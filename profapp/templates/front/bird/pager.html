@@ -37,7 +37,7 @@
     <li class="next">
         {% if current_page != pages %}
         <a href="{{ url_for('front.division', division_name=current_division.name, page=current_page + 1, search_text=search_text) }}"></a>
-        {% else %} Newer &rarr;
+        {% else %}
         {% endif %}
     </li>
 {% endif %}
