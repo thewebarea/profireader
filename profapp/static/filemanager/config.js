@@ -8,13 +8,15 @@
 
             listUrl: "/filemanager/list/",
             uploadUrl: "/filemanager/upload/",
-            renameUrl: "bridges/php/handler.php",
-            copyUrl: "bridges/php/handler.php",
-            removeUrl: "bridges/php/handler.php",
+            renameUrl: "/filemanager/rename/",
+            set_properties: "/filemanager/properties/",
+            search_Url: "/filemanager/search/",
+            copyUrl: "/filemanager/copy/",
+            cutUrl: "/filemanager/cut/",
+            removeUrl: "/filemanager/remove/",
             editUrl: "bridges/php/handler.php",
             getContentUrl: "bridges/php/handler.php",
             createFolderUrl: "/filemanager/createdir/",
-            downloadFileUrl: "bridges/php/handler.php",
             compressUrl: "bridges/php/handler.php",
             extractUrl: "bridges/php/handler.php",
             permissionsUrl: "bridges/php/handler.php",
@@ -23,7 +25,7 @@
             breadcrumb: true,
             allowedActions: {
                 rename: !true,
-                copy: !true,
+                copy: true,
                 edit: !true,
                 changePermissions: !true,
                 compress: !true,
@@ -32,8 +34,10 @@
                 download: true,
                 preview: !true,
                 choose: true,
-                remove: !true
+                remove: true
             },
+
+            error_msg_exist:'file_is_not_exist',
 
             enablePermissionsRecursive: true,
 

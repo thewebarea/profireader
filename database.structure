@@ -491,7 +491,8 @@ CREATE TABLE file (
     md_tm timestamp without time zone NOT NULL,
     ac_tm timestamp without time zone NOT NULL,
     copyright_author_name character varying(100) DEFAULT ''::character varying NOT NULL,
-    root_folder_id character varying(36)
+    root_folder_id character varying(36),
+    article_portal_id character varying(36)
 );
 
 
@@ -724,7 +725,6 @@ CREATE TABLE "user" (
     yahoo_gender character varying(6),
     yahoo_link text,
     yahoo_phone character varying(20),
-    personal_folder_file_id character varying(36),
     profireader_avatar_url text DEFAULT '/static/no_avatar.png'::text NOT NULL,
     group_id character varying(30) DEFAULT 'unconfirmed'::character varying NOT NULL,
     _banned boolean DEFAULT false NOT NULL,
@@ -1211,6 +1211,14 @@ ALTER TABLE ONLY article_portal
 
 
 --
+-- Name: article_portal_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+--
+
+ALTER TABLE ONLY file
+    ADD CONSTRAINT article_portal_id FOREIGN KEY (article_portal_id) REFERENCES article_portal(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
 -- Name: article_portal_portal_division_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
@@ -1291,11 +1299,11 @@ ALTER TABLE ONLY file
 
 
 --
--- Name: file_content_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
+-- Name: file_id; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
 --
 
 ALTER TABLE ONLY file_content
-    ADD CONSTRAINT file_content_id_fkey FOREIGN KEY (id) REFERENCES file(id);
+    ADD CONSTRAINT file_id FOREIGN KEY (id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -1312,14 +1320,6 @@ ALTER TABLE ONLY file
 
 ALTER TABLE ONLY article_company
     ADD CONSTRAINT fk_article_article_bulk_id FOREIGN KEY (article_id) REFERENCES article(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: fk_user_personal_folder; Type: FK CONSTRAINT; Schema: public; Owner: pfuser
---
-
-ALTER TABLE ONLY "user"
-    ADD CONSTRAINT fk_user_personal_folder FOREIGN KEY (personal_folder_file_id) REFERENCES file(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --

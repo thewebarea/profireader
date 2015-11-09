@@ -27,7 +27,9 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-
+/solr*/
+solr*
+/solr*
 # PyInstaller
 client_secret.json
 #  Usually these files are written by a python script from a template
@@ -76,6 +78,7 @@ client_secret.*
 *client_secret.json
 /*client_secrets.json
 /*client_secret.json
+/client_secret.json
 
 # database
 database_full.*
@@ -90,3 +93,4 @@ tmp*
 **/node_modules
 **/bower_components
 *.sql
+**/bower_components_dev

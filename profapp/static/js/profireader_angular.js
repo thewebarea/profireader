@@ -52,7 +52,7 @@ function getObjectsDifference(a, b, setval, notstrict) {
 
 angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip', 'ajaxFormModule'])
     .factory('$ok', ['$http', function ($http) {
-        return function (url, data, ifok, iferror, config) {
+        return function (url, data, ifok, iferror) {
             function error(result, error_code) {
                 if (iferror) {
                     iferror(result, error_code)
@@ -62,26 +62,25 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip',
                 }
             };
 
-
-            return $http.post(url, data, config ? config : {}).then(
-                function (response) {
-                    if (!response || !response['data'] || typeof response['data'] !== 'object' || response === null) {
-                        return error('wrong response', -1, response);
+            return $http.post(url, data).then(
+                function (resp) {
+                    if (!resp || !resp['data'] || typeof resp['data'] !== 'object' || resp === null) {
+                        return error('wrong response', -1);
                     }
 
-                    var resp = response['data'];
+                    resp = resp ['data'];
 
                     if (!resp['ok']) {
-                        return error(resp['data'], resp['error_code'], response);
+                        return error(resp['data'], resp['error_code']);
                     }
 
                     if (ifok) {
-                        return ifok(resp['data'], 0, response);
+                        return ifok(resp['data']);
                     }
 
                 },
-                function (response) {
-                    return error('wrong response', -1, response);
+                function () {
+                    return error('wrong response', -1);
                 }
             );
         }
@@ -119,117 +118,117 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip',
             }
         };
     }])
-    .service('objectTransformation', function () {
-        var objectTransformation = {};
+    .service('objectTransformation', function() {
+                    var objectTransformation = {};
 
-        objectTransformation.reverseKeyValue = function (objIn) {
-            var objOut = {}, keys, i;
-            keys = Object.keys($scope.data.PortalDivisionTags3);
-            for (i = 0; i < objIn.length; i++) {
-                objOut[objIn[keys[i]]] = keys[i];
-            }
-            return objOut;
-        };
+                    objectTransformation.reverseKeyValue = function(objIn){
+                        var objOut = {}, keys, i;
+                        keys = Object.keys($scope.data.PortalDivisionTags3);
+                        for (i = 0; i < objIn.length; i++){
+                            objOut[objIn[keys[i]]] = keys[i];
+                            }
+                        return objOut;
+                        };
 
-        objectTransformation.getValues1 = function (objList, key, unique) {
-            var values = [], value;
-            for (var i = 0; i < objList.length; i++) {
-                value = objList[i][key];
-                if (!unique || (values.indexOf(value) === -1)) {
-                    values.push(value);
-                }
-            }
-            return values;
-        };
+                    objectTransformation.getValues1 = function(objList, key, unique){
+                        var values = [], value;
+                        for (var i = 0; i < objList.length; i++){
+                            value = objList[i][key];
+                            if (!unique || (values.indexOf(value) === -1)){
+                                values.push(value);
+                            }
+                        }
+                        return values;
+                    };
 
-        objectTransformation.getValues2 = function (objList, key1, key2) {
-            var resultObject = {}, key, value;
-            for (var i = 0; i < objList.length; i++) {
-                key = objList[i][key1];
-                value = objList[i][key2];
+                    objectTransformation.getValues2 = function(objList, key1, key2){
+                        var resultObject = {}, key, value;
+                        for (var i = 0; i < objList.length; i++){
+                            key = objList[i][key1];
+                            value = objList[i][key2];
 
-                if (typeof resultObject[key] === 'undefined') {
-                    resultObject[key] = [value]
-                } else {
-                    if (resultObject[key].indexOf(value) === -1) {
-                        resultObject[key].push(value)
-                    }
-                }
-            }
-            return resultObject;
-        };
+                            if (typeof resultObject[key] === 'undefined'){
+                                resultObject[key] = [value]
+                            } else {
+                                if (resultObject[key].indexOf(value) === -1){
+                                    resultObject[key].push(value)
+                                }
+                            }
+                        }
+                        return resultObject;
+                    };
 
-        objectTransformation.getValues3 = function (objList, key1, key2, key2List) {
-            var resultObject = {}, key, i, objFilledWithFalse = {};
+                    objectTransformation.getValues3 = function(objList, key1, key2, key2List){
+                        var resultObject = {}, key, i, objFilledWithFalse = {};
 
-            for (i = 0; i < key2List.length; i++) {
-                objFilledWithFalse[key2List[i]] = false
-            }
+                        for (i = 0; i < key2List.length; i++){
+                            objFilledWithFalse[key2List[i]] = false
+                        }
 
-            for (i = 0; i < objList.length; i++) {
-                key = objList[i][key1];
-                if (typeof resultObject[key] === 'undefined') {
-                    resultObject[key] = $.extend(true, {}, objFilledWithFalse);
-                }
-                resultObject[key][objList[i][key2]] = true;
-            }
+                        for (i = 0; i < objList.length; i++){
+                            key = objList[i][key1];
+                            if (typeof resultObject[key] === 'undefined'){
+                                resultObject[key] = $.extend(true, {}, objFilledWithFalse);
+                            }
+                            resultObject[key][objList[i][key2]] = true;
+                        }
 
-            return resultObject;
-        };
+                        return resultObject;
+                    };
 
-        objectTransformation.getValues4 = function (objList, key1, key2, key2List) {
-            var resultObject = {}, key, i, objFilledWithFalse = {}, lList, elem;
+                    objectTransformation.getValues4 = function(objList, key1, key2, key2List){
+                        var resultObject = {}, key, i, objFilledWithFalse = {}, lList, elem;
 
-            lList = [];
-            for (i = 0; i < objList.length; i++) {
-                elem = objList[i][key1];
-                if (lList.indexOf(elem) === -1) {
-                    lList.push(elem);
-                }
-            }
+                        lList = [];
+                        for (i = 0; i < objList.length; i++){
+                            elem = objList[i][key1];
+                            if (lList.indexOf(elem) === -1){
+                                lList.push(elem);
+                                }
+                        }
 
-            for (i = 0; i < lList.length; i++) {
-                objFilledWithFalse[lList[i]] = false;
-            }
+                        for (i = 0; i < lList.length; i++){
+                            objFilledWithFalse[lList[i]] = false;
+                        }
 
-            for (i = 0; i < key2List.length; i++) {
-                resultObject[key2List[i]] = $.extend(true, {}, objFilledWithFalse);
-            }
+                        for (i = 0; i < key2List.length; i++){
+                            resultObject[key2List[i]] = $.extend(true, {}, objFilledWithFalse);
+                        }
 
-            for (i = 0; i < objList.length; i++) {
-                key = objList[i];
-                resultObject[key[key2]][key[key1]] = true;
-            }
+                        for (i = 0; i < objList.length; i++){
+                            key = objList[i];
+                            resultObject[key[key2]][key[key1]] = true;
+                        }
 
-            return resultObject;
-        };
+                        return resultObject;
+                    };
 
-        // substitution in keys is performed
-        objectTransformation.subsInKey = function (objIn, objForSubstitution) {
-            var keys, i, objOut;
+                    // substitution in keys is performed
+                    objectTransformation.subsInKey = function(objIn, objForSubstitution){
+                        var keys, i, objOut;
 
-            keys = Object.keys(objIn);
-            objOut = {};
+                        keys = Object.keys(objIn);
+                        objOut = {};
 
-            for (i = 0; i < keys.length; i++) {
-                objOut[objForSubstitution[keys[i]]] = objIn[keys[i]];
-            }
+                        for (i = 0; i < keys.length; i++){
+                            objOut[objForSubstitution[keys[i]]] = objIn[keys[i]];
+                        }
 
-            return objOut;
-        };
+                        return objOut;
+                    };
 
-        // substitution of list elements is performed
-        objectTransformation.subsElemOfList = function (listIn, objForSubstitution) {
-            var i, listOut;
-            listOut = [];
-            for (i = 0; i < listIn.length; i++) {
-                listOut.push(objForSubstitution[listIn[i]])
-            }
-            return listOut;
-        };
+                    // substitution of list elements is performed
+                    objectTransformation.subsElemOfList = function(listIn, objForSubstitution){
+                        var i, listOut;
+                        listOut = [];
+                        for (i = 0; i < listIn.length; i++){
+                            listOut.push(objForSubstitution[listIn[i]])
+                        }
+                        return listOut;
+                    };
 
-        return objectTransformation;
-    })
+                    return objectTransformation;
+                })
     .directive('ngOk', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',
@@ -352,7 +351,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip',
                 //            s.getTemp(iAttrs.ngCity);
             }
         }
-
     }])
     .directive('ngAjaxFormOld', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
@@ -505,7 +503,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip',
                     });
             }
         }
-
     }]);
 
 
@@ -602,9 +599,7 @@ module.run(function ($rootScope, $ok) {
             var scope = this;
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
-                if (!beforeload) beforeload = function (d) {
-                    return d;
-                };
+                if (!beforeload) beforeload = function (d) {return d;};
                 scope.data = beforeload(data);
                 scope.original_data = $.extend(true, {}, scope.data);
                 if (afterload) afterload();
@@ -614,14 +609,10 @@ module.run(function ($rootScope, $ok) {
             });
         },
         areAllEmpty: areAllEmpty,
-
         tinymceImageOptions: {
             inline: false,
-            plugins: 'advlist autolink link image lists charmap print preview paste',
+            plugins: 'advlist autolink link image lists charmap print preview',
             skin: 'lightgray',
-            paste_as_text: false,
-            width: '100%',
-            height: '100%',
             theme: 'modern',
             //paste_postprocess1: function (plugin, args) {
             //    console.log('paste_postprocess', args);
@@ -647,7 +638,6 @@ module.run(function ($rootScope, $ok) {
                 tinymce.activeEditor.windowManager.open({
                         file: cmsURL,
                         title: 'Select an Image',
-
                         width: 950,  // Your dimensions may differ - toy around with them!
                         height: 700,
                         resizable: "yes",
@@ -661,6 +651,7 @@ module.run(function ($rootScope, $ok) {
                     }
                 )
                 ;
+
             },
             //valid_elements: Config['article_html_valid_elements'],
             //valid_elements: 'a[class],img[class|width|height],p[class],table[class|width|height],th[class|width|height],tr[class],td[class|width|height],span[class],div[class],ul[class],ol[class],li[class]',
@@ -704,9 +695,11 @@ module.run(function ($rootScope, $ok) {
             //        }
             //    }
             //]
+
         }
-    });
+    })
 });
+
 
 function cleanup_html(html) {
     normaltags = '^(span|a|br|div|table)$'
@@ -778,14 +771,16 @@ function angularControllerFunction(controller_attr, function_name) {
 
 }
 
-function fileUrl(id) {
+function fileUrl(id, down) {
     if (!id) return '';
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
-    return 'http://file' + server + '.profireader.com/' + id + '/'
+    if (down){
+        return 'http://file' + server + '.profireader.com/' + id + '?d'
+    }else {
+         return 'http://file' + server + '.profireader.com/' + id + '/'
+    }
 }
-
 
 function cloneObject(o) {
     return (o === null || typeof o !== 'object') ? o : $.extend(true, {}, o);
 }
-
