@@ -1,6 +1,12 @@
-<a class="login-by login-by-google" href="{{ url_for('auth.signup_soc_network', soc_network_name='google') }}"><span><i>by</i>google</span></a>
-<a class="login-by login-by-facebook"  href="{{ url_for('auth.signup_soc_network', soc_network_name='facebook') }}"><span><i>by</i>facebook</span></a>
-<a class="login-by login-by-linkedin"  href="{{ url_for('auth.signup_soc_network', soc_network_name='linkedin') }}"><span><i>by</i>linkedin</span></a>
-{#<a href="{{ url_for('auth.signup_soc_network', soc_network_name='twitter') }}">twitter</a>#}
-<a class="login-by login-by-microsoft"  href="{{ url_for('auth.signup_soc_network', soc_network_name='microsoft') }}"><span><i>by</i>microsoft</span></a>
-{#<a href="{{ url_for('auth.signup_soc_network', soc_network_name='yahoo') }}">yahoo</a>#}
+<h3>Sign up via social:</h3>
+<div class="via-social">
+    <a class="login-by login-by-google" href="{{ url_for('auth.signup_soc_network', soc_network_name='google') }}"></a>
+    <a class="login-by login-by-facebook"
+       href="{{ url_for('auth.signup_soc_network', soc_network_name='facebook') }}"></a>
+    <a class="login-by login-by-linkedin"
+       href="{{ url_for('auth.signup_soc_network', soc_network_name='linkedin') }}"></a>
+    {#<a href="{{ url_for('auth.signup_soc_network', soc_network_name='twitter') }}">twitter</a>#}
+    <a class="login-by login-by-microsoft"
+       href="{{ url_for('auth.signup_soc_network', soc_network_name='microsoft') }}"></a>
+    {#<a href="{{ url_for('auth.signup_soc_network', soc_network_name='yahoo') }}">yahoo</a>#}
+</div>
