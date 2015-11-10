@@ -253,7 +253,7 @@ function menu_db_user_pass {
 ALTER USER $psqluser WITH PASSWORD '$psqlpass';" compare_local_makarony
     }
 
-makaronyaddress='m.ntaxa.com/profireader/54321'
+makaronyaddress='m.ntaxa.com/profireader/54322'
 localaddress='localhost/profireader/5432'
 artekaddress='a.ntaxa.com/profireader/54321'
 
