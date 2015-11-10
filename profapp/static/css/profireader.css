@@ -1,22 +1,24 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic);
 
-
-body{
-    background: #eee!important;
+html {
+    min-height: 100%;
 }
 
+body {
+    background: #eee !important;
+    min-height: 100%;
+}
 
-.navbar{
+.navbar {
     margin: 0;
 }
 
-.container.widewrapper{
+.container.widewrapper {
     background: #fff;
 }
 
-*, html, h1, h2, h3, h4, h5,h6
-{
-    font-family: 'Roboto', sans-serif!important;
+*, html, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto', sans-serif !important;
 }
 
 /*
@@ -25,7 +27,7 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 */
 
 .highlight {
-    color: coral;
+    color: #ca2027;
     -moz-transition: color 0.5s;
     -webkit-transition: color 0.5s;
     -o-transition: color 0.5s;
@@ -33,24 +35,69 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 
 }
 
-.navbar-brand{
-    padding: 5px;
-    margin-left: px!important;
+.red-label {
+    background: #ca2027;
+    color: #fff;
+    padding: 10px 10px 10px 25px;
+    margin-left: -15px;
+    display: inline-block;
 }
 
-.navbar-brand img{
+.navbar-brand {
+    padding: 5px;
+    margin-left: px !important;
+}
+
+.navbar-brand img {
     height: 40px;
     width: auto;
 }
 
-.dropdown-menu{
+ul.user-auth li a {
+    height: 100%;
+    padding: 11px !important;
+}
+
+.dropdown-menu {
     width: 100%;
     border-radius: 0;
     margin: 0;
+    padding: 0;
+}
+
+ul.dropdown-menu li {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+ul.dropdown-menu li:first-child {
+    border: none;
 }
 
 ul.dropdown-menu li a.typeahead-item strong {
     color: #f00;
+}
+
+ul.dropdown-menu li a {
+    padding: 10px 10px 10px 20px;
+    border-left: 3px solid transparent;
+}
+
+ul.dropdown-menu li a:hover {
+    border-color: #ca2027;
+    color: #ca2027;
+}
+
+ul.dropdown-menu li a.typeahead-item strong {
+    color: #f00;
+}
+
+ul.dropdown-menu li a {
+    padding: 10px 10px 10px 20px;
+    border-left: 3px solid transparent;
+}
+
+ul.dropdown-menu li a:hover {
+    border-color:;
 }
 
 .modal-filemanager-fullscreen {
@@ -82,6 +129,10 @@ body {
     background-color: #feffff;
 }
 
+.navbar > .container .navbar-brand, .navbar > .container-fluid .navbar-brand {
+    margin: 0 !important;
+}
+
 a {
     color: #5b6268;
 }
@@ -93,21 +144,27 @@ a:focus {
 }
 
 h1 {
-    font-size: 45px;
-    line-height: 60px;
+    display: inline-block;
+    width: auto;
+    background: #CA2027;
+    color: #fff;
+    margin-left: -15px;
+    padding: 10px 15px;
+    font-size: 28px;
+    line-height: 28px;
     font-weight: normal;
     font-family: 'PT Serif', serif;
 }
 
 h2 {
-    font-size: 30px;
-    line-height: 40px;
+    font-size: 22px;
+    line-height: 22px;
     font-family: 'Open Sans', sans-serif;
 }
 
 h3 {
-    font-size: 21px;
-    line-height: 30px;
+    font-size: 18px;
+    line-height: 18px;
     font-weight: normal;
     font-family: 'Open Sans', sans-serif;
 }
@@ -202,6 +259,7 @@ hr {
 .widewrapper.copyright a:hover {
     color: #CD2027;
 }
+
 /* Styles for the navigation, both mobile and desktop */
 /* Desktop version of the navigation */
 .tales-nav .nav-pills {
@@ -332,8 +390,8 @@ hr {
         border-radius: 6px;
     }
 
-    .navbar.navbar-collapse{
-        padding: 0!important;
+    .navbar.navbar-collapse {
+        padding: 0 !important;
     }
 
     .tales-nav .navbar-collapse {
@@ -1493,10 +1551,8 @@ fieldset[disabled] .btn-tales-two.active {
 
 .nav > li > ul > li:hover > a {
     background: #777;
-    color: #fff!important;
+    color: #fff !important;
 }
-
-
 
 .top-style-line {
     height: 3px;
@@ -1518,93 +1574,6 @@ fieldset[disabled] .btn-tales-two.active {
 
 .container-fluid {
     padding: 0;
-}
-
-.via-social{
-    text-align: center;
-    font-size: 0;
-}
-
-.login-by {
-    position: relative;
-    display: inline-block;
-    width: 65px;
-    height: 65px;
-    margin: 2px;
-    background: #eee;
-    margin-bottom: 50px;
-    background-size: cover;
-}
-
-.login-by span {
-    display: block;
-    position: absolute;
-    bottom: -31px;
-    background: #777;
-    color: #FFFFFF;
-    width: 65px;
-    box-sizing: border-box;
-    padding: 2px;
-    text-align: center;
-    font-size: 12px;
-
-    /*background: #152d00; /!* Old browsers *!/*/
-    /*background: -moz-linear-gradient(left,  #152d00 0%, #97d800 100%); /!* FF3.6+ *!/*/
-    /*background: -webkit-gradient(linear, left top, right top, color-stop(0%,#152d00), color-stop(100%,#97d800)); /!* Chrome,Safari4+ *!/*/
-    /*background: -webkit-linear-gradient(left,  #152d00 0%,#97d800 100%); /!* Chrome10+,Safari5.1+ *!/*/
-    /*background: -o-linear-gradient(left,  #152d00 0%,#97d800 100%); /!* Opera 11.10+ *!/*/
-    /*background: -ms-linear-gradient(left,  #152d00 0%,#97d800 100%); /!* IE10+ *!/*/
-    /*background: linear-gradient(to right,  #152d00 0%,#97d800 100%); /!* W3C *!/*/
-    /*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#152d00', endColorstr='#97d800',GradientType=1 ); /!* IE6-9 *!/*/
-}
-
-.login-by:hover span {
-    /*display: block;*/
-    background: #555;
-}
-
-
-.login-by span i {
-    display: none;
-    font-size: 10px;
-    /*margin-right: 5px;*/
-}
-
-
-.login-by-google {
-    background-image: url("/static/images/social/g.png");
-}
-
-.login-by-facebook {
-    background-image: url("/static/images/social/f.png");
-}
-
-.login-by-linkedin {
-    background-image: url("/static/images/social/l.png");
-}
-
-.login-by-microsoft {
-    background-image: url("/static/images/social/m.png");
-}
-
-.by-socials-block {
-    float: left;
-}
-
-.by-profireader-block {
-    float: right;
-}
-
-.tab {
-    display: inline-block;
-    padding: 10px 15px;
-    font-size: 16px;
-    margin-bottom: -1px;
-}
-
-.tab.actual {
-    border: 1px #ccc solid;
-    border-bottom: 1px #fff solid;
 }
 
 a {
@@ -1640,19 +1609,17 @@ form {
 
 /* ---------------------------------------------------------------- */
 
-.navbar .container{
+.navbar .container {
     padding: 0;
 }
 
-
-.nav .open>a, .nav .open>a:focus, .nav .open>a:hover{
+.nav .open > a, .nav .open > a:focus, .nav .open > a:hover {
     background-color: #222;
 }
 
-
 /*** TOP MENU ***/
 
-.top-menu{
+.top-menu {
     display: inline-block;
     position: relative;
     float: right;
@@ -1665,12 +1632,24 @@ form {
     margin-right: 10px;
 }
 
-
-.top-menu li{
+.top-menu li {
     display: inline-block;
+
+    background: -moz-linear-gradient(left, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.04) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, right top, color-stop(0%, rgba(0, 0, 0, 0)), color-stop(100%, rgba(255, 255, 255, 0.04))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.04) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(left, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.04) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(left, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.04) 100%); /* IE10+ */
+    background: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.04) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#14ffffff', GradientType=1); /* IE6-9 */
+
 }
 
-.top-menu li a{
+.top-menu li:first-child a {
+    border-left: 1px rgba(0, 0, 0, 0.3) solid !important;;
+}
+
+.top-menu li a {
     display: inline-block;
     width: 50px;
     height: 50px;
@@ -1682,43 +1661,43 @@ form {
     font-size: 16px;
     filter: alpha(opacity=50);
     opacity: .5;
+    border-right: 1px rgba(0, 0, 0, 0.4) solid !important;
 }
 
-.top-menu .tooltip{
+.top-menu .tooltip {
     display: none;
 }
 
-.top-menu li a:hover{
+.top-menu li a:hover {
     background-color: #777;
     filter: alpha(opacity=95);
     opacity: 0.95;
 }
 
-
-.top-menu li a.messages_btn{
+.top-menu li a.messages_btn {
     background-image: url("../../static/front/img/ico/messenger.png");
 }
-.top-menu li a.company_btn{
+
+.top-menu li a.company_btn {
     background-image: url("../../static/front/img/ico/companies.png");
 }
-.top-menu li a.article_btn{
+
+.top-menu li a.article_btn {
     background-image: url("../../static/front/img/ico/articles.png");
 }
-.top-menu li a.filemanager_btn{
+
+.top-menu li a.filemanager_btn {
     background-image: url("../../static/front/img/ico/files.png");
 }
 
-
-.person-small-cover{
+.person-small-cover {
     border-radius: 50%;
     border: 3px #999 solid;
-    width:36px;height:36px;
+    width: 36px;
+    height: 36px;
 }
 
-
-
-
-.topbar-menu-links{
+.topbar-menu-links {
     display: block;
     width: 1170px;
     margin-left: -15px;
@@ -1726,16 +1705,14 @@ form {
     font-size: 0;
 }
 
-.topbar-menu-links div{
+.topbar-menu-links div {
     display: block;
     line-height: 2;
     height: 100%;
 }
 
-
-
 .topbar-menu-links a,
-.topbar-menu-links span{
+.topbar-menu-links span {
     font-size: 16px;
     padding: 7px 15px;
     border-right: 1px #fff dotted;
@@ -1743,7 +1720,7 @@ form {
     background: transparent;
 }
 
-.topbar-menu-links a:hover{
+.topbar-menu-links a:hover {
     background: #CD2027;
     color: #fff;
 }
@@ -1782,9 +1759,7 @@ form {
     background-size: 256px 256px;
 }
 
-
-
-.form.info .img-upload-form{
+.form.info .img-upload-form {
     display: block;
     position: absolute;
 
@@ -1794,7 +1769,7 @@ form {
     width: 200px;
 }
 
-.form.info .img-upload-form input{
+.form.info .img-upload-form input {
     width: 200px;
 }
 
@@ -1829,25 +1804,24 @@ form {
     padding: 0px;
 }
 
-.profile-thumbnail .control span{
+.profile-thumbnail .control span {
     width: 100px;
     margin: 0;
     padding: 0;
 }
 
-.profile-thumbnail .control a{
+.profile-thumbnail .control a {
     width: 70px;
     margin: 2px;
     padding: 5px;
     cursor: pointer;
 }
 
-
-.profile-thumbnail .control a:hover{
+.profile-thumbnail .control a:hover {
     background: #fff;
 }
 
-.form input[btn-radio]{
+.form input[btn-radio] {
     width: auto;
 }
 
@@ -1874,29 +1848,180 @@ form {
     left: 10px;
 }
 
-
 input[type=checkbox]:not(old),
-input[type=radio   ]:not(old){
-  width   : 28px;
-  margin  : 0;
-  padding : 0;
-/* TODO OK BY OZ: i have removed this code. why u need it?
-  opacity : 0; */
+input[type=radio   ]:not(old) {
+    width: 28px;
+    margin: 0;
+    padding: 0;
+    /* TODO OK BY OZ: i have removed this code. why u need it?
+      opacity : 0; */
 }
 
 input[type=checkbox]:not(old) + label,
-input[type=radio   ]:not(old) + label{
-  display      : inline-block;
-  margin-left  : -28px;
-  padding-left : 28px;
-  background   : url('/static/images/checks.png') no-repeat 0 0;
-  line-height  : 24px;
+input[type=radio   ]:not(old) + label {
+    display: inline-block;
+    margin-left: -28px;
+    padding-left: 28px;
+    background: url('/static/images/checks.png') no-repeat 0 0;
+    line-height: 24px;
 }
 
-input[type=checkbox]:not(old):checked + label{
-  background-position : 0 -24px;
+input[type=checkbox]:not(old):checked + label {
+    background-position: 0 -24px;
 }
 
-input[type=radio]:not(old):checked + label{
-  background-position : 0 -48px;
+input[type=radio]:not(old):checked + label {
+    background-position: 0 -48px;
+}
+
+select:active, select:hover {
+    outline-color: none !important;
+    box-shadow: 0 0 10px 100px #fff inset;
+}
+
+a.title-btn {
+    display: inline-block;
+    padding-left: 5px 5px 5px 50px !important;
+    font-size: 12px !important;
+    margin-left: 10px;
+    height: 48px;
+    background-color: #ff0000;
+}
+
+/* ----- LOGINATION & AUTHORITHATION ------------------ */
+
+.via-social {
+    text-align: left;
+    font-size: 0;
+}
+
+.login-by {
+    position: relative;
+    display: inline-block;
+    width: 45px;
+    height: 45px;
+    margin: 10px 10px 0px 0px;
+    background: #eee;
+    /*margin-bottom: 50px;*/
+    background-size: cover;
+}
+
+/*.login-by span {*/
+/*display: none;*/
+/*position: absolute;*/
+/*bottom: -31px;*/
+/*background: #777;*/
+/*color: #FFFFFF;*/
+/*width: 65px;*/
+/*box-sizing: border-box;*/
+/*padding: 2px;*/
+/*text-align: center;*/
+/*font-size: 12px;*/
+
+/*background: #152d00; /!* Old browsers *!/*/
+/*background: -moz-linear-gradient(left,  #152d00 0%, #97d800 100%); /!* FF3.6+ *!/*/
+/*background: -webkit-gradient(linear, left top, right top, color-stop(0%,#152d00), color-stop(100%,#97d800)); /!* Chrome,Safari4+ *!/*/
+/*background: -webkit-linear-gradient(left,  #152d00 0%,#97d800 100%); /!* Chrome10+,Safari5.1+ *!/*/
+/*background: -o-linear-gradient(left,  #152d00 0%,#97d800 100%); /!* Opera 11.10+ *!/*/
+/*background: -ms-linear-gradient(left,  #152d00 0%,#97d800 100%); /!* IE10+ *!/*/
+/*background: linear-gradient(to right,  #152d00 0%,#97d800 100%); /!* W3C *!/*/
+/*filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#152d00', endColorstr='#97d800',GradientType=1 ); /!* IE6-9 *!/*/
+/*}*/
+
+.login-by {
+    box-sizing: content-box;
+    border-bottom: 3px solid transparent;
+    background-repeat: no-repeat;
+}
+
+.login-by:hover {
+    border-color: #ca2027;
+}
+
+.login-by:hover span {
+    /*display: block;*/
+    background: #555;
+}
+
+.login-by span i {
+    display: none;
+    font-size: 10px;
+    /*margin-right: 5px;*/
+}
+
+.login-by-google {
+    background-image: url("/static/images/social/g.png");
+}
+
+.login-by-facebook {
+    background-image: url("/static/images/social/f.png");
+}
+
+.login-by-linkedin {
+    background-image: url("/static/images/social/l.png");
+}
+
+.login-by-microsoft {
+    background-image: url("/static/images/social/m.png");
+}
+
+.by-socials-block {
+    float: left;
+}
+
+.by-profireader-block {
+    float: right;
+}
+
+.tabs {
+    border-bottom: 1px #ccc solid;
+}
+
+.tab {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 16px;
+    margin-bottom: -1px;
+    color: #ca2027;
+}
+
+.tab.actual {
+    border: 1px #ccc solid;
+    border-bottom: 1px #eee solid !important;
+    background-color: #eee;
+    color: #555;
+}
+
+.auth-form {
+    padding-top: 15px;
+    width: 340px;
+    margin: 0 auto;
+}
+
+.auth-form h3 {
+    margin: 15px 0px 7px 0px;
+}
+
+.auth-form input {
+    padding: 5px 15px;
+}
+
+.auth-form input[type="submit"] {
+    border: none;
+    background: #555;
+    color: #eee;
+    padding: 15px;
+    text-align: center;
+}
+
+.auth-form input[type="submit"]:hover {
+    background: #ca2027;
+    color: #fff;
+}
+
+.content-block {
+    background: #eee;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-top: -1px;
 }
