@@ -11,7 +11,7 @@
     {% block company_base %}
 {% include 'company/company_base.html' %}
 {% endblock company_base %}
-    <span ng-cloak ng-show="{{ g.user_dict['id'] }}">
+    <span ng-cloak ng-show="'{{ g.user_dict['id'] }}'">
         {% for user_id in company_user_rights %}
             {% if not curr_user %}
                 <a href="{{ url_for('company.subscribe', company_id=company.id)}}">Subscribe to this company</a>
