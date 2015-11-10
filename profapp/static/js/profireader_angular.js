@@ -60,7 +60,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip',
                 else {
                     alert(result);
                 }
-            };
+            }
 
             return $http.post(url, data).then(
                 function (resp) {
@@ -393,7 +393,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip',
                             window.location.href = httpresp['headers']('Location');
                         }
                         return response;
-                    },
+                    }
 
                 };
 
@@ -430,7 +430,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip',
                 if (scope['ngWatch']) {
                     scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
                 }
-                ;
+                
 
 
                 var parameters = $.extend(defaultparameters, {
@@ -534,7 +534,9 @@ function file_choose(selectedfile) {
     top.tinymce.activeEditor.windowManager.close();
 }
 
-module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ajaxFormModule']);
+// 'ui.select' uses "/static/js/select.js" included in index_layout.html
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select']);
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select', 'ajaxFormModule']);
 
 module.config(function ($provide) {
     $provide.decorator('$controller', function ($delegate) {
@@ -665,7 +667,7 @@ module.run(function ($rootScope, $ok) {
                 {title: 'NORMAL', inline: 'span', classes: 'small'},
                 {title: 'SMALLER', inline: 'span', classes: 'smaller'},
                 {title: 'SMALL', inline: 'span', classes: 'small'}
-            ],
+            ]
 
 
             //paste_auto_cleanup_on_paste : true,
@@ -702,10 +704,10 @@ module.run(function ($rootScope, $ok) {
 
 
 function cleanup_html(html) {
-    normaltags = '^(span|a|br|div|table)$'
+    normaltags = '^(span|a|br|div|table)$';
     common_attributes = {
         whattr: {'^(width|height)$': '^([\d]+(.[\d]*)?)(em|px|%)$'}
-    }
+    };
 
     allowed_tags = {
         '^table$': {allow: '^(tr)$', attributes: {whattr: true}},
@@ -715,7 +717,7 @@ function cleanup_html(html) {
         '^img$': {allow: false, attributes: {'^src$': '.*'}},
         '^br$': {allow: false, attributes: {}},
         '^div$': {allow: normaltags, attributes: {}}
-    }
+    };
 
     $.each(allowed_tags, function (tag, properties) {
         var attributes = properties.attributes ? properties.attributes : {}

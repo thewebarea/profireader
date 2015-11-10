@@ -45,6 +45,7 @@ def register(app):
     from . import errors
     app.register_blueprint(exception_bp, url_prefix='/exception')
 
+
 def register_front(app):
     from . import views_front
     app.register_blueprint(front_bp, url_prefix='/')

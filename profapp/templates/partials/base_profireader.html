@@ -53,20 +53,15 @@
                                     <b class="caret"></b>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">Your
-                                            Profile</a></li>
-                                    <li><a href="{{ url_for('auth.change_password') }}">Change
-                                        Password</a></li>
-                                    <li><a href="{{ url_for('auth.change_email_request') }}">Change
-                                        Email</a></li>
+                                    <li><a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">My Profile</a></li>
+{#                                    <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>#}
+{#                                    <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>#}
                                     <li><a href="{{ url_for('company.show') }}">Company</a></li>
                                     <li><a href="{{ url_for('article.show_mine') }}">My articles</a>
                                     </li>
                                     <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
-                                    <li><a href="#" ng-click="open_filemanager()">file manager</a>
-                                    </li>
-
+{#                                    <li><a href="#" ng-click="open_filemanager()">file manager</a>#}
+{#                                    </li>#}
                                 </ul>
                             </li>
                         </ul>
@@ -75,7 +70,7 @@
 
                 </ul>
                 <ul class="top-menu">
-                    <li><a class="messages_btn" href="#" title="All Messages"><span class="tooltip">All Messages<span></a></li>
+                    <li><a class="messages_btn" href="#" title="All Messages"><span class="tooltip">All Messages</span></a></li>
                     <li><a class="company_btn" href="{{ url_for('company.show') }}" title="Company"><span class="tooltip">Company</span></a>
                     </li>
                     <li><a class="article_btn" href="{{ url_for('article.show_mine') }}" title="My articles"><span class="tooltip">My articles</span></a>
