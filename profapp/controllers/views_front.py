@@ -76,14 +76,12 @@ def division(division_name, search_text, page=1):
     search_text, portal, sub_query = get_params()
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, name=division_name).one()
     if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events':
-
         sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                         portal_division_id=division.id)
         articles, pages, page = pagination(query=sub_query, page=page)
 
         return render_template('front/bird/division.html',
-                               articles={a.id: a.get_client_side_dict() for
-                                         a in articles},
+                               articles={a.id: a.get_client_side_dict() for a in articles},
                                current_division=division.get_client_side_dict(),
                                portal=portal_and_settings(portal),
                                pages=pages,
@@ -153,11 +151,14 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
     subportal_division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
                                                                 name=division_name).one()
 
-    sub_query = Article.subquery_articles_at_portal(search_text=search_text,
-                                                    portal_division_id=subportal_division.id).\
+    sub_query = Article.subquery_articles_at_portal(
+        search_text=search_text,
+        portal_division_id=subportal_division.id).\
         filter(db(ArticleCompany,
-                  company_id=member_company_id, id=ArticlePortalDivision.article_company_id).exists())
+                  company_id=member_company_id,
+                  id=ArticlePortalDivision.article_company_id).exists())
         # filter(Company.id == member_company_id)
+
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/subportal_division.html',

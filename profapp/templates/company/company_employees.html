@@ -12,7 +12,6 @@
 {% include 'company/company_base.html' %}
 {% endblock company_base %}
     <span ng-cloak ng-show="{{ g.user_dict['id'] }}">
-
         {% for user_id in company_user_rights %}
             {% if not curr_user %}
                 <a href="{{ url_for('company.subscribe', company_id=company.id)}}">Subscribe to this company</a>
@@ -30,16 +29,18 @@
                 <dt>
                     <img src="{{ company_user_rights[user_id]['user'].profireader_small_avatar_url }}" style="width:100px;height:100px;border:0">
                     {{ company_user_rights[user_id]['name'] }} {% if g.user_dict['id']==user_id %} (you) {% endif %}{% if company_user_rights[user_id]['status']=='suspended' %} - Suspended<br>{% for c_user in curr_user %}{% if curr_user[c_user]['rights'][Right['suspend_employee']] %}<a href="{{ url_for('company.unsuspend', user_id=user_id, company_id=company_id) }}">Unsuspend</a>{% endif %}{% endfor %}{% endif %}<br>
-                    Phone number : {{ company_user_rights[user_id]['user'].phone_number }}<br>
-                    Email : {{ company_user_rights[user_id]['user'].show_email }}
-                    Subscribed : {{ company_user_rights[user_id]['date'] }}
+                    Phone number : {{ company_user_rights[user_id]['user'].phone_number }}<br/>
+                    Email : {{ company_user_rights[user_id]['user'].show_email }}<br/>
+                    Subscribed : {{ company_user_rights[user_id]['date'] }}<br/>
+                    Position: [edit]<br/>
                 </dt>
                 {% for company in company_user_rights[user_id]['companies'] %}
                     <dt> ALL COMPANIES :
                         {% for c in company %}
                             <a href="{{ url_for('company.profile', company_id=c.id)}}">{{ c.name }}</a>
                         {% endfor %}
-                    </dt><br/>
+                    </dt>
+                    <br/>
                     {% if curr_user %}
                         {% for c_user in curr_user %}
                             {% if curr_user[c_user]['status']=='active' and (company_user_rights[user_id]['status']=='active' or company_user_rights[user_id]['status']=='suspended') %}
@@ -55,7 +56,7 @@
                                         {% endif %}
                                         {% endfor %}
                                     {% if g.user_dict['id']!=user_id and company_user_rights[user_id]['status']!='suspended' %}
-                                        <input type="submit" id="apply" value="Apply rights">
+                                        <input type="submit" id="apply" value="Apply changes">
                                     {% endif %}
                                 {% else %}
                                     {% for right in company_user_rights[user_id]['rights'] %}

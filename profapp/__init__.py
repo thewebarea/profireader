@@ -193,6 +193,7 @@ class AnonymousUser(AnonymousUserMixin):
 
 login_manager.anonymous_user = AnonymousUser
 
+
 def create_app(config='config.ProductionDevelopmentConfig',
                front='n',
                host='localhost'):
@@ -200,7 +201,6 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     app.config.from_object(config)
     app.config['SERVER_NAME'] = host
-    # x = app.config['SQLALCHEMY_DATABASE_URI']
 
     babel = Babel(app)
 

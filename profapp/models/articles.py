@@ -385,13 +385,19 @@ class Article(Base, PRBase):
 
     @staticmethod
     def subquery_articles_at_portal(search_text=None, **kwargs):
+        portal_id = None
+        if 'portal_id' in kwargs.keys():
+            portal_id = kwargs['portal_id']
+            kwargs.pop('portal_id', None)
 
-        if not search_text:
-            sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
-                order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() '))
-        else:
-            sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
-                order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() ')). \
+        sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs).\
+            order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() '))
+
+        if portal_id:
+            sub_query = sub_query.join(PortalDivision).join(Portal).filter(Portal.id==portal_id)
+
+        if search_text:
+            sub_query = sub_query. \
                 filter(or_(ArticlePortalDivision.title.ilike("%" + search_text + "%"),
                            ArticlePortalDivision.short.ilike("%" + search_text + "%"),
                            ArticlePortalDivision.long_stripped.ilike("%" + search_text + "%")))
