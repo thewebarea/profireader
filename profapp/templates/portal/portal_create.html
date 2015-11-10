@@ -11,12 +11,13 @@
             $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};
             $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};
 
-            $scope.getData = function () {
-                return $scope.data.portal;
+            $scope.getData = function (validation) {
+                ret = $.extend({__validation: validation});
             };
             $scope.afterSave = function (resp) {
                 window.location.href = $scope.url_after_save({company_id: resp.company_id})
             };
+
             $scope.addDivision = function () {
                 $scope.data.portal.divisions.push({
                     name: '',
@@ -78,10 +79,20 @@
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
+            {# var enableEdit = function (enablesubmit, enableinput) {#}
+            {# if (enablesubmit) {#}
+            {# $('*[ng-model]', $(iElement)).prop('disabled', false);#}
+            {# }#}
+            {# else {#}
+            {# $('*[ng-model]', $(iElement)).prop('disabled', true);#}
+            {# }#}
+            {# }#}
 
-            <form ng-ok ng-watch="data.portal" ng-onsuccess="afterSave"
-                  ng-onsubmit="getData"
-                  ng-action="url_confirm_create({company_id: data.company_id})">
+            <form
+                    ng-ok="url_confirm_create({company_id: data.company_id})"
+                    ng-watch="data.portal"
+                    ng-before="getData"
+                    ng-after="afterSave">
 
 
                 <div ng-click="chooseImage()"
@@ -148,20 +159,27 @@
                     </select>
                     <span class="error">{{ __validated.errors['divisions'][division_index] }}</span>
                     <span class="link error" style="float: right"
-                              ng-click="removeDivision($index)">X</span>
+                          ng-click="removeDivision($index)">X</span>
                 </div>
                 <div class="item">
-                    <input type="text" style="visibility: hidden"  />
+                    <input type="text" style="visibility: hidden"/>
                     <button type="button" ng-click="addDivision()">add division</button>
                     <span class="error">{{ __validated.errors.add_division }}</span>
                 </div>
 
 
                 <div class="item text-align-right">
+<<<<<<< HEAD
+                    <span class="error">{{ __validated.errors.ok }}</span>
+                    <input ng-disabled="!areAllEmpty(__validated.errors) || __validation"
+                           type="submit"
+                           value="Create portal"/>
+=======
                     <span class="error">{{ __validated.errors.form }}</span>
                     <input  ng-disabled="!areAllEmpty(__validated.errors) || __validation"
                         type="submit"
                         value="Create portal"/>
+>>>>>>> origin/master
 
                 </div>
 

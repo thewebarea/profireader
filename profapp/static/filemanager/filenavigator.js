@@ -100,6 +100,9 @@
 
         FileNavigator.prototype.folderClick = function(item) {
             var self = this;
+            if(self.fileList === 0){
+                return false
+            }
             self.currentPath = [];
             if (item && item.isFolder()) {
                 self.currentPath = item.model.fullPath().split('/').splice(1);
@@ -127,9 +130,9 @@
 
         FileNavigator.prototype.fileNameExists = function(fileName) {
             var self = this;
-            for (var item in self.fileList) {
-                item = self.fileList[item];
-                if (fileName.trim && item.model.name.trim() === fileName.trim()) {
+            for (var i in self.fileList) {
+                i = self.fileList[i];
+                if (i.model.name.trim() === fileName.trim()) {
                     return true;
                 }
             }

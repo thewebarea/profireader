@@ -32,11 +32,12 @@ def create(company_id):
                            company_logo=company_logo)
 
 
-@portal_bp.route('/create/<string:company_id>/', methods=['POST'])
+@portal_bp.route('/<any(create,update):action>/<any(validate,save):state>/<string:company_id>/',
+                 methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
 @ok
-def create_load(json, company_id):
+def create_save(json, action, state, company_id):
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
     types = {x.id: x.get_client_side_dict() for x in
              PortalDivisionType.get_division_types()}
@@ -88,12 +89,33 @@ def confirm_create(json, company_id):
             company_id=company_id, root_folder_id=company_owner.system_folder_file_id,
             parent_folder_id=company_owner.system_folder_file_id,
             article_portal_division_id=None).save().id
-
+        
         company_logo = company_owner.logo_file_relationship.url() \
             if company_owner.logo_file_id else '/static/img/company_no_logo.png'
 
-        return {'company_id': company_id,
-                'company_logo': company_logo}
+    ret = {
+        'company_id': company_id,
+        'company_logo': company_logo,
+        'layouts': layouts,
+        'division_types': {x.id: x.get_client_side_dict() for x in
+                           PortalDivisionType.get_division_types()}
+    }
+
+    if action == 'create':
+        ret['portal'] = {'company_id': company_id, 'name': '', 'host': '',
+                         'portal_layout_id': layouts[0]['id'],
+                         'divisions': [
+                             {'name': 'index page', 'portal_division_type_id': 'index'},
+                             {'name': 'news', 'portal_division_type_id': 'news'},
+                             {'name': 'events', 'portal_division_type_id': 'events'},
+                             {'name': 'catalog', 'portal_division_type_id': 'catalog'},
+                             {'name': 'about', 'portal_division_type_id': 'about'},
+                         ]}
+    else:
+        ret['portal'] = {}
+
+    return ret
+
 
 
 @portal_bp.route('/', methods=['POST'])
@@ -355,10 +377,6 @@ def profile_edit_load(json, portal_id):
     tags = set(tag_portal_division.tag for tag_portal_division in portal.portal_bound_tags_select)
     tags_dict = {tag.id: tag.name for tag in tags}
 
-    x = portal.to_dict(
-                   'portal_notbound_tags_select.*',
-                   # 'portal_notbound_tags_select.*'
-                   ),
     company = portal.own_company
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'

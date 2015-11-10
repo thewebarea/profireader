@@ -1,5 +1,7 @@
 
-
+*[disabled] {
+    color: #ccc;
+}
 /*#navigation_selected_division {*/
     /*color: red;*/
 /*}*/
@@ -65,4 +67,17 @@
 
 .item input[disabled], .item select[disabled], .item button[disabled] {
     color: #ccc;
+}
+
+
+/* class for tiny mce in profireader (editing article) */
+.profi-tiny-mce-birdy {
+    width: 697.5px;
+}
+
+div.profi-tiny-mce-birdy-wraper {
+    width: 713.5px;
+    height: 600px;
+    position: absolute;
+    top: 450px;
 }

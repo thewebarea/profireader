@@ -19,6 +19,7 @@ from sqlalchemy.sql import or_
 import re
 from sqlalchemy import event
 from html.parser import HTMLParser
+from ..controllers import errors
 
 
 class MLStripper(HTMLParser):
@@ -184,6 +185,15 @@ class ArticleCompany(Base, PRBase):
                                           'portal_article.portal.name'):
         return self.to_dict(fields)
 
+    def validate(self, action):
+        ret = super().validate(action)
+
+        if not re.match('[^\s]{3,}', self.title):
+            ret['errors']['title'] = 'pls enter title longer than 3 letters'
+        if not re.match('\S+', self.keywords):
+            ret['warnings']['keywords'] = 'pls enter at least one keyword'
+        return ret
+
     @staticmethod
     def get_companies_where_user_send_article(user_id):
         all = {'name': 'All', 'id': 0}
@@ -301,12 +311,12 @@ class ArticleCompany(Base, PRBase):
             kwargs)
 
 
-@event.listens_for(ArticlePortalDivision, 'before_insert')
-@event.listens_for(ArticlePortalDivision, 'before_update')
-@event.listens_for(ArticleCompany, 'before_insert')
-@event.listens_for(ArticleCompany, 'before_update')
 def set_long_striped(mapper, connection, target):
     target.long_stripped = MLStripper().strip_tags(target.long)
+event.listen(ArticlePortalDivision, 'before_update', set_long_striped)
+event.listen(ArticlePortalDivision, 'before_insert', set_long_striped)
+event.listen(ArticleCompany, 'before_update', set_long_striped)
+event.listen(ArticleCompany, 'before_insert', set_long_striped)
 
 
 class Article(Base, PRBase):
@@ -355,10 +365,10 @@ class Article(Base, PRBase):
                                                                  exists()).filter(
             Company.name.ilike("%" + searchtext + "%")).all()]
 
-    @staticmethod
-    def save_edited_version(user_id, article_company_id, **kwargs):
-        a = ArticleCompany.get(article_company_id)
-        return a.attr(kwargs)
+    # @staticmethod
+    # def save_edited_version(user_id, article_company_id, **kwargs):
+    #     a = ArticleCompany.get(article_company_id)
+    #     return a.attr(kwargs)
 
     @staticmethod
     def get_articles_for_user(user_id):

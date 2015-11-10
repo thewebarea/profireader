@@ -1,4 +1,5 @@
-from flask import Flask, g, request
+from flask import Flask, session, g, request, redirect, current_app
+from authomatic.providers import oauth2
 from authomatic import Authomatic
 from profapp.controllers.blueprints import register as register_blueprints
 from profapp.controllers.blueprints import register_front as register_blueprints_front
@@ -21,6 +22,20 @@ import re
 from flask.ext.babel import Babel, gettext
 import jinja2
 from .models.users import User
+from .models.config import Config
+from profapp.controllers.errors import BadDataProvided
+
+
+def req(name, allowed=None, default=None, exception=True):
+    ret = request.args.get(name)
+    if allowed and ret in allowed:
+        return ret
+    elif default is None:
+        return default
+    elif exception:
+        raise BadDataProvided
+    else:
+        return None
 
 
 def load_database(db_config):
@@ -33,6 +48,8 @@ def load_database(db_config):
                                                  autoflush=False,
                                                  bind=engine))
         g.db = db_session
+        g.req = req
+
     return load_db
 
 
@@ -53,6 +70,7 @@ def setup_authomatic(app):
 
     def func():
         g.authomatic = authomatic
+
     return func
 
 
@@ -67,6 +85,7 @@ def load_user():
 
     if user_init.is_authenticated():
         from profapp.models.users import User
+
         id = user_init.get_id()
         # user = g.db.query(User).filter_by(id=id).first()
         user = current_user
@@ -77,20 +96,30 @@ def load_user():
         for attr in SOC_NET_FIELDS:
             if attr == 'link' or attr == 'phone':
                 user_dict[attr] = \
-                    str(user.attribute_getter(logged_via,  attr))
+                    str(user.attribute_getter(logged_via, attr))
             else:
                 user_dict[attr] = \
-                    user.attribute_getter(logged_via,  attr)
+                    user.attribute_getter(logged_via, attr)
         user_dict['id'] = id
         user_dict['registered_tm'] = user.registered_tm
-        #name = user.user_name
+        # name = user.user_name
 
 
-    #user_dict = {'id': id, 'name': name, 'logged_via': logged_via}
+    # user_dict = {'id': id, 'name': name, 'logged_via': logged_via}
 
     g.user_init = user_init
     g.user = user
     g.user_dict = user_dict
+
+    for variable in g.db.query(Config).filter_by(server_side=1).all():
+
+        var_id = variable.id
+        if variable.type == 'int':
+            current_app.config[var_id] = int(variable.value)
+        elif variable.type == 'bool':
+            current_app.config[var_id] = False if int(variable.value) == 0 else True
+        else:
+            current_app.config[var_id] = '%s' % (variable.value,)
 
 
 # def load_user():
@@ -106,6 +135,7 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
         options[kw] = "{{" + "{0}".format(kwargs[kw]) + "}}"
     url = url_for(endpoint, **options)
     import urllib.parse
+
     url = urllib.parse.unquote(url)
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
@@ -116,6 +146,21 @@ def file_url(id):
         return ''
     server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', id)
     return 'http://file' + server + '.profireader.com/' + id + '/'
+
+
+def config_variables():
+    variables = g.db.query(Config).filter_by(client_side=1).all()
+    ret = {}
+    for variable in variables:
+        var_id = variable.id
+        if variable.type == 'int':
+            ret[var_id] = '%s' % (int(variable.value),)
+        elif variable.type == 'bool':
+            ret[var_id] = 'false' if int(variable.value) == 0 else 'true'
+        else:
+            ret[var_id] = '\'' + variable.value + '\''
+    return "<script>\nConfig = {};\n" + ''.join(
+        [("Config['%s']=%s;\n" % (var_id, ret[var_id])) for var_id in ret]) + '</script>'
 
 
 # TODO: OZ by OZ: add kwargs just like in url_for
@@ -132,10 +177,11 @@ def raw_url_for(endpoint):
     if len(rules) < 1:
         return ''
 
-    ret = re.compile('<[^:]*:').sub('<', url_adapter.map._rules_by_endpoint.get(endpoint, ())[0].rule)
+    ret = re.compile('<[^:]*:').sub('<',
+                                    url_adapter.map._rules_by_endpoint.get(endpoint, ())[0].rule)
 
     return "function (dict) { var ret = '" + ret + "'; " \
-           " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
+                                                   " for (prop in dict) ret = ret.replace('<'+prop+'>',dict[prop]); return ret; }"
 
 
 def pre(value):
@@ -143,6 +189,7 @@ def pre(value):
     for k in dir(value):
         res.append('%r %r\n' % (k, getattr(value, k)))
     return '<pre>' + '\n'.join(res) + '</pre>'
+
 
 mail = Mail()
 moment = Moment()
@@ -191,6 +238,7 @@ class AnonymousUser(AnonymousUserMixin):
     def __repr__(self):
         return "<User(id = %r)>" % self.id
 
+
 login_manager.anonymous_user = AnonymousUser
 
 
@@ -215,7 +263,7 @@ def create_app(config='config.ProductionDevelopmentConfig',
         my_loader = jinja2.ChoiceLoader([
             app.jinja_loader,
             jinja2.FileSystemLoader('templates_front'),
-            ])
+        ])
         app.jinja_loader = my_loader
     if front == 'f':
         register_blueprints_file(app)
@@ -227,7 +275,7 @@ def create_app(config='config.ProductionDevelopmentConfig',
     moment.init_app(app)
     login_manager.init_app(app)
 
-    #if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
+    # if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
     #    from flask.ext.sslify import SSLify
     #    sslify = SSLify(app)
 
@@ -242,6 +290,8 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.jinja_env.globals.update(raw_url_for=raw_url_for)
     app.jinja_env.globals.update(pre=pre)
     app.jinja_env.globals.update(file_url=file_url)
+    app.jinja_env.globals.update(config_variables=config_variables)
+
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/
     # Flask will automatically remove database sessions at the end of the

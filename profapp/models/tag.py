@@ -48,7 +48,7 @@ class TagPortal(Base, PRBase):
 
     tag = relationship('Tag')
 
-    UniqueConstraint('tag_id', 'portal_id', name='uc_tag_id_company_id')
+    UniqueConstraint('tag_id', 'portal_id', name='uc_tag_id_portal_id')
 
     def __init__(self, tag_id=None, portal_id=None):
         super(TagPortal, self).__init__()

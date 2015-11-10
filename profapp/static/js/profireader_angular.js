@@ -50,7 +50,7 @@ function getObjectsDifference(a, b, setval, notstrict) {
 }
 
 
-angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
+angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip', 'ajaxFormModule'])
     .factory('$ok', ['$http', function ($http) {
         return function (url, data, ifok, iferror) {
             function error(result, error_code) {
@@ -242,38 +242,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             link: function (scope, iElement, iAttrs, ngModelCtrl) {
 
 
-                var enableSubmit = function (enablesubmit, enableinput) {
-                    if (enablesubmit) {
-                        $('*[ng-model]', $(iElement)).prop('disabled', false);
-                    }
-                    else {
-                        $('*[ng-model]', $(iElement)).prop('disabled', true);
-                    }
-                }
 
-                scope.$parent.$parent.__validation = false;
-                scope.$parent.$parent.__validated = false;
-
-                var sendValidation = _.debounce(function () {
-                    if (scope.$parent.$parent.__validation) {
-                        return false;
-                    }
-                    var dataToSend = scope['ngOnsubmit']()();
-                    if (dataToSend) {
-                        scope.$parent.$parent.__validation = dataToSend;
-                        $ok(scope['ngAction'], $.extend({__validation: true}, dataToSend), function (resp) {
-                            scope.$parent.$parent.__validated = resp;
-                        }, function (resp) {
-                            scope.$parent.$parent.__validated = false;
-                        }).finally(function () {
-                            scope.$parent.$parent.__validation = false;
-                        });
-                    }
-                }, 500);
-
-                if (scope['ngWatch']) {
-                    scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
-                }
 
 
                 //if (iAttrs['ngValidationResult']) {
@@ -299,30 +268,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 //iAttrs.$observe('ngOnSuccess', function(value) {
                 //    s.on_success_url = value;
                 //    });
-
-                if (scope['ngOnsubmit']) {
-                    $(iElement).on('submit',
-                        function () {
-                            if (scope.$parent.$parent.__validation) {
-                                return false;
-                            }
-                            enableSubmit(false);
-                            scope.$apply(function () {
-                                var dataToSend = scope['ngOnsubmit']()();
-                                console.log(dataToSend);
-                                if (dataToSend) {
-                                    $ok(scope['ngAction'], dataToSend, function (resp) {
-                                        if (scope.ngOnsuccess) {
-                                            scope.ngOnsuccess()(resp)
-                                        }
-                                    }).finally(function () {
-                                        enableSubmit(true);
-                                    });
-                                }
-                            });
-                            return false;
-                        });
-                }
 
 
                 //$.each($('[name]', $(iElement)), function (ind, el) {
@@ -406,7 +351,158 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 //            s.getTemp(iAttrs.ngCity);
             }
         }
+    }])
+    .directive('ngAjaxFormOld', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+        return {
+            restrict: 'A',
+            scope: {
+                ngAfter: '&',
+                ngBefore: '&',
+                ngData: '@',
+                ngState: '@'
+            },
+            link: function (scope, iElement, iAttrs, ngModelCtrl) {
 
+                var parentscope = scope.$parent.$parent;
+
+                var defaultparameters = {
+
+                    ngData: 'data',
+
+                    ngState: 'state',
+
+
+                    ngBefore: function (data, validation, httpconfig, defaultfunc) {
+                        //httpconfig['url'] = http://someurl
+                        if (data) {
+                            if (typeof parentscope[parameters['ngState']] === 'string') {
+                                return false;
+                            }
+                            parentscope[parameters['ngState']] = validation ? 'validating' : 'sending';
+                        }
+                        else {
+                            return false;
+                        }
+                    },
+
+                    ngAfter: function (response, validation, httpresp, defaultfunc) {
+                        if (!response) {
+                            return false;
+                        }
+                        if (!validation && response && httpresp && httpresp['headers']('Location')) {
+                            window.location.href = httpresp['headers']('Location');
+                        }
+                        return response;
+                    }
+
+                };
+
+
+                var enableSubmit = function (enablesubmit, enableinput) {
+                    if (enablesubmit) {
+                        $('*[ng-model]', $(iElement)).prop('disabled', false);
+                    }
+                    else {
+                        $('*[ng-model]', $(iElement)).prop('disabled', true);
+                    }
+                }
+
+                scope.$parent.$parent.__validation = false;
+                scope.$parent.$parent.__validated = false;
+
+                var sendValidation = _.debounce(function () {
+                    if (scope.$parent.$parent.__validation) {
+                        return false;
+                    }
+                    var dataToSend = scope['ngOnsubmit']()();
+                    if (dataToSend) {
+                        scope.$parent.$parent.__validation = dataToSend;
+                        $ok(scope['ngAction'], $.extend({__validation: true}, dataToSend), function (resp) {
+                            scope.$parent.$parent.__validated = resp;
+                        }, function (resp) {
+                            scope.$parent.$parent.__validated = false;
+                        }).finally(function () {
+                            scope.$parent.$parent.__validation = false;
+                        });
+                    }
+                }, 500);
+
+                if (scope['ngWatch']) {
+                    scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
+                }
+                
+
+
+                var parameters = $.extend(defaultparameters, {
+                    ngData: scope['ngData'],
+                    ngBefore: scope['ngBefore'],
+                    ngAfter: scope['ngAfter'],
+                    ngState: scope['ngState']
+                });
+
+                var sendfunction = function (validate) {
+                    var old_state = parentscope[parameters['ngState']];
+                    var default_data = parentscope[parameters['ngData']];
+                    var default_config = {url: iAttrs['action'] ? iAttrs['action'] : window.location.href};
+                    if (validate) {
+                        default_config['headers'] = {validation: 'true'};
+                    }
+                    var dataToSend = parameters['ngBefore'](default_data, validate, default_config, defaultparameters['ngBefore']);
+                    console.log(dataToSend);
+
+                    if (!dataToSend) {
+                        return false;
+                    }
+                    var url = default_config['url'](dataToSend, true, defaultparameters['ngUrl']);
+                    $ok(url, dataToSend,
+                        function (resp, errorcode, httpresp) {
+                            var ret = parameters['ngAfter']()(resp, true, defaultparameters['ngAfter'], errorcode, httpresp);
+                            parentscope[parameters['ngState']] = ret ? ret : old_state;
+                        },
+                        function (resp, errorcode, httpresp) {
+                            var ret = parameters['ngAfter']()(null, true, defaultparameters['ngAfter'], errorcode, httpresp);
+                            parentscope[parameters['ngState']] = ret ? ret : old_state;
+                        });
+                }
+
+
+                if (parameters['ngData']) {
+                    parentscope.$watch(parameters['ngData'], _.debounce(function () {
+                        sendfunction(true);
+                    }, 500), true);
+                }
+
+                if (scope['ngOnsubmit']) {
+                    $(iElement).on('submit',
+                        function () {
+                            if (scope.$parent.$parent.__validation) {
+                                return false;
+                            }
+                            enableSubmit(false);
+                            scope.$apply(function () {
+                                var dataToSend = scope['ngOnsubmit']()();
+                                console.log(dataToSend);
+                                if (dataToSend) {
+                                    $ok(scope['ngAction'], dataToSend, function (resp) {
+                                        if (scope.ngOnsuccess) {
+                                            scope.ngOnsuccess()(resp)
+                                        }
+                                    }).finally(function () {
+                                        enableSubmit(true);
+                                    });
+                                }
+                            });
+                            return false;
+                        });
+                }
+
+                $(iElement).on('submit',
+                    function () {
+                        sendfunction(false);
+                        return false;
+                    });
+            }
+        }
     }]);
 
 
@@ -440,6 +536,7 @@ function file_choose(selectedfile) {
 
 // 'ui.select' uses "/static/js/select.js" included in index_layout.html
 module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select']);
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select', 'ajaxFormModule']);
 
 module.config(function ($provide) {
     $provide.decorator('$controller', function ($delegate) {
@@ -519,6 +616,24 @@ module.run(function ($rootScope, $ok) {
             plugins: 'advlist autolink link image lists charmap print preview',
             skin: 'lightgray',
             theme: 'modern',
+            //paste_postprocess1: function (plugin, args) {
+            //    console.log('paste_postprocess', args);
+            //},
+            setup: function (editor) {
+                console.log('setup', editor);
+                editor.on('PreInit', function (event) {
+                    editor.parser.addNodeFilter('img,p', function (nodes, name) {
+                        console.log('addNodeFilter', nodes, name);
+                    });
+                    //editor.parser.addAttributeFilter('src,href', function (nodes, name) {
+                    //    console.log('addAttributeFilter', nodes, name);
+                    //    debugger;
+                    //    });
+                });
+            },
+            //init_instance_callback1: function () {
+            //    console.log('init_instance_callback', arguments);
+            //},
             file_browser_callback: function (field_name, url, type, win) {
                 var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
                     '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
@@ -538,10 +653,89 @@ module.run(function ($rootScope, $ok) {
                     }
                 )
                 ;
-            }
+
+            },
+            //valid_elements: Config['article_html_valid_elements'],
+            //valid_elements: 'a[class],img[class|width|height],p[class],table[class|width|height],th[class|width|height],tr[class],td[class|width|height],span[class],div[class],ul[class],ol[class],li[class]',
+            content_css: "/static/front/bird/css/article.css",
+            style_formats: [
+                {title: 'HEAD1', block: 'div', classes: 'h1'},
+                {title: 'HEAD2', block: 'div', classes: 'h2'},
+                {title: 'HEAD3', block: 'div', classes: 'h3'},
+                {title: 'BIG', inline: 'span', classes: 'big'},
+                {title: 'BIGGER', inline: 'span', classes: 'bigger'},
+                {title: 'NORMAL', inline: 'span', classes: 'small'},
+                {title: 'SMALLER', inline: 'span', classes: 'smaller'},
+                {title: 'SMALL', inline: 'span', classes: 'small'}
+            ]
+
+
+            //paste_auto_cleanup_on_paste : true,
+            //paste_remove_styles: true,
+            //paste_remove_styles_if_webkit: true,
+            //paste_strip_class_attributes: "all",
+
+            //style_formats: [
+            //    {title: 'Bold text', inline: 'b'},
+            //    {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
+            //    {title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+            //
+            //    {
+            //        title: 'Image Left',
+            //        selector: 'img',
+            //        styles: {
+            //            'float': 'left',
+            //            'margin': '0 10px 0 10px'
+            //        }
+            //    },
+            //    {
+            //        title: 'Image Right',
+            //        selector: 'img',
+            //        styles: {
+            //            'float': 'right',
+            //            'margin': '0 0 10px 10px'
+            //        }
+            //    }
+            //]
+
         }
     })
 });
+
+
+function cleanup_html(html) {
+    normaltags = '^(span|a|br|div|table)$';
+    common_attributes = {
+        whattr: {'^(width|height)$': '^([\d]+(.[\d]*)?)(em|px|%)$'}
+    };
+
+    allowed_tags = {
+        '^table$': {allow: '^(tr)$', attributes: {whattr: true}},
+        '^tr$': {allow: '^(td|th)$', attributes: {}},
+        '^td$': {allow: normaltags, attributes: {whattr: true}},
+        '^a$': {allow: '^(span)$', attributes: {'^href$': '.*'}},
+        '^img$': {allow: false, attributes: {'^src$': '.*'}},
+        '^br$': {allow: false, attributes: {}},
+        '^div$': {allow: normaltags, attributes: {}}
+    };
+
+    $.each(allowed_tags, function (tag, properties) {
+        var attributes = properties.attributes ? properties.attributes : {}
+        $.each(attributes, function (attrname, allowedvalus) {
+            if (allowedvalus === true) {
+                allowed_tags[tag].attributes[attrname] = common_attributes[attrname] ? common_attributes[attrname] : '.*';
+            }
+        });
+    });
+
+    var tags = html.split(/<[^>]*>/)
+
+    $.each(tags, function (tagindex, tag) {
+        console.log(tagindex, tag);
+    })
+
+    return html;
+}
 
 
 None = null;
@@ -579,8 +773,16 @@ function angularControllerFunction(controller_attr, function_name) {
 
 }
 
-function fileUrl(id) {
+function fileUrl(id, down) {
     if (!id) return '';
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
-    return 'http://file' + server + '.profireader.com/' + id + '/'
+    if (down){
+        return 'http://file' + server + '.profireader.com/' + id + '?d'
+    }else {
+         return 'http://file' + server + '.profireader.com/' + id + '/'
+    }
+}
+
+function cloneObject(o) {
+    return (o === null || typeof o !== 'object') ? o : $.extend(true, {}, o);
 }

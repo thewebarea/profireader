@@ -7,39 +7,49 @@ from flask import g
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import event
 from utils.validators import validators
+from ..controllers import errors
 
-from sqlalchemy.ext.declarative import declarative_base
+
 Base = declarative_base()
 
 # this event is called whenever an attribute
 # on a class is instrumented
-@event.listens_for(Base, 'attribute_instrument')
-def configure_listener(class_, key, inst):
-    if not hasattr(inst.property, 'columns'):
-        return
-    # this event is called whenever a "set"
-    # occurs on that instrumented attribute
+# @event.listens_for(Base, 'attribute_instrument')
+# def configure_listener(class_, key, inst):
+#     if not hasattr(inst.property, 'columns'):
+#         return
+#     # this event is called whenever a "set"
+#     # occurs on that instrumented attribute
+#
+#     @event.listens_for(inst, "set", retval=True)
+#     def set_(instance, value, oldvalue, initiator):
+#         validator = validators.get(inst.property.columns[0].type.__class__)
+#         if validator:
+#             return validator(value)
+#         else:
+#             return value
 
-    @event.listens_for(inst, "set", retval=True)
-    def set_(instance, value, oldvalue, initiator):
-        validator = validators.get(inst.property.columns[0].type.__class__)
-        if validator:
-            return validator(value)
-        else:
-            return value
 
-
-class PRBase:
+class PRBase(object):
     def __init__(self):
         self.query = g.db.query_property()
+
+
+    def validate(self, action):
+        return {'errors': {}, 'warnings': {}, 'notices': {}}
+
+    def delfile(self):
+        g.db.delete(self)
+        g.db.commit()
 
     def save(self):
         g.db.add(self)
         g.db.flush()
         return self
 
-    def update(self, **kwargs):
-        self.update(**kwargs)
+    def updates(self, dictionary):
+        for f in dictionary:
+            setattr(self, f, dictionary[f])
         return self
 
     def attr(self, dictionary):
@@ -147,10 +157,53 @@ class PRBase:
 
         return ret
 
-        # @staticmethod
-        # def searchResult(collection, convert_item = lambda item: item.dict()):
-        #     ret = {}
-        #     for x in collection:
-        #         ret[x.id] = convert_item(x)
-        #
-        #     return ret
+    @staticmethod
+    def validate_before_update(mapper, connection, target):
+        ret = target.validate('update')
+        if len(ret['errors'].keys()):
+            raise errors.ValidationException(ret)
+
+    @staticmethod
+    def validate_before_insert(mapper, connection, target):
+        ret = target.validate('insert')
+        if len(ret['errors'].keys()):
+            raise errors.ValidationException(ret)
+
+    @staticmethod
+    def validate_before_delete(mapper, connection, target):
+        ret = target.validate('delete')
+        if len(ret['errors'].keys()):
+            raise errors.ValidationException(ret)
+
+    @classmethod
+    def __declare_last__(cls):
+        event.listen(cls, 'before_update', cls.validate_before_update)
+        event.listen(cls, 'before_insert', cls.validate_before_insert)
+        event.listen(cls, 'before_delete', cls.validate_before_delete)
+
+#
+#
+#
+#
+# @event.listens_for(PRBase, 'before_insert')
+# def validate_insert(mapper, connection, target):
+#     ret = target.validate('insert')
+#     if len(ret['errors'].keys()):
+#         raise errors.ValidationException(ret)
+#
+# @event.listens_for(PRBase, 'before_delete')
+# def validate_delete(mapper, connection, target):
+#     ret = target.validate('delete')
+#     if len(ret['errors'].keys()):
+#         raise errors.ValidationException(ret)
+#
+# @event.listens_for(PRBase, 'before_update')
+# def validate_update(mapper, connection, target):
+#     ret = target.validate('update')
+#     if len(ret['errors'].keys()):
+#         raise errors.ValidationException(ret)
+#
+# event.listen(PRBase, 'before_update', validate_update)
+# event.listen(ArticlePortal, 'before_insert', set_long_striped)
+# event.listen(ArticleCompany, 'before_update', set_long_striped)
+# event.listen(ArticleCompany, 'before_insert', set_long_striped)

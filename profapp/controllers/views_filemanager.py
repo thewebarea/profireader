@@ -1,7 +1,7 @@
 import os
 from flask import render_template, g, make_response
 from flask.ext.login import current_user
-from profapp.models.files import File
+from profapp.models.files import File, FileContent
 from .blueprints import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
@@ -33,21 +33,20 @@ def filemanager():
     # {'name': 'My personal files',
     # 'icon': current_user.gravatar(size=18)}}
     library = {}
-    for user_company in g.user.employer_assoc:
 
+    for user_company in g.user.employer_assoc:
 # TODO VK by OZ: we need function that get all emploees with specific right
 # Company.get_emploees('can_read', status = 'active')
 # Company.get_emploees(['can_read', 'can_write'], status = ['active','banned'])
 # similar function User.get_emploers ...
-
         if user_company.status == 'active' and 'upload_files' in g.user.user_rights_in_company(user_company.company_id):
             library[user_company.employer.journalist_folder_file_id] = {'name': "%s files" % (user_company.employer.name,), 'icon': ''}
-            # library[user_company.employer.corporate_folder_file_id] = {'name': "%s corporate files" % (user_company.employer.name,), 'icon': ''}
 
     file_manager_called_for = request.args['file_manager_called_for'] if 'file_manager_called_for' in request.args else ''
     file_manager_on_action = jsonmodule.loads(request.args['file_manager_on_action']) if 'file_manager_on_action' in request.args else {}
-
-    return render_template('filemanager.html', library=library,
+    # library = {}
+    err = True if len(library) == 0 else False
+    return render_template('filemanager.html', library=library,err=err,
                            file_manager_called_for=file_manager_called_for,
                            file_manager_on_action = file_manager_on_action)
 
@@ -60,6 +59,11 @@ def list(json):
     ancestors = File.ancestors(json['params']['folder_id'])
     return {'list': list, 'ancestors': ancestors}
 
+@filemanager_bp.route('/search/', methods=['POST'])
+@ok
+def search_list(json):
+    list = File.search(json['params']['search_name'], json['params']['roots'])
+    return list
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @ok
@@ -68,6 +72,38 @@ def createdir(json, parent_id=None):
                           root_folder_id=request.json['params']['root_id'],
                           parent_id=request.json['params']['folder_id'])
 
+@filemanager_bp.route('/test/', methods=['GET','POST'])
+def test():
+    name = File.search('f', ['5629030e-d4f8-4001-8a3a-f5cfdffc8647'])
+    return render_template('tmp-test.html', file=name)
+
+@filemanager_bp.route('/properties/', methods=['POST'])
+@ok
+def set_properties(json):
+    file = File.get(request.json['params']['id'],)
+    return File.set_properties(file, request.json['params']['add_all'], name=request.json['params']['name'], copyright_author_name=request.json['params']['author_name'], description=request.json['params']['description'])
+
+@filemanager_bp.route('/rename/', methods=['POST'])
+@ok
+def rename(json):
+    file = File.get(request.json['params']['id'],)
+    return File.rename(file, request.json['params']['name'])
+
+@filemanager_bp.route('/copy/', methods=['POST'])
+@ok
+def copy(json):
+    file = File.get(request.json['params']['id'])
+    return File.copy_file(file, request.json['params']['folder_id'])
+
+@filemanager_bp.route('/cut/', methods=['POST'])
+@ok
+def cut(json):
+    file = File.get(request.json['params']['id'])
+    return File.move_to(file, request.json['params']['folder_id'])
+
+@filemanager_bp.route('/remove/<string:file_id>', methods=['POST'])
+def remove(file_id):
+    return File.remove(file_id)
 
 @filemanager_bp.route('/upload/', methods=['POST'])
 @ok
@@ -78,14 +114,20 @@ def upload(json):
     ret = {}
     for uploaded_file_name in request.files:
         uploaded_file = request.files[uploaded_file_name]
+        uploaded_file.seek(0, os.SEEK_END)
+        size = uploaded_file.tell()
+        uploaded_file.seek(0, os.SEEK_SET)
+        uploaded_file.tell()
+        name = File.get_unique_name(uploaded_file.filename, uploaded_file.content_type, parent_id)
         file = File(parent_id=parent_id,
                     root_folder_id=root_id,
-                    name=uploaded_file.filename,
-                    mime=uploaded_file.content_type)
+                    name=name,
+                    mime=uploaded_file.content_type,
+                    size=size
+                    )
         uploaded = file.upload(content=uploaded_file.stream.read(-1))
         ret[uploaded.id] = True
     return ret
-
 
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST'])
 @filemanager_bp.route('/uploader/<string:company_id>', methods=['GET', 'POST'])

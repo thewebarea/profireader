@@ -30,6 +30,8 @@
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
     <link rel="icon" href="/static/favicon.gif" type="image/gif" />
 
+{{ config_variables()|safe }}
+
 {#    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>#}
 {#    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.js"></script>#}
 
@@ -40,6 +42,7 @@
     <script src="{{ url_for('static', filename = 'angular-bootstrap/ui-bootstrap-tpls.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'tinymce/tinymce.jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'angular-ui-tinymce/tinymce.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'angular-ajax-validator/ngAjaxValidator.js') }}"></script>
 
     <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.2.js"></script>
 {#    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js"></script>#}
