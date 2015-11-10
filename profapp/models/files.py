@@ -117,46 +117,86 @@ class File(Base, PRBase):
             nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
         return ret[::-1]
 
-    # GETTERS
 
     @staticmethod
-    def list(parent_id=None, file_manager_called_for=''):
+    def sort_search(name, files):
+        rel_sort = []
+        sort = []
+        for file in files:
+            if re.match(r'^'+name+'.*', file.name.lower()):
+                rel_sort.append(file)
+            else:
+                sort.append(file)
+        return rel_sort + sort
 
-        default_actions = {}
-        # default_actions['choose'] = lambda file: None
-        default_actions['download'] = lambda file: None if ((file.mime == 'directory') or (file.mime == 'root')) else True
-        actions = {act: default_actions[act] for act in default_actions}
-        show = lambda file: True
-        actions['remove'] = lambda file: None if file.mime == "root" else True
-        actions['copy'] = lambda file: None if file.mime == "root" else True
-        actions['paste'] = lambda file: None if file == None else True
-        actions['cut'] = lambda file: None if file.mime == "root" else True
-        actions['properties'] = lambda file: None if file.mime == "root" else True
-
-        parent = File.get(parent_id)
-
-        if file_manager_called_for == 'file_browse_image':
-            actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
-
-
-            # 'cropable': True if File.is_cropable(file) else False,
+    @staticmethod
+    def search(name, folder_id, actions, file_manager_called_for=''):
+        if name == None:
+            return None
+        name = name.lower()
+        all_files = File.get_all_in_dir_rev(folder_id)[::-1]
+        sort_dirs = []; sort_files = []
+        for file in all_files:
+            if re.match(r'.*'+name+'.*', file.name.lower()):
+                sort_dirs.append(file) if file.mime == 'directory' else sort_files.append(file)
+        sort_d = File.sort_search(name, sort_dirs)
+        sort_f = File.sort_search(name, sort_files)
+        s =  sort_d+sort_f
         ret = list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
                                 'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0],
                     'url': file.url(),
                     'author_name': file.copyright_author_name,
                     'description': file.description,
-                    'actions': {action: actions[action](file) for action in actions},
+                    'actions': {action: actions[action](file) for action in actions}
                     }
-                                        for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
-        ret.append({'name': parent.name, 'id': parent.id, 'parent_id': parent.parent_id,
-                                'type': 'parent',
-                                'date': str(parent.md_tm).split('.')[0],
-                    'url': parent.url(),
-                    'author_name': parent.copyright_author_name,
-                    'description': parent.description,
-                    'actions': {action: actions[action](parent) for action in actions},
-                    })
+                                        for file in s)
+        return ret
+
+    # GETTERS
+
+    @staticmethod
+    def list(parent_id=None, file_manager_called_for='', name=None):
+        show = lambda file: True
+
+        default_actions = {}
+        files = [file for file in db(File, parent_id = parent_id) if show(file)]
+        # default_actions['choose'] = lambda file: None
+        default_actions['download'] = lambda file: None if ((file.mime == 'directory') or (file.mime == 'root')) else True
+        actions = {act: default_actions[act] for act in default_actions}
+
+        actions['remove'] = lambda file: None if file.mime == "root" else True
+        actions['copy'] = lambda file: None if file.mime == "root" else True
+        actions['paste'] = lambda file: None if file == None else True
+        actions['cut'] = lambda file: None if file.mime == "root" else True
+        actions['properties'] = lambda file: None if file.mime == "root" else True
+
+        if file_manager_called_for == 'file_browse_image':
+            actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
+
+        search_files = File.search(name, parent_id, actions, file_manager_called_for)
+        parent = File.get(parent_id)
+        if search_files != None:
+            ret = search_files
+        else:
+            # 'cropable': True if File.is_cropable(file) else False,
+            ret = list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
+                                    'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
+                                    'date': str(file.md_tm).split('.')[0],
+                        'url': file.url(),
+                        'author_name': file.copyright_author_name,
+                        'description': file.description,
+                        'actions': {action: actions[action](file) for action in actions},
+                        }
+                                            for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
+            ret.append({'name': parent.name, 'id': parent.id, 'parent_id': parent.parent_id,
+                                    'type': 'parent',
+                                    'date': str(parent.md_tm).split('.')[0],
+                        'url': parent.url(),
+                        'author_name': parent.copyright_author_name,
+                        'description': parent.description,
+                        'actions': {action: actions[action](parent) for action in actions},
+                        })
 
         return ret
 
@@ -257,29 +297,6 @@ class File(Base, PRBase):
         g.db.add(self, file_cont)
         g.db.commit()
         return self
-
-    @staticmethod
-    def search(serch_text, folder_id):
-        # files = []
-        # prop = []
-        # name = name.lower()
-        # prog = re.compile(r'.*'+name+'.*')
-        # for root in roots:
-        #     for file in db(File, root_folder_id=root):
-        #         if re.match(r'^'+name+'.*',file.name.lower()):
-        #             prop.append(file)
-        #         elif re.match(r'.*'+name+'.*',file.name.lower()):
-        #             files.append(file)
-        # prop.extend(files)
-        sub_query = File.get_all_in_dir_rev(folder_id)
-        # if search_text:
-        #     sub_query = sub_query.filter(ArticleCompany.title.ilike("%" + search_text + "%"))
-        # if kwargs.get('portal_id') or kwargs.get('status'):
-        #     sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
-        #                                     **kwargs).exists())
-
-        return sub_query
-
 
     def set_properties(self, add_all,**kwargs):
         if self == None:

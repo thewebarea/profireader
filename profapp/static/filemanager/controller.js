@@ -6,6 +6,7 @@
 
         $scope.config = fileManagerConfig;
         $scope.appName = fileManagerConfig.appName;
+        $scope.path_profireader = 'http://profireader.com';
         $scope.orderProp = ['model.type', 'model.name'];
         $scope.query = '';
         $scope.temp = new Item();
@@ -22,7 +23,6 @@
         $scope.copy_file_id = '';
         $scope.cut_file_id = '';
         $scope.timer = false;
-        $scope.search_all = false;
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
@@ -71,12 +71,8 @@
             });
         };
 
-        $scope.search = function(item){
-            $scope.copy_file_id = $cookies.copy_file_id = item.model.id;
-            $scope.cut_file_id = $cookies.cut_file_id = '';
-            item.copy(function() {
-                $scope.fileNavigator.refresh();
-            });
+        $scope.search = function(query){
+            $scope.fileNavigator.search(query, $scope.fileNavigator.getCurrentFolder());
         };
 
 
@@ -189,6 +185,13 @@
                 catch(e) {
 
                 }
+            }else if ($scope.file_manager_on_action[actionname] !== '' &&  actionname === 'choose') {
+                try {
+                    eval($scope.file_manager_on_action[actionname] + '(item);');
+                }
+                catch(e) {
+
+                }
             }else if($scope.file_manager_on_action[actionname] !== ''){
                 eval('$scope.' + actionname.toString()+'(item)');//$scope.file_manager_on_action[actionname] + '(item);');
             }
@@ -203,26 +206,26 @@
             return defaultpermited
             };
 
-        $scope.name = '';
-        $scope.chunkSize = '20480KB';
-        $scope.uploadUsingUpload=function(file) {
-            $scope.f = file;
-            console.log(file);
-            file.upload = Upload.upload({
-                url: 'http://profi.ntaxa.com/filemanager/send/{{ company_id }}/',
-                data : $scope.name,
-                resumeSizeUrl: 'http://profi.ntaxa.com/filemanager/resumeopload/',
-                resumeChunkSize: $scope.chunkSize,
-                headers: {
-                    'optional-header': 'header-value'
-                },
-                fields: {username: $scope.username},
-                file: file});
-                        file.upload.progress(function (evt) {
-                        file.progress = Math.min(100, parseInt(100.0 *
-                                                               evt.loaded / evt.total));
-                    });
-        };
+        //$scope.name = '';
+        //$scope.chunkSize = '20480KB';
+        //$scope.uploadUsingUpload=function(file) {
+        //    $scope.f = file;
+        //    console.log(file);
+        //    file.upload = Upload.upload({
+        //        url: 'http://profi.ntaxa.com/filemanager/send/{{ company_id }}/',
+        //        data : $scope.name,
+        //        resumeSizeUrl: 'http://profi.ntaxa.com/filemanager/resumeopload/',
+        //        resumeChunkSize: $scope.chunkSize,
+        //        headers: {
+        //            'optional-header': 'header-value'
+        //        },
+        //        fields: {username: $scope.username},
+        //        file: file});
+        //                file.upload.progress(function (evt) {
+        //                file.progress = Math.min(100, parseInt(100.0 *
+        //                                                       evt.loaded / evt.total));
+        //            });
+        //};
 
         $scope.uploadFiles = function() {
                 $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath,

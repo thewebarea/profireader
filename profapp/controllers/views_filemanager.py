@@ -62,8 +62,13 @@ def list(json):
 @filemanager_bp.route('/search/', methods=['POST'])
 @ok
 def search_list(json):
-    list = File.search(json['params']['search_name'], json['params']['roots'])
-    return list
+    if json['params']['search_text'] != '':
+        list = File.list(json['params']['folder'], json['params']['file_manager_called_for'],json['params']['search_text'])
+        ancestors = File.ancestors(json['params']['folder'])
+    else:
+        list = []
+        ancestors = File.ancestors(json['params']['folder'])
+    return {'list': list, 'ancestors': ancestors}
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @ok
@@ -74,8 +79,8 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    name = File.search('f', ['5629030e-d4f8-4001-8a3a-f5cfdffc8647'])
-    return render_template('tmp-test.html', file=name)
+    name = File.search('dell', '56406eb3-4f5d-4001-9202-f834534f2d51')
+    return render_template('tmp-test.html', file=len(name))
 
 @filemanager_bp.route('/properties/', methods=['POST'])
 @ok

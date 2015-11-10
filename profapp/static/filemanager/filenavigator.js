@@ -9,11 +9,14 @@
         var FileNavigator = function(root_id, file_manager_called_for) {
             this.requesting = false;
             this.fileList = [];
+            this.search_text = '';
             this.currentPath = [];
+            this.searchList = [];
             self.root_id = root_id;
             self.ancestors = [root_id];
             this.history = [];
             this.error = '';
+            this.is_search = false;
             this.file_manager_called_for = file_manager_called_for;
         };
 
@@ -32,6 +35,37 @@
             self.goTo(-1);
         };
 
+        FileNavigator.prototype.search = function(query, folder_id, success, error) {
+            var self = this;
+            var path = self.currentPath.join('/');
+            var data = {params: {
+                mode: "list",
+                search_text: query,
+                root_id: self.root_id,
+                file_manager_called_for: self.file_manager_called_for,
+                folder: folder_id //? folder_id : self.ancestors[self.ancestors.length - 1]
+            }};
+            self.requesting = true;
+            self.is_search = true;
+            self.searchList = [];
+            self.error = '';
+            $http.post(fileManagerConfig.search_Url, data).success(function(resp) {
+                self.searchList = [];
+                self.ancestors = resp.data.ancestors;
+                angular.forEach(resp.data.list, function(file) {
+                    self.searchList.push(new Item(file, self.currentPath));
+                });
+                self.requesting = false;
+                if (resp.error) {
+                    self.error = resp.error;
+                    return typeof error === 'function' && error(resp);
+                }
+                typeof success === 'function' && success(resp);
+            }).error(function(data) {
+                self.requesting = false;
+                typeof error === 'function' && error(data);
+            });
+        };
 
         FileNavigator.prototype.refresh = function(folder_id, success, error) {
             var self = this;
@@ -44,7 +78,8 @@
                 root_id: self.root_id,
                 folder_id: folder_id ? folder_id : self.ancestors[self.ancestors.length - 1]
             }};
-
+            self.is_search  = false;
+            self.searchList = [];
             self.requesting = true;
             self.fileList = [];
             self.error = '';
