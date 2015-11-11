@@ -79,7 +79,8 @@ module.filter('propsFilter', function() {
     };
 });
 
-module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, $http, $ok) {
+module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($scope, $http, $ok, $af) {
+    $scope.$af = $af;
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
     $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
@@ -125,7 +126,8 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
     $scope.selectedTags = [];
 
 }]);
-        module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
+        module.controller('materials_articles', ['$scope','$ok', '$af', function ($scope, $ok, $af) {
+            $scope.$af = $af;
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
             $scope.selectedUser = null;
@@ -139,7 +141,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             $scope.data_resp_user = '';
             $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
-            $scope.statuses = '';
+            $scope.statuses = ''; // current status of article in portal
 
             $scope.tagsObject = {};
             $scope.tagsObject.tags = [];
@@ -232,8 +234,8 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             color: #f00;
         }
     </style>
-    <div ng-init="loadData()" ng-controller="materials_articles">
-
+    <div ng-controller="materials_articles">
+        <div af ng-model="data">
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
             <h3>{{data.article.title}}</h3>
@@ -244,11 +246,11 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             <br>
 
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                Current status is <span ng-if="!data_resp.article.status">{{ original_data.article.status }}</span>{{
-                data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(original_data.article.status) }}</span>
+                Current status is <span ng-if="!data_resp.article.status">{{ data_original.article.status }}</span>{{
+                data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(data_original.article.status) }}</span>
                 <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
 
-                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData" ng-action="url_update_status">
+                <form ang-ok ng-onsuccess="resp_data" ng-onsubmit="getData" ng-action="url_update_status">
                     <div ng-if="!data_resp.status">
                         Change material status to
                         <select ng-init="data.article.status = data.status[0]"
@@ -284,7 +286,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     data_resp_user_search.user.profireader_name }}
                 </div>
                 <div ng-if="!data_resp_user.user">
-                    <form ng-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
+                    <form ang-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
                           ng-action="url_send_article_to_user">
                         Introduce user to work with this material
                         <select disabled ng-init="data.send_to_user = data.company.employees[0]"
@@ -303,11 +305,13 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 </div>
 
             </div>
-            <div ng-if="myRights('publish')">
+            <div ang-if="myRights('publish')">
                 <div ng-if="!data_resp_portal.portal">
-                    <form ng-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal">
+                    <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal">
                     Publish this material to portal
-                    <span ng-if="statuses=='accepted'">
+
+
+
                     <select ng-model="data.selected_division">
                         <option disabled>---Below materials sent---</option>
                         <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
@@ -336,17 +340,10 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     </div>
                     <br/>
                     <span>
-                        <input type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
+                        <input ng-click="$af.save(data)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
                     </span>
-                    </span>
-                    <span ng-if="statuses!='accepted'">
-                <select disabled>
-                    <optgroup label="Change article status to accepted first">
-                        <option>Change article status to accepted first</option>
-                    </optgroup>
-                </select>
-                <input type="submit" value="Publish" disabled>
-            </span>
+                    
+
                     </form>
                 </div>
                 <span ng-if="data_resp_portal.portal">
@@ -354,6 +351,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 </span>
             </div>
         </div>
+    </div>
     </div>
 
     {% endraw %}
