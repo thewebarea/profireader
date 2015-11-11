@@ -209,7 +209,6 @@
                                     ok(ret);
                                 }
                                 catch (e) {
-                                    console.error(e);
                                     notok(resp, e);
                                 }
                             },
