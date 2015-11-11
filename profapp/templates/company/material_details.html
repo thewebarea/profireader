@@ -89,6 +89,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
         if ($scope.data && (newValue !== oldValue)){
             res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
 		    res.success(function(data, status, headers, config) {
+                $scope.tagsObject.tags = []; // TODO (AA to AA): it works but...
                 $scope.availableTags = data.data.availableTags;
 		    });
 		    res.error(function(data, status, headers, config) {
@@ -134,7 +135,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
             $scope.selectedUser_sending = false;
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
-            $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
+            $scope.url_submit_to_portal = '{{ url_for('portal.submit_to_portal')|safe }}';
             $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
             $scope.url_send_article_user = {{ raw_url_for('company.send_article_to_user')|safe }};
             $scope.data_resp = '';
@@ -147,8 +148,9 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                 return deff(model);
             };
 
-            $scope.afterLoadArticle = function (model, deff) {
-                return deff(model);
+            $scope.afterLoadArticle = function (resp, default_after_load) {
+                default_after_load(resp);
+{#                console.log($scope.data);#}
             };
 
             $scope.tagsObject = {};
@@ -243,7 +245,14 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
         }
     </style>
     <div ng-controller="materials_articles">
-        <div af af-before-load="beforeLoadArticle" af-after-load="afterLoadArticle" ng-model="data">
+        <div af af-before-load="beforeLoadArticle"
+             af-after-load="afterLoadArticle"
+             af-validate-url="{{ url_submit_to_portal }}"
+             af-save-url="{{ url_submit_to_portal }}"
+             ng-model="data">
+
+            {{ url_submit_to_portal }}++++
+
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
             <h3>{{data.article.title}}</h3>
@@ -318,8 +327,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                     <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal">
                     Publish this material to portal
 
-
-
                     <select ng-model="data.selected_division">
                         <option disabled>---Below materials sent---</option>
                         <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
@@ -335,7 +342,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                     </select>
                     <br/>
                     <hr>
-                    <div ang-controller="SelectTagsCtrl">
+                    <div ng-controller="SelectTagsCtrl">
                         <h3>Add tags:</h3>
                         <ui-select multiple ng-model="tagsObject.tags" theme="select2" ng-disabled="disabled" style="width: 300px;">
                             <ui-select-match placeholder="Select tags...">{{$item}}</ui-select-match>

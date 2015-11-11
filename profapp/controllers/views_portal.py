@@ -117,7 +117,6 @@ def confirm_create(json, company_id):
     return ret
 
 
-
 @portal_bp.route('/', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([]))
@@ -518,3 +517,25 @@ def update_article_portal(json, article_id):
         if json.get('new_status') != ARTICLE_STATUS_IN_PORTAL.published \
         else ARTICLE_STATUS_IN_PORTAL.declined
     return json
+
+
+@portal_bp.route('/submit_to_portal/', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([]))
+@ok
+def submit_to_portal(json):
+    # json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
+
+    portal_division_id = json['selected_division']
+    article = ArticleCompany.get(json['article']['id'])
+
+    action = g.req('action', allowed=['validate', 'save'])
+
+    if action == 'validate':
+        return article.validate('update')
+
+    if action == 'save':
+        article_portal = article.clone_for_portal(portal_division_id, json['tags'])
+        article.save()
+        portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
+        return {'portal': portal.name}
