@@ -32,7 +32,7 @@
                     Phone number : {{ company_user_rights[user_id]['user'].phone_number }}<br/>
                     Email : {{ company_user_rights[user_id]['user'].show_email }}<br/>
                     Subscribed : {{ company_user_rights[user_id]['date'] }}<br/>
-                    Position: [edit]<br/>
+                    Position: <input type="text" name="FirstName" disabled value={{ company_user_rights[user_id]['position'] }}><br/>
                 </dt>
                 {% for company in company_user_rights[user_id]['companies'] %}
                     <dt> ALL COMPANIES :

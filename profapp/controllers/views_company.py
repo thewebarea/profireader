@@ -255,6 +255,8 @@ def profile(company_id):
 def employees(company_id):
 
     company_user_rights = UserCompany.show_rights(company_id)
+    # print(company_user_rights[list(company_user_rights.keys())[0]])
+    # print(company_user_rights[list(company_user_rights.keys())[0]]['position'])
     ordered_rights = sorted(Right.keys(), key=lambda t: Right.RIGHT_POSITION()[t.lower()])
     ordered_rights = list(map((lambda x: getattr(x, 'lower')()), ordered_rights))
 
@@ -302,6 +304,7 @@ def update_rights():
 # @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def edit(company_id):
     return render_template('company/company_edit.html', company_id=company_id)
+
 
 @company_bp.route('/edit/<string:company_id>/', methods=['POST'])
 @login_required
@@ -396,6 +399,7 @@ def suspend_employee():
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
 
+
 @company_bp.route('/fire_employee/', methods=['POST'])
 @login_required
 def fire_employee():
@@ -406,6 +410,7 @@ def fire_employee():
     return redirect(url_for('company.employees',
                             company_id=data.get('company_id')))
 
+
 @company_bp.route('/unsuspend/<string:user_id>,<string:company_id>')
 @login_required
 def unsuspend(user_id, company_id):
@@ -414,7 +419,6 @@ def unsuspend(user_id, company_id):
                                        company_id=company_id,
                                        status=STATUS.ACTIVE())
     return redirect(url_for('company.employees', company_id=company_id))
-
 
 
 @company_bp.route('/suspended_employees/<string:company_id>',
