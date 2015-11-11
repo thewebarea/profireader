@@ -21,7 +21,6 @@ from sqlalchemy import event
 from html.parser import HTMLParser
 from ..controllers import errors
 
-
 class MLStripper(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -81,10 +80,10 @@ class ArticlePortalDivision(Base, PRBase):
                           secondaryjoin="PortalDivision.portal_id == Portal.id",
                           back_populates='articles',
                           uselist=False)
+    search_fields = ('title', 'short', 'long_stripped', 'keywords')
 
     def __init__(self, article_company_id=None, title=None, short=None, keywords=None,
-                 long=None, status=None, portal_division_id=None, image_file_id=None,
-                 # portal_id=None
+                 long=None, status=None, portal_division_id=None, image_file_id=None
                  ):
         self.article_company_id = article_company_id
         self.title = title
@@ -141,17 +140,15 @@ class ArticlePortalDivision(Base, PRBase):
         sub_query = g.db.query(ArticlePortalDivision).\
             join(ArticlePortalDivision.division).\
             join(PortalDivision.portal).\
-            filter(Portal.id==portal_id).\
+            filter(Portal.id == portal_id).\
             filter_by(**kwargs)
         if search_text:
             sub_query = sub_query.filter(ArticlePortalDivision.title.ilike("%" + search_text + "%"))
         return sub_query
 
-
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-
     editor_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'), nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
@@ -167,7 +164,6 @@ class ArticleCompany(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
     keywords = Column(TABLE_TYPES['keywords'], nullable=False)
-
     company = relationship(Company)
     editor = relationship(User)
     article = relationship('Article', primaryjoin="and_(Article.id==ArticleCompany.article_id)",
