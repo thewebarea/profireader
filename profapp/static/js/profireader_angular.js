@@ -50,7 +50,7 @@ function getObjectsDifference(a, b, setval, notstrict) {
 }
 
 
-angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip', 'ajaxFormModule'])
+angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
     .factory('$ok', ['$http', function ($http) {
         return function (url, data, ifok, iferror) {
             function error(result, error_code) {
@@ -622,6 +622,27 @@ module.run(function ($rootScope, $ok) {
                 editor.on('PreInit', function (event) {
                     editor.parser.addNodeFilter('img,p', function (nodes, name) {
                         console.log('addNodeFilter', nodes, name);
+                        return nodes;
+
+        //                ed.parser.addNodeFilter('cms:control', function (nodes) {
+        //    var i = nodes.length;
+        //
+        //    while (i--)
+        //        objectToHtml(nodes[i], ed.schema);
+        //});
+        //
+        //ed.serializer.addNodeFilter('cms:control', function (nodes, name, args) {
+        //    var i = nodes.length,
+        //        node;
+        //
+        //    while (i--) {
+        //        node = nodes[i];
+        //        htmlToObject(node, args);
+        //    }
+        //});
+
+
+
                     });
                     //editor.parser.addAttributeFilter('src,href', function (nodes, name) {
                     //    console.log('addAttributeFilter', nodes, name);
@@ -768,7 +789,6 @@ function angularControllerFunction(controller_attr, function_name) {
     }
     else return function () {
     };
-
 }
 
 function fileUrl(id, down) {
