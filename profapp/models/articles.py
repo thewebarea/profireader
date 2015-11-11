@@ -20,6 +20,15 @@ from sqlalchemy import event
 from html.parser import HTMLParser
 
 
+class ColumnModify(Column):
+    def __init__(self, *args, **kwargs):
+
+        self.search = kwargs.get('search')
+        self.relevance = kwargs.get('relevance')
+        kwargs.pop('search', None)
+        kwargs.pop('relevance', None)
+        super(ColumnModify, self).__init__(*args, **kwargs)
+
 class MLStripper(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -41,23 +50,23 @@ class MLStripper(HTMLParser):
 
 class ArticlePortal(Base, PRBase):
     __tablename__ = 'article_portal'
-    id = Column(TABLE_TYPES['id_profireader'], primary_key=True, nullable=False)
+    id = ColumnModify(TABLE_TYPES['id_profireader'], primary_key=True, nullable=False)
     # TODO: (AA to AA) delete portal_id!
-    article_company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_company.id'))
-    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
-    portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
+    article_company_id = ColumnModify(TABLE_TYPES['id_profireader'], ForeignKey('article_company.id'))
+    portal_id = ColumnModify(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
+    portal_division_id = ColumnModify(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
 
-    image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    image_file_id = ColumnModify(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
 
-    cr_tm = Column(TABLE_TYPES['timestamp'])
-    title = Column(TABLE_TYPES['name'], default='')
-    short = Column(TABLE_TYPES['text'], default='')
-    long = Column(TABLE_TYPES['text'], default='')
-    long_stripped = Column(TABLE_TYPES['text'], nullable=False)
-    keywords = Column(TABLE_TYPES['keywords'], nullable=False)
-    md_tm = Column(TABLE_TYPES['timestamp'])
-    publishing_tm = Column(TABLE_TYPES['timestamp'])
-    status = Column(TABLE_TYPES['id_profireader'], default=ARTICLE_STATUS_IN_PORTAL.published)
+    cr_tm = ColumnModify(TABLE_TYPES['timestamp'])
+    title = ColumnModify(TABLE_TYPES['name'], default='')
+    short = ColumnModify(TABLE_TYPES['text'], default='')
+    long = ColumnModify(TABLE_TYPES['text'], default='')
+    long_stripped = ColumnModify(TABLE_TYPES['text'], nullable=False)
+    keywords = ColumnModify(TABLE_TYPES['keywords'], nullable=False)
+    md_tm = ColumnModify(TABLE_TYPES['timestamp'])
+    publishing_tm = ColumnModify(TABLE_TYPES['timestamp'])
+    status = ColumnModify(TABLE_TYPES['id_profireader'], default=ARTICLE_STATUS_IN_PORTAL.published)
 
     division = relationship('PortalDivision', backref='article_portal')
     company = relationship(Company, secondary='article_company',
@@ -420,3 +429,19 @@ class ArticleCompanyHistory(Base, PRBase):
         self.long = long
         self.article_company_id = article_company_id
         self.article_id = article_id
+
+
+class Search(Base, PRBase):
+    __tablename__ = 'search'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True, unique=True)
+    index = Column(TABLE_TYPES['id_profireader'], nullable=False)
+    table_name = Column(TABLE_TYPES['short_text'], nullable=False)
+    text = Column(TABLE_TYPES['text'], nullable=False)
+    relevance = Column(TABLE_TYPES['int'], nullable=False)
+
+    def __init__(self, index=None, table_name=None, text=None, relevance=None):
+        super(Search, self).__init__()
+        self.index = index
+        self.table_name = table_name
+        self.text = text
+        self.relevance = relevance

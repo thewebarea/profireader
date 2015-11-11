@@ -14,9 +14,11 @@ from .views_file import crop_image, update_croped_image
 from ..models.files import ImageCroped, File
 from utils.db_utils import db
 from sqlalchemy.orm.exc import NoResultFound
+from ..models.articles import Search
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
+    a = Search(index='lalal', table_name='sss', text='asfjlhdskluf', relevance=10)
     return render_template(
         'article/list.html',
         angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
