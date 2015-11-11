@@ -1,22 +1,17 @@
 <script>
 
     module.controller('article_edit', ['$scope', '$modal', '$af', function ($scope, $modal, $af) {
+
+        console.log($af);
+
         $scope.af = $af;
+
         $scope.details_article = {{ raw_url_for('article.details')|safe }};
         {% if article_company_id %}
             $scope.save_article = '{{ url_for('article.save', article_company_id = article_company_id)|safe }}';
         {% else %}
             $scope.save_article = '{{ url_for('article.confirm_create')|safe }}';
         {% endif %}
-
-
-        $scope.afterSave = function (resp) {
-            window.location.href = $scope.details_article({article_id: resp['id']})
-        };
-
-        {#        $scope.getData = function (model, defaultfunction) {#}
-        {##}
-        {#            return true;#}
 
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
@@ -36,7 +31,6 @@
             };
             return $scope.data;
         };
-
 
         $scope.tinymceImageOptions['height'] = '450px';
         $scope.change_picture_in_croper = function (image_file_url) {
@@ -60,13 +54,7 @@
         $scope.cleanUpHtml = function (data) {
             data.long = cleanup_html(data.long);
             return data;
-        };
-
-
-        $scope.change_picture_in_croper = function (image_file_url) {
-            var $image = $('.img-container > img');
-            $image.cropper('replace', image_file_url);
-        };
+        }
 
         $scope.setImageUrl = function () {
             $scope.image_file_url = fileUrl($scope.data.image_file_id) || "{{ url_for('static', filename='images/choose_image.jpg') }}";
@@ -75,6 +63,7 @@
                 $scope.default_image = false;
             }
             $scope.change_picture_in_croper(image);
+
         };
 
 
@@ -99,65 +88,92 @@
     }]);
 </script>
 
-{% include 'croper.html' %}
-
 {% raw %}
-
 
 <div ng-controller="article_edit">
 
 
+    <div ang-init="loadData11(null, {}, cleanUpHtml, setImageUrl)"
+
+         ng-model="data"
+
+         af=""
+
+         af-load-url=""
+         af-save-url=""
+         af-validate-url=""
+
+         af-before-load=""
+         af-after-load=""
+
+         af-before-save=""
+         af-after-save=""
+
+         af-before-validation=""
+         af-after-validation=""
+
+         af-load-result="data_original"
+         af-validation-result="data_validation"
+         af-save-result="data_save"
+
+         af-watch=""
+         af-debounce=""
 
 
-    <div af ng-model="data">
-
-        <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
-
-        <h2 ng-show="data.id && company">{{ _('update version of article for company
-            `%(company.name)s`', company)
-            }}</h2>
-
-        <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
-
-        <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
-                maybe layout selector is apporpriate here-->
+         ang-controller="article_edit">
 
 
-        <div style="width: 400px; float: left">
-            <input type="hidden" ang-model="data.id"/>
-            {{ _('Article title') }} {{ validation.errors.title }}
-            <input style="width: 100%" type="text" ng-model="data.title">
-            {{ _('Short Description') }}
-            <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>
-            {{ _('KeyWords') }}
-            <input style="width: 100%" ng-model="data.keywords"/>
-            {{ _('Full text') }}
+        <div ng-if="!data">Loading...</div>
+        <div ng-if="data">
 
-        </div>
+            <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
+            <h2 ng-show="data.id && company">{{ _('update version of article for company
+                `%(company.name)s`', company)
+                }}</h2>
 
-        <div ng-click="chooseImage()" style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
+            <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
+
+            <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
+                    maybe layout selector is apporpriate here-->
+
+            <div ang-ajax-form
+                 ang-onsuccess="afterSave"
+                 ang-onsubmit="getData"
+                 ang-action="save_article">
+                <div style="width: 400px; float: left">
+                    <input type="hidden" ang-model="data.id"/>
+                    {{ _('Article title') }} {{ validation.errors.title }}
+                    <input style="width: 100%" type="text" ng-model="data.title">
+                    {{ _('Short Description') }}
+                    <textarea style="width: 100%" placeholder="short" ang-model="data.short"></textarea>
+                    {{ _('KeyWords') }}
+                    <input style="width: 100%" ang-model="data.keywords"/>
+                    {{ _('Full text') }}
+
+                </div>
+
+                <div ng-click="chooseImage()" style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
                         background-size: cover; background-image:url({{ image_file_url }});">
-            {{ _('Select main article image') }}
+                    {{ _('Select main article image') }}
+                </div>
+
+            </div>
+
+            <div class="profi-tiny-mce-birdy-wraper">
+            <textarea aui-tinymce="tinymceImageOptions" style="width: 400px;"
+                      ang-model="data.long"></textarea>
+            </div>
+
+            {{ data_state }}
+            <input style="clear: both;" type="submit" ang-disabled="!isActionAllowed('save')" ng-click="af.save(data)"
+                   value="{{ data.id ? 'save' : 'create' }}"/>
+            <input style="clear: both;" type="submit" ang-disabled="!isActionAllowed('save')" ng-click="data={'title': '1'}"
+                   value="sn"/>
+
         </div>
-
-
-        <div class="profi-tiny-mce-birdy-wraper">
-            <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
-                      ng-model="data.long"></textarea>
-        </div>
-
-        <input type="hidden" ng-model="data.image_file_id">
-
-        <input style="clear: both;" type="submit" ng-click="af.save(data)" value="{{ data.id ? 'save' : 'create' }}"/>
-        {{ data_state }}
-
-
-
-
     </div>
-</div>
 
-{% endraw %}
+    {% endraw %}
 
 </div>

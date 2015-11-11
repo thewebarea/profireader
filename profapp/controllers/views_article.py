@@ -14,11 +14,9 @@ from .views_file import crop_image, update_croped_image
 from ..models.files import ImageCroped, File
 from utils.db_utils import db
 from sqlalchemy.orm.exc import NoResultFound
-from ..models.articles import Search
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
-    a = Search(index='lalal', table_name='sss', text='asfjlhdskluf', relevance=10)
     return render_template(
         'article/list.html',
         angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
@@ -27,7 +25,6 @@ def show_mine():
 @article_bp.route('/list/', methods=['POST'])
 @ok
 def load_mine(json):
-
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
     params = {'search_text': json.get('search_text'), 'user_id': g.user_dict['id']}
@@ -48,7 +45,7 @@ def load_mine(json):
     statuses['All'] = 'All'
 
     return {'articles': [{'article': a.get_client_side_dict(),
-                          'company_count': len(a.get_client_side_dict()['submitted_versions'])+1}
+                          'company_count': len(a.get_client_side_dict()['submitted_versions']) + 1}
                          for a in articles],
             'companies': companies,
             'search_text': json.get('search_text') or '',
@@ -94,18 +91,33 @@ def show_form_update(article_company_id):
 @article_bp.route('/update/<string:article_company_id>/', methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
-    article = ArticleCompany.get(article_company_id).get_client_side_dict()
-    article.update(ratio=Config.IMAGE_EDITOR_RATIO)
-    image_id = article.get('image_file_id')
-    if image_id:
-        try:
-            article['image_file_id'], coordinates = ImageCroped.\
+    action = g.req('action', allowed=['load', 'save', 'validate'])
+    article = ArticleCompany.get(article_company_id)
+    if action == 'load':
+        article = article.get_client_side_dict()
+        article.update(ratio=Config.IMAGE_EDITOR_RATIO)
+        image_id = article.get('image_file_id')
+        if image_id:
+            try:
+                article['image_file_id'], coordinates = ImageCroped.\
                 get_coordinates_and_original_img(image_id)
-            article.update(coordinates)
-        except NoResultFound:
-            pass
-    return article
+                article.update(coordinates)
+            except NoResultFound:
+                pass
+        return article
+    else:
+        article.attr({key: val for key, val in json.items() if key in ['keywords', 'title', 'short', 'long']})
+        if action == 'save':
 
+            # article.update(ratio=Config.IMAGE_EDITOR_RATIO)
+            # image_id = article.get('image_file_id')
+            # if image_id:
+            #     article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
+            #     article.update(coordinates)
+            return article.save().get_client_side_dict()
+        else:
+            article.detach()
+            return article.validate('update')
 
 @article_bp.route('/save/<string:article_company_id>/', methods=['POST'])
 @ok

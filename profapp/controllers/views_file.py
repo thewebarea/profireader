@@ -7,7 +7,7 @@ from PIL import Image
 from time import gmtime, strftime
 import sys
 import re
-from ..models.articles import Article, ArticlePortal
+from ..models.articles import Article, ArticlePortalDivision
 from ..models.portal import CompanyPortal, PortalDivision, Portal
 from config import Config
 from utils.db_utils import db

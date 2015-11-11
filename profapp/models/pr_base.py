@@ -1,4 +1,5 @@
 # from db_init import g.db, Base
+from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship, backref, make_transient, class_mapper
 import datetime
@@ -7,31 +8,56 @@ from flask import g
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import event
 from utils.validators import validators
+from ..controllers import errors
+from utils.db_utils import db
 
-from sqlalchemy.ext.declarative import declarative_base
+
 Base = declarative_base()
 
 # this event is called whenever an attribute
 # on a class is instrumented
-@event.listens_for(Base, 'attribute_instrument')
-def configure_listener(class_, key, inst):
-    if not hasattr(inst.property, 'columns'):
-        return
-    # this event is called whenever a "set"
-    # occurs on that instrumented attribute
+# @event.listens_for(Base, 'attribute_instrument')
+# def configure_listener(class_, key, inst):
+#     if not hasattr(inst.property, 'columns'):
+#         return
+#     # this event is called whenever a "set"
+#     # occurs on that instrumented attribute
+#
+#     @event.listens_for(inst, "set", retval=True)
+#     def set_(instance, value, oldvalue, initiator):
+#         validator = validators.get(inst.property.columns[0].type.__class__)
+#         if validator:
+#             return validator(value)
+#         else:
+#             return value
+class Search(Base):
+    __tablename__ = 'search'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True, unique=True)
+    index = Column(TABLE_TYPES['id_profireader'], nullable=False)
+    table_name = Column(TABLE_TYPES['short_text'], nullable=False)
+    text = Column(TABLE_TYPES['text'], nullable=False)
+    relevance = Column(TABLE_TYPES['int'], nullable=False)
+    kind = Column(TABLE_TYPES['short_text'])
 
-    @event.listens_for(inst, "set", retval=True)
-    def set_(instance, value, oldvalue, initiator):
-        validator = validators.get(inst.property.columns[0].type.__class__)
-        if validator:
-            return validator(value)
-        else:
-            return value
+    def __init__(self, index=None, table_name=None, text=None, relevance=None, kind=None):
+        super(Search, self).__init__()
+        self.index = index
+        self.table_name = table_name
+        self.text = text
+        self.relevance = relevance
+        self.kind = kind
 
+    @staticmethod
+    def get_relevance(field_name):
+        rel = {'keywords': 10, 'title': 9, 'name': 8, 'short': 7, 'long_stripped': 6}
+        return rel[field_name]
 
 class PRBase:
     def __init__(self):
         self.query = g.db.query_property()
+
+    def validate(self, action):
+        return {'errors': {}, 'warnings': {}, 'notices': {}}
 
     def delfile(self):
         g.db.delete(self)
@@ -152,10 +178,75 @@ class PRBase:
 
         return ret
 
-        # @staticmethod
-        # def searchResult(collection, convert_item = lambda item: item.dict()):
-        #     ret = {}
-        #     for x in collection:
-        #         ret[x.id] = convert_item(x)
-        #
-        #     return ret
+    @staticmethod
+    def validate_before_update(mapper, connection, target):
+        ret = target.validate('update')
+        if len(ret['errors'].keys()):
+            raise errors.ValidationException(ret)
+
+    @staticmethod
+    def validate_before_insert(mapper, connection, target):
+        ret = target.validate('insert')
+        if len(ret['errors'].keys()):
+            raise errors.ValidationException(ret)
+
+    @staticmethod
+    def validate_before_delete(mapper, connection, target):
+        ret = target.validate('delete')
+        if len(ret['errors'].keys()):
+            raise errors.ValidationException(ret)
+
+    @staticmethod
+    def add_to_search(mapper, connection, target):
+
+        if not target.id:
+            target.save()
+        if hasattr(target, 'search_fields'):
+            add_to_db = []
+            for field in target.search_fields:
+                search_setter = Search(index=target.id, table_name=target.__tablename__,
+                                       relevance=Search.get_relevance(field), kind=field)
+                setattr(search_setter, 'text', getattr(target, field))
+                add_to_db.append(search_setter)
+            g.db.add_all(add_to_db)
+
+    @staticmethod
+    def update_search_table(mapper, connection, target):
+        if hasattr(target, 'search_fields'):
+            for field in target.search_fields:
+                db(Search, index=target.id, kind=field).update({'text': getattr(target, field)})
+
+    @classmethod
+    def __declare_last__(cls):
+        event.listen(cls, 'before_update', cls.validate_before_update)
+        event.listen(cls, 'before_insert', cls.validate_before_insert)
+        event.listen(cls, 'before_delete', cls.validate_before_delete)
+        event.listen(cls, 'after_insert', cls.add_to_search)
+        event.listen(cls, 'after_update', cls.update_search_table)
+
+#
+#
+#
+#
+# @event.listens_for(PRBase, 'before_insert')
+# def validate_insert(mapper, connection, target):
+#     ret = target.validate('insert')
+#     if len(ret['errors'].keys()):
+#         raise errors.ValidationException(ret)
+#
+# @event.listens_for(PRBase, 'before_delete')
+# def validate_delete(mapper, connection, target):
+#     ret = target.validate('delete')
+#     if len(ret['errors'].keys()):
+#         raise errors.ValidationException(ret)
+#
+# @event.listens_for(PRBase, 'before_update')
+# def validate_update(mapper, connection, target):
+#     ret = target.validate('update')
+#     if len(ret['errors'].keys()):
+#         raise errors.ValidationException(ret)
+#
+# event.listen(PRBase, 'before_update', validate_update)
+# event.listen(ArticlePortal, 'before_insert', set_long_striped)
+# event.listen(ArticleCompany, 'before_update', set_long_striped)
+# event.listen(ArticleCompany, 'before_insert', set_long_striped)

@@ -14,7 +14,8 @@
     {% endblock company_base %}<br/>
 
     <script>
-        module.controller('portal_list', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
+        module.controller('PortalProfileController', ['$scope', '$ok', 'objectTransformation', function ($scope, $ok, objectTransformation) {
+            $scope.url_portal_profile_edit = {{ raw_url_for('portal.profile_edit')|safe }};
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
 {#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
 {#            $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};#}
@@ -44,7 +45,7 @@
 
             $scope.loadPortalDivisionTagsID = function(bool){
                 if ($scope.data){
-                    $scope.PortalDivisionTagsID = objectTransformation.getValues1($scope.data.portal.portal_tags, 'tag_id', bool)
+                    $scope.PortalDivisionTagsID = objectTransformation.getValues1($scope.data.portal.portal_bound_tags_select, 'tag_id', bool)
                 }
             };
 
@@ -74,14 +75,14 @@
 
             $scope.loadPortalDivisionTags2 = function(){
                 if ($scope.data){
-                    $scope.data.PortalDivisionTags2 = objectTransformation.getValues2($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id')
+                    $scope.data.PortalDivisionTags2 = objectTransformation.getValues2($scope.data.portal.portal_bound_tags_select, 'portal_division_id', 'tag_id')
                 }
             };
 
             $scope.loadPortalDivisionTags3 = function(list){
                 var i, objIn, objOut, keys;
                 if ($scope.data){
-                    $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', list);
+                    $scope.data.PortalDivisionTags3 = objectTransformation.getValues3($scope.data.portal.portal_bound_tags_select, 'portal_division_id', 'tag_id', list);
                     keys = Object.keys($scope.data.PortalDivisionTags3);
                     for (i = 0; i < keys.length; i++){
                         objIn = $scope.data.PortalDivisionTags3[keys[i]];
@@ -99,7 +100,7 @@
                     $scope.loadPortalDivisionIDs();
                     $scope.PortDivCheckboxLoad($scope.PortalDivisionIDs);
                     $scope.tagCheckboxLoad($scope.PortalDivisionTagsName);
-                    res = objectTransformation.getValues4($scope.data.portal.portal_tags, 'portal_division_id', 'tag_id', $scope.PortalDivisionTagsID);
+                    res = objectTransformation.getValues4($scope.data.portal.portal_bound_tags_select, 'portal_division_id', 'tag_id', $scope.PortalDivisionTagsID);
                     $scope.data.PortalDivisionTags4 = objectTransformation.subsInKey(res, $scope.data.tag);
                     $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
 
@@ -112,62 +113,12 @@
                 }
             };
 
-            $scope.togglePortalDivision = function(portal_division_id){
-                var i, keys;
-                if ($scope.data){
-                    keys = Object.keys($scope.data.PortalDivisionTags4);
-                    for (i = 0; i < keys.length; i++){
-                        {# it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
-                        $scope.data.PortalDivisionTags4[keys[i]][portal_division_id] = !$scope.PortDivCheckbox[portal_division_id];
-                    }
-                }
-            };
-
-            $scope.toggleTag = function(tag_name){
-                var i, PortDivIDs, tagCheckboxesState, currState = false;
-                if ($scope.data){
-                    {# it is really important to have = ! and not just = as $scope.PortDivCheckbox[portal_division_id] is not still changed!!! #}
-                    currState = !$scope.tagCheckbox[tag_name];
-                    PortDivIDs = $scope.PortalDivisionIDs;
-                    tagCheckboxesState = {};
-                    for (i = 0; i < PortDivIDs.length; i++){
-                        tagCheckboxesState[PortDivIDs[i]] = currState;
-                    }
-
-                    $scope.data.PortalDivisionTags4[tag_name] = tagCheckboxesState;
-                }
-            };
-
-            $scope.addTag = function (tag_name, values) {
-                if ($scope.data){
-                $scope.data.PortalDivisionTags4[tag_name] = $.extend(true, {}, values);
-                $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
-                $scope.newTag = '';
-                $scope.newTagPortDivAvailability = $.extend(true, {}, $scope.TagPortDivAvailabilityFalse);
-                }
-            };
-
-            $scope.removeTag = function (tag_name) {
-                if ($scope.data){
-                    delete $scope.data.PortalDivisionTags4[tag_name];
-                    $scope.data.tagsNew = Object.keys($scope.data.PortalDivisionTags4);
-                    console.log($scope.data.PortalDivisionTags4);
-                }
-            };
-
-            $scope.getData = function () {
-                return $scope.data.PortalDivisionTags4;
-            };
-            $scope.afterSave = function (resp) {
-                window.location.href = $scope.url_after_save({company_id: resp.company_id})
-            };
-
         }]);
 
 
     </script>
     {% raw %}
- <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="portal_list">
+ <div ng-init="loadData(null, null, null, loadPortalDivisionTags4)" ng-controller="PortalProfileController">
 
     <!-- !!!{{ data.PortalDivisionTagsName }}<br/><br/> -->
     <!-- {{ loadPortalDivisionTags2() }} -->
@@ -175,56 +126,33 @@
     <!-- ???{{ PortDivCheckbox }}<br/><br/> -->
     <!-- ***{{ data.PortalDivisionTags4 }}<br/><br/> -->
 
+    <h3>Portal <strong>"{{ data.portal.name }}"</strong> profile</h3>
     <br/>
-    <strong>Portal tags:</strong><br/>
-    <!-- <form ng-ok ng-watch="data.PortalDivisionTags4" ng-onsuccess="afterSave"
-          ng-onsubmit="getData"
-          ng-action="url_confirm_create({company_id: data.company_id})"> -->
-        <table style="width:100%">
+    <h4>Portal tags:</h4>
+    <table style="width:100%">
             <tr>
                 <th>
                     <strong>tag/division</strong>
                 </th>
                 <th ng-repeat="portal_division in data.portal.divisions">
                     {{ portal_division.name }}<br/>
-                    <input type="checkbox" ng-click='togglePortalDivision(portal_division.id)' ng-model="PortDivCheckbox[portal_division.id]"/>
-                    {{ PortDivCheckbox[portal_division.id] }}
                 </th>
             </tr>
             <tr ng-repeat="tag_name in data.tagsNew  | orderBy: 'toString()'">
                 <th>
-                    <input type="checkbox" ng-click='toggleTag(tag_name)' ng-model="tagCheckbox[tag_name]"/>
-                    <button type="button" ng-click='removeTag(tag_name)'>remove tag</button>
                     {{ tag_name }}
                 </th>
                 <td ng-repeat="portal_division_id in PortalDivisionIDs">
-                    <input name="chk_group[tag_name][portal_division_id]" type="checkbox" ng-model="data.PortalDivisionTags4[tag_name][portal_division_id]"/>
-                    {{ data.PortalDivisionTags4[tag_name][portal_division_id] }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type="text" name="newTag" ng-model="newTag"/>
-                    <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)" ng-disabled="data.tagsNew.indexOf(newTag) !== -1 || newTag === ''">add tag</button>
-                </td>
-                <td ng-repeat="portal_division_id in PortalDivisionIDs">
-                    <input name="chk_group[newTag][portal_division_id]" type="checkbox" ng-model="newTagPortDivAvailability[portal_division_id]" value=''/>
-                    {{ newTagPortDivAvailability[portal_division_id] }}
+                    <input ng-model="data.PortalDivisionTags4[tag_name][portal_division_id]" type="checkbox" disabled/>
                 </td>
             </tr>
         </table>
-        <br/>
-        <div class="item text-align-left">
-            <span class="error">{{ }}</span>
-            <input  ng-disabled="false"
-                    type="submit"
-                    value="Save Tags"/>
-        </div>
-    <!-- </form> -->
+    <br/>
+    <a href="{{ url_portal_profile_edit({portal_id: data.portal['id']}) }}">[edit]</a>
     <br/>
     <br/>
 
-    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> profile
+    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> company profile
 
 
 </div>

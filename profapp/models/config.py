@@ -11,4 +11,3 @@ class Config(Base, PRBase):
     comment = Column(TABLE_TYPES['text'])
     client_side = Column(TABLE_TYPES['boolean'])
     server_side = Column(TABLE_TYPES['boolean'])
-

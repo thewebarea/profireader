@@ -7,6 +7,8 @@ from flask import url_for, g
 from .pr_base import PRBase, Base
 from flask import make_response
 
+
+# TODO: (AA to AA): change article_portal_id to article_portal_division_id in table
 class File(Base, PRBase):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -19,7 +21,8 @@ class File(Base, PRBase):
     company_id = Column(TABLE_TYPES['id_profireader'],
                         ForeignKey('company.id'),
                         nullable=False)
-    article_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_portal.id'))
+    article_portal_division_id = Column(TABLE_TYPES['id_profireader'],
+                                        ForeignKey('article_portal_division.id'))
     copyright_author_name = Column(TABLE_TYPES['name'],
                                    default='',
                                    nullable=False)
@@ -492,6 +495,7 @@ class FileContent(Base, PRBase):
         #
         # return result
         # return True
+
 
 class ImageCroped(Base, PRBase):
     __tablename__ = 'image_croped'
