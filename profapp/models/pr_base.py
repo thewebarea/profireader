@@ -34,7 +34,6 @@ class PRBase(object):
     def __init__(self):
         self.query = g.db.query_property()
 
-
     def validate(self, action):
         return {'errors': {}, 'warnings': {}, 'notices': {}}
 

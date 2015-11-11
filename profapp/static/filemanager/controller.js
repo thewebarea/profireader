@@ -161,6 +161,10 @@
             });
         };
 
+        $scope.choose = function(item) {
+
+        };
+
 
         $scope.createFolder = function(item) {
             var name = item.tempModel.name && item.tempModel.name.trim();
@@ -180,16 +184,26 @@
             }
         };
 
+//TODO OZ by OZ: why we have hardcoded download action
         $scope.take_action = function(item, actionname) {
             $scope.modal = '';
-            if ($scope.file_manager_on_action[actionname] !== '' &&  actionname === 'download') {
+            if ($scope.file_manager_on_action[actionname] !== '' &&  ( actionname === 'download')) {
                 try {
                     eval('item'+'.'+actionname+'();');//$scope.file_manager_on_action[actionname] + '(item);');
                 }
                 catch(e) {
 
                 }
-            }else if($scope.file_manager_on_action[actionname] !== ''){
+            }
+            else if ($scope.file_manager_on_action[actionname] !== '' &&  ( actionname === 'choose')) {
+                try {
+                    eval($scope.file_manager_on_action[actionname] + '(item.model);');
+                }
+                catch(e) {
+
+                }
+            }
+            else if($scope.file_manager_on_action[actionname] !== ''){
                 eval('$scope.' + actionname.toString()+'(item)');//$scope.file_manager_on_action[actionname] + '(item);');
             }
         };

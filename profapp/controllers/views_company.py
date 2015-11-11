@@ -128,8 +128,9 @@ def material_details(company_id, article_id):
 #@check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
     action = g.req('action', allowed=['load', 'validate', 'save'])
+    article = Article.get_one_article(article_id)
     if action == 'load':
-        article = Article.get_one_article(article_id)
+
         portals = {port.portal_id: port.portal.get_client_side_dict() for port in
                    CompanyPortal.get_portals(company_id)}
         joined_portals = {}
@@ -166,7 +167,7 @@ def load_material_details(json, company_id, article_id):
     if action == 'save':
         pass
     if action == 'validate':
-        pass
+        return article.validate('update')
 
 
 @company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])

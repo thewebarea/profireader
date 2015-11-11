@@ -11,18 +11,19 @@
     var cloneIfExistsAttributes = function (cloneto, defaultparams, params) {
 
         $.each(defaultparams, function (ind, val) {
-            cloneto[ind] = ((typeof params[ind] === 'undefined' || params[ind] === '') ? val : params[ind]);
+            cloneto[ind] = ((typeof params[ind] === 'undefined') ? val : params[ind]);
         });
         return cloneto;
     };
 
+    var cloneIfExistsCallbacks = function (cloneto, defaultparams, params, $scope) {
 
-    var cloneIfExistsCalculatedArguments = function (cloneto, defaultparams, params) {
         $.each(defaultparams, function (ind, val) {
-            cloneto[ind] = ((typeof params[ind] === 'undefined' || params[ind] === '') ? val : params[ind]);
+            cloneto[ind] = ((typeof params[ind] === 'undefined') ? val : $scope[ind]);
         });
         return cloneto;
     };
+
 
     // url builders
 
@@ -31,45 +32,6 @@
         return function (p, d) {
             return p
         }
-    };
-    var defaultCallbacks = {
-
-        afBeforeLoad: function () {
-            return function (model, default_function) {
-                return true
-            }
-        },
-
-        afAfterLoad: function () {
-            return function (resp, default_function) {
-                return resp
-            }
-        },
-
-        afBeforeValidate: function () {
-            return function (model, default_function) {
-                return model
-            }
-        },
-
-        afAfterValidate: function () {
-            return function (resp, default_function) {
-                return resp
-            }
-        },
-
-        afBeforeSave: function () {
-            return function (model, default_function) {
-                return model
-            }
-        },
-
-        afAfterSave: function () {
-            return function (resp, default_function) {
-                return resp
-            }
-        }
-
     };
 
 
@@ -97,11 +59,10 @@
         };
 
         ret.$callDirectiveMethod = function (model, method, action) {
-            console.log(model, method, action);
             var found = false;
             $.each(modelsForValidation, function (ind, val) {
                 if (val && val['model'].$modelValue === model) {
-                    found = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method](action));
+                    found = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method]());
                 }
             });
             return null;
@@ -157,31 +118,71 @@
 
                 cloneIfExistsAttributes(params, {'af-url': window.location.href}, attrs);
                 cloneIfExistsAttributes(params, {
-                    'af-url-load': AppendParameter(params['af-url'], 'action=load'),
-                    'af-url-validate': AppendParameter(params['af-url'], 'action=validate'),
-                    'af-url-save': AppendParameter(params['af-url'], 'action=save')
+                    'afUrlLoad': AppendParameter(params['af-url'], 'action=load'),
+                    'afUrlValidate': AppendParameter(params['af-url'], 'action=validate'),
+                    'afUrlSave': AppendParameter(params['af-url'], 'action=save')
                 }, attrs);
 
                 cloneIfExistsAttributes(params, {
-                    'af-debounce': '500',
-                    'af-load-result': (attrs.ngModel + '_original'),
-                    'af-validation-result': attrs.ngModel + '_validation',
-                    'af-save-result': attrs.ngModel + '_saved',
-                    'af-state': attrs.ngModel + '_state'
+                    'afDebounce': '500',
+                    'afLoadResult': (attrs.ngModel + '_original'),
+                    'afValidationResult': attrs.ngModel + '_validation',
+                    'afSaveResult': attrs.ngModel + '_saved',
+                    'afState': attrs.ngModel + '_state'
                 }, attrs);
 
-                params['af-debounce'] = parseInt(params['af-debounce']);
-                if (params['af-debounce'] <= 0) params['af-debounce'] = 500;
+                console.log(attrs, params, $scope);
 
-                cloneIfExistsCalculatedArguments(params, defaultCallbacks, $scope);
+                params['afDebounce'] = parseInt(params['afDebounce']);
+                if (params['afDebounce'] <= 0) params['afDebounce'] = 500;
+
+                var trivialbefore = function () {
+                    return function (model, default_function) {
+                        return model;
+                    }
+                };
+
+
+                var defaultCallbacks = {
+                    afBeforeLoad: trivialbefore,
+                    afBeforeValidate: trivialbefore,
+                    afBeforeSave: trivialbefore,
+                    afAfterLoad: function () {
+                        return function (resp) {
+                            $scope.model = cloneObject(resp);
+                            setInParent('afLoadResult', cloneObject(resp));
+                            return true;
+                        }
+                    },
+                    afAfterValidate: function () {
+                        return function (resp) {
+                            setInParent('afValidationResult', cloneObject(resp));
+                            if (resp['errors']) {
+                                setInParent('afState', !resp['errors'] || Object.keys(resp['errors']).length ? 'invalid' : 'valid');
+                                return true;
+                            }
+                            else {
+                                return false;
+                            }
+                        }
+                    },
+                    afAfterSave: function () {
+                        return function (resp) {
+                            setInParent('afSaveResult', cloneObject(resp));
+                            return true;
+                        };
+                    }
+                };
+
+                cloneIfExistsCallbacks(params, defaultCallbacks, attrs, $scope);
+
 
                 console.log(params);
-
 
                 function callCallback() {
                     var args = Array.prototype.slice.call(arguments);
                     var callbackkey = args.shift();
-                    args.push(defaultCallbacks[callbackkey]);
+                    args.push(defaultCallbacks[callbackkey]());
                     var func = params[callbackkey]();
                     if (func === undefined) {
                         func = defaultCallbacks[callbackkey]();
@@ -196,95 +197,100 @@
 
 
                 var func1 = function (action, statebefore, ok, notok) {
+                    try {
+                        var dataToSend = callCallback('afBefore' + action, $scope['model']);
+                        var url = params['afUrl' + action];
 
-                    var dataToSend = callCallback('afBefore' + action, $scope['model']);
-                    var url = params['af-url-' + action.toLowerCase()];
-
-                    if (!dataToSend || !url) {
-                        return false;
+                        setInParent('afState', statebefore);
+                        $ok(url, dataToSend ? dataToSend : {},
+                            function (resp, errorcode, httpresp) {
+                                try {
+                                    var ret = callCallback('afAfter' + action, resp);
+                                    ok(ret);
+                                }
+                                catch (e) {
+                                    notok(resp, e);
+                                }
+                            },
+                            function (resp, errorcode, httpresp) {
+                                notok(resp, errorcode);
+                            });
+                        return true;
+                    }
+                    catch (e) {
+                        notok(undefined, e);
                     }
 
-                    setInParent('af-state', statebefore);
-                    $ok(url, dataToSend,
-                        function (resp, errorcode, httpresp) {
-                            var ret = callCallback('afAfter' + action, resp);
-                            ok(ret);
-                        },
-                        function (resp, errorcode, httpresp) {
-                            notok(resp);
-                        });
 
-                    return true;
                 }
 
-                setInParent('af-state', 'init');
+                setInParent('afState', 'init');
 
                 $scope.load = function () {
-                    if ($scope.isActionAllowed('load')) func1('Load', 'loading',
-                        function (resp) {
-                            $af.$storeModelForValidation(ctrl, $scope);
-                            $scope.model = cloneObject(resp);
-
-                            //$parent[attrs.ngModel] =  cloneObject(resp);
-                            //$parent.$watch(attrs.ngModel, watchfunc, true);
-                            //ctrl.$setViewValue(cloneObject(resp));
-                            //ctrl.$render();
-                            setInParent('af-load-result', cloneObject(resp));
-                            setInParent('af-state', 'clean');
-                        },
-                        function (resp) {
-                            setInParent('af-state', 'loading_failed');
-                        });
+                    if ($scope.isActionAllowed('load')) {
+                        func1('Load', 'loading',
+                            function (resp) {
+                                //$parent[attrs.ngModel] =  cloneObject(resp);
+                                //$parent.$watch(attrs.ngModel, watchfunc, true);
+                                //ctrl.$setViewValue(cloneObject(resp));
+                                //ctrl.$render();
+                                $af.$storeModelForValidation(ctrl, $scope);
+                                setInParent('afState', 'clean');
+                            },
+                            function (resp) {
+                                setInParent('afState', 'loading_failed');
+                            });
+                    }
+                    else {
+                        console.error('called method `load` is forbidden for model because current model is in state: `' + $parent[params['afState']] + '`');
+                    }
                 };
 
                 $scope.validate = function () {
                     if ($scope.isActionAllowed('validate')) {
                         func1('Validate', 'validating',
                             function (resp) {
-                                if ($parent[params['af-state']] === 'validating') {
-                                    setInParent('af-validation-result', cloneObject(resp));
-                                    if (resp && resp['errors']) {
-                                        setInParent('af-state', Object.keys(resp['errors']).length ? 'invalid' : 'valid');
-                                    }
-                                    else {
-                                        setInParent('af-state', 'validating_failed');
-                                    }
+                                if ($parent[params['afState']] === 'validating') {
+
                                 }
                             },
                             function (resp) {
-                                setInParent('af-state', 'validating_failed');
+                                setInParent('afState', 'validating_failed');
                             });
                     }
                     else {
+                        console.error('called method `validate` is forbidden for model because current model is in state: `' + $parent[params['afState']] + '`. debouncing validation');
                         debouncedvalidate();
                     }
                 };
 
                 $scope.save = function () {
-                    if ($scope.isActionAllowed('save')) func1('Save', 'saving',
-                        function (resp) {
-                            setInParent('af-save-result', cloneObject(resp));
-                            if ($parent[params['af-state']] === 'saving') {
-                                setInParent('af-state', 'clean');
-                            }
-                        },
-                        function (resp) {
-                            setInParent('af-state', 'saving_failed');
-                        })
+                    if ($scope.isActionAllowed('save')) {
+                        func1('Save', 'saving',
+                            function (resp) {
+                                setInParent('afState', 'clean');
+                            },
+                            function (resp) {
+                                setInParent('afState', 'saving_failed');
+                            })
+                    }
+                    else {
+                        console.error('called method `save` is forbidden for model because current model is in state: `' + $parent[params['afState']] + '`');
+                    }
                 };
 
-                var save_states = ['init', 'clean', 'saving_failed', 'valid', 'loading_failed', 'saving_failed'];
+                var save_states = ['init', 'clean', 'saving_failed', 'valid', 'loading_failed'];
                 var validate_or_load_states = save_states.slice(0);
                 validate_or_load_states.push('dirty', 'validating_failed', 'invalid');
                 $scope.isActionAllowed = function (action) {
                     if (action === 'load') {
-                        return validate_or_load_states.indexOf($parent[params['af-state']]) !== -1
+                        return validate_or_load_states.indexOf($parent[params['afState']]) !== -1
                     }
                     if (action === 'validate') {
-                        return validate_or_load_states.indexOf($parent[params['af-state']]) !== -1
+                        return validate_or_load_states.indexOf($parent[params['afState']]) !== -1
                     }
                     if (action === 'save') {
-                        return save_states.indexOf($parent[params['af-state']]) !== -1
+                        return save_states.indexOf($parent[params['afState']]) !== -1
                     }
                 };
 
@@ -292,10 +298,10 @@
 
                 var debouncedvalidate = _.debounce(function () {
                     $scope.validate();
-                }, params['af-debounce']);
+                }, params['afDebounce']);
 
                 var watchfunc = function (oldval, newval) {
-                    setInParent('af-state', 'dirty');
+                    setInParent('afState', 'dirty');
                     debouncedvalidate();
                 };
 
