@@ -12,10 +12,12 @@
             this.search_text = '';
             this.currentPath = [];
             this.searchList = [];
+            this.list = [];
             self.root_id = root_id;
             self.ancestors = [root_id];
             this.history = [];
             this.error = '';
+            this.search_len = None;
             this.is_search = false;
             this.file_manager_called_for = file_manager_called_for;
         };
@@ -34,7 +36,6 @@
             this.currentPath = [];
             self.goTo(-1);
         };
-
         FileNavigator.prototype.search = function(query, folder_id, success, error) {
             var self = this;
             var path = self.currentPath.join('/');
@@ -49,12 +50,15 @@
             self.is_search = true;
             self.searchList = [];
             self.error = '';
+            self.list = [];
             $http.post(fileManagerConfig.search_Url, data).success(function(resp) {
                 self.searchList = [];
                 self.ancestors = resp.data.ancestors;
                 angular.forEach(resp.data.list, function(file) {
                     self.searchList.push(new Item(file, self.currentPath));
                 });
+                self.list = self.searchList;
+                self.search_len = self.searchList.length;
                 self.requesting = false;
                 if (resp.error) {
                     self.error = resp.error;
@@ -83,12 +87,14 @@
             self.requesting = true;
             self.fileList = [];
             self.error = '';
+            self.list = [];
             $http.post(fileManagerConfig.listUrl, data).success(function(resp) {
                 self.fileList = [];
                 self.ancestors = resp.data.ancestors;
                 angular.forEach(resp.data.list, function(file) {
                     self.fileList.push(new Item(file, self.currentPath));
                 });
+                self.list = self.fileList;
                 self.requesting = false;
                 self.buildTree(path);
                 if (resp.error) {
@@ -145,6 +151,10 @@
             }
             self.refresh(item.model.id, function () {
             });
+        };
+
+        FileNavigator.prototype.parent = function() {
+            return this.fileList[this.fileList.length - 1]
         };
 
         FileNavigator.prototype.upDir = function() {

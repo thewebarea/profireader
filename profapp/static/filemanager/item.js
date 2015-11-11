@@ -9,6 +9,7 @@
                 description: model && model.description || '',
                 add_all: model && model.add_all || '',
                 path: path || [],
+                path_to: model && model.path_to || '',
                 type: model && model.type || 'file',
                 size: model && model.size || 0,
                 date: convertDate(model && model.date),
@@ -338,6 +339,11 @@
             return $http.post(fileManagerConfig.can_paste, data).success(function(data) {
                 self.defineCallback(data, success, error);
             })
+        };
+        Item.prototype.title = function(){
+            var size = this.isFolder()? '':'('+this.model.sizeKb()+')kb';
+            var p = this.model.path_to;
+            return 'Name: ' + this.model.name + size + '\n'+ 'Full path: '+p
         };
 
         Item.prototype.isFolder = function() {

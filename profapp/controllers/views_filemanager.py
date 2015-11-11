@@ -79,8 +79,8 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    name = File.search('dell', '56406eb3-4f5d-4001-9202-f834534f2d51')
-    return render_template('tmp-test.html', file=len(name))
+    name = File.get_unique_name('Sds(1)','directory', '5629030e-d4f8-4001-8a3a-f5cfdffc8647')
+    return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/properties/', methods=['POST'])
 @ok

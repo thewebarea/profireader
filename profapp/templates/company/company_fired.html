@@ -30,9 +30,9 @@
                 Suspended : {{ emplo.md_tm }}
             </dt>
             <dt> ALL COMPANIES :
-            <div ng-repeat="company in emplo.employee.employers">
-                <a href="{{ url_after_seve({company_id: company.id}) }}">{{ company.name }}</a>
-            </div>
+                <div ng-repeat="company in emplo.employee.employers">
+                    <a href="{{ url_after_seve({company_id: company.id}) }}">{{ company.name }}</a>
+                </div>
             </dt>
         </div>
         <br>

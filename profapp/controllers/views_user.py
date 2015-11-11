@@ -41,13 +41,12 @@ def edit_profile(user_id):
             user = user_query.first()
             image = request.files['avatar']
             user.avatar_update(image)
-            g.db.add(user)
-            g.db.commit()
         else:  # request.form['avatar'] == 'Use Gravatar':
             user.profireader_avatar_url = user.gravatar(size=AVATAR_SIZE)
             user.profireader_small_avatar_url = user.gravatar(size=AVATAR_SMALL_SIZE)
-            g.db.add(user)
-            g.db.commit()
+        g.db.add(user)
+        g.db.commit()
+
     else:
         user_fields = dict()
         user_fields['profireader_name'] = request.form['name']

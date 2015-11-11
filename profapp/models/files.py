@@ -7,6 +7,8 @@ from flask import url_for, g
 from .pr_base import PRBase, Base
 from flask import make_response
 
+
+# TODO: (AA to AA): change article_portal_id to article_portal_division_id in table
 class File(Base, PRBase):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -19,7 +21,8 @@ class File(Base, PRBase):
     company_id = Column(TABLE_TYPES['id_profireader'],
                         ForeignKey('company.id'),
                         nullable=False)
-    article_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_portal.id'))
+    article_portal_division_id = Column(TABLE_TYPES['id_profireader'],
+                                        ForeignKey('article_portal_division.id'))
     copyright_author_name = Column(TABLE_TYPES['name'],
                                    default='',
                                    nullable=False)
@@ -109,12 +112,16 @@ class File(Base, PRBase):
         return True
 
     @staticmethod
-    def ancestors(folder_id=None):
+    def ancestors(folder_id=None, path=False):
         ret = []
         nextf = g.db.query(File).get(folder_id)
         while nextf and len(ret) < 50:
-            ret.append(nextf.id)
-            nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
+            if path:
+                ret.append(nextf.name)
+                nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
+            else:
+                ret.append(nextf.id)
+                nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
         return ret[::-1]
 
 
@@ -133,6 +140,7 @@ class File(Base, PRBase):
     def search(name, folder_id, actions, file_manager_called_for=''):
         if name == None:
             return None
+        actions['paste'] = lambda file: None
         name = name.lower()
         all_files = File.get_all_in_dir_rev(folder_id)[::-1]
         sort_dirs = []; sort_files = []
@@ -146,6 +154,7 @@ class File(Base, PRBase):
                                 'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                 'date': str(file.md_tm).split('.')[0],
                     'url': file.url(),
+                    'path_to': File.path(file),
                     'author_name': file.copyright_author_name,
                     'description': file.description,
                     'actions': {action: actions[action](file) for action in actions}
@@ -184,12 +193,13 @@ class File(Base, PRBase):
                                     'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
                                     'date': str(file.md_tm).split('.')[0],
                         'url': file.url(),
+                        'path_to': File.path(file),
                         'author_name': file.copyright_author_name,
                         'description': file.description,
                         'actions': {action: actions[action](file) for action in actions},
                         }
                                             for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
-            ret.append({'name': parent.name, 'id': parent.id, 'parent_id': parent.parent_id,
+            ret.append({ 'id': parent.id, 'parent_id': parent.parent_id,
                                     'type': 'parent',
                                     'date': str(parent.md_tm).split('.')[0],
                         'url': parent.url(),
@@ -200,6 +210,15 @@ class File(Base, PRBase):
 
         return ret
 
+
+    def path(self):
+        parents = File.ancestors(self.parent_id, True)
+        del parents[0]
+        path = '/'
+        for dir in parents:
+            path += dir+'/'
+        path += self.name
+        return path
 
     def url(self):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
@@ -255,7 +274,7 @@ class File(Base, PRBase):
             name = File.if_copy(name)
             list = []
             for n in db(File,parent_id = parent_id, mime=mime):
-                if re.match(r'name'+'\(\d+\)'+'ext', n.name):
+                if re.match(r'^'+name+'\(\d+\)'+''+ext+'', n.name):
                     pos = (len(n.name) - 2) - len(ext)
                     list.append(int(n.name[pos:pos+1]))
             if list == []:
@@ -307,6 +326,7 @@ class File(Base, PRBase):
             del attr['name']
         self.updates(attr)
         if add_all:
+            del attr['name']
             files = File.get_all_in_dir_rev(self.id)
             for file in files:
                 file.updates(attr)
@@ -509,6 +529,7 @@ class FileContent(Base, PRBase):
         #
         # return result
         # return True
+
 
 class ImageCroped(Base, PRBase):
     __tablename__ = 'image_croped'
