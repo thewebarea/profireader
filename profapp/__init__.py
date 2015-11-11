@@ -1,9 +1,9 @@
 from flask import Flask, session, g, request, redirect, current_app
 from authomatic.providers import oauth2
 from authomatic import Authomatic
-from profapp.controllers.blueprints import register as register_blueprints
-from profapp.controllers.blueprints import register_front as register_blueprints_front
-from profapp.controllers.blueprints import register_file as register_blueprints_file
+from profapp.controllers.blueprints_register import register as register_blueprints
+from profapp.controllers.blueprints_register import register_front as register_blueprints_front
+from profapp.controllers.blueprints_register import register_file as register_blueprints_file
 
 from flask import url_for
 from profapp.controllers.errors import csrf
@@ -204,16 +204,16 @@ login_manager.login_view = 'auth.login'
 
 class AnonymousUser(AnonymousUserMixin):
     id = 0
-    # def gravatar(self, size=100, default='identicon', rating='g'):
-    # if request.is_secure:
-    #    url = 'https://secure.gravatar.com/avatar'
-    # else:
-    #    url = 'http://www.gravatar.com/avatar'
-    # hash = hashlib.md5(
-    #    'guest@profireader.com'.encode('utf-8')).hexdigest()
-    # return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
-    #    url=url, hash=hash, size=size, default=default, rating=rating)
-    # return '/static/no_avatar.png'
+    #def gravatar(self, size=100, default='identicon', rating='g'):
+        #if request.is_secure:
+        #    url = 'https://secure.gravatar.com/avatar'
+        #else:
+        #    url = 'http://www.gravatar.com/avatar'
+        #hash = hashlib.md5(
+        #    'guest@profireader.com'.encode('utf-8')).hexdigest()
+        #return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+        #    url=url, hash=hash, size=size, default=default, rating=rating)
+        #return '/static/no_avatar.png'
 
     @staticmethod
     def check_rights(permissions):
@@ -249,8 +249,6 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     app.config.from_object(config)
     app.config['SERVER_NAME'] = host
-
-    # x = app.config['SQLALCHEMY_DATABASE_URI']
 
     babel = Babel(app)
 

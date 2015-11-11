@@ -60,7 +60,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 else {
                     alert(result);
                 }
-            };
+            }
 
             return $http.post(url, data).then(
                 function (resp) {
@@ -245,110 +245,110 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
 
 
-                //if (iAttrs['ngValidationResult']) {
-                //    scope[iAttrs['ngValidationResult']] = {};
-                //    var s = scope[iAttrs['ngValidationResult']];
-                //
-                //    s.checking = {};
-                //    s.checked = {};
-                //
-                //    s.errors = {};
-                //    s.warnings = {};
-                //    s.dirty = true;
-                //
-                //    s.submitting = false;
-                //    s.url = null;
-                //    s.on_success_url = null;
-                //}
+                if (iAttrs['ngValidationResult']) {
+                    scope[iAttrs['ngValidationResult']] = {};
+                    var s = scope[iAttrs['ngValidationResult']];
 
-                //iAttrs.$observe('ngAjaxAction', function(value) {
-                //    s.url = value;
-                //    });
+                    s.checking = {};
+                    s.checked = {};
 
-                //iAttrs.$observe('ngOnSuccess', function(value) {
-                //    s.on_success_url = value;
-                //    });
+                    s.errors = {};
+                    s.warnings = {};
+                    s.dirty = true;
 
+                    s.submitting = false;
+                    s.url = null;
+                    s.on_success_url = null;
+                }
 
-                //$.each($('[name]', $(iElement)), function (ind, el) {
-                //$newel = $(el).clone();
-                //scope.data[$(el).attr('name')] = $(el).val();
-                //$newel.attr('ng-model', 'data.' + $newel.attr('name'));
-                //$(el).replaceWith($compile($newel)(scope))
-                //});
+                iAttrs.$observe('ngAjaxAction', function(value) {
+                    s.url = value;
+                    });
+
+                iAttrs.$observe('ngOnSuccess', function(value) {
+                    s.on_success_url = value;
+                    });
 
 
-                //s.getSignificantClass = function (index, one, onw, onn) {
-                //
-                //    if (s.errors && !areAllEmpty(s.errors[index])) {
-                //        return one;
-                //    }
-                //    if (s.warnings && !areAllEmpty(s.warnings[index])) {
-                //        return onw;
-                //    }
-                //    if (s.notices && !areAllEmpty(s.notices[index])) {
-                //        return onn;
-                //    }
-                //    return '';
-                //};
-                //
-                //s.getSignificantMessage = function (index) {
-                //
-                //    if (s.errors && !areAllEmpty(s.errors[index])) {
-                //        return s.errors[index][0];
-                //    }
-                //    if (s.warnings && !areAllEmpty(s.warnings[index])) {
-                //        return s.warnings[index][0];
-                //    }
-                //    if (s.notices && !areAllEmpty(s.notices[index])) {
-                //        return s.notices[index][0]
-                //    }
-                //    return '';
-                //};
-                //
-                //
-                //s.refresh = function () {
-                //    s.changed = getObjectsDifference(s.checked, s['data']);
-                //    s.check();
-                //};
-                //
-                //s.check = _.debounce(function (d) {
-                //    if (areAllEmpty(s.checking)) {
-                //        console.log('s.changed', s.changed);
-                //        s.changed = getObjectsDifference(s.checked, scope['data']);
-                //        if (!areAllEmpty(s.changed)) {
-                //            s.checking = scope['data'];
-                //
-                //            $http.post($(iElement).attr('njAjaxAction'), s.checking)
-                //                .then(function (fromserver) {
-                //                    var resp = fromserver['data'];
-                //                    if (areAllEmpty(getObjectsDifference(s.checking, scope['data']))) {
-                //                        s.errors = $.extend(true, {}, resp['errors']);
-                //                        s.warnings = $.extend(true, {}, resp['warnings']);
-                //                        s.checked = $.extend(true, {}, s.checking);
-                //                        s.changed = {};
-                //                        s.checking = {};
-                //                    }
-                //                    else {
-                //                        s.checking = {};
-                //                        s.refresh();
-                //                    }
-                //                }, function () {
-                //                    s.checking = {};
-                //                    s.refresh();
-                //                });
-                //        }
-                //    }
-                //    else {
-                //        s.refresh();
-                //    }
-                //}, 500);
-                //console.log(iAttrs);
-                //if (iAttrs['ngAjaxFormValidate'] !== undefined) {
-                //    s.$watch('data', s.refresh, true);
-                //    s.refresh();
-                //}
-                //            s.getTemp(iAttrs.ngCity);
+                $.each($('[name]', $(iElement)), function (ind, el) {
+                $newel = $(el).clone();
+                scope.data[$(el).attr('name')] = $(el).val();
+                $newel.attr('ng-model', 'data.' + $newel.attr('name'));
+                $(el).replaceWith($compile($newel)(scope))
+                });
+
+
+                s.getSignificantClass = function (index, one, onw, onn) {
+
+                    if (s.errors && !areAllEmpty(s.errors[index])) {
+                        return one;
+                    }
+                    if (s.warnings && !areAllEmpty(s.warnings[index])) {
+                        return onw;
+                    }
+                    if (s.notices && !areAllEmpty(s.notices[index])) {
+                        return onn;
+                    }
+                    return '';
+                };
+
+                s.getSignificantMessage = function (index) {
+
+                    if (s.errors && !areAllEmpty(s.errors[index])) {
+                        return s.errors[index][0];
+                    }
+                    if (s.warnings && !areAllEmpty(s.warnings[index])) {
+                        return s.warnings[index][0];
+                    }
+                    if (s.notices && !areAllEmpty(s.notices[index])) {
+                        return s.notices[index][0]
+                    }
+                    return '';
+                };
+
+
+                s.refresh = function () {
+                    s.changed = getObjectsDifference(s.checked, s['data']);
+                    s.check();
+                };
+
+                s.check = _.debounce(function (d) {
+                    if (areAllEmpty(s.checking)) {
+                        console.log('s.changed', s.changed);
+                        s.changed = getObjectsDifference(s.checked, scope['data']);
+                        if (!areAllEmpty(s.changed)) {
+                            s.checking = scope['data'];
+
+                            $http.post($(iElement).attr('njAjaxAction'), s.checking)
+                                .then(function (fromserver) {
+                                    var resp = fromserver['data'];
+                                    if (areAllEmpty(getObjectsDifference(s.checking, scope['data']))) {
+                                        s.errors = $.extend(true, {}, resp['errors']);
+                                        s.warnings = $.extend(true, {}, resp['warnings']);
+                                        s.checked = $.extend(true, {}, s.checking);
+                                        s.changed = {};
+                                        s.checking = {};
+                                    }
+                                    else {
+                                        s.checking = {};
+                                        s.refresh();
+                                    }
+                                }, function () {
+                                    s.checking = {};
+                                    s.refresh();
+                                });
+                        }
+                    }
+                    else {
+                        s.refresh();
+                    }
+                }, 500);
+                console.log(iAttrs);
+                if (iAttrs['ngAjaxFormValidate'] !== undefined) {
+                    s.$watch('data', s.refresh, true);
+                    s.refresh();
+                }
+                            s.getTemp(iAttrs.ngCity);
             }
         }
     }])
@@ -393,7 +393,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                             window.location.href = httpresp['headers']('Location');
                         }
                         return response;
-                    },
+                    }
 
                 };
 
@@ -430,7 +430,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 if (scope['ngWatch']) {
                     scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
                 }
-                ;
+                
 
 
                 var parameters = $.extend(defaultparameters, {
@@ -534,7 +534,9 @@ function file_choose(selectedfile) {
     top.tinymce.activeEditor.windowManager.close();
 }
 
-module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ajaxFormModule']);
+// 'ui.select' uses "/static/js/select.js" included in index_layout.html
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select']);
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select', 'ajaxFormModule']);
 
 module.config(function ($provide) {
     $provide.decorator('$controller', function ($delegate) {
@@ -686,7 +688,7 @@ module.run(function ($rootScope, $ok) {
                 {title: 'NORMAL', inline: 'span', classes: 'small'},
                 {title: 'SMALLER', inline: 'span', classes: 'smaller'},
                 {title: 'SMALL', inline: 'span', classes: 'small'}
-            ],
+            ]
 
 
             //paste_auto_cleanup_on_paste : true,
@@ -723,10 +725,10 @@ module.run(function ($rootScope, $ok) {
 
 
 function cleanup_html(html) {
-    normaltags = '^(span|a|br|div|table)$'
+    normaltags = '^(span|a|br|div|table)$';
     common_attributes = {
         whattr: {'^(width|height)$': '^([\d]+(.[\d]*)?)(em|px|%)$'}
-    }
+    };
 
     allowed_tags = {
         '^table$': {allow: '^(tr)$', attributes: {whattr: true}},
@@ -736,7 +738,7 @@ function cleanup_html(html) {
         '^img$': {allow: false, attributes: {'^src$': '.*'}},
         '^br$': {allow: false, attributes: {}},
         '^div$': {allow: normaltags, attributes: {}}
-    }
+    };
 
     $.each(allowed_tags, function (tag, properties) {
         var attributes = properties.attributes ? properties.attributes : {}

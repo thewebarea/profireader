@@ -1,4 +1,4 @@
-from .blueprints import company_bp
+from .blueprints_declaration import company_bp
 from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
@@ -8,9 +8,11 @@ from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
+from ..models.portal import PortalDivision
+from ..models.tag import TagPortalDivisionArticle
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import CompanyPortal
-from ..models.articles import ArticleCompany, ArticlePortal
+from ..models.articles import ArticleCompany, ArticlePortalDivision
 from utils.db_utils import db
 from collections import OrderedDict
 # from ..models.rights import list_of_RightAtomic_attributes
@@ -51,16 +53,27 @@ def load_companies(json):
 
 @company_bp.route('/materials/<string:company_id>/', methods=['GET'])
 @login_required
+# @check_rights(simple_permissions([]))
 def materials(company_id):
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
     return render_template(
-        'company/materials.html', company_id=company_id,
-        angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
+        'company/materials.html', 
+        company_id=company_id,
+        angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js',
+        company_logo=company_logo
+    )
 
 
 @company_bp.route('/materials/<string:company_id>/', methods=['POST'])
 @login_required
 @ok
 def materials_load(json, company_id):
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
+    
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_portal_id = json.get('chosen_portal')['id'] if json.get('chosen_portal') else 0
     params = {'search_text': json.get('search_text'), 'company_id': company_id}
@@ -75,7 +88,7 @@ def materials_load(json, company_id):
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
                                                items_per_page=5)
-    all, portals = ArticlePortal.get_portals_where_company_send_article(company_id)
+    all, portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
 
@@ -92,15 +105,21 @@ def materials_load(json, company_id):
             'company_id': company_id,
             'chosen_status': article_status or statuses['All'],
             'statuses': statuses,
-            'original_chosen_status': original_chosen_status}
+            'original_chosen_status': original_chosen_status,
+            'company_logo': company_logo}
+
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
 @login_required
 # @check_rights(simple_permissions([]))
 def material_details(company_id, article_id):
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
     return render_template('company/material_details.html',
                            company_id=company_id,
-                           article_id=article_id)
+                           article_id=article_id,
+                           company_logo=company_logo)
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
@@ -108,35 +127,57 @@ def material_details(company_id, article_id):
 @ok
 #@check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
-    article = Article.get_one_article(article_id)
-    portals = {port.portal_id: port.portal.get_client_side_dict() for port in
-               CompanyPortal.get_portals(company_id)}
-    joined_portals = {}
-    if article.portal_article:
-        joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
-                          for articles in article.portal_article
-                          if articles.division.portal.id in portals}
+    action = g.req('action', allowed=['load', 'validate', 'save'])
+    if action == 'load':
+        article = Article.get_one_article(article_id)
+        portals = {port.portal_id: port.portal.get_client_side_dict() for port in
+                   CompanyPortal.get_portals(company_id)}
+        joined_portals = {}
+        if article.portal_article:
+            joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
+                              for articles in article.portal_article
+                              if articles.division.portal.id in portals}
 
-    article = article.to_dict('id, title,short, cr_tm, md_tm, '
-                              'company_id, status, long,'
-                              'editor_user_id, company.name|id,'
-                              'portal_article.division.portal.id')
+        article = article.to_dict('id, title,short, cr_tm, md_tm, '
+                                  'company_id, status, long,'
+                                  'editor_user_id, company.name|id,'
+                                  'portal_article.division.portal.id')
 
-    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
-    user_rights = list(g.user.user_rights_in_company(company_id))
+        status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
+        user_rights = list(g.user.user_rights_in_company(company_id))
 
-    return {'article': article,
-            'status': status,
-            'portals': portals,
-            'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
-            'selected_portal': {},
-            'selected_division': {},
-            # 'user_rights': ['publish', 'unpublish', 'edit'],
-            # TODO: uncomment the string below and delete above
-            # TODO: when all works with rights are finished
-            'user_rights': user_rights,
-            'send_to_user': {},
-            'joined_portals': joined_portals}
+        company = db(Company, id=company_id).one()
+        company_logo = company.logo_file_relationship.url() \
+            if company.logo_file_id else '/static/img/company_no_logo.png'
+
+        return {'article': article,
+                'status': status,
+                'portals': portals,
+                'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
+                'selected_portal': {},
+                'selected_division': {},
+                # 'user_rights': ['publish', 'unpublish', 'edit'],
+                # TODO: uncomment the string below and delete above
+                # TODO: when all works with rights are finished
+                'user_rights': user_rights,
+                'send_to_user': {},
+                'joined_portals': joined_portals,
+                'company_logo': company_logo}
+    if action == 'save':
+        pass
+    if action == 'validate':
+        pass
+
+
+@company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([]))
+@ok
+def get_tags(json, portal_division_id):
+# def get_tags(portal_division_id):
+    available_tags = g.db.query(PortalDivision).get(portal_division_id).portal_division_tags
+    available_tag_names = list(map(lambda x: getattr(x, 'name'), available_tags))
+    return {'availableTags': available_tag_names}
 
 
 @company_bp.route('/update_article/', methods=['POST'])
@@ -157,11 +198,14 @@ def update_article(json):
 # @check_rights(simple_permissions([]))
 @ok
 def submit_to_portal(json):
+    # json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
+
+    portal_division_id = json['selected_division']
 
     article = ArticleCompany.get(json['article']['id'])
-    article_portal = article.clone_for_portal(json['selected_division'])
+    article_portal = article.clone_for_portal(portal_division_id, json['tags'])
     article.save()
-    portal = article_portal.get_article_owner_portal(portal_division_id=json['selected_division'])
+    portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
     return {'portal': portal.name}
 
 
@@ -193,14 +237,14 @@ def confirm_create(json):
 def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = list(g.user.user_rights_in_company(company_id))
-    # image = File.get(company.logo_file).url() \
+    # company_logo = File.get(company.logo_file).url() \
     #     if company.logo_file else '/static/img/company_no_logo.png'
-    image = company.logo_file_relationship.url() \
+    company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
     return render_template('company/company_profile.html',
                            company=company.to_dict('*, own_portal.*'),
                            user_rights=user_rights,
-                           image=image,
+                           company_logo=company_logo,
                            company_id=company_id
                            )
 
@@ -225,13 +269,17 @@ def employees(company_id):
     curr_user = {user_id: company_user_rights[user_id]}
     current_company = db(Company, id=company_id).one()
 
+    company_logo = current_company.logo_file_relationship.url() \
+        if current_company.logo_file_id else '/static/img/company_no_logo.png'
+
     return render_template('company/company_employees.html',
                            company=current_company,
                            company_id=company_id,
                            company_user_rights=company_user_rights,
                            curr_user=curr_user,
                            Right=Right,
-                           RightHumnReadible=RightHumnReadible
+                           RightHumnReadible=RightHumnReadible,
+                           company_logo=company_logo
                            )
 
 

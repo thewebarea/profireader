@@ -1,6 +1,6 @@
-<h2>Log in using Profireader</h2>
+<h3>Log in using Profireader</h3>
 
-<form action="{{ url_for('auth.login', next=request.args.get('next')) }}" method="POST" >
+<form action="{{ url_for('auth.login', next=request.args.get('next')) }}" method="POST">
     {{ form.email(placeholder='yourname@email.com') }} <br/>
     {{ form.password(placeholder='Password') }} <br/>
     {{ form.submit(type="submit", value="login") }}<br/>
@@ -8,8 +8,10 @@
     {{ form.csrf_token }}
 </form>
 
-<p>Forgot your password? <a href="{{ url_for('auth.password_reset_request') }}">Click here to reset it</a>.</p>
-<p>New user? <a href="{{ url_for('auth.signup') }}">Click here to register</a>.</p>
+<div style="font-size: 14px; text-align: center; padding-top: 25px; line-height: 16px;">
+    <p>Forgot your password? <a href="{{ url_for('auth.password_reset_request') }}">Click here to Reset it</a>.</p>
+    <p>New user? <a href="{{ url_for('auth.signup') }}">Click here to register</a>.</p>
+</div>
 
 <!--<form id="se-login-form" action="url_for('user.login_profireader')" method="POST">
     <input name="email" placeholder="Email" maxlength="100" type="email"><br/>

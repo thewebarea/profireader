@@ -64,8 +64,6 @@ class Company(Base, PRBase):
                                           backref='logo_owner_company',
                                           foreign_keys='Company.logo_file_id')
 
-    company_tags = relationship('TagCompany')
-
     # get all users in company : company.employees
     # get all users companies : user.employers
 
@@ -194,9 +192,10 @@ class UserCompany(Base, PRBase):
                                 get_my_attributes(STATUS_NAME))),
                          name='status_name_type'), nullable=False)
 
+    position = Column(TABLE_TYPES['short_name'])
+
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    # confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
     _rights = Column(TABLE_TYPES['bigint'],

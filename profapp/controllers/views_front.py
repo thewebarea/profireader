@@ -1,6 +1,6 @@
-from .blueprints import front_bp
+from .blueprints_declaration import front_bp
 from flask import render_template, request, url_for, redirect, g, current_app
-from ..models.articles import Article, ArticlePortal, ArticleCompany
+from ..models.articles import Article, ArticlePortalDivision, ArticleCompany
 from ..models.portal import CompanyPortal, PortalDivision, Portal, Company, \
     PortalDivisionSettings_company_subportal
 from utils.db_utils import db
@@ -78,14 +78,12 @@ def division(division_name, page=1):
         return redirect(url_for('front.index', search_text=search_text))
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, name=division_name).one()
     if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events':
-
         sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                         portal_division_id=division.id)
         articles, pages, page = pagination(query=sub_query, page=page)
 
         return render_template('front/bird/division.html',
-                               articles={a.id: a.get_client_side_dict() for
-                                         a in articles},
+                               articles={a.id: a.get_client_side_dict() for a in articles},
                                current_division=division.get_client_side_dict(),
                                portal=portal_and_settings(portal),
                                pages=pages,
@@ -112,11 +110,11 @@ def division(division_name, page=1):
 
 # TODO OZ by OZ: portal filter, move portal filtering to decorator
 
-@front_bp.route('details/<string:article_portal_id>')
-def details(article_portal_id):
+@front_bp.route('details/<string:article_portal_division_id>')
+def details(article_portal_division_id):
     search_text, portal, sub_query = get_params()
 
-    article = ArticlePortal.get(article_portal_id)
+    article = ArticlePortalDivision.get(article_portal_division_id)
     article_dict = article.to_dict('id, title,short, cr_tm, md_tm, '
                                    'publishing_tm, keywords, status, long, image_file_id,'
                                    'division.name, division.portal.id,'
@@ -125,9 +123,9 @@ def details(article_portal_id):
 
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
-    related_articles = g.db().query(ArticlePortal).filter(
+    related_articles = g.db().query(ArticlePortalDivision).filter(
         division.portal.id == article.division.portal_id).order_by(
-        ArticlePortal.cr_tm.desc()).limit(10).all()
+        ArticlePortalDivision.cr_tm.desc()).limit(10).all()
 
     return render_template('front/bird/article_details.html',
                            portal=portal_and_settings(portal),
@@ -155,11 +153,14 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
     subportal_division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
                                                                 name=division_name).one()
 
-    sub_query = Article.subquery_articles_at_portal(search_text=search_text,
-                                                    portal_division_id=subportal_division.id).\
+    sub_query = Article.subquery_articles_at_portal(
+        search_text=search_text,
+        portal_division_id=subportal_division.id).\
         filter(db(ArticleCompany,
-                  company_id=member_company_id, id=ArticlePortal.article_company_id).exists())
+                  company_id=member_company_id,
+                  id=ArticlePortalDivision.article_company_id).exists())
         # filter(Company.id == member_company_id)
+
     articles, pages, page = pagination(query=sub_query, page=page)
 
     return render_template('front/bird/subportal_division.html',

@@ -200,7 +200,7 @@ class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
 
     # Define database connection parameters
-    host = secret_data.DB_HOST
+    host = secret_data.DB_HOST_UNITTEST
     database = secret_data.DB_NAME_UNITTEST
 
     # Define the database - we are working with
