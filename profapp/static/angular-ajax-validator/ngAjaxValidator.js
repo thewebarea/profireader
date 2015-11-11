@@ -98,7 +98,7 @@
             require: ['ngModel'],
             link: function ($scope, el, attrs, afModelCtrl) {
 
-                console.log($scope, el, attrs, afModelCtrl);
+                console.log(attrs.ngModel, 1);
 
                 var $parent = $scope['$parent'];
                 var ctrl = afModelCtrl[0];

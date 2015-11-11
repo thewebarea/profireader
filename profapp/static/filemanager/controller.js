@@ -186,13 +186,14 @@
 
 //TODO OZ by OZ: why we have hardcoded download action
         $scope.take_action = function(item, actionname) {
+            console.log(item, actionname);
             $scope.modal = '';
             if ($scope.file_manager_on_action[actionname] !== '' &&  ( actionname === 'download')) {
                 try {
                     eval('item'+'.'+actionname+'();');//$scope.file_manager_on_action[actionname] + '(item);');
                 }
                 catch(e) {
-
+                    console.error(e);
                 }
             }
             else if ($scope.file_manager_on_action[actionname] !== '' &&  ( actionname === 'choose')) {
@@ -200,7 +201,7 @@
                     eval($scope.file_manager_on_action[actionname] + '(item.model);');
                 }
                 catch(e) {
-
+                    console.error(e);
                 }
             }
             else if($scope.file_manager_on_action[actionname] !== ''){

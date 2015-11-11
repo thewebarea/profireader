@@ -613,38 +613,17 @@ module.run(function ($rootScope, $ok) {
         areAllEmpty: areAllEmpty,
         tinymceImageOptions: {
             inline: false,
-            plugins: 'advlist autolink link image lists charmap print preview',
+            plugins: 'advlist autolink link image lists charmap print preview paste',
             skin: 'lightgray',
             theme: 'modern',
-            //paste_postprocess1: function (plugin, args) {
-            //    console.log('paste_postprocess', args);
-            //},
             setup: function (editor) {
                 console.log('setup', editor);
                 editor.on('PreInit', function (event) {
-                    editor.parser.addNodeFilter('img,p', function (nodes, name) {
-                        console.log('addNodeFilter', nodes, name);
-                        return nodes;
-
-        //                ed.parser.addNodeFilter('cms:control', function (nodes) {
-        //    var i = nodes.length;
-        //
-        //    while (i--)
-        //        objectToHtml(nodes[i], ed.schema);
-        //});
-        //
-        //ed.serializer.addNodeFilter('cms:control', function (nodes, name, args) {
-        //    var i = nodes.length,
-        //        node;
-        //
-        //    while (i--) {
-        //        node = nodes[i];
-        //        htmlToObject(node, args);
-        //    }
-        //});
-
-
-
+                    editor.parser.addNodeFilter('a', function (nodes, name) {
+                        console.log(nodes);
+                        $.each(nodes,function(i ,v) {
+                            v.unwrap();
+                        });
                     });
                     //editor.parser.addAttributeFilter('src,href', function (nodes, name) {
                     //    console.log('addAttributeFilter', nodes, name);
