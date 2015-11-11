@@ -1,4 +1,4 @@
-from .blueprints import portal_bp
+from .blueprints_declaration import portal_bp
 from flask import render_template, g, flash, redirect, url_for, jsonify
 from ..models.company import Company
 from flask.ext.login import current_user, login_required

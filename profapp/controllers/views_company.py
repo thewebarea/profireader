@@ -1,4 +1,4 @@
-from .blueprints import company_bp
+from .blueprints_declaration import company_bp
 from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
@@ -127,40 +127,47 @@ def material_details(company_id, article_id):
 @ok
 #@check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
+    action = g.req('action', allowed=['load', 'validate', 'save'])
     article = Article.get_one_article(article_id)
-    portals = {port.portal_id: port.portal.get_client_side_dict() for port in
-               CompanyPortal.get_portals(company_id)}
-    joined_portals = {}
-    if article.portal_article:
-        joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
-                          for articles in article.portal_article
-                          if articles.division.portal.id in portals}
+    if action == 'load':
 
-    article = article.to_dict('id, title,short, cr_tm, md_tm, '
-                              'company_id, status, long,'
-                              'editor_user_id, company.name|id,'
-                              'portal_article.division.portal.id')
+        portals = {port.portal_id: port.portal.get_client_side_dict() for port in
+                   CompanyPortal.get_portals(company_id)}
+        joined_portals = {}
+        if article.portal_article:
+            joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
+                              for articles in article.portal_article
+                              if articles.division.portal.id in portals}
 
-    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
-    user_rights = list(g.user.user_rights_in_company(company_id))
+        article = article.to_dict('id, title,short, cr_tm, md_tm, '
+                                  'company_id, status, long,'
+                                  'editor_user_id, company.name|id,'
+                                  'portal_article.division.portal.id')
 
-    company = db(Company, id=company_id).one()
-    company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
+        user_rights = list(g.user.user_rights_in_company(company_id))
 
-    return {'article': article,
-            'status': status,
-            'portals': portals,
-            'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
-            'selected_portal': {},
-            'selected_division': {},
-            # 'user_rights': ['publish', 'unpublish', 'edit'],
-            # TODO: uncomment the string below and delete above
-            # TODO: when all works with rights are finished
-            'user_rights': user_rights,
-            'send_to_user': {},
-            'joined_portals': joined_portals,
-            'company_logo': company_logo}
+        company = db(Company, id=company_id).one()
+        company_logo = company.logo_file_relationship.url() \
+            if company.logo_file_id else '/static/img/company_no_logo.png'
+
+        return {'article': article,
+                'status': status,
+                'portals': portals,
+                'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
+                'selected_portal': {},
+                'selected_division': {},
+                # 'user_rights': ['publish', 'unpublish', 'edit'],
+                # TODO: uncomment the string below and delete above
+                # TODO: when all works with rights are finished
+                'user_rights': user_rights,
+                'send_to_user': {},
+                'joined_portals': joined_portals,
+                'company_logo': company_logo}
+    if action == 'save':
+        pass
+    if action == 'validate':
+        return article.validate('update')
 
 
 @company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])

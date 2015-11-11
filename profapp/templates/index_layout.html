@@ -75,7 +75,7 @@
 {%- endblock head %}
 
 
-{% block body_attribs %} ng-app="Profireader" ng-model-options="{{ "{" }}updateOn: 'default change blur', debounce: {{ "{" }} 'default': 250, 'change': 250, 'blur': 0 {{ "}" }} {{ "}" }}" {% endblock body_attribs %}
+{% block body_attribs %} ng-app="Profireader" ng-model-options="{{ "{" }}updateOn: 'default change blur', debounce: {{ "{" }} 'default': 10, 'change': 250, 'blur': 0 {{ "}" }} {{ "}" }}" {% endblock body_attribs %}
 
 {% block navbar %}
     {% include 'partials/base_profireader.html' %}
