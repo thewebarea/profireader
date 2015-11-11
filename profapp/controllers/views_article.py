@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, request, g, make_response
 from profapp.forms.article import ArticleForm
-from profapp.models.articles import Article, ArticleCompany
+from profapp.models.articles import Article, ArticleCompany, ArticlePortalDivision
 from profapp.models.users import User
 # from profapp.models.company import Company
 # from db_init import db_session

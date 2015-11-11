@@ -215,6 +215,7 @@ class PRBase:
         if hasattr(target, 'search_fields'):
             for field in target.search_fields:
                 db(Search, index=target.id, kind=field).update({'text': getattr(target, field)})
+                print(getattr(target, field))
 
     @classmethod
     def __declare_last__(cls):
@@ -222,7 +223,7 @@ class PRBase:
         event.listen(cls, 'before_insert', cls.validate_before_insert)
         event.listen(cls, 'before_delete', cls.validate_before_delete)
         event.listen(cls, 'after_insert', cls.add_to_search)
-        event.listen(cls, 'after_update', cls.update_search_table)
+        event.listen(cls, 'before_update', cls.update_search_table)
 
 #
 #

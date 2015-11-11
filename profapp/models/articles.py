@@ -80,10 +80,10 @@ class ArticlePortalDivision(Base, PRBase):
                           secondaryjoin="PortalDivision.portal_id == Portal.id",
                           back_populates='articles',
                           uselist=False)
+    search_fields = ('title', 'short', 'long_stripped', 'keywords')
 
     def __init__(self, article_company_id=None, title=None, short=None, keywords=None,
-                 long=None, status=None, portal_division_id=None, image_file_id=None,
-                 # portal_id=None
+                 long=None, status=None, portal_division_id=None, image_file_id=None
                  ):
         self.article_company_id = article_company_id
         self.title = title
@@ -173,7 +173,6 @@ class ArticleCompany(Base, PRBase):
                                               "ArticlePortalDivision."
                                               "article_company_id",
                                   backref='company_article')
-    search_fields = ('title', 'short', 'long_stripped', 'keywords')
 
     def get_client_side_dict(self, fields='id|title|short|'
                                           'long|keywords|cr_tm|md_tm|company_id|'
