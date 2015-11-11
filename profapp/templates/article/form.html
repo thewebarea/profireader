@@ -21,6 +21,8 @@
         {##}
         {#            return true;#}
 
+        $scope.data = {};
+
 
         $scope.hh = function () {
             $ok('/hh/', {hh: '1'}, function () {
@@ -31,10 +33,6 @@
             console.log('hh');
             return false;
         };
-
-    $scope.data = {
-        'long': "1212121<img src='/aaa/'><img src='/bbb/'>"
-    };
 
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
@@ -67,6 +65,7 @@
 
 
         $scope.articleImageSelected = function (item) {
+            debugger;
             $scope.data.image_file_id = item.id;
             $scope.setImageUrl();
             closeFileManager();
@@ -84,6 +83,14 @@
         $scope.change_picture_in_croper = function (image_file_url) {
             var $image = $('.img-container > img');
             $image.cropper('replace', image_file_url);
+        };
+
+    $scope.articleAfterLoad = function(resp, deff) {
+            deff(resp);
+        debugger;
+        console.log($scope.data);
+        $scope.setImageUrl($scope.data);
+        return true;
         };
 
         $scope.setImageUrl = function (model) {
@@ -126,7 +133,8 @@
 <div ng-controller="article_edit">
 
 
-    <div af-state="aaa" af-after-load="setImageUrl" af-before-save="getData" ng-model="data">
+    <div af af-after-load="articleAfterLoad" af-before-save="articleBeforeSave" ng-model="data">
+        {{ data }}
 
         <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
@@ -155,20 +163,15 @@
         </div>
 
 
-        <div ng-include="'image_cropper'">111</div>
+        <div ng-include="'image_cropper'"></div>
 
 
-        <div class="profi-tiny-mce-birdy-wraper">
+        <div ng-if="0" class="profi-tiny-mce-birdy-wraper">
             <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
-                      ng-model="data.long">2222</textarea>
+                      ng-model="data.long"></textarea>
         </div>
 
         <input type="hidden" ng-model="data.image_file_id">
-
-        {{ aaa }}
-        {{ data_validation }}
-
-
 
 
     </div>
