@@ -1,4 +1,4 @@
-from .blueprints import company_bp
+from .blueprints_declaration import company_bp
 from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect

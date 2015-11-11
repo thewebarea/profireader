@@ -4,7 +4,7 @@ from profapp.models.articles import Article, ArticleCompany
 from profapp.models.users import User
 # from profapp.models.company import Company
 # from db_init import db_session
-from .blueprints import article_bp
+from .blueprints_declaration import article_bp
 from .request_wrapers import ok, object_to_dict
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 # import os

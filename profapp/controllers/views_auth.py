@@ -1,4 +1,4 @@
-from .blueprints import auth_bp
+from .blueprints_declaration import auth_bp
 from flask import g, request, url_for, render_template, flash, current_app
 #from db_init import db_session
 from ..constants.SOCIAL_NETWORKS import DB_FIELDS, SOC_NET_FIELDS, \

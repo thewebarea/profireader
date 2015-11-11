@@ -1,4 +1,4 @@
-from .blueprints import user_bp
+from .blueprints_declaration import user_bp
 from flask import url_for, render_template, abort, request, flash, redirect, \
     request, g
 # from db_init import db_session
