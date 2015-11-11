@@ -135,7 +135,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
             $scope.selectedUser_sending = false;
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
-            $scope.url_submit_to_portal = '{{ url_for('portal.submit_to_portal')|safe }}';
+            $scope.url_submit_to_portal = {{ raw_url_for('portal.submit_to_portal')|safe }};
             $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
             $scope.url_send_article_user = {{ raw_url_for('company.send_article_to_user')|safe }};
             $scope.data_resp = '';
@@ -247,11 +247,9 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
     <div ng-controller="materials_articles">
         <div af af-before-load="beforeLoadArticle"
              af-after-load="afterLoadArticle"
-             af-validate-url="{{ url_submit_to_portal }}"
-             af-save-url="{{ url_submit_to_portal }}"
+             af-url-validate="{{ url_submit_to_portal({action: 'validate'}) }}"
+             af-url-save="{{ url_submit_to_portal({action: 'save'}) }}"
              ng-model="data">
-
-            {{ url_submit_to_portal }}++++
 
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
