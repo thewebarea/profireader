@@ -1,4 +1,4 @@
-from .blueprints import image_editor_bp
+from .blueprints_declaration import image_editor_bp
 from flask import render_template, request, url_for, redirect, g
 from config import Config
 from PIL import Image
@@ -10,6 +10,7 @@ from time import gmtime, strftime
 import sys
 from ..models.files import File
 from .views_file import file_query
+
 
 @image_editor_bp.route('/<string:img_id>', methods=['GET', 'POST'])
 def image_editor(img_id):

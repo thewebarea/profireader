@@ -1,4 +1,4 @@
-from .blueprints import file_bp
+from .blueprints_declaration import file_bp
 from flask import request, make_response, g, abort
 from ..models.files import File, FileContent, ImageCroped
 from io import BytesIO

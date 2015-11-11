@@ -97,6 +97,7 @@
         };
 
         ret.$callDirectiveMethod = function (model, method, action) {
+            console.log(model, method, action);
             var found = false;
             $.each(modelsForValidation, function (ind, val) {
                 if (val && val['model'].$modelValue === model) {
