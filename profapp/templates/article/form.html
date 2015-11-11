@@ -21,6 +21,8 @@
         {##}
         {#            return true;#}
 
+        $scope.data = {};
+
 
         $scope.hh = function () {
             $ok('/hh/', {hh: '1'}, function () {
@@ -31,7 +33,6 @@
             console.log('hh');
             return false;
         };
-
 
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
@@ -133,6 +134,7 @@
 
 
     <div af af-after-load="articleAfterLoad" af-before-save="articleBeforeSave" ng-model="data">
+        {{ data }}
 
         <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
