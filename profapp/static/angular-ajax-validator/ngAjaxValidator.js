@@ -16,10 +16,10 @@
         return cloneto;
     };
 
-    var cloneIfExistsCallbacks = function (cloneto, defaultparams, params) {
+    var cloneIfExistsCallbacks = function (cloneto, defaultparams, params, $scope) {
 
         $.each(defaultparams, function (ind, val) {
-            cloneto[ind] = ((typeof params[ind] === 'undefined') ? val : params[ind]);
+            cloneto[ind] = ((typeof params[ind] === 'undefined') ? val : $scope[ind]);
         });
         return cloneto;
     };
@@ -59,11 +59,10 @@
         };
 
         ret.$callDirectiveMethod = function (model, method, action) {
-            console.log(model, method, action);
             var found = false;
             $.each(modelsForValidation, function (ind, val) {
                 if (val && val['model'].$modelValue === model) {
-                    found = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method](action));
+                    found = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method]());
                 }
             });
             return null;
@@ -132,7 +131,7 @@
                     'afState': attrs.ngModel + '_state'
                 }, attrs);
 
-                console.log(attrs, params);
+                console.log(attrs, params, $scope);
 
                 params['afDebounce'] = parseInt(params['afDebounce']);
                 if (params['afDebounce'] <= 0) params['afDebounce'] = 500;
@@ -175,16 +174,15 @@
                     }
                 };
 
-                cloneIfExistsCallbacks(params, defaultCallbacks, attrs);
+                cloneIfExistsCallbacks(params, defaultCallbacks, attrs, $scope);
 
 
                 console.log(params);
 
                 function callCallback() {
-                    debugger;
                     var args = Array.prototype.slice.call(arguments);
                     var callbackkey = args.shift();
-                    args.push(defaultCallbacks[callbackkey]);
+                    args.push(defaultCallbacks[callbackkey]());
                     var func = params[callbackkey]();
                     if (func === undefined) {
                         func = defaultCallbacks[callbackkey]();
@@ -204,10 +202,10 @@
                         var url = params['afUrl' + action];
 
                         setInParent('afState', statebefore);
-                        $ok(url, dataToSend?dataToSend:{},
+                        $ok(url, dataToSend ? dataToSend : {},
                             function (resp, errorcode, httpresp) {
                                 try {
-                                    var ret = callCallback('afAfter' + action, resp)(resp);
+                                    var ret = callCallback('afAfter' + action, resp);
                                     ok(ret);
                                 }
                                 catch (e) {
@@ -229,18 +227,23 @@
                 setInParent('afState', 'init');
 
                 $scope.load = function () {
-                    if ($scope.isActionAllowed('load')) func1('Load', 'loading',
-                        function (resp) {
-                            //$parent[attrs.ngModel] =  cloneObject(resp);
-                            //$parent.$watch(attrs.ngModel, watchfunc, true);
-                            //ctrl.$setViewValue(cloneObject(resp));
-                            //ctrl.$render();
-                            $af.$storeModelForValidation(ctrl, $scope);
-                            setInParent('afState', 'clean');
-                        },
-                        function (resp) {
-                            setInParent('afState', 'loading_failed');
-                        });
+                    if ($scope.isActionAllowed('load')) {
+                        func1('Load', 'loading',
+                            function (resp) {
+                                //$parent[attrs.ngModel] =  cloneObject(resp);
+                                //$parent.$watch(attrs.ngModel, watchfunc, true);
+                                //ctrl.$setViewValue(cloneObject(resp));
+                                //ctrl.$render();
+                                $af.$storeModelForValidation(ctrl, $scope);
+                                setInParent('afState', 'clean');
+                            },
+                            function (resp) {
+                                setInParent('afState', 'loading_failed');
+                            });
+                    }
+                    else {
+                        console.error('called method `load` is forbidden for model because current model is in state: `' + $parent[params['afState']] + '`');
+                    }
                 };
 
                 $scope.validate = function () {
@@ -256,18 +259,24 @@
                             });
                     }
                     else {
+                        console.error('called method `validate` is forbidden for model because current model is in state: `' + $parent[params['afState']] + '`. debouncing validation');
                         debouncedvalidate();
                     }
                 };
 
                 $scope.save = function () {
-                    if ($scope.isActionAllowed('save')) func1('Save', 'saving',
-                        function (resp) {
-                            setInParent('afState', 'clean');
-                        },
-                        function (resp) {
-                            setInParent('afState', 'saving_failed');
-                        })
+                    if ($scope.isActionAllowed('save')) {
+                        func1('Save', 'saving',
+                            function (resp) {
+                                setInParent('afState', 'clean');
+                            },
+                            function (resp) {
+                                setInParent('afState', 'saving_failed');
+                            })
+                    }
+                    else {
+                        console.error('called method `save` is forbidden for model because current model is in state: `' + $parent[params['afState']] + '`');
+                    }
                 };
 
                 var save_states = ['init', 'clean', 'saving_failed', 'valid', 'loading_failed'];
