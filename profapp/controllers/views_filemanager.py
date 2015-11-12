@@ -78,7 +78,8 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    name = File.get_unique_name('Sds(1)','directory', '5629030e-d4f8-4001-8a3a-f5cfdffc8647')
+    file = File.get('5644d72e-a269-4001-a5de-8c3194039273')
+    name = File.set_properties(file,False,name='None', copyright_author_name='',description='')
     return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/properties/', methods=['POST'])

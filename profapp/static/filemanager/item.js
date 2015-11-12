@@ -98,8 +98,8 @@
                 "id" : self.model.id,
                 'add_all': self.tempModel.add_all,
                 "name": self.tempModel.name.trim() === self.model.name.trim() ? 'None': self.tempModel.name.trim(),
-                "author_name":self.tempModel.author_name.trim(),
-                "description": self.tempModel.description,
+                "author_name": self.tempModel.author_name === ''? '':self.tempModel.author_name,
+                "description": self.tempModel.description === ''? '':self.tempModel.description,
                 "mode": "properties",
                 "path": self.model.fullPath(),
                 "newPath": self.tempModel.fullPath()

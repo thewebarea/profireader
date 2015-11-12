@@ -332,16 +332,17 @@ class File(Base, PRBase):
         g.db.commit()
         return self
 
-    def set_properties(self, add_all,**kwargs):
+    def set_properties(self, add_all, **kwargs):
         if self == None:
             return False
-        attr = {f:kwargs[f] for f in kwargs if kwargs[f] != ''}
+        attr = {f:kwargs[f] for f in kwargs}
         check = File.is_name(attr['name'], self.mime, self.parent_id) if attr['name'] != 'None' else True
         if attr['name'] == 'None':
             del attr['name']
         self.updates(attr)
         if add_all:
-            del attr['name']
+            if 'name' in attr.keys():
+                del attr['name']
             files = File.get_all_in_dir_rev(self.id)
             for file in files:
                 file.updates(attr)
