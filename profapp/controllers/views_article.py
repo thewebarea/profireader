@@ -26,6 +26,7 @@ def show_mine():
 @article_bp.route('/list/', methods=['POST'])
 @ok
 def load_mine(json):
+    print(json)
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
     params = {'search_text': json.get('search_text'), 'user_id': g.user_dict['id']}
@@ -50,7 +51,7 @@ def load_mine(json):
                          for a in articles],
             'companies': companies,
             'search_text': json.get('search_text') or '',
-            'original_search_text': json.get('search_text') or '',
+            'original_search_text': str(json.get('search_text')) or '',
             'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
