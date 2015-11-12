@@ -363,7 +363,7 @@ class File(Base, PRBase):
                 dir.save()
                 new_list.append(dir)
                 f = File.save_files(files, dir.id, attr)
-        return old_list,new_list
+        return old_list, new_list
 
     @staticmethod
     def update_files(files,attr):
@@ -406,6 +406,8 @@ class File(Base, PRBase):
                 fil.updates(attr)
         return files_in_parent
 
+
+
     def copy_file(self, parent_id, **kwargs):
         folder = File.get(parent_id)
         if self == None or folder == None:
@@ -424,7 +426,7 @@ class File(Base, PRBase):
             all_in_dir = File.save_all(id, attr, copy_file.id)
         else:
             file_content = FileContent.get(id).detach()
-            file_content.id = copy_file.id
+            # file_content.id = copy_file.id
             copy_file.file_content = file_content
 
         return copy_file.id
@@ -458,9 +460,10 @@ class FileContent(Base, PRBase):
     file = relationship('File',
                                 uselist=False,
                                 backref=backref('file_content', uselist=False),
-                                cascade='save-update,delete')
+                                cascade="save-update, delete")
 
-    def __init__(self, file=None, content=None):
+    def __init__(self, file=None, id=None, content=None):
+        self.id = id
         self.file = file
         self.content = content
 

@@ -116,14 +116,14 @@ def load_form_update(json, article_company_id):
             image_id = json.get('image_file_id')
             coordinates = json.get('coordinates')
             if image_id:
-                try:
-                    if db(ImageCroped, original_image_id=image_id).count():
-                        update_croped_image(image_id, coordinates)
-                    else:
-                        article.attr({'image_file_id': crop_image(image_id, coordinates)}).save()
-                except Exception as e:
-                    print(e)
+                if db(ImageCroped, original_image_id=image_id).count():
+                    update_croped_image(image_id, coordinates)
+                else:
+                    crop_image(image_id, coordinates)
+                    article.image_file_id = crop_image(image_id, coordinates)
+
             article = article.get_client_side_dict()
+            print(article)
             return article
         else:
             article.detach()
