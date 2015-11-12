@@ -127,47 +127,42 @@ def material_details(company_id, article_id):
 @ok
 #@check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
-    action = g.req('action', allowed=['load', 'validate', 'save'])
+    g.req('action', allowed=['load'])
     article = Article.get_one_article(article_id)
-    if action == 'load':
+    # if action == 'load':
+    portals = {port.portal_id: port.portal.get_client_side_dict() for port in
+               CompanyPortal.get_portals(company_id)}
+    joined_portals = {}
+    if article.portal_article:
+        joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
+                          for articles in article.portal_article
+                          if articles.division.portal.id in portals}
 
-        portals = {port.portal_id: port.portal.get_client_side_dict() for port in
-                   CompanyPortal.get_portals(company_id)}
-        joined_portals = {}
-        if article.portal_article:
-            joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
-                              for articles in article.portal_article
-                              if articles.division.portal.id in portals}
+    article = article.to_dict('id, title,short, cr_tm, md_tm, '
+                              'company_id, status, long,'
+                              'editor_user_id, company.name|id,'
+                              'portal_article.division.portal.id')
 
-        article = article.to_dict('id, title,short, cr_tm, md_tm, '
-                                  'company_id, status, long,'
-                                  'editor_user_id, company.name|id,'
-                                  'portal_article.division.portal.id')
+    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
+    user_rights = list(g.user.user_rights_in_company(company_id))
 
-        status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
-        user_rights = list(g.user.user_rights_in_company(company_id))
+    company = db(Company, id=company_id).one()
+    company_logo = company.logo_file_relationship.url() \
+        if company.logo_file_id else '/static/img/company_no_logo.png'
 
-        company = db(Company, id=company_id).one()
-        company_logo = company.logo_file_relationship.url() \
-            if company.logo_file_id else '/static/img/company_no_logo.png'
-
-        return {'article': article,
-                'status': status,
-                'portals': portals,
-                'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
-                'selected_portal': {},
-                'selected_division': {},
-                # 'user_rights': ['publish', 'unpublish', 'edit'],
-                # TODO: uncomment the string below and delete above
-                # TODO: when all works with rights are finished
-                'user_rights': user_rights,
-                'send_to_user': {},
-                'joined_portals': joined_portals,
-                'company_logo': company_logo}
-    if action == 'save':
-        pass
-    if action == 'validate':
-        return article.validate('update')
+    return {'article': article,
+            'status': status,
+            'portals': portals,
+            'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
+            'selected_portal': {},
+            'selected_division': {},
+            # 'user_rights': ['publish', 'unpublish', 'edit'],
+            # TODO: uncomment the string below and delete above
+            # TODO: when all works with rights are finished
+            'user_rights': user_rights,
+            'send_to_user': {},
+            'joined_portals': joined_portals,
+            'company_logo': company_logo}
 
 
 @company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])
@@ -192,22 +187,6 @@ def update_article(json):
         article_id=json['article']['id'],
         **{'status': json['article']['status']})
     return {'article': json['article'], 'status': 'ok'}
-
-
-@company_bp.route('/submit_to_portal/', methods=['POST'])
-@login_required
-# @check_rights(simple_permissions([]))
-@ok
-def submit_to_portal(json):
-    # json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
-
-    portal_division_id = json['selected_division']
-
-    article = ArticleCompany.get(json['article']['id'])
-    article_portal = article.clone_for_portal(portal_division_id, json['tags'])
-    article.save()
-    portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
-    return {'portal': portal.name}
 
 
 @company_bp.route('/create/')
@@ -256,6 +235,8 @@ def profile(company_id):
 def employees(company_id):
 
     company_user_rights = UserCompany.show_rights(company_id)
+    # print(company_user_rights[list(company_user_rights.keys())[0]])
+    # print(company_user_rights[list(company_user_rights.keys())[0]]['position'])
     ordered_rights = sorted(Right.keys(), key=lambda t: Right.RIGHT_POSITION()[t.lower()])
     ordered_rights = list(map((lambda x: getattr(x, 'lower')()), ordered_rights))
 
@@ -303,6 +284,7 @@ def update_rights():
 # @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
 def edit(company_id):
     return render_template('company/company_edit.html', company_id=company_id)
+
 
 @company_bp.route('/edit/<string:company_id>/', methods=['POST'])
 @login_required
@@ -397,6 +379,7 @@ def suspend_employee():
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
 
+
 @company_bp.route('/fire_employee/', methods=['POST'])
 @login_required
 def fire_employee():
@@ -407,6 +390,7 @@ def fire_employee():
     return redirect(url_for('company.employees',
                             company_id=data.get('company_id')))
 
+
 @company_bp.route('/unsuspend/<string:user_id>,<string:company_id>')
 @login_required
 def unsuspend(user_id, company_id):
@@ -415,7 +399,6 @@ def unsuspend(user_id, company_id):
                                        company_id=company_id,
                                        status=STATUS.ACTIVE())
     return redirect(url_for('company.employees', company_id=company_id))
-
 
 
 @company_bp.route('/suspended_employees/<string:company_id>',

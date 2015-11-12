@@ -183,11 +183,12 @@ class ArticleCompany(Base, PRBase):
 
     def validate(self, action):
         ret = super().validate(action)
+        # TODO: (AA to OZ): regexp doesn't work
 
-        if not re.match('[^\s]{3,}', self.title):
-            ret['errors']['title'] = 'pls enter title longer than 3 letters'
-        if not re.match('\S+', self.keywords):
-            ret['warnings']['keywords'] = 'pls enter at least one keyword'
+        # if not re.compile(r'[^\s]{3,}',re.U).match(self.title):
+        #     ret['errors']['title'] = 'pls enter title longer than 3 letters'
+        # if not re.match('\S+', self.keywords):
+        #     ret['warnings']['keywords'] = 'pls enter at least one keyword'
         return ret
 
     @staticmethod
@@ -280,7 +281,7 @@ class ArticleCompany(Base, PRBase):
             filesintext[file_id] = \
                 File.get(file_id).copy_file(company_id=company.id,
                                             root_folder_id=company.system_folder_file_id,
-                                            parent_folder_id=company.system_folder_file_id,
+                                            parent_id=company.system_folder_file_id,
                                             article_portal_division_id=article_portal_division.id).save().id
 
         if self.image_file_id:
