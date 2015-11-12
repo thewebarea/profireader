@@ -27,7 +27,7 @@ function a() {
 
     init_cropper = function () {
 
-        debugger;
+        //debugger;
 
     var $image = $('.img-container > img'),
         $dataX = $('#dataX'),
