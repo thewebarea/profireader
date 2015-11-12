@@ -130,52 +130,53 @@
 
 <div ng-controller="article_edit">
 
+    <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
-    <div af af-after-load="articleAfterLoad" af-before-save="getData" af-beforeValidate="getData" ng-model="data">
-
-        <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
-
-        <h2 ng-show="data.id && company">{{ _('update version of article for company
-            `%(company.name)s`', company)
-            }}</h2>
+    <h2 ng-show="data.id && company">{{ _('update version of article for company
+        `%(company.name)s`', company)
+        }}</h2>
 
 
-        <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
+    <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
 
-        <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
-                maybe layout selector is apporpriate here-->
+    <table af af-after-load="articleAfterLoad" af-before-save="getData" af-beforeValidate="getData" ng-model="data">
+        <tr>
+            <td style="width: 60%">
 
+                <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
+                        maybe layout selector is apporpriate here-->
 
-        <div style="width: 400px; float: left">
-            <input type="hidden" ang-model="data.id"/>
+                <input type="hidden" ang-model="data.id"/>
 
-            {{ _('Article title') }} {{ validation.errors.title }}
-            <input style="width: 100%" type="text" ng-model="data.title">
-            {{ _('Short Description') }}
-            <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>
-            {{ _('KeyWords') }}
-            <input style="width: 100%" ng-model="data.keywords"/>
-            {{ _('Full text') }}
+                {{ _('Article title') }} {{ validation.errors.title }}
+                <input style="width: 100%" type="text" ng-model="data.title">
+                {{ _('Short Description') }}
+                <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>
+                {{ _('KeyWords') }}
+                <input style="width: 100%" ng-model="data.keywords"/>
 
-        </div>
+            </td>
+            <td style="width: 40%">
+                <div ng-include="'image_cropper'"></div>
+                <input type="hidden" ng-model="data.image_file_id">
+            </td>
+        </tr>
+        <tr>
+            <td>
 
-
-        <div ng-include="'image_cropper'"></div>
-
-
-        <div class="profi-tiny-mce-birdy-wraper">
+                {{ _('Full text') }}<br/>
             <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
                       ng-model="data.long"></textarea>
-        </div>
 
-        <input type="hidden" ng-model="data.image_file_id">
-
-
-    </div>
-
-
-    <input style="clear: both;" ng-disabled="data_state != 'valid' && data_state != 'clean'" type="submit"
-           ng-click="af.save(data)" value="{{ data.id ? 'save' : 'create' }}"/> {{ data_state }}
+            </td>
+            <td style="position: relative"><input style="position: absolute; bottom: 0px; right: 0px;"
+                                                  ng-disabled="data_state != 'valid' && data_state != 'clean'"
+                                                  type="submit"
+                                                  ng-click="af.save(data)"
+                                                  value="{{ data.id ? 'save' : 'create' }} ({{ data_state }})"/>
+            </td>
+        </tr>
+    </table>
 
 </div>
 
@@ -183,6 +184,7 @@
 {% endraw %}
 
 </div>
+
 <script src="/static/image_editor/dist/cropper.js"></script>
 <script src="/static/image_editor/demo/js/main.js"></script>
 {#TODO: OZ by OZ move this code to one file#}

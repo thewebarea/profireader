@@ -1,7 +1,6 @@
 <script type="text/ng-template" id="image_cropper">
     {% raw %}
-    <div class="container" style="float: left; margin-left: 50px; width: 320px; height: 250px; border: 0 solid #aaa;
-                        background-size: cover;">
+    <div class="container" style="width: 320px; background-size: cover;">
         <div class="row">
             <div class="col-md-9">
                 <!-- <h3 class="page-header">Demo:</h3> -->
@@ -69,11 +68,12 @@
               <span class="icon icon-rotate-right"></span>
             </span>
                     </button>
-            <span class="docs-tooltip" data-toggle="tooltip" title="Chose image">
-             <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
-                     ng-click="chooseImage()">Chose image
-             </button>
-        </span>
+
+                    <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
+                            ng-click="chooseImage()">
+                 <span class="docs-tooltip" data-toggle="tooltip" title="Chose image"><span class="glyphicon glyphicon-folder-open"></span></span>
+                    </button>
+
                 </div>
 
                 <div class="btn-group" ng-if="!default_image">
@@ -100,11 +100,11 @@
               <span class="icon icon-rotate-right"></span>
             </span>
                     </button>
-            <span class="docs-tooltip" data-toggle="tooltip" title="Chose image">
-             <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
-                     ng-click="chooseImage()">Chose image
-             </button>
-        </span>
+                    <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
+                            ng-click="chooseImage()">
+                 <span class="docs-tooltip" data-toggle="tooltip" title="Chose image"><span class="glyphicon glyphicon-folder-open"></span></span>
+                    </button>
+
                 </div>
                 <input type="hidden" id="dataRatio" value="{{ data.ratio }}">
                 <input type="hidden" id="coordinate_x" value="{{ data.coordinates.x }}">
