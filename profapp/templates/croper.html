@@ -1,6 +1,5 @@
 <script type="text/ng-template" id="image_cropper">
     {% raw %}
-    {{ data.ratio }}
     <div class="container" style="float: left; margin-left: 50px; width: 320px; height: 250px; border: 0 solid #aaa;
                         background-size: cover;">
         <div class="row">
@@ -107,7 +106,6 @@
              </button>
         </span>
                 </div>
-
                 <input type="hidden" id="dataRatio" value="{{ data.ratio }}">
                 <input type="hidden" id="coordinate_x" value="{{ data.coordinates.x }}">
                 <input type="hidden" id="coordinate_y" value="{{ data.coordinates.y }}">
