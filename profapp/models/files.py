@@ -430,7 +430,8 @@ class File(Base, PRBase):
             # file_content.id = copy_file.id
             copy_file.file_content = file_content
 
-        return copy_file.id
+        # return copy_file.id
+        return self
 
     def move_to(self, parent_id, **kwargs):
         folder = File.get(parent_id)
