@@ -36,7 +36,7 @@
                 <th ng-repeat="portal_division in data.portal.divisions">
                     {{ portal_division.name }}<br/>
                     <input type="checkbox" ng-click='togglePortalDivision(portal_division.id)' ng-model="PortDivCheckbox[portal_division.id]"/>
-                    {{ PortDivCheckbox[portal_division.id] }}
+                    <!-- {{ PortDivCheckbox[portal_division.id] }} -->
                 </th>
             </tr>
             <tr ng-repeat="tag_name in data.tagsNew  | orderBy: 'toString()'">
@@ -47,7 +47,7 @@
                 </th>
                 <td ng-repeat="portal_division_id in PortalDivisionIDs">
                     <input name="chk_group[tag_name][portal_division_id]" type="checkbox" ng-model="data.PortalDivisionTags4[tag_name][portal_division_id]"/>
-                    {{ data.PortalDivisionTags4[tag_name][portal_division_id] }}
+                    <!-- {{ data.PortalDivisionTags4[tag_name][portal_division_id] }} -->
                 </td>
             </tr>
             <tr>
@@ -59,7 +59,7 @@
                 </td>
                 <td ng-repeat="portal_division_id in PortalDivisionIDs">
                     <input type="checkbox" ng-click='toggleNewTag(portal_division_id)' ng-model="newTagPortDivAvailability[portal_division_id]"/>
-                    {{ newTagPortDivAvailability[portal_division_id] }}
+                    <!-- {{ newTagPortDivAvailability[portal_division_id] }} -->
                 </td>
             </tr>
         </table>
