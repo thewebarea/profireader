@@ -1,4 +1,7 @@
-$(function () {
+var init_cropper = null;
+
+function a() {
+
 
   'use strict';
 
@@ -22,7 +25,10 @@ $(function () {
   // Demo
   // -------------------------------------------------------------------------
 
-  (function () {
+    init_cropper = function () {
+
+        debugger;
+
     var $image = $('.img-container > img'),
         $dataX = $('#dataX'),
         $dataY = $('#dataY'),
@@ -83,8 +89,9 @@ $(function () {
             $dataRotate.val(Math.round(data.rotate));
           }
         };
+      console.log($('#default_image').val()=='false', $('#default_image').val(), 'false');
 if($('#default_image').val()=='false'){
-    console.log('xdsfkljdhjsg;ldf');
+
 options.data =  {
              x: parseInt($('#coordinate_x').val()),
              y: parseInt($('#coordinate_y').val()),
@@ -160,34 +167,6 @@ options.data =  {
         }
 
       }
-    }).on('keydown', function (e) {
-
-      if (!$image.data('cropper')) {
-        return;
-      }
-
-      switch (e.which) {
-        case 37:
-          e.preventDefault();
-          $image.cropper('move', -1, 0);
-          break;
-
-        case 38:
-          e.preventDefault();
-          $image.cropper('move', 0, -1);
-          break;
-
-        case 39:
-          e.preventDefault();
-          $image.cropper('move', 1, 0);
-          break;
-
-        case 40:
-          e.preventDefault();
-          $image.cropper('move', 0, 1);
-          break;
-      }
-
     });
 
 
@@ -250,6 +229,7 @@ options.data =  {
     // Tooltips
     $('[data-toggle="tooltip"]').tooltip();
 
-  }());
+  };
 
-});
+};
+a();

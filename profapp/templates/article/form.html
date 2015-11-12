@@ -23,6 +23,11 @@
 
         $scope.data = {};
 
+    $scope.init_cropper = function () {
+{#        debugger;#}
+{#        init_cropper();#}
+    };
+
 
         $scope.hh = function () {
             $ok('/hh/', {hh: '1'}, function () {
@@ -86,7 +91,12 @@
 
     $scope.articleAfterLoad = function(resp, deff) {
             deff(resp);
+
+        setTimeout(function () {
+            init_cropper();
             $scope.setImageUrl($scope.data);
+        }, 0);
+{#        init_cropper();#}
             return true;
         };
 
@@ -132,7 +142,6 @@
 
 
     <div af af-after-load="articleAfterLoad" af-before-save="articleBeforeSave" ng-model="data">
-        {{ data }}
 
         <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
@@ -173,8 +182,7 @@
 
 
     </div>
-    <script src="/static/image_editor/dist/cropper.js"></script>
-<script src="/static/image_editor/demo/js/main.js"></script>
+
 
     <input style="clear: both;" ng-disabled="data_state != 'valid' && data_state != 'clean'" type="submit"
            ng-click="af.save(data)" value="{{ data.id ? 'save' : 'create' }}"/> {{ data_state }}
@@ -185,5 +193,7 @@
 {% endraw %}
 
 </div>
+<script src="/static/image_editor/dist/cropper.js"></script>
+<script src="/static/image_editor/demo/js/main.js"></script>
 {#TODO: OZ by OZ move this code to one file#}
 
