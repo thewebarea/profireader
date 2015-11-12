@@ -362,10 +362,10 @@ class Article(Base, PRBase):
                                                                  exists()).filter(
             Company.name.ilike("%" + searchtext + "%")).all()]
 
-    # @staticmethod
-    # def save_edited_version(user_id, article_company_id, **kwargs):
-    #     a = ArticleCompany.get(article_company_id)
-    #     return a.attr(kwargs)
+    @staticmethod
+    def save_edited_version(user_id, article_company_id, **kwargs):
+        a = ArticleCompany.get(article_company_id)
+        return a.attr(kwargs)
 
     @staticmethod
     def get_articles_for_user(user_id):
