@@ -112,22 +112,16 @@ def load_form_update(json, article_company_id):
     else:
         article.attr({key: val for key, val in json.items() if key in ['keywords', 'title', 'short', 'long']})
         if action == 'save':
-            json.pop('company')
             image_id = json.get('image_file_id')
+            coordinates = json.get('coordinates')
             if image_id:
-                if db(ImageCroped, original_image_id=image_id).count():
-                    update_croped_image(image_id, json.get('coordinates'))
-                    del json['image_file_id']
-                else:
-                    json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
-            del json['coordinates'], json['ratio']
-            ret = Article.save_edited_version(g.user.id, article_company_id, **json).save().article
-
-        # article.update(ratio=Config.IMAGE_EDITOR_RATIO)
-        # image_id = article.get('image_file_id')
-        # if image_id:
-        #     article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
-        #     article.update(coordinates)
+                try:
+                    if db(ImageCroped, original_image_id=image_id).count():
+                        update_croped_image(image_id, coordinates)
+                    else:
+                        article.attr({'image_file_id': crop_image(image_id, coordinates)})
+                except Exception as e:
+                    pass
             return article.save().get_client_side_dict()
         else:
             article.detach()

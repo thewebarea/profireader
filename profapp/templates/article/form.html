@@ -23,39 +23,29 @@
 
         $scope.data = {};
 
-    $scope.init_cropper = function () {
-{#        debugger;#}
-{#        init_cropper();#}
-    };
-
-
-        $scope.hh = function () {
-            $ok('/hh/', {hh: '1'}, function () {
-                console.log('hh success')
-            }, function () {
-                console.log('hh failed')
-            });
-            console.log('hh');
-            return false;
+        $scope.init_cropper = function () {
+            {#        debugger;#}
+            {#        init_cropper();#}
         };
+
 
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
         };
 
-        $scope.getData = function (model) {
+        $scope.getData = function (model, deff) {
 
             var x = document.getElementById("dataX");
             var y = document.getElementById("dataY");
             var width = document.getElementById("dataWidth");
             var height = document.getElementById("dataHeight");
             var rotate = document.getElementById("dataRotate");
-            $scope.data.coordinates = {
+            model.coordinates = {
                 'x': angular.element(x).val(), 'y': angular.element(y).val(),
                 'width': angular.element(width).val(), 'height': angular.element(height).val(),
                 'rotate': angular.element(rotate).val()
             };
-            return $scope.data;
+            return deff(model);
         };
 
 
@@ -89,14 +79,14 @@
             $image.cropper('replace', image_file_url);
         };
 
-    $scope.articleAfterLoad = function(resp, deff) {
+        $scope.articleAfterLoad = function (resp, deff) {
             deff(resp);
 
-        setTimeout(function () {
-            init_cropper();
-            $scope.setImageUrl($scope.data);
-        }, 0);
-{#        init_cropper();#}
+            setTimeout(function () {
+                init_cropper();
+                $scope.setImageUrl($scope.data);
+            }, 0);
+            {#        init_cropper();#}
             return true;
         };
 
@@ -141,7 +131,7 @@
 <div ng-controller="article_edit">
 
 
-    <div af af-after-load="articleAfterLoad" af-before-save="articleBeforeSave" ng-model="data">
+    <div af af-after-load="articleAfterLoad" af-before-save="getData" af-beforeValidate="getData" ng-model="data">
 
         <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
@@ -173,7 +163,7 @@
         <div ng-include="'image_cropper'"></div>
 
 
-        <div ng-if="0" class="profi-tiny-mce-birdy-wraper">
+        <div class="profi-tiny-mce-birdy-wraper">
             <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
                       ng-model="data.long"></textarea>
         </div>

@@ -618,7 +618,7 @@ module.run(function ($rootScope, $ok) {
             theme: 'modern',
             setup: function (editor) {
                 console.log('setup', editor);
-                editor.on('PreInit', function (event) {
+                editor.on('PreInit111', function (event) {
                     editor.parser.addNodeFilter('a', function (nodes, name) {
                         console.log(nodes);
                         $.each(nodes,function(i ,v) {
