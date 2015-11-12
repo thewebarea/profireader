@@ -147,10 +147,10 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
 
             $scope.changeStatus = function() {
 {#                ng-onsuccess="resp_data" ng-onsubmit="getData"#}
-{#                $scope.$af.save('data');#}
-                $ok($scope.url_update_status, $scope.data, function (resp) {
-                    $scope.data = resp;
-                });
+                $scope.$af.save($scope.data);
+{#                $ok($scope.url_update_status, $scope.data, function (resp) {#}
+{#                    $scope.data = resp;#}
+{#                });#}
             };
 
             $scope.beforeLoadArticle = function (model, deff) {

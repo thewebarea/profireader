@@ -148,7 +148,7 @@
 
                 <input type="hidden" ang-model="data.id"/>
 
-                {{ _('Article title') }} {{ validation.errors.title }}
+                {{ _('Article title') }} <span validation-for="data_validation:title"></span>
                 <input style="width: 100%" type="text" ng-model="data.title">
                 {{ _('Short Description') }}
                 <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>

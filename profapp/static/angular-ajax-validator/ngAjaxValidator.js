@@ -69,6 +69,7 @@
         };
 
         ret.save = function (model, action) {
+            debugger;
             ret.$callDirectiveMethod(model, 'save');
         };
         ret.load = function (model) {
