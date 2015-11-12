@@ -12,6 +12,7 @@ from .pagination import pagination
 from config import Config
 from .views_file import crop_image, update_croped_image
 from ..models.files import ImageCroped, File
+from ..models.pr_base import PRBase
 from utils.db_utils import db
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -39,7 +40,7 @@ def load_mine(json):
 
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
-                                               items_per_page=5)
+                                               items_per_page=2)
 
     all, companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
     statuses = {status: status for status in ARTICLE_STATUS_IN_COMPANY.all}
@@ -50,7 +51,7 @@ def load_mine(json):
                          for a in articles],
             'companies': companies,
             'search_text': json.get('search_text') or '',
-            'original_search_text': json.get('search_text') or '',
+            'original_search_text': str(json.get('search_text')) or '',
             'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
@@ -81,7 +82,7 @@ def load_form_create(json):
             json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
         del json['coordinates'], json['ratio']
 
-        return Article.save_new_article(g.user_dict['id'], **json).save().get_client_side_dict()
+        return Article.save_new_article(g.user_dict['id'], **json).get_client_side_dict()
 
 
 
@@ -95,6 +96,7 @@ def show_form_update(article_company_id):
 @article_bp.route('/update/<string:article_company_id>/', methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
+
     action = g.req('action', allowed=['load', 'save', 'validate'])
     article = ArticleCompany.get(article_company_id)
     if action == 'load':
@@ -110,20 +112,22 @@ def load_form_update(json, article_company_id):
                 pass
         return article
     else:
-        article.attr({key: val for key, val in json.items() if key in ['keywords', 'title', 'short', 'long']})
+        article.attr({key: val for key, val in json.items() if key in
+                      ['keywords', 'title', 'short', 'long']})
         if action == 'save':
             image_id = json.get('image_file_id')
             coordinates = json.get('coordinates')
             if image_id:
-                try:
-                    if db(ImageCroped, original_image_id=image_id).count():
-                        update_croped_image(image_id, coordinates)
-                    else:
-                        article.attr({'image_file_id': crop_image(image_id, coordinates)})
-                except Exception as e:
-                    pass
-            return article.save().get_client_side_dict()
+                if db(ImageCroped, croped_image_id=image_id).count():
+                    update_croped_image(image_id, coordinates)
+                else:
+                    article.image_file_id = crop_image(image_id, coordinates)
+
+            article = article.get_client_side_dict()
+            # print(article['image_file_id'])
+            return article
         else:
+            return {'errors': {}, 'warnings': {}, 'notices': {}}
             article.detach()
             return article.validate('update')
 

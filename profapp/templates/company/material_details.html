@@ -136,7 +136,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
             $scope.url_update_status = {{ raw_url_for('company.update_material_status')|safe }};
             $scope.url_submit_to_portal = '{{ url_for('portal.submit_to_portal')|safe }}';
-{#            console.log(url_submit_to_portal);#}
 {#            $scope.url_submit_to_portal = {{ raw_url_for('portal.submit_to_portal')|safe }};#}
             $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
             $scope.url_send_article_user = {{ raw_url_for('company.send_article_to_user')|safe }};

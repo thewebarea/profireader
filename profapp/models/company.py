@@ -67,7 +67,8 @@ class Company(Base, PRBase):
     # get all users in company : company.employees
     # get all users companies : user.employers
 
-    def create_new_company(self):
+# TODO: VK by OZ I think this have to be moved to __init__ and dublication check to validation
+    def setup_new_company(self):
         """Add new company to company table and make all necessary relationships,
         if company with this name already exist raise DublicateName"""
         if db(Company, name=self.name).count():
@@ -111,12 +112,12 @@ class Company(Base, PRBase):
         return ret
         # return PRBase.searchResult(query_companies)
 
-    @staticmethod
-    def update_comp(company_id, data):
-        """Edit company. Pass to data parameters which will be edited"""
-        company = db(Company, id=company_id)
-        upd = {x: y for x, y in zip(data.keys(), data.values())}
-        company.update(upd)
+    # @staticmethod
+    # def update_comp(company_id, data):
+    #     """Edit company. Pass to data parameters which will be edited"""
+    #     company = db(Company, id=company_id)
+    #     upd = {x: y for x, y in zip(data.keys(), data.values())}
+    #     company.update(upd)
 
         # if passed_file:
         #     file = File(company_id=company_id,

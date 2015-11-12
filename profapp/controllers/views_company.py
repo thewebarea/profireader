@@ -22,6 +22,7 @@ from flask import session
 from .pagination import pagination
 from config import Config
 
+
 @company_bp.route('/search_to_submit_article/', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions(Right[RIGHTS.SUBMIT_PUBLICATIONS()]))
@@ -59,7 +60,7 @@ def materials(company_id):
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
     return render_template(
-        'company/materials.html', 
+        'company/materials.html',
         company_id=company_id,
         angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js',
         company_logo=company_logo
@@ -73,7 +74,7 @@ def materials_load(json, company_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
-    
+
     current_page = json.get('pages')['current_page'] if json.get('pages') else 1
     chosen_portal_id = json.get('chosen_portal')['id'] if json.get('chosen_portal') else 0
     params = {'search_text': json.get('search_text'), 'company_id': company_id}
@@ -93,7 +94,7 @@ def materials_load(json, company_id):
     statuses['All'] = 'All'
 
     return {'articles': [{'article': a.get_client_side_dict(),
-                          'portals_count': len(a.get_client_side_dict()['portal_article'])+1}
+                          'portals_count': len(a.get_client_side_dict()['portal_article']) + 1}
                          for a in articles],
             'portals': portals,
             'search_text': json.get('search_text') or '',
@@ -123,9 +124,9 @@ def material_details(company_id, article_id):
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
-# @login_required
+@login_required
 @ok
-#@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
     # g.req('action', allowed=['load'])
     article = Article.get_one_article(article_id)
@@ -189,28 +190,6 @@ def update_material_status(json, company_id, article_id):
     return {'article_new_status': json['new_status'],
             'allowed_statuses': allowed_statuses,
             'status': 'ok'}
-
-
-@company_bp.route('/create/')
-@login_required
-# @check_rights(simple_permissions([]))
-def create():
-    return render_template('company/company_edit.html', user=g.user_dict)
-
-
-@company_bp.route('/create/', methods=['POST'])
-@ok
-def load_form_create(json):
-    return {}
-
-
-@company_bp.route('/confirm_create/', methods=['POST'])
-@login_required
-# @check_rights(simple_permissions([]))
-@ok
-def confirm_create(json):
-    return Company(**json).create_new_company().\
-        get_client_side_dict()
 
 
 @company_bp.route('/profile/<string:company_id>/')
@@ -280,30 +259,58 @@ def update_rights():
                             company_id=data['company_id']))
 
 
-# todo: it must be checked!!!
+@company_bp.route('/create/', methods=['GET'])
 @company_bp.route('/edit/<string:company_id>/', methods=['GET'])
 @login_required
-# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
-def edit(company_id):
+# @check_rights(simple_permissions([]))
+def update(company_id=None):
     return render_template('company/company_edit.html', company_id=company_id)
 
 
+@company_bp.route('/create/', methods=['POST'])
 @company_bp.route('/edit/<string:company_id>/', methods=['POST'])
 @login_required
 @ok
-# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
-def edit_load(json, company_id):
-    company = db(Company, id=company_id).one()
-    return company.get_client_side_dict()
+def load(json, company_id=None):
+    action = g.req('action', allowed=['load', 'validate', 'save'])
+    company = Company() if company_id is None else Company.get(company_id)
+    if action == 'load':
+        return company.get_client_side_dict()
+    else:
+        company.attr(json)
+        if action == 'save':
+            if company_id is None:
+                company.setup_new_company()
+            return company.save().get_client_side_dict()
+        else:
+            if company_id is not None:
+                company.detach()
+            return company.validate('insert' if company_id is None else 'update')
 
 
-@company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
-@login_required
-@ok
-# @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
-def confirm_edit(json, company_id):
-    Company().update_comp(company_id=company_id, data = json)
-    return {}
+# @company_bp.route('/confirm_create/', methods=['POST'])
+# @login_required
+# # @check_rights(simple_permissions([]))
+# @ok
+# def confirm_create(json):
+
+
+# @company_bp.route('/edit/<string:company_id>/', methods=['POST'])
+# @login_required
+# @ok
+# # @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
+# def edit_load(json, company_id):
+#     company = db(Company, id=company_id).one()
+#     return company.get_client_side_dict()
+
+
+# @company_bp.route('/confirm_edit/<string:company_id>', methods=['POST'])
+# @login_required
+# @ok
+# # @check_rights(simple_permissions([RIGHTS.MANAGE_RIGHTS_COMPANY()]))
+# def confirm_edit(json, company_id):
+#
+#     return {}
 
 
 @company_bp.route('/subscribe/<string:company_id>/')
@@ -341,14 +348,13 @@ def search_for_user(json, company_id):
 @ok
 # @check_rights(simple_permissions([]))
 def send_article_to_user(json):
-
     return {'user': json['send_to_user']}
 
 
 @company_bp.route('/join_to_company/<string:company_id>/', methods=['POST'])
 @login_required
 @ok
-#@check_rights(simple_permissions([]))
+# @check_rights(simple_permissions([]))
 def join_to_company(json, company_id):
     company_role = UserCompany(user_id=g.user_dict['id'],
                                company_id=json['company_id'],
@@ -396,7 +402,6 @@ def fire_employee():
 @company_bp.route('/unsuspend/<string:user_id>,<string:company_id>')
 @login_required
 def unsuspend(user_id, company_id):
-
     UserCompany.change_status_employee(user_id=user_id,
                                        company_id=company_id,
                                        status=STATUS.ACTIVE())
@@ -416,7 +421,6 @@ def suspended_employees(company_id):
 # @check_rights(simple_permissions([]))
 @ok
 def load_suspended_employees(json, company_id):
-
     suspend_employees = Company.query_company(company_id)
     suspend_employees = suspend_employees.suspended_employees()
     return suspend_employees

@@ -35,18 +35,18 @@ class File(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     ac_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     youtube_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('youtube_video.id'))
+    file_content = relationship('FileContent', uselist=False)
 
     UniqueConstraint('name', 'parent_id', name='unique_name_in_folder')
 
     owner = relationship('User',
                          backref=backref('files', lazy='dynamic'),
-                         foreign_keys='File.author_user_id',
-                         cascade='save-update, delete')
+                         foreign_keys='File.author_user_id')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
                  root_folder_id=None, youtube_id=None,
-                 company_id=None, author_user_id=None, image_croped=None):
+                 company_id=None, author_user_id=None, image_croped=None, file_content=None):
         super(File, self).__init__()
         self.parent_id = parent_id
         self.name = name
@@ -61,6 +61,7 @@ class File(Base, PRBase):
         self.company_id = company_id
         self.youtube_id = youtube_id
         self.image_croped = image_croped
+        self.file_content = file_content
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
@@ -363,7 +364,7 @@ class File(Base, PRBase):
                 dir.save()
                 new_list.append(dir)
                 f = File.save_files(files, dir.id, attr)
-        return old_list,new_list
+        return old_list, new_list
 
     @staticmethod
     def update_files(files,attr):
@@ -406,6 +407,8 @@ class File(Base, PRBase):
                 fil.updates(attr)
         return files_in_parent
 
+
+
     def copy_file(self, parent_id, **kwargs):
         folder = File.get(parent_id)
         if self == None or folder == None:
@@ -414,7 +417,7 @@ class File(Base, PRBase):
         root = folder.root_folder_id
         if folder.root_folder_id == None:
             root = folder.id
-        attr = {f: kwargs[f] for f in kwargs}
+        attr = {f:kwargs[f] for f in kwargs}
         attr['name'] = File.get_unique_name(self.name, self.mime, parent_id)
         attr['parent_id'] = parent_id
         attr['root_folder_id'] = root
@@ -424,7 +427,7 @@ class File(Base, PRBase):
             all_in_dir = File.save_all(id, attr, copy_file.id)
         else:
             file_content = FileContent.get(id).detach()
-            file_content.id = copy_file.id
+            # file_content.id = copy_file.id
             copy_file.file_content = file_content
 
         # return copy_file.id
@@ -456,10 +459,7 @@ class FileContent(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file = relationship('File',
-                                uselist=False,
-                                backref=backref('file_content', uselist=False),
-                                cascade='save-update,delete')
+    file = relationship('File', uselist=False)
 
     def __init__(self, file=None, content=None):
         self.file = file

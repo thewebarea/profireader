@@ -190,11 +190,11 @@ class PRBase:
         if len(ret['errors'].keys()):
             raise errors.ValidationException(ret)
 
-    @staticmethod
-    def validate_before_delete(mapper, connection, target):
-        ret = target.validate('delete')
-        if len(ret['errors'].keys()):
-            raise errors.ValidationException(ret)
+    # @staticmethod
+    # def validate_before_delete(mapper, connection, target):
+    #     ret = target.validate('delete')
+    #     if len(ret['errors'].keys()):
+    #         raise errors.ValidationException(ret)
 
     @staticmethod
     def add_to_search(mapper, connection, target):
@@ -221,7 +221,7 @@ class PRBase:
     def __declare_last__(cls):
         event.listen(cls, 'before_update', cls.validate_before_update)
         event.listen(cls, 'before_insert', cls.validate_before_insert)
-        event.listen(cls, 'before_delete', cls.validate_before_delete)
+        # event.listen(cls, 'before_delete', cls.validate_before_delete)
         event.listen(cls, 'after_insert', cls.add_to_search)
         event.listen(cls, 'before_update', cls.update_search_table)
 
