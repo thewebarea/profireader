@@ -69,7 +69,6 @@
         };
 
         ret.save = function (model, action) {
-            debugger;
             ret.$callDirectiveMethod(model, 'save');
         };
         ret.load = function (model) {
@@ -99,8 +98,6 @@
             require: ['ngModel'],
             link: function ($scope, el, attrs, afModelCtrl) {
 
-                console.log(attrs.ngModel, 1);
-
                 var $parent = $scope['$parent'];
                 var ctrl = afModelCtrl[0];
 
@@ -124,6 +121,7 @@
                     'afUrlSave': AppendParameter(params['af-url'], 'action=save')
                 }, attrs);
 
+
                 cloneIfExistsAttributes(params, {
                     'afDebounce': '500',
                     'afLoadResult': (attrs.ngModel + '_original'),
@@ -131,8 +129,6 @@
                     'afSaveResult': attrs.ngModel + '_saved',
                     'afState': attrs.ngModel + '_state'
                 }, attrs);
-
-                console.log(attrs, params, $scope);
 
                 params['afDebounce'] = parseInt(params['afDebounce']);
                 if (params['afDebounce'] <= 0) params['afDebounce'] = 500;
@@ -142,7 +138,6 @@
                         return model;
                     }
                 };
-
 
                 var defaultCallbacks = {
                     afBeforeLoad: trivialbefore,
@@ -177,9 +172,6 @@
 
                 cloneIfExistsCallbacks(params, defaultCallbacks, attrs, $scope);
 
-
-                console.log(params);
-
                 function callCallback() {
                     var args = Array.prototype.slice.call(arguments);
                     var callbackkey = args.shift();
@@ -198,7 +190,6 @@
 
 
                 var func1 = function (action, statebefore, ok, notok) {
-                    console.log(action, statebefore, ok, notok);
                     //debugger;
                     try {
                         var dataToSend = callCallback('afBefore' + action, $scope['model']);

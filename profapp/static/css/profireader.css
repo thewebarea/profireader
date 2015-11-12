@@ -49,8 +49,12 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 }
 
 .navbar-brand img {
-    height: 40px;
+    height: 100%;
     width: auto;
+}
+
+.topbar-menu-links a.navbar-brand {
+    padding: 0px 5px;
 }
 
 ul.user-auth li a {
