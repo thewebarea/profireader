@@ -281,7 +281,7 @@ class ArticleCompany(Base, PRBase):
             filesintext[file_id] = \
                 File.get(file_id).copy_file(company_id=company.id,
                                             root_folder_id=company.system_folder_file_id,
-                                            parent_folder_id=company.system_folder_file_id,
+                                            parent_id=company.system_folder_file_id,
                                             article_portal_division_id=article_portal_division.id).save().id
 
         if self.image_file_id:

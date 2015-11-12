@@ -144,6 +144,15 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
             $scope.data_resp_portal = '';
             $scope.statuses = ''; // current status of article in portal
 
+
+            $scope.changeStatus = function() {
+{#                ng-onsuccess="resp_data" ng-onsubmit="getData"#}
+{#                $scope.$af.save('data');#}
+                $ok($scope.url_update_status, $scope.data, function (resp) {
+                    $scope.data = resp;
+                });
+            };
+
             $scope.beforeLoadArticle = function (model, deff) {
                 return deff(model);
             };
@@ -169,6 +178,8 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
             };
             $scope.resp_data = function (resp) {
                 $scope.data_resp = resp;
+                console.log('aaaaaaaaa');
+                console.log($scope.data_resp);
             };
             $scope.resp_data_user = function (resp) {
                 $scope.data_resp_user = resp;
@@ -184,9 +195,14 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                 }
                 return true;
             };
-            $scope.getData = function () {
-                $scope.data.tags = $scope.tagsObject.tags;
-                return $scope.data;
+            $scope.getData = function (model, deff) {
+                model.tags = $scope.tagsObject.tags;
+                return deff(model);
+{#                console.log('aaaaaaaaaaaaaaaaaaa');#}
+{#                console.log('getData',arguments);#}
+{#                return true;#}
+{#                #}
+{#                return $scope.data;#}
             };
 
             $scope.cancel = function () {
@@ -199,6 +215,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                             article_id: resp.article.id
                         })
             };
+
 
         $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {
@@ -245,7 +262,12 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
         }
     </style>
     <div ng-controller="materials_articles">
-        <div af af-before-load="beforeLoadArticle"
+
+        {{ data_state }}
+        <div af
+             af-before-load="beforeLoadArticle"
+             af-before-save="getData"
+             af-before-validate="getData"
              af-after-load="afterLoadArticle"
              af-url-validate="{{ url_submit_to_portal({action: 'validate'}) }}"
              af-url-save="{{ url_submit_to_portal({action: 'save'}) }}"
@@ -265,7 +287,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                 data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(data_original.article.status) }}</span>
                 <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
 
-                <form ang-ok ng-onsuccess="resp_data" ng-onsubmit="getData" ng-action="url_update_status">
+
                     <div ng-if="!data_resp.status">
                         Change material status to
                         <select ng-init="data.article.status = data.status[0]"
@@ -273,14 +295,13 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                                 ng-options="stat for stat in data.status">
                             <option value="" selected hidden/>
                         </select>
-                        <input type="submit" ng-if="data.status" value="Submit status">
-                        <input type="submit" ng-if="!data.status" value="Submit status" disabled>
+                        <input ng-click="changeStatus()" ng-disabled="!data.status" type="submit" ng-if="data.status" value="Submit status">
                     </div>
                     <div ng-if="data_resp.status">
                         Status was successfully changed
                     </div>
 
-                </form>
+
                 <br/>
             </div>
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
@@ -320,7 +341,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                 </div>
 
             </div>
-            <div ang-if="myRights('publish')">
+            <div ng-if="myRights('publish')">
                 <div ng-if="!data_resp_portal.portal">
                     <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal">
                     Publish this material to portal
@@ -359,7 +380,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
 
                     </form>
                 </div>
-                <span ng-if="data_resp_portal.portal">
+                <span ng-if="data_resp.portal">
                     Article {{ data.article.title }} successfully was published at portal {{ data_resp_portal.portal }}
                 </span>
             </div>

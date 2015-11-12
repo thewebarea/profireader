@@ -193,10 +193,12 @@
 
                 var setInParent = function (ind, val) {
                     $parent[params[ind]] = val;
-                }
+                };
 
 
                 var func1 = function (action, statebefore, ok, notok) {
+                    console.log(action, statebefore, ok, notok);
+                    //debugger;
                     try {
                         var dataToSend = callCallback('afBefore' + action, $scope['model']);
                         var url = params['afUrl' + action];
@@ -222,7 +224,7 @@
                     }
 
 
-                }
+                };
 
                 setInParent('afState', 'init');
 
@@ -236,6 +238,7 @@
                                 //ctrl.$render();
                                 $af.$storeModelForValidation(ctrl, $scope);
                                 setInParent('afState', 'clean');
+                                //!!!$scope.$watch('model', watchfunc, true);
                             },
                             function (resp) {
                                 setInParent('afState', 'loading_failed');
@@ -251,7 +254,7 @@
                         func1('Validate', 'validating',
                             function (resp) {
                                 if ($parent[params['afState']] === 'validating') {
-
+                                    setInParent('afState', 'valid');
                                 }
                             },
                             function (resp) {
@@ -301,11 +304,15 @@
                 }, params['afDebounce']);
 
                 var watchfunc = function (oldval, newval) {
-                    setInParent('afState', 'dirty');
-                    debouncedvalidate();
+                    //if (-1 !== ['clean', 'saving_failed', 'valid', 'loading_failed', 'dirty', 'validating_failed', 'invalid', 'saving', 'validating'].indexOf($parent[params['afState']])) {
+                        setInParent('afState', 'dirty');
+                        debouncedvalidate();
+                        //}
                 };
 
                 $scope.$watch('model', watchfunc, true);
+
+
             }
         };
 

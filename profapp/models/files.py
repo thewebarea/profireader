@@ -414,7 +414,7 @@ class File(Base, PRBase):
         root = folder.root_folder_id
         if folder.root_folder_id == None:
             root = folder.id
-        attr = {f:kwargs[f] for f in kwargs}
+        attr = {f: kwargs[f] for f in kwargs}
         attr['name'] = File.get_unique_name(self.name, self.mime, parent_id)
         attr['parent_id'] = parent_id
         attr['root_folder_id'] = root
@@ -427,7 +427,8 @@ class File(Base, PRBase):
             file_content.id = copy_file.id
             copy_file.file_content = file_content
 
-        return copy_file.id
+        # return copy_file.id
+        return self
 
     def move_to(self, parent_id, **kwargs):
         folder = File.get(parent_id)
