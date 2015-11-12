@@ -212,7 +212,7 @@ class ArticleCompany(Base, PRBase):
         article_filter = db(ArticleCompany, article_id=Article.id, **kwargs)
         if search_text:
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
-                "%" + search_text + "%"))
+                "%" + repr(search_text).strip("'") + "%"))
 
         return db(Article, author_user_id=user_id).filter(article_filter.exists())
 
