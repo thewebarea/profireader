@@ -84,6 +84,7 @@ $(function () {
           }
         };
 if($('#default_image').val()=='false'){
+    console.log('xdsfkljdhjsg;ldf');
 options.data =  {
              x: parseInt($('#coordinate_x').val()),
              y: parseInt($('#coordinate_y').val()),

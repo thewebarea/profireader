@@ -9,7 +9,7 @@
         {% if article_company_id %}
             $scope.save_article = '{{ url_for('article.save', article_company_id = article_company_id)|safe }}';
         {% else %}
-            $scope.save_article = '{{ url_for('article.confirm_create')|safe }}';
+            $scope.save_article = '{{ url_for('article.load_form_create')|safe }}';
         {% endif %}
 
 
@@ -65,9 +65,8 @@
 
 
         $scope.articleImageSelected = function (item) {
-            debugger;
             $scope.data.image_file_id = item.id;
-            $scope.setImageUrl();
+            $scope.setImageUrl($scope.data);
             closeFileManager();
             {#            $('#replace-toggle').click();#}
 
@@ -87,13 +86,12 @@
 
     $scope.articleAfterLoad = function(resp, deff) {
             deff(resp);
-        debugger;
-        console.log($scope.data);
-        $scope.setImageUrl($scope.data);
-        return true;
+            $scope.setImageUrl($scope.data);
+            return true;
         };
 
         $scope.setImageUrl = function (model) {
+            console.log(model)
             $scope.image_file_url = fileUrl(model.image_file_id) || "{{ url_for('static', filename='images/choose_image.jpg') }}";
             var image = $scope.image_file_url;
             if (image != "{{ url_for('static', filename='images/choose_image.jpg') }}") {
@@ -175,8 +173,11 @@
 
 
     </div>
+    <script src="/static/image_editor/dist/cropper.js"></script>
+<script src="/static/image_editor/demo/js/main.js"></script>
+
     <input style="clear: both;" ng-disabled="data_state != 'valid' && data_state != 'clean'" type="submit"
-           ng-click="af.save(data)" value="{{ data.id ? 'save' : 'create' }}"/>
+           ng-click="af.save(data)" value="{{ data.id ? 'save' : 'create' }}"/> {{ data_state }}
 
 </div>
 
@@ -185,5 +186,4 @@
 
 </div>
 {#TODO: OZ by OZ move this code to one file#}
-<script src="/static/image_editor/dist/cropper.js"></script>
-<script src="/static/image_editor/demo/js/main.js"></script>
+
