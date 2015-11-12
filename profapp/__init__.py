@@ -28,9 +28,9 @@ from profapp.controllers.errors import BadDataProvided
 
 def req(name, allowed=None, default=None, exception=True):
     ret = request.args.get(name)
-    if allowed and ret in allowed:
+    if allowed and (ret in allowed):
         return ret
-    elif default is None:
+    elif default is not None:
         return default
     elif exception:
         raise BadDataProvided
