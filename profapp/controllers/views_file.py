@@ -238,13 +238,17 @@ def crop_image(image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
         croped.mime = image_query.mime
         croped.file_content = FileContent(content=bytes_file.getvalue())
         croped.save()
+        print(type(croped))
+        print(croped)
+
         copy_original_image_to_system_folder = image_query.copy_file(
-            parent_folder_id=company_owner.system_folder_file_id,
+            company_owner.system_folder_file_id,
             root_folder_id=company_owner.system_folder_file_id)
         ImageCroped(original_image_id=copy_original_image_to_system_folder.id,
                     croped_image_id=croped.id,
-                    x=coordinates['x'], y=coordinates['y'], width=coordinates['width'],
-                    height=coordinates['height'], rotate=coordinates['rotate']).save()
+                    x=int(coordinates['x']), y=int(coordinates['y']),
+                    width=int(coordinates['width']),
+                    height=int(coordinates['height']), rotate=int(coordinates['rotate'])).save()
 
         return croped.id
 
@@ -275,11 +279,11 @@ def update_croped_image(original_image_id, coordinates, ratio=Config.IMAGE_EDITO
         cropped.save(bytes_file, image_query.mime.split('/')[-1].upper())
         croped.size = sys.getsizeof(bytes_file.getvalue())
         croped.file_content.content = bytes_file.getvalue()
-        image_croped_assoc.x = coordinates['x']
-        image_croped_assoc.y = coordinates['y']
-        image_croped_assoc.width = coordinates['width']
-        image_croped_assoc.height = coordinates['height']
-        image_croped_assoc.rotate = coordinates['rotate']
+        image_croped_assoc.x = int(coordinates['x'])
+        image_croped_assoc.y = int(coordinates['y'])
+        image_croped_assoc.width = int(coordinates['width'])
+        image_croped_assoc.height = int(coordinates['height'])
+        image_croped_assoc.rotate = int(coordinates['rotate'])
 
         return croped.id
 

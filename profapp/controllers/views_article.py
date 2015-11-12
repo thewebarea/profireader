@@ -110,7 +110,8 @@ def load_form_update(json, article_company_id):
                 pass
         return article
     else:
-        article.attr({key: val for key, val in json.items() if key in ['keywords', 'title', 'short', 'long']})
+        article.attr({key: val for key, val in json.items() if key in
+                      ['keywords', 'title', 'short', 'long']})
         if action == 'save':
             image_id = json.get('image_file_id')
             coordinates = json.get('coordinates')
@@ -119,10 +120,11 @@ def load_form_update(json, article_company_id):
                     if db(ImageCroped, original_image_id=image_id).count():
                         update_croped_image(image_id, coordinates)
                     else:
-                        article.attr({'image_file_id': crop_image(image_id, coordinates)})
+                        article.attr({'image_file_id': crop_image(image_id, coordinates)}).save()
                 except Exception as e:
-                    pass
-            return article.save().get_client_side_dict()
+                    print(e)
+            article = article.get_client_side_dict()
+            return article
         else:
             article.detach()
             return article.validate('update')
