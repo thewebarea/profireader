@@ -79,7 +79,7 @@ module.filter('propsFilter', function() {
     };
 });
 
-module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($scope, $http, $ok, $af) {
+module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, $http, $ok) {
 
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
@@ -127,14 +127,14 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
     $scope.selectedTags = [];
 
 }]);
-        module.controller('materials_articles', ['$scope','$ok', '$af', function ($scope, $ok, $af) {
-            $scope.$af = $af;
+        module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
+{#            $scope.$af = $af;#}
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
             $scope.selectedUser = null;
             $scope.selectedUser_sending = false;
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
-            $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
+            $scope.url_update_status = {{ raw_url_for('company.update_material_status')|safe }};
             $scope.url_submit_to_portal = {{ raw_url_for('portal.submit_to_portal')|safe }};
             $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
             $scope.url_send_article_user = {{ raw_url_for('company.send_article_to_user')|safe }};
@@ -142,19 +142,28 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
             $scope.data_resp_user = '';
             $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
-            $scope.statuses = ''; // current status of article in portal
 
 
-            $scope.changeStatus = function() {
-{#                ng-onsuccess="resp_data" ng-onsubmit="getData"#}
-{#                $scope.$af.save('data');#}
-                $ok($scope.url_update_status, $scope.data, function (resp) {
-                    $scope.data = resp;
+{#            $ok($scope.url_search_for_company(), {article_id: $scope.data.id, search: val}, function (resp) {#}
+{#                    return resp.length ? resp : [{id: false, name: 'No results'}];#}
+{#                });#}
+
+
+            $scope.changeStatus = function(new_status) {
+                url_send_request = $scope.url_update_status({'company_id': $scope.data.article.company_id, 'article_id': $scope.data.article.id});
+                $ok(url_send_request, {new_status: new_status}, function (resp) {
+                    $scope.data.article.status = resp.article_new_status;
+                    $scope.data.allowed_statuses = resp.allowed_statuses;
+                    $scope.change_status_to = $scope.data.allowed_statuses[0];
                 });
             };
 
-            $scope.beforeLoadArticle = function (model, deff) {
-                return deff(model);
+            $scope.loadArticle = function () {
+                $ok('', {}, function (resp) {
+                    $scope.data = resp;
+                    $scope.change_status_to = $scope.data.allowed_statuses[0];
+                });
+{#                return deff(model);#}
             };
 
             $scope.afterLoadArticle = function (resp, default_after_load) {
@@ -173,9 +182,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                 {#    var count = Object.keys(portals).length; #}
                 return divisions;
             };
-            $scope.change_status = function (status) {
-                $scope.statuses = status;
-            };
+
             $scope.resp_data = function (resp) {
                 $scope.data_resp = resp;
                 console.log('aaaaaaaaa');
@@ -261,17 +268,16 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
             color: #f00;
         }
     </style>
-    <div ng-controller="materials_articles">
+    <div ng-init="loadArticle()" ng-controller="materials_articles">
 
-        {{ data_state }}
-        <div af
-             af-before-load="beforeLoadArticle"
-             af-before-save="getData"
-             af-before-validate="getData"
-             af-after-load="afterLoadArticle"
-             af-url-validate="{{ url_submit_to_portal({action: 'validate'}) }}"
-             af-url-save="{{ url_submit_to_portal({action: 'save'}) }}"
-             ng-model="data">
+        <div aaf
+             aaf-before-load="beforeLoadArticle"
+             aaf-before-save="getData"
+             aaf-before-validate="getData"
+             aaf-after-load="afterLoadArticle"
+             aaf-url-validate="{{ url_submit_to_portal({action: 'validate'}) }}"
+             aaf-url-save="{{ url_submit_to_portal({action: 'save'}) }}"
+             ang-model="data">
 
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
@@ -283,23 +289,12 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
             <br>
 
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                Current status is <span ng-if="!data_resp.article.status">{{ data_original.article.status }}</span>{{
-                data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(data_original.article.status) }}</span>
-                <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
-
-
-                    <div ng-if="!data_resp.status">
+                Current status is `<span class="..." ng-if="!data_resp.article.status">{{ data.article.status }}</span>`<br/>
                         Change material status to
-                        <select ng-init="data.article.status = data.status[0]"
-                                ng-model="data.article.status"
-                                ng-options="stat for stat in data.status">
-                            <option value="" selected hidden/>
+                        <select ng-model="change_status_to">
+                            <option value="{{ changeto }}" ng-repeat="changeto in data.allowed_statuses">{{ changeto }}</option>
                         </select>
-                        <input ng-click="changeStatus()" ng-disabled="!data.status" type="submit" ng-if="data.status" value="Submit status">
-                    </div>
-                    <div ng-if="data_resp.status">
-                        Status was successfully changed
-                    </div>
+                        <input ng-click="changeStatus(change_status_to)" ng-disabled="!data.allowed_statuses" type="submit" ng-if="data.allowed_statuses" value="Submit status">
 
 
                 <br/>
@@ -322,7 +317,21 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                     data_resp_user_search.user.profireader_name }}
                 </div>
                 <div ng-if="!data_resp_user.user">
-                    <form ang-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
+                    <div>
+                        Introduce user to work with this material
+                        <select disabled
+                                ng-init="data.send_to_user = data.company.employees[0]"
+                                ng-model="data.send_to_user"
+                                ng-options="user.profireader_name for user in data.company.employees">
+                            <option value="" selected hidden/>
+                        </select>
+                        <input disabled type="submit" value="Send article">
+                    </div>
+
+
+<!--                    <form ng-ok
+                          ng-onsuccess="resp_data_user"
+                          ng-onsubmit="getData"
                           ng-action="url_send_article_to_user">
                         Introduce user to work with this material
                         <select disabled ng-init="data.send_to_user = data.company.employees[0]"
@@ -331,8 +340,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                             <option value="" selected hidden/>
                         </select>
                         <input disabled type="submit" value="Send article">
-                    </form>
-
+                    </form>  -->
 
                 </div>
                 <div ng-if="data_resp_user.user">
@@ -366,7 +374,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', '$af', function($
                         <ui-select multiple ng-model="tagsObject.tags" theme="select2" ng-disabled="disabled" style="width: 300px;">
                             <ui-select-match placeholder="Select tags...">{{$item}}</ui-select-match>
                             <ui-select-choices repeat="tag in availableTags | filter:$select.search">
-                                {{tag}}
+                                {{ tag }}
                             </ui-select-choices>
                         </ui-select>
                         <p>Selected: {{tagsObject.tags}}</p>

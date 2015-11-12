@@ -123,11 +123,11 @@ def material_details(company_id, article_id):
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
-@login_required
+# @login_required
 @ok
 #@check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
-    g.req('action', allowed=['load'])
+    # g.req('action', allowed=['load'])
     article = Article.get_one_article(article_id)
     # if action == 'load':
     portals = {port.portal_id: port.portal.get_client_side_dict() for port in
@@ -143,7 +143,6 @@ def load_material_details(json, company_id, article_id):
                               'editor_user_id, company.name|id,'
                               'portal_article.division.portal.id')
 
-    status = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status'])
     user_rights = list(g.user.user_rights_in_company(company_id))
 
     company = db(Company, id=company_id).one()
@@ -151,7 +150,7 @@ def load_material_details(json, company_id, article_id):
         if company.logo_file_id else '/static/img/company_no_logo.png'
 
     return {'article': article,
-            'status': status,
+            'allowed_statuses': ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status']),
             'portals': portals,
             'company': Company.get(company_id).to_dict('id, employees.id|profireader_name'),
             'selected_portal': {},
@@ -170,23 +169,26 @@ def load_material_details(json, company_id, article_id):
 # @check_rights(simple_permissions([]))
 @ok
 def get_tags(json, portal_division_id):
-# def get_tags(portal_division_id):
     available_tags = g.db.query(PortalDivision).get(portal_division_id).portal_division_tags
     available_tag_names = list(map(lambda x: getattr(x, 'name'), available_tags))
     return {'availableTags': available_tag_names}
 
 
-@company_bp.route('/update_article/', methods=['POST'])
-@login_required
+@company_bp.route('/update_material_status/<string:company_id>/<string:article_id>', methods=['POST'])
+# @login_required
 # @check_rights(simple_permissions([]))
 @ok
-def update_article(json):
+def update_material_status(json, company_id, article_id):
+    allowed_statuses = ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(json['new_status'])
 
     ArticleCompany.update_article(
-        company_id=json['company']['id'],
-        article_id=json['article']['id'],
-        **{'status': json['article']['status']})
-    return {'article': json['article'], 'status': 'ok'}
+        company_id=company_id,
+        article_id=article_id,
+        **{'status': json['new_status']})
+
+    return {'article_new_status': json['new_status'],
+            'allowed_statuses': allowed_statuses,
+            'status': 'ok'}
 
 
 @company_bp.route('/create/')
