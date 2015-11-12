@@ -91,7 +91,6 @@
         };
 
         $scope.setImageUrl = function (model) {
-            console.log(model);
             $scope.image_file_url = fileUrl(model.image_file_id) || "{{ url_for('static', filename='images/choose_image.jpg') }}";
             var image = $scope.image_file_url;
             if (image != "{{ url_for('static', filename='images/choose_image.jpg') }}") {

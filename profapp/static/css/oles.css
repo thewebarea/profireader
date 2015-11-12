@@ -75,3 +75,26 @@
     width: 697.5px;
 }
 
+.error {
+    margin-left: 1em;
+    padding-left: 0.2em;
+    color: #f00;
+}
+
+.warning {
+    margin-left: 1em;
+    padding-left: 0.2em;
+    color: #F7C223;
+}
+
+.notice {
+    margin-left: 1em;
+    padding-left: 0.2em;
+    color: #2ecc40;
+}
+
+.ok {
+    margin-left: 1em;
+    padding-left: 0.2em;
+    color: #2ecc40;
+}

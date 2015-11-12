@@ -118,117 +118,117 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             }
         };
     }])
-    .service('objectTransformation', function() {
-                    var objectTransformation = {};
+    .service('objectTransformation', function () {
+        var objectTransformation = {};
 
-                    objectTransformation.reverseKeyValue = function(objIn){
-                        var objOut = {}, keys, i;
-                        keys = Object.keys($scope.data.PortalDivisionTags3);
-                        for (i = 0; i < objIn.length; i++){
-                            objOut[objIn[keys[i]]] = keys[i];
-                            }
-                        return objOut;
-                        };
+        objectTransformation.reverseKeyValue = function (objIn) {
+            var objOut = {}, keys, i;
+            keys = Object.keys($scope.data.PortalDivisionTags3);
+            for (i = 0; i < objIn.length; i++) {
+                objOut[objIn[keys[i]]] = keys[i];
+            }
+            return objOut;
+        };
 
-                    objectTransformation.getValues1 = function(objList, key, unique){
-                        var values = [], value;
-                        for (var i = 0; i < objList.length; i++){
-                            value = objList[i][key];
-                            if (!unique || (values.indexOf(value) === -1)){
-                                values.push(value);
-                            }
-                        }
-                        return values;
-                    };
+        objectTransformation.getValues1 = function (objList, key, unique) {
+            var values = [], value;
+            for (var i = 0; i < objList.length; i++) {
+                value = objList[i][key];
+                if (!unique || (values.indexOf(value) === -1)) {
+                    values.push(value);
+                }
+            }
+            return values;
+        };
 
-                    objectTransformation.getValues2 = function(objList, key1, key2){
-                        var resultObject = {}, key, value;
-                        for (var i = 0; i < objList.length; i++){
-                            key = objList[i][key1];
-                            value = objList[i][key2];
+        objectTransformation.getValues2 = function (objList, key1, key2) {
+            var resultObject = {}, key, value;
+            for (var i = 0; i < objList.length; i++) {
+                key = objList[i][key1];
+                value = objList[i][key2];
 
-                            if (typeof resultObject[key] === 'undefined'){
-                                resultObject[key] = [value]
-                            } else {
-                                if (resultObject[key].indexOf(value) === -1){
-                                    resultObject[key].push(value)
-                                }
-                            }
-                        }
-                        return resultObject;
-                    };
+                if (typeof resultObject[key] === 'undefined') {
+                    resultObject[key] = [value]
+                } else {
+                    if (resultObject[key].indexOf(value) === -1) {
+                        resultObject[key].push(value)
+                    }
+                }
+            }
+            return resultObject;
+        };
 
-                    objectTransformation.getValues3 = function(objList, key1, key2, key2List){
-                        var resultObject = {}, key, i, objFilledWithFalse = {};
+        objectTransformation.getValues3 = function (objList, key1, key2, key2List) {
+            var resultObject = {}, key, i, objFilledWithFalse = {};
 
-                        for (i = 0; i < key2List.length; i++){
-                            objFilledWithFalse[key2List[i]] = false
-                        }
+            for (i = 0; i < key2List.length; i++) {
+                objFilledWithFalse[key2List[i]] = false
+            }
 
-                        for (i = 0; i < objList.length; i++){
-                            key = objList[i][key1];
-                            if (typeof resultObject[key] === 'undefined'){
-                                resultObject[key] = $.extend(true, {}, objFilledWithFalse);
-                            }
-                            resultObject[key][objList[i][key2]] = true;
-                        }
+            for (i = 0; i < objList.length; i++) {
+                key = objList[i][key1];
+                if (typeof resultObject[key] === 'undefined') {
+                    resultObject[key] = $.extend(true, {}, objFilledWithFalse);
+                }
+                resultObject[key][objList[i][key2]] = true;
+            }
 
-                        return resultObject;
-                    };
+            return resultObject;
+        };
 
-                    objectTransformation.getValues4 = function(objList, key1, key2, key2List){
-                        var resultObject = {}, key, i, objFilledWithFalse = {}, lList, elem;
+        objectTransformation.getValues4 = function (objList, key1, key2, key2List) {
+            var resultObject = {}, key, i, objFilledWithFalse = {}, lList, elem;
 
-                        lList = [];
-                        for (i = 0; i < objList.length; i++){
-                            elem = objList[i][key1];
-                            if (lList.indexOf(elem) === -1){
-                                lList.push(elem);
-                                }
-                        }
+            lList = [];
+            for (i = 0; i < objList.length; i++) {
+                elem = objList[i][key1];
+                if (lList.indexOf(elem) === -1) {
+                    lList.push(elem);
+                }
+            }
 
-                        for (i = 0; i < lList.length; i++){
-                            objFilledWithFalse[lList[i]] = false;
-                        }
+            for (i = 0; i < lList.length; i++) {
+                objFilledWithFalse[lList[i]] = false;
+            }
 
-                        for (i = 0; i < key2List.length; i++){
-                            resultObject[key2List[i]] = $.extend(true, {}, objFilledWithFalse);
-                        }
+            for (i = 0; i < key2List.length; i++) {
+                resultObject[key2List[i]] = $.extend(true, {}, objFilledWithFalse);
+            }
 
-                        for (i = 0; i < objList.length; i++){
-                            key = objList[i];
-                            resultObject[key[key2]][key[key1]] = true;
-                        }
+            for (i = 0; i < objList.length; i++) {
+                key = objList[i];
+                resultObject[key[key2]][key[key1]] = true;
+            }
 
-                        return resultObject;
-                    };
+            return resultObject;
+        };
 
-                    // substitution in keys is performed
-                    objectTransformation.subsInKey = function(objIn, objForSubstitution){
-                        var keys, i, objOut;
+        // substitution in keys is performed
+        objectTransformation.subsInKey = function (objIn, objForSubstitution) {
+            var keys, i, objOut;
 
-                        keys = Object.keys(objIn);
-                        objOut = {};
+            keys = Object.keys(objIn);
+            objOut = {};
 
-                        for (i = 0; i < keys.length; i++){
-                            objOut[objForSubstitution[keys[i]]] = objIn[keys[i]];
-                        }
+            for (i = 0; i < keys.length; i++) {
+                objOut[objForSubstitution[keys[i]]] = objIn[keys[i]];
+            }
 
-                        return objOut;
-                    };
+            return objOut;
+        };
 
-                    // substitution of list elements is performed
-                    objectTransformation.subsElemOfList = function(listIn, objForSubstitution){
-                        var i, listOut;
-                        listOut = [];
-                        for (i = 0; i < listIn.length; i++){
-                            listOut.push(objForSubstitution[listIn[i]])
-                        }
-                        return listOut;
-                    };
+        // substitution of list elements is performed
+        objectTransformation.subsElemOfList = function (listIn, objForSubstitution) {
+            var i, listOut;
+            listOut = [];
+            for (i = 0; i < listIn.length; i++) {
+                listOut.push(objForSubstitution[listIn[i]])
+            }
+            return listOut;
+        };
 
-                    return objectTransformation;
-                })
+        return objectTransformation;
+    })
     .directive('ngOk', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',
@@ -240,9 +240,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 ngWatch: '@'
             },
             link: function (scope, iElement, iAttrs, ngModelCtrl) {
-
-
-
 
 
                 if (iAttrs['ngValidationResult']) {
@@ -261,20 +258,20 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     s.on_success_url = null;
                 }
 
-                iAttrs.$observe('ngAjaxAction', function(value) {
+                iAttrs.$observe('ngAjaxAction', function (value) {
                     s.url = value;
-                    });
+                });
 
-                iAttrs.$observe('ngOnSuccess', function(value) {
+                iAttrs.$observe('ngOnSuccess', function (value) {
                     s.on_success_url = value;
-                    });
+                });
 
 
                 $.each($('[name]', $(iElement)), function (ind, el) {
-                $newel = $(el).clone();
-                scope.data[$(el).attr('name')] = $(el).val();
-                $newel.attr('ng-model', 'data.' + $newel.attr('name'));
-                $(el).replaceWith($compile($newel)(scope))
+                    $newel = $(el).clone();
+                    scope.data[$(el).attr('name')] = $(el).val();
+                    $newel.attr('ng-model', 'data.' + $newel.attr('name'));
+                    $(el).replaceWith($compile($newel)(scope))
                 });
 
 
@@ -348,7 +345,51 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                     s.$watch('data', s.refresh, true);
                     s.refresh();
                 }
-                            s.getTemp(iAttrs.ngCity);
+                s.getTemp(iAttrs.ngCity);
+            }
+        }
+    }])
+    .directive('validationFor', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+        var watch_functions = {};
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function (scope, iElement, iAttrs, ngModelCtrl) {
+                //var $ie = $(iElement);
+                var model_fields = iAttrs['validationFor'].split(':');
+                var model_name = model_fields[0];
+                var field_name = model_fields[1];
+                console.log(model_fields);
+                if (!scope['$validation_watcher']) {
+                    scope['$validation_watcher'] = {};
+                }
+
+                if (!scope['$validation_watcher'][model_name]) {
+                    scope['$validation_watcher'][model_name] = [];
+                    scope.$watch(model_fields[0], function () {
+                        $.each(scope['$validation_watcher'][model_name], function (ind, el_field) {
+                            var el = el_field[0];
+                            var fld = el_field[1];
+                            console.log(scope[model_name]);
+                            if (scope[model_name]) {
+                                var sn = scope[model_name];
+                                if (sn['errors'] && sn['errors'][field_name]) {
+                                    iElement.attr('class', 'error glyphicon glyphicon-thumbs-down').html(sn['errors'][field_name]);
+                                }
+                                else if (sn['warnings'] && sn['warnings'][field_name]) {
+                                    iElement.attr('class', 'warning glyphicon glyphicon-hand-up').html(sn['warnings'][field_name]);
+                                }
+                                else if (sn['notices'] && sn['notices'][field_name]) {
+                                    iElement.attr('class', 'notice glyphicon glyphicon-thumbs-up').html(sn['notices'][field_name]);
+                                }
+                                else {
+                                    iElement.attr('class', 'ok glyphicon glyphicon-thumbs-up').html('');
+                                }
+                            }
+                        });
+                    }, true);
+                }
+                scope['$validation_watcher'][model_name].push([iElement, model_fields]);
             }
         }
     }])
@@ -430,7 +471,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 if (scope['ngWatch']) {
                     scope, scope.$parent.$parent.$watch(scope['ngWatch'], sendValidation, true);
                 }
-                
 
 
                 var parameters = $.extend(defaultparameters, {
@@ -601,7 +641,9 @@ module.run(function ($rootScope, $ok) {
             var scope = this;
             scope.loading = true;
             $ok(url ? url : '', senddata ? senddata : {}, function (data) {
-                if (!beforeload) beforeload = function (d) {return d;};
+                if (!beforeload) beforeload = function (d) {
+                    return d;
+                };
                 scope.data = beforeload(data);
                 scope.original_data = $.extend(true, {}, scope.data);
                 if (afterload) afterload();
@@ -621,7 +663,7 @@ module.run(function ($rootScope, $ok) {
                 editor.on('PreInit111', function (event) {
                     editor.parser.addNodeFilter('a', function (nodes, name) {
                         console.log(nodes);
-                        $.each(nodes,function(i ,v) {
+                        $.each(nodes, function (i, v) {
                             v.unwrap();
                         });
                     });
@@ -658,7 +700,7 @@ module.run(function ($rootScope, $ok) {
             //valid_elements: Config['article_html_valid_elements'],
             //valid_elements: 'a[class],img[class|width|height],p[class],table[class|width|height],th[class|width|height],tr[class],td[class|width|height],span[class],div[class],ul[class],ol[class],li[class]',
             content_css: "/static/front/bird/css/article.css",
-            style_formats: [
+            aastyle_formats: [
                 {title: 'HEAD1', block: 'div', classes: 'h1'},
                 {title: 'HEAD2', block: 'div', classes: 'h2'},
                 {title: 'HEAD3', block: 'div', classes: 'h3'},
@@ -775,10 +817,10 @@ function angularControllerFunction(controller_attr, function_name) {
 function fileUrl(id, down) {
     if (!id) return '';
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
-    if (down){
+    if (down) {
         return 'http://file' + server + '.profireader.com/' + id + '?d'
-    }else {
-         return 'http://file' + server + '.profireader.com/' + id + '/'
+    } else {
+        return 'http://file' + server + '.profireader.com/' + id + '/'
     }
 }
 

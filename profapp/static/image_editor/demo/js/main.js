@@ -30,7 +30,7 @@ function a() {
 
     init_cropper = function () {
 
-
+        //debugger;
 
         var $image = $('.img-container > img'),
             $dataX = $('#dataX'),
