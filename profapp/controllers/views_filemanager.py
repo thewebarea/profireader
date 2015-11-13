@@ -1,14 +1,13 @@
 import os
 from flask import render_template, g, make_response
 from flask.ext.login import current_user
-from profapp.models.files import File, FileContent
+from profapp.models.files import File, FileContent, YoutubeApi
 from .blueprints_declaration import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
 from flask import jsonify
 import json as jsonmodule
-from ..models.google import YoutubeApi
 from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
 from utils.db_utils import db
@@ -62,8 +61,13 @@ def list(json):
 @filemanager_bp.route('/search/', methods=['POST'])
 @ok
 def search_list(json):
-    list = File.search(json['params']['search_name'], json['params']['roots'])
-    return list
+    if json['params']['search_text'] != '':
+        list = File.list(json['params']['folder'], json['params']['file_manager_called_for'],json['params']['search_text'])
+        ancestors = File.ancestors(json['params']['folder'])
+    else:
+        list = []
+        ancestors = File.ancestors(json['params']['folder'])
+    return {'list': list, 'ancestors': ancestors}
 
 @filemanager_bp.route('/createdir/', methods=['POST'])
 @ok
@@ -74,7 +78,8 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    name = File.search('f', ['5629030e-d4f8-4001-8a3a-f5cfdffc8647'])
+    file = File.get('5644d72e-a269-4001-a5de-8c3194039273')
+    name = File.set_properties(file,False,name='None', copyright_author_name='',description='')
     return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/properties/', methods=['POST'])
@@ -93,7 +98,7 @@ def rename(json):
 @ok
 def copy(json):
     file = File.get(request.json['params']['id'])
-    return File.copy_file(file, request.json['params']['folder_id'])
+    return file.copy_file(request.json['params']['folder_id'])
 
 @filemanager_bp.route('/cut/', methods=['POST'])
 @ok
@@ -105,29 +110,28 @@ def cut(json):
 def remove(file_id):
     return File.remove(file_id)
 
-@filemanager_bp.route('/upload/', methods=['POST'])
-@ok
-def upload(json):
+@filemanager_bp.route('/upload/<string:parent_id>/', methods=['POST'])
+def upload(parent_id):
     sleep(0.1)
-    parent_id = request.form['folder_id']
-    root_id = request.form['root_id']
+    parent = File.get(parent_id)
+    root_id = parent.root_folder_id
     ret = {}
-    for uploaded_file_name in request.files:
-        uploaded_file = request.files[uploaded_file_name]
-        uploaded_file.seek(0, os.SEEK_END)
-        size = uploaded_file.tell()
-        uploaded_file.seek(0, os.SEEK_SET)
-        uploaded_file.tell()
-        name = File.get_unique_name(uploaded_file.filename, uploaded_file.content_type, parent_id)
-        file = File(parent_id=parent_id,
+    data = request.form
+    uploaded_file = request.files['file']
+    uploaded_file.seek(0, os.SEEK_END)
+    size = uploaded_file.tell()
+    uploaded_file.seek(0, os.SEEK_SET)
+    uploaded_file.tell()
+    name = File.get_unique_name(uploaded_file.filename, uploaded_file.content_type, parent.id)
+    file = File(parent_id=parent.id,
                     root_folder_id=root_id,
                     name=name,
-                    mime=uploaded_file.content_type,
+                    mime=data.get('ftype'),
                     size=size
                     )
-        uploaded = file.upload(content=uploaded_file.stream.read(-1))
-        ret[uploaded.id] = True
-    return ret
+    uploaded = file.upload(content=uploaded_file.stream.read(-1))
+    ret[uploaded.id] = True
+    return jsonify({'result': {'size': 0}})
 
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST'])
 @filemanager_bp.route('/uploader/<string:company_id>', methods=['GET', 'POST'])
@@ -145,25 +149,33 @@ def uploader(company_id=None):
     return render_template('file_uploader.html', company_id=company_id)
 
 
-@filemanager_bp.route('/send/<string:company_id>/', methods=['POST'])
-def send(company_id):
+@filemanager_bp.route('/send/<string:parent_id>/', methods=['POST'])
+def send(parent_id):
     """ YOU SHOULD SEND PROPERTY NAME, DESCRIPTION, ROOT_FOLDER AND FOLDER.
     NOW THIS VALUES GET FROM DB. HARDCODE!!! """
-    company = db(Company, id=company_id).one() ## HARD CODE
     file = request.files['file']
+    parent = File.get(parent_id)
+    root = parent.root_folder_id
+    if parent.mime == 'root':
+        root = parent.id
     data = request.form
+    company = db(Company, journalist_folder_file_id=root).one()
     body = {'title': file.filename,
-            'description': 'TESTING', ## HARD CODE
+            'description': '',
             'status': 'public'}
-
+    # file.seek(0, os.SEEK_END)
+    # size = file.tell()
+    # file.seek(0, os.SEEK_SET)
+    # file.tell()
+    name = File.get_unique_name(file.filename, 'video/*', parent_id)
     youtube = YoutubeApi(body_dict=body,
                          video_file=file.stream.read(-1),
                          chunk_info=dict(chunk_size=int(data.get('chunkSize')),
                                          chunk_number=int(data.get('chunkNumber')),
                                          total_size=int(data.get('totalSize'))),
-                         company_id=company_id,
-                         root_folder_id=company.journalist_folder_file_id, ## HARD CODE
-                         parent_folder_id=company.journalist_folder_file_id) ## HARD CODE
+                         company_id=company.id,
+                         root_folder_id=company.journalist_folder_file_id,
+                         parent_folder_id=parent_id)
     youtube.upload()
     return jsonify({'result': {'size': 0}})
 

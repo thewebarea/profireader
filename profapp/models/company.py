@@ -21,7 +21,7 @@ from ..controllers import errors
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
 from functools import wraps
-from .google import YoutubePlaylist
+from .files import YoutubePlaylist
 
 
 class Company(Base, PRBase):

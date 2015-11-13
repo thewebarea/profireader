@@ -45,7 +45,7 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 
 .navbar-brand {
     padding: 5px;
-    margin-left: px !important;
+    margin-left: 1px !important;
 }
 
 .navbar-brand img {
@@ -1805,7 +1805,7 @@ form {
     /*background: rgba(255, 255, 255, 0.9);*/
     font-size: 12px;
     width: 200px;
-    padding: 0px;
+    padding: 0;
 }
 
 .profile-thumbnail .control span {
@@ -1840,8 +1840,8 @@ form {
 
 .form form {
     position: relative;
-    padding: 0px;
-    margin-bottom: 0px;
+    padding: 0;
+    margin-bottom: 0;
     border: none;
     background: transparent;
 }
@@ -1866,7 +1866,7 @@ input[type=radio   ]:not(old) + label {
     display: inline-block;
     margin-left: -28px;
     padding-left: 28px;
-    background: url('/static/images/checks.png') no-repeat 0 0;
+    background: url('../../static/images/checks.png') no-repeat 0 0;
     line-height: 24px;
 }
 
@@ -1904,7 +1904,7 @@ a.title-btn {
     display: inline-block;
     width: 45px;
     height: 45px;
-    margin: 10px 10px 0px 0px;
+    margin: 10px 10px 0 0;
     background: #eee;
     /*margin-bottom: 50px;*/
     background-size: cover;
@@ -1954,19 +1954,19 @@ a.title-btn {
 }
 
 .login-by-google {
-    background-image: url("/static/images/social/g.png");
+    background-image: url("../../static/images/social/g.png");
 }
 
 .login-by-facebook {
-    background-image: url("/static/images/social/f.png");
+    background-image: url("../../static/images/social/f.png");
 }
 
 .login-by-linkedin {
-    background-image: url("/static/images/social/l.png");
+    background-image: url("../../static/images/social/l.png");
 }
 
 .login-by-microsoft {
-    background-image: url("/static/images/social/m.png");
+    background-image: url("../../static/images/social/m.png");
 }
 
 .by-socials-block {
@@ -2003,7 +2003,7 @@ a.title-btn {
 }
 
 .auth-form h3 {
-    margin: 15px 0px 7px 0px;
+    margin: 15px 0 7px 0;
 }
 
 .auth-form input {
