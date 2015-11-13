@@ -146,6 +146,7 @@ class ArticlePortalDivision(Base, PRBase):
             sub_query = sub_query.filter(ArticlePortalDivision.title.ilike("%" + search_text + "%"))
         return sub_query
 
+
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -304,8 +305,7 @@ class ArticleCompany(Base, PRBase):
 
     @staticmethod
     def update_article(company_id, article_id, **kwargs):
-        db(ArticleCompany, company_id=company_id, id=article_id).update(
-            kwargs)
+        db(ArticleCompany, company_id=company_id, id=article_id).update(kwargs)
 
 
 def set_long_striped(mapper, connection, target):

@@ -534,19 +534,32 @@ def update_article_portal(json, article_id):
     return json
 
 
-@portal_bp.route('/submit_to_portal/<any(validate,save):action>/', methods=['POST'])
+# @portal_bp.route('/submit_to_portal/<any(validate,save):action>/', methods=['POST'])
+# @ok
+# def submit_to_portal(json, action):
+#     json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
+    #
+    # article = ArticleCompany.get(json['article']['id'])
+    # if action == 'validate':
+    #     return article.validate('update')
+    # if action == 'save':
+    #     portal_division_id = json['selected_division']
+    #     article_portal = article.clone_for_portal(portal_division_id, json['tags'])
+    #     article.save()
+    #     portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
+    #     return {'portal': portal.name}
+
+
+@portal_bp.route('/submit_to_portal/', methods=['POST'])
 # @login_required
 # @check_rights(simple_permissions([]))
 @ok
-def submit_to_portal(json, action):
+def submit_to_portal(json):
     # json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
 
     article = ArticleCompany.get(json['article']['id'])
-    if action == 'validate':
-        return article.validate('update')
-    if action == 'save':
-        portal_division_id = json['selected_division']
-        article_portal = article.clone_for_portal(portal_division_id, json['tags'])
-        article.save()
-        portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
-        return {'portal': portal.name}
+    portal_division_id = json['selected_division']
+    article_portal = article.clone_for_portal(portal_division_id, json['tags'])
+    article.save()
+    portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
+    return {'portal': portal.name}
