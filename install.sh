@@ -156,7 +156,7 @@ apt-get install postgresql-9.4" sudo deb
 
 function menu_deb {
     conf_comm "apt-get update
-apt-get install libpq-dev python-dev libapache2-mod-wsgi" sudo hosts
+apt-get install libpq-dev python-dev libapache2-mod-wsgi libjpeg-dev" sudo hosts
     }
 
 function menu_hosts {
