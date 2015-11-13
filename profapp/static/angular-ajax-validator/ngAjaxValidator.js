@@ -5,8 +5,8 @@
     }
 
     var AppendParameter = function (url, var_val) {
-        var hashpart =  url.match(/^([^#]*)(#(.*))?$/)
-        var ret = hashpart[1] + (hashpart[1].match(/\?/) ? '&' : '?') + var_val + (hashpart[2]?hashpart[2]:'')
+        var hashpart = url.match(/^([^#]*)(#(.*))?$/)
+        var ret = hashpart[1] + (hashpart[1].match(/\?/) ? '&' : '?') + var_val + (hashpart[2] ? hashpart[2] : '')
         return ret
     };
 
@@ -84,6 +84,80 @@
         };
         return ret;
 
+    }]).directive('afValidationAnswer', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+
+
+        var watch_functions = {};
+        return {
+            restrict: "A",
+            replace: false,
+            template: function (tElement, tAttrs) {
+                var model_fields = tAttrs['afValidationAnswer'].split(':');
+                var model_name = model_fields[0];
+                var field_name = model_fields[1];
+                var erm = '' + model_name + '.errors.' + field_name;
+                var ewm = '' + model_name + '.warnings.' + field_name;
+                var enm = '' + model_name + '.notices.' + field_name;
+                return '<span class="ok glyphicon glyphicon-thumbs-up" ng-if="!'+erm+' && !'+ewm+' && !'+enm+'"></span><span class="error glyphicon glyphicon-thumbs-down" ng-if="' + erm + '">{{ ' + erm + ' }}</span><span class="warning glyphicon glyphicon-hand-up" ng-if="!' + erm + ' && ' + ewm + '">{{ ' + ewm + ' }}</span class="notice glyphicon glyphicon-thumbs-up"><span ng-if="!' + erm + ' ! ' + ewm + ' && ' + enm + '">{{ ' + enm + ' }}</span>';
+            },
+            scope: false,
+            link: function ($scope, iElement, iAttrs, ngModelCtrl) {
+                //var $parent = $scope['$parent'];
+                //
+
+                //
+                //if (!$parent.$$afValidationAnswerWatches) {
+                //    $parent.$$afValidationAnswerWatches = {}
+                //}
+                //if (!$parent.$$afValidationAnswerWatches[model_name]) {
+                //    $parent.$$afValidationAnswerWatches[model_name] = {
+                //        watcher: $parent.$watch(model_name, function (oldv, newv) {}, true),
+                //        element: iElement,
+                //        field: field_name,
+                //    };
+                //}
+                //else {
+                //
+                //}
+                //$parent.$$afValidationAnswerWatches
+                //
+                //$parent.$watch('')
+                //
+                ////var $ie = $(iElement);
+                //
+                //console.log(model_fields);
+                //if (!scope['$validation_watcher']) {
+                //    scope['$validation_watcher'] = {};
+                //}
+                //
+                //if (!scope['$validation_watcher'][model_name]) {
+                //    scope['$validation_watcher'][model_name] = [];
+                //    scope.$watch(model_fields[0], function () {
+                //        $.each(scope['$validation_watcher'][model_name], function (ind, el_field) {
+                //            var el = el_field[0];
+                //            var fld = el_field[1];
+                //            console.log(scope[model_name]);
+                //            if (scope[model_name]) {
+                //                var sn = scope[model_name];
+                //                if (sn['errors'] && sn['errors'][field_name]) {
+                //                    iElement.attr('class', 'error glyphicon glyphicon-thumbs-down').html(sn['errors'][field_name]);
+                //                }
+                //                else if (sn['warnings'] && sn['warnings'][field_name]) {
+                //                    iElement.attr('class', 'warning glyphicon glyphicon-hand-up').html(sn['warnings'][field_name]);
+                //                }
+                //                else if (sn['notices'] && sn['notices'][field_name]) {
+                //                    iElement.attr('class', 'notice glyphicon glyphicon-thumbs-up').html(sn['notices'][field_name]);
+                //                }
+                //                else {
+                //                    iElement.attr('class', 'ok glyphicon glyphicon-thumbs-up').html('');
+                //                }
+                //            }
+                //        });
+                //    }, true);
+                //}
+                //scope['$validation_watcher'][model_name].push([iElement, model_fields]);
+            }
+        }
     }]).directive('af', ['$af', '$ok', function ($af, $ok) {
 
         return {
@@ -299,9 +373,9 @@
 
                 var watchfunc = function (oldval, newval) {
                     //if (-1 !== ['clean', 'saving_failed', 'valid', 'loading_failed', 'dirty', 'validating_failed', 'invalid', 'saving', 'validating'].indexOf($parent[params['afState']])) {
-                        setInParent('afState', 'dirty');
-                        debouncedvalidate();
-                        //}
+                    setInParent('afState', 'dirty');
+                    debouncedvalidate();
+                    //}
                 };
 
                 $scope.$watch('model', watchfunc, true);
