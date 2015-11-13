@@ -244,12 +244,12 @@ def crop_image(image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
         cfc = FileContent(content=image_query.file_content.content,
                           file=copy_original_image_to_system_folder)
         g.db.add_all([croped, fc, copy_original_image_to_system_folder, cfc])
-        g.db.commit()
+        g.db.flush()
         ImageCroped(original_image_id=copy_original_image_to_system_folder.id,
                     croped_image_id=croped.id,
                     x=int(coordinates['x']), y=int(coordinates['y']),
                     width=int(coordinates['width']),
-                    height=int(coordinates['height']), rotate=int(coordinates['rotate']))
+                    height=int(coordinates['height']), rotate=int(coordinates['rotate'])).save()
         return croped.id
     else:
         g.db.rollback()

@@ -115,6 +115,8 @@ def upload(parent_id):
     sleep(0.1)
     parent = File.get(parent_id)
     root_id = parent.root_folder_id
+    if parent.root_folder_id == None:
+        root_id = parent.id
     ret = {}
     data = request.form
     uploaded_file = request.files['file']
