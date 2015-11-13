@@ -51,7 +51,7 @@ def load_mine(json):
                          for a in articles],
             'companies': companies,
             'search_text': json.get('search_text') or '',
-            'original_search_text': str(json.get('search_text')) or '',
+            'original_search_text': json.get('search_text') or '',
             'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
