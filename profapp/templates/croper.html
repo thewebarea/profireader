@@ -1,167 +1,149 @@
-<script> function AjaxPost() {
-  $.post('', {
-             '1x': $("#dataX").val(),
-      '2y': $("#dataY").val(),
-             '3width': $("#dataWidth").val(),
-             '4height': $("#dataHeight").val(),
-             '5rotate': $("#dataRotate").val(),
-            '6name': $("#new_name").val()
- }, function (resp) {
-             console.log(resp);
-           },
-   'json');
-   return false;
- };
+<script type="text/ng-template" id="image_cropper">
+    {% raw %}
+    <div class="container" style="width: 320px; background-size: cover;">
+        <div class="row">
+            <div class="col-md-9">
+                <!-- <h3 class="page-header">Demo:</h3> -->
 
 
-</script>
-
-<script type="text/ng-template" id="croper.html">
-      <link href="../../static/image_editor/assets/css/bootstrap.min.css" rel="stylesheet">
-  <link href="../../static/image_editor/dist/cropper.css" rel="stylesheet">
-  <link href="../../static/image_editor/demo/css/main.css" rel="stylesheet">
-<div class="container" style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 0 solid #aaa;
-                        background-size: cover;">
-    <div class="row">
-      <div class="col-md-9">
-        <!-- <h3 class="page-header">Demo:</h3> -->
-        <div class="img-container">
-          <img src="../../static/images/picture.jpeg">
-        </div>
-      </div>
-      <div class="col-md-3">
-        <!-- <h3 class="page-header">Preview:</h3> -->
-
-
-        <div>
-
-        </div>
-
-
-          <form class="send coordinates" action="/image_editor/{{ img_id }}" onsubmit="return AjaxPost()" id="crop" method="post">
-        <!-- <h3 class="page-header">Data:</h3> -->
-            <div class="docs-data">
-          <div class="input-group">
-            <input class="form-control" id="dataX" type="hidden" name="1x" placeholder="x">
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataY" type="hidden" name="2y" placeholder="y">
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataWidth" type="hidden" name="3width" placeholder="width">
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataHeight" type="hidden" name="4height" placeholder="height">
-          </div>
-          <div class="input-group">
-            <input class="form-control" id="dataRotate" type="hidden" name="5rotate" placeholder="rotate">
-          </div>
-
+                <div class="img-container">
+                    <img src="{{ image_file_url }}" alt="Picture">
+                </div>
             </div>
-            <div class="input-group">
-              <input id="new_name" type="text" name="6name" placeholder="new_name">
+            <div class="col-md-3">
+                <!-- <h3 class="page-header">Preview:</h3> -->
+
+
+                <div>
+
+                </div>
+                <!-- <h3 class="page-header">Data:</h3> -->
+                <div class="docs-data">
+                    <div class="input-group">
+                        <input class="form-control" id="dataX" name="x" type="hidden" placeholder="x">
+
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataY" name="y" type="hidden" placeholder="y">
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataWidth" type="hidden" name="width" placeholder="width">
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataHeight" type="hidden" name="height" placeholder="height">
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataRotate" type="hidden" name="rotate" placeholder="rotate">
+                    </div>
+                </div>
             </div>
 
-            <input type="submit" value="submit">
-              </form>
-      </div>
 
-
-
-    </div>
-    <div class="row">
-      <div class="col-md-9 docs-buttons">
-        <!-- <h3 class="page-header">Toolbar:</h3> -->
-        <div class="btn-group">
-          <button class="btn btn-primary" data-method="zoom" data-option="0.1" type="button" title="Zoom In">
+        </div>
+        <div class="row">
+            <div class="col-md-9 docs-buttons">
+                <!-- <h3 class="page-header">Toolbar:</h3> -->
+                <div class="btn-group" ng-if="default_image">
+                    <button class="btn btn-primary" data-method="zoom" data-option="0.1" type="button" disabled
+                            title="Zoom In">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, 0.1)">
               <span class="icon icon-zoom-in"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="zoom" data-option="-0.1" type="button" title="Zoom Out">
+                    </button>
+                    <button class="btn btn-primary" data-method="zoom" data-option="-0.1" type="button" disabled
+                            title="Zoom Out">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, -0.1)">
               <span class="icon icon-zoom-out"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="rotate" data-option="-90" type="button" title="Rotate Left">
+                    </button>
+                    <button class="btn btn-primary" data-method="rotate" data-option="-90" type="button" disabled
+                            title="Rotate Left">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, -90)">
               <span class="icon icon-rotate-left"></span>
             </span>
-          </button>
-          <button class="btn btn-primary" data-method="rotate" data-option="90" type="button" title="Rotate Right">
+                    </button>
+                    <button class="btn btn-primary" data-method="rotate" data-option="90" type="button" disabled
+                            title="Rotate Right">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, 90)">
               <span class="icon icon-rotate-right"></span>
             </span>
-          </button>
-        </div>
+                    </button>
 
-        <div class="btn-group">
-          <button class="btn btn-primary" data-method="crop" type="button" title="Enable crop">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;crop&quot;)">
-              <span class="icon icon-ok"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="clear" type="button" title="Disable crop">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;clear&quot;)">
-              <span class="icon icon-remove"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="disable" type="button" title="Lock">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;disable&quot;)">
-              <span class="icon icon-lock"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="enable" type="button" title="Unlock">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;enable&quot;)">
-              <span class="icon icon-unlock"></span>
-            </span>
-          </button>
-          <button class="btn btn-primary" data-method="reset" type="button" title="Reset">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;reset&quot;)">
-              <span class="icon icon-refresh"></span>
-            </span>
-          </button>
+                    <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
+                            ng-click="chooseImage()">
+                 <span class="docs-tooltip" data-toggle="tooltip" title="Chose image"><span class="glyphicon glyphicon-folder-open"></span></span>
+                    </button>
 
-        </div>
+                </div>
 
-        <!-- Show the cropped image in modal -->
-        <div class="modal fade docs-cropped" id="getCroppedCanvasModal" aria-hidden="true" aria-labelledby="getCroppedCanvasTitle" role="dialog" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button class="close" data-dismiss="modal" type="button" aria-hidden="true">&times;</button>
-                <h4 class="modal-title" id="getCroppedCanvasTitle">Cropped</h4>
-              </div>
-              <div class="modal-body"></div>
-              <!-- <div class="modal-footer">
-                <button class="btn btn-primary" data-dismiss="modal" type="button">Close</button>
-              </div> -->
+                <div class="btn-group" ng-if="!default_image">
+                    <button class="btn btn-primary" data-method="zoom" data-option="0.1" type="button" title="Zoom In">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, 0.1)">
+              <span class="icon icon-zoom-in"></span>
+            </span>
+                    </button>
+                    <button class="btn btn-primary" data-method="zoom" data-option="-0.1" type="button"
+                            title="Zoom Out">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, -0.1)">
+              <span class="icon icon-zoom-out"></span>
+            </span>
+                    </button>
+                    <button class="btn btn-primary" data-method="rotate" data-option="-90" type="button"
+                            title="Rotate Left">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, -90)">
+              <span class="icon icon-rotate-left"></span>
+            </span>
+                    </button>
+                    <button class="btn btn-primary" data-method="rotate" data-option="90" type="button"
+                            title="Rotate Right">
+            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;rotate&quot;, 90)">
+              <span class="icon icon-rotate-right"></span>
+            </span>
+                    </button>
+                    <button class="btn btn-primary" id="replace-toggle" type="button" value="{{ image_file_url }}"
+                            ng-click="chooseImage()">
+                 <span class="docs-tooltip" data-toggle="tooltip" title="Chose image"><span class="glyphicon glyphicon-folder-open"></span></span>
+                    </button>
+
+                </div>
+                <input type="hidden" id="dataRatio" value="{{ data.ratio }}">
+                <input type="hidden" id="coordinate_x" value="{{ data.coordinates.x }}">
+                <input type="hidden" id="coordinate_y" value="{{ data.coordinates.y }}">
+                <input type="hidden" id="coordinate_width" value="{{ data.coordinates.width }}">
+                <input type="hidden" id="coordinate_height" value="{{ data.coordinates.height }}">
+                <input type="hidden" id="coordinate_rotate" value="{{ data.coordinates.rotate }}">
+                <input type="hidden" id="default_image" value="{{ default_image }}">
+                <!-- Show the cropped image in modal -->
+                <div class="modal fade docs-cropped" id="getCroppedCanvasModal" aria-hidden="true"
+                     aria-labelledby="getCroppedCanvasTitle" role="dialog" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button class="close" data-dismiss="modal" type="button"
+                                        aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="getCroppedCanvasTitle">Cropped</h4>
+                            </div>
+                            <div class="modal-body"></div>
+                            <!-- <div class="modal-footer">
+                              <button class="btn btn-primary" data-dismiss="modal" type="button">Close</button>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal -->
+
+
             </div>
-          </div>
-        </div><!-- /.modal -->
+            <!-- /.docs-buttons -->
+
+            <div class="col-md-3 docs-toggles">
 
 
-      </div><!-- /.docs-buttons -->
-
-      <div class="col-md-3 docs-toggles">
-
-
-        <!-- <h3 class="page-header">Toggles:</h3> -->
-        <div class="btn-group btn-group-justified" data-toggle="buttons">
-          <label data-method="setAspectRatio" data-option="{{ ratio }}" title="Set Aspect Ratio">
-            <input class="sr-only" id="aspestRatio1" name="aspestRatio" value="{{ ratio }}" type="hidden">
-            <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;setAspectRatio&quot;, {{ ratio }})">
-            </span>
-          </label>
+            </div>
+            <!-- Alert -->
+            <div class="docs-alert"><span class="warning message"></span></div>
+            <!-- Scripts -->
         </div>
-
-      </div><!-- /.docs-toggles -->
     </div>
-  </div>
-  <!-- Alert -->
-  <div class="docs-alert"><span class="warning message"></span></div>
-  <!-- Scripts -->
+    {% endraw %}
 </script>
-
-
-

@@ -11,16 +11,13 @@
 
 {% block portal_content %}
     <script>
-        module.controller('company_create', ['$scope', '$modal', '$ok', function ($scope, $modal, $ok) {
+        module.controller('company_create', ['$scope', '$modal', '$ok', '$af', function ($scope, $modal, $ok, $af) {
 
-            {% if company_id %}
-                $scope.save_company = '{{ url_for('company.confirm_edit', company_id = company_id)|safe }}';
-            {% else %}
-                $scope.save_company = '{{ url_for('company.confirm_create') |safe }}';
-            {% endif %}
+            $scope.$af = $af;
 
             $scope.url_back = {{ raw_url_for('company.show')|safe }};
             $scope.data = {};
+
             $scope.cancel = function () {
                 window.location.href = $scope.url_back();
                 return false;
@@ -29,21 +26,31 @@
                 return $scope.data;
             };
 
-            $scope.afterSave = function (resp) {
+            $scope.afterSave = function (resp, deff) {
                 if (resp && !$scope.data.id) {
                     window.location.href = '{{ url_for('company.show') |safe }}';
                 }
+                deff(resp);
             };
 
-            $scope.articleImageSelected = function (item) {
+            $scope.afterLoad = function (resp, deff) {
+                deff(resp);
+                $scope.setImageUrl(resp['logo_file_id']);
+            };
 
+            {#            ng-onsuccess="afterSave"#}
+            {#                      ng-onsubmit="getData"#}
+            {#                      ng-action="save_company_url"#}
+
+            $scope.articleImageSelected = function (item) {
                 $scope.data.logo_file_id = item.id;
-                $scope.setImageUrl();
+                $scope.setImageUrl($scope.data.logo_file_id);
                 closeFileManager();
             }
 
-            $scope.setImageUrl = function () {
-                $scope.logo_file_url = fileUrl($scope.data.logo_file_id);
+            $scope.setImageUrl = function (logo_file_id) {
+                console.log(logo_file_id);
+                $scope.logo_file_url = fileUrl(logo_file_id);
             }
 
             $scope.chooseImage = function () {
@@ -69,49 +76,56 @@
         }])
     </script>
     {% raw %}
-    <div ng-init="loadData(null,{}, null, setImageUrl)" ng-controller="company_create">
-        <div ng-if="!data">Loading...</div>
-        <div ng-if="data">
-            <form class="add"
-                  ng-ok
-                  ng-onsuccess="afterSave"
-                  ng-onsubmit="getData"
-                  ng-action="save_company">
-                <h1>{{ data.id ? 'Edit company profile' : 'New company Account' }}</h1>
+    <div ng-controller="company_create">
+        {{ load_company_url }}
+        <div af
+             af-after-save="afterSave"
+             af-after-load="afterLoad"
+             ng-model="data">
 
-                <div style="width: 400px;">
-                    <div ng-click="chooseImage()"
-                         style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
+            <h1>{{ data.id ? 'Edit company profile' : 'New company Account' }}</h1>
+
+            <div style="width: 400px;">
+                <div ng-click="chooseImage()"
+                     style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
                         background-size: cover; background-image:url({{ logo_file_url }});">
-                        {{ _('Select logo') }}
-                    </div>
+                    {{ _('Select logo') }}
                 </div>
+            </div>
 
-                <div style="width: 500px; margin-left: 450px;">
-                    <div class="item"><span class="input_label">Company name</span><input ng-model="data.name"></div>
-                    <div class="item"><span class="input_label">Country</span><input type="text" ng-model="data.country"></div>
-                    <div class="item"><span class="input_label">Region</span><input type="text" ng-model="data.region"></div>
-                    <div class="item"><span class="input_label">Adress</span><input type="text" ng-model="data.address"></div>
-                    <div class="item"><span class="input_label">Phone</span><input type="text" ng-model="data.phone"></div>
-                    <div class="item"><span class="input_label">Fax</span><input type="text" ng-model="data.phone2"></div>
-                    <div class="item"><span class="input_label">Email</span><input type="text" ng-model="data.email"></div>
+            <div style="width: 500px; margin-left: 450px;">
+                <div class="item"><span class="input_label">Company name</span><input ng-model="data.name">
                 </div>
+                <div class="item"><span class="input_label">Country</span><input type="text"
+                                                                                 ng-model="data.country"></div>
+                <div class="item"><span class="input_label">Region</span><input type="text"
+                                                                                ng-model="data.region"></div>
+                <div class="item"><span class="input_label">Adress</span><input type="text"
+                                                                                ng-model="data.address"></div>
+                <div class="item"><span class="input_label">Phone</span><input type="text"
+                                                                               ng-model="data.phone"></div>
+                <div class="item"><span class="input_label">Fax</span><input type="text" ng-model="data.phone2">
+                </div>
+                <div class="item"><span class="input_label">Email</span><input type="text"
+                                                                               ng-model="data.email"></div>
+            </div>
 
-                <div style="width: 1000px; margin-left: 0px;">
-                    Short description
+            <div style="width: 1000px; margin-left: 0px;">
+                Short description
                 <textarea ui-tinymce="tinymceImageOptions" placeholder=""
                           ng-model="data.short_description"></textarea><br/>
-                </div>
+            </div>
 
-                <div style="width: 1000px; margin-left: 0px;">
-                    About company
+            <div style="width: 1000px; margin-left: 0px;">
+                About company
                 <textarea ui-tinymce="tinymceImageOptions" placeholder=""
                           ng-model="data.about"></textarea><br/>
-                </div>
+            </div>
 
-                <input type="submit" value="{{ data.id ? 'save' : 'create' }}"/>
-            </form>
+            <input ng-click="$af.save(data)" ng-disabled="data_state != 'valid' && data_state != 'clean'" type="submit"
+                   value="{{ data.id ? 'save' : 'create' }} ({{ data_state }})"/>
         </div>
+
     </div>
 
 

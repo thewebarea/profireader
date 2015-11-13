@@ -92,5 +92,4 @@ tmp*
 
 **/node_modules
 **/bower_components
-*.sql
 **/bower_components_dev

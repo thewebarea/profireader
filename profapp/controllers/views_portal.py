@@ -1,4 +1,4 @@
-from .blueprints import portal_bp
+from .blueprints_declaration import portal_bp
 from flask import render_template, g, flash, redirect, url_for, jsonify
 from ..models.company import Company
 from flask.ext.login import current_user, login_required
@@ -115,7 +115,6 @@ def confirm_create(json, company_id):
         ret['portal'] = {}
 
     return ret
-
 
 
 @portal_bp.route('/', methods=['POST'])
@@ -518,3 +517,34 @@ def update_article_portal(json, article_id):
         if json.get('new_status') != ARTICLE_STATUS_IN_PORTAL.published \
         else ARTICLE_STATUS_IN_PORTAL.declined
     return json
+
+
+# @portal_bp.route('/submit_to_portal/<any(validate,save):action>/', methods=['POST'])
+# @ok
+# def submit_to_portal(json, action):
+#     json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
+    #
+    # article = ArticleCompany.get(json['article']['id'])
+    # if action == 'validate':
+    #     return article.validate('update')
+    # if action == 'save':
+    #     portal_division_id = json['selected_division']
+    #     article_portal = article.clone_for_portal(portal_division_id, json['tags'])
+    #     article.save()
+    #     portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
+    #     return {'portal': portal.name}
+
+
+@portal_bp.route('/submit_to_portal/', methods=['POST'])
+# @login_required
+# @check_rights(simple_permissions([]))
+@ok
+def submit_to_portal(json):
+    # json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
+
+    article = ArticleCompany.get(json['article']['id'])
+    portal_division_id = json['selected_division']
+    article_portal = article.clone_for_portal(portal_division_id, json['tags'])
+    article.save()
+    portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
+    return {'portal': portal.name}

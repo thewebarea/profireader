@@ -21,7 +21,6 @@ from sqlalchemy import event
 from html.parser import HTMLParser
 from ..controllers import errors
 
-
 class MLStripper(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -81,10 +80,10 @@ class ArticlePortalDivision(Base, PRBase):
                           secondaryjoin="PortalDivision.portal_id == Portal.id",
                           back_populates='articles',
                           uselist=False)
+    search_fields = ('title', 'short', 'long_stripped', 'keywords')
 
     def __init__(self, article_company_id=None, title=None, short=None, keywords=None,
-                 long=None, status=None, portal_division_id=None, image_file_id=None,
-                 # portal_id=None
+                 long=None, status=None, portal_division_id=None, image_file_id=None
                  ):
         self.article_company_id = article_company_id
         self.title = title
@@ -141,7 +140,7 @@ class ArticlePortalDivision(Base, PRBase):
         sub_query = g.db.query(ArticlePortalDivision).\
             join(ArticlePortalDivision.division).\
             join(PortalDivision.portal).\
-            filter(Portal.id==portal_id).\
+            filter(Portal.id == portal_id).\
             filter_by(**kwargs)
         if search_text:
             sub_query = sub_query.filter(ArticlePortalDivision.title.ilike("%" + search_text + "%"))
@@ -151,7 +150,6 @@ class ArticlePortalDivision(Base, PRBase):
 class ArticleCompany(Base, PRBase):
     __tablename__ = 'article_company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-
     editor_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'), nullable=False)
     company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
@@ -167,7 +165,6 @@ class ArticleCompany(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     image_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
     keywords = Column(TABLE_TYPES['keywords'], nullable=False)
-
     company = relationship(Company)
     editor = relationship(User)
     article = relationship('Article', primaryjoin="and_(Article.id==ArticleCompany.article_id)",
@@ -187,11 +184,12 @@ class ArticleCompany(Base, PRBase):
 
     def validate(self, action):
         ret = super().validate(action)
+        # TODO: (AA to OZ): regexp doesn't work
 
-        if not re.match('[^\s]{3,}', self.title):
-            ret['errors']['title'] = 'pls enter title longer than 3 letters'
-        if not re.match('\S+', self.keywords):
-            ret['warnings']['keywords'] = 'pls enter at least one keyword'
+        # if not re.compile(r'[^\s]{3,}',re.U).match(self.title):
+        #     ret['errors']['title'] = 'pls enter title longer than 3 letters'
+        # if not re.match('\S+', self.keywords):
+        #     ret['warnings']['keywords'] = 'pls enter at least one keyword'
         return ret
 
     @staticmethod
@@ -215,7 +213,7 @@ class ArticleCompany(Base, PRBase):
         article_filter = db(ArticleCompany, article_id=Article.id, **kwargs)
         if search_text:
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
-                "%" + search_text + "%"))
+                "%" + repr(search_text).strip("'") + "%"))
 
         return db(Article, author_user_id=user_id).filter(article_filter.exists())
 
@@ -284,7 +282,7 @@ class ArticleCompany(Base, PRBase):
             filesintext[file_id] = \
                 File.get(file_id).copy_file(company_id=company.id,
                                             root_folder_id=company.system_folder_file_id,
-                                            parent_folder_id=company.system_folder_file_id,
+                                            parent_id=company.system_folder_file_id,
                                             article_portal_division_id=article_portal_division.id).save().id
 
         if self.image_file_id:
@@ -307,8 +305,7 @@ class ArticleCompany(Base, PRBase):
 
     @staticmethod
     def update_article(company_id, article_id, **kwargs):
-        db(ArticleCompany, company_id=company_id, id=article_id).update(
-            kwargs)
+        db(ArticleCompany, company_id=company_id, id=article_id).update(kwargs)
 
 
 def set_long_striped(mapper, connection, target):
@@ -365,10 +362,10 @@ class Article(Base, PRBase):
                                                                  exists()).filter(
             Company.name.ilike("%" + searchtext + "%")).all()]
 
-    # @staticmethod
-    # def save_edited_version(user_id, article_company_id, **kwargs):
-    #     a = ArticleCompany.get(article_company_id)
-    #     return a.attr(kwargs)
+    @staticmethod
+    def save_edited_version(user_id, article_company_id, **kwargs):
+        a = ArticleCompany.get(article_company_id)
+        return a.attr(kwargs)
 
     @staticmethod
     def get_articles_for_user(user_id):

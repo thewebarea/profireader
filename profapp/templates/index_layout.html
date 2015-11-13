@@ -19,7 +19,7 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
     #}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.css">
     <link rel="stylesheet" href="/static/css/profireader.css">
     <link rel="stylesheet" href="/static/css/oles.css">
 {%- endblock styles %}
@@ -75,7 +75,7 @@
 {%- endblock head %}
 
 
-{% block body_attribs %} ng-app="Profireader" ng-model-options="{{ "{" }}updateOn: 'default change blur', debounce: {{ "{" }} 'default': 250, 'change': 250, 'blur': 0 {{ "}" }} {{ "}" }}" {% endblock body_attribs %}
+{% block body_attribs %} ng-app="Profireader" ng-model-options="{{ "{" }}updateOn: 'default change blur', debounce: {{ "{" }} 'default': 10, 'change': 250, 'blur': 0 {{ "}" }} {{ "}" }}" {% endblock body_attribs %}
 
 {% block navbar %}
     {% include 'partials/base_profireader.html' %}

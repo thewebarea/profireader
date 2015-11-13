@@ -16,7 +16,6 @@ from sqlalchemy import desc
 from .google import GoogleAuthorize,GoogleToken
 import sys
 
-# TODO: (AA to AA): change article_portal_id to article_portal_division_id in table
 class File(Base, PRBase):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -49,7 +48,7 @@ class File(Base, PRBase):
     owner = relationship('User',
                          backref=backref('files', lazy='dynamic'),
                          foreign_keys='File.author_user_id',
-                         cascade='save-update, delete')
+                         cascade='save-update,delete')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
@@ -368,18 +367,16 @@ class File(Base, PRBase):
                 if f.mime == 'directory':
                     File.delfile(f)
                 elif f.mime == 'video/*':
-                    youtube_id = f.youtube_id
                     File.delfile(File.get(f.id))
-                    YoutubeVideo.delfile(YoutubeVideo.get(youtube_id))
+                    YoutubeVideo.delfile(YoutubeVideo.get(f.youtube_id))
                 else:
-                    File.delfile(FileContent.get(f.id))
-            b = File.delfile(file)
+                    FileContent.delfile(FileContent.get(f.id))
+            File.delfile(file)
         elif file.mime == 'video/*':
-            youtube_id = file.youtube_id
             File.delfile(File.get(file.id))
-            YoutubeVideo.delfile(YoutubeVideo.get(youtube_id))
+            YoutubeVideo.delfile(YoutubeVideo.get(file.youtube_id))
         else:
-            b = File.delfile(FileContent.get(file_id))
+            FileContent.delfile(FileContent.get(file_id))
         resp = (False if File.get(file_id) else "Success")
         return resp
 
@@ -427,7 +424,7 @@ class File(Base, PRBase):
                 dir.save()
                 new_list.append(dir)
                 f = File.save_files(files, dir.id, attr)
-        return old_list,new_list
+        return old_list, new_list
 
     @staticmethod
     def update_files(files,attr):
@@ -513,7 +510,7 @@ class File(Base, PRBase):
         attr['root_folder_id'] = root
         self.updates(attr)
         if self.mime == 'directory':
-            b = File.update_all(self.id,attr)
+            b = File.update_all(self.id, attr)
         return self.id
 
 

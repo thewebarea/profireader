@@ -1,9 +1,9 @@
 from flask import Flask, session, g, request, redirect, current_app
 from authomatic.providers import oauth2
 from authomatic import Authomatic
-from profapp.controllers.blueprints import register as register_blueprints
-from profapp.controllers.blueprints import register_front as register_blueprints_front
-from profapp.controllers.blueprints import register_file as register_blueprints_file
+from profapp.controllers.blueprints_register import register as register_blueprints
+from profapp.controllers.blueprints_register import register_front as register_blueprints_front
+from profapp.controllers.blueprints_register import register_file as register_blueprints_file
 
 from flask import url_for
 from profapp.controllers.errors import csrf
@@ -28,9 +28,9 @@ from profapp.controllers.errors import BadDataProvided
 
 def req(name, allowed=None, default=None, exception=True):
     ret = request.args.get(name)
-    if allowed and ret in allowed:
+    if allowed and (ret in allowed):
         return ret
-    elif default is None:
+    elif default is not None:
         return default
     elif exception:
         raise BadDataProvided

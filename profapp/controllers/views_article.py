@@ -1,10 +1,10 @@
 from flask import render_template, redirect, url_for, request, g, make_response
 from profapp.forms.article import ArticleForm
-from profapp.models.articles import Article, ArticleCompany
+from profapp.models.articles import Article, ArticleCompany, ArticlePortalDivision
 from profapp.models.users import User
 # from profapp.models.company import Company
 # from db_init import db_session
-from .blueprints import article_bp
+from .blueprints_declaration import article_bp
 from .request_wrapers import ok, object_to_dict
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 # import os
@@ -12,8 +12,10 @@ from .pagination import pagination
 from config import Config
 from .views_file import crop_image, update_croped_image
 from ..models.files import ImageCroped, File
+from ..models.pr_base import PRBase
 from utils.db_utils import db
 from sqlalchemy.orm.exc import NoResultFound
+
 
 @article_bp.route('/list/', methods=['GET'])
 def show_mine():
@@ -38,7 +40,7 @@ def load_mine(json):
 
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
-                                               items_per_page=5)
+                                               items_per_page=2)
 
     all, companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
     statuses = {status: status for status in ARTICLE_STATUS_IN_COMPANY.all}
@@ -49,7 +51,7 @@ def load_mine(json):
                          for a in articles],
             'companies': companies,
             'search_text': json.get('search_text') or '',
-            'original_search_text': json.get('search_text') or '',
+            'original_search_text': str(json.get('search_text')) or '',
             'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
@@ -67,19 +69,22 @@ def show_form_create():
 @article_bp.route('/create/', methods=['POST'])
 @ok
 def load_form_create(json):
-    return {'id': '', 'title': '', 'short': '', 'long': '', 'coordinates': '',
-            'ratio': Config.IMAGE_EDITOR_RATIO}
+    action = g.req('action', allowed=['load', 'validate', 'save'])
+    if action == 'load':
+        return {'id': '', 'title': '', 'short': '', 'long': '', 'coordinates': '',
+                'ratio': Config.IMAGE_EDITOR_RATIO}
+    if action == 'validate':
+        del json['coordinates'], json['ratio']
+        return Article.save_new_article(g.user_dict['id'], **json).validate('insert')
+    else:
+        image_id = json.get('image_file_id')
+        if image_id:
+            json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
+        del json['coordinates'], json['ratio']
+
+        return Article.save_new_article(g.user_dict['id'], **json).get_client_side_dict()
 
 
-@article_bp.route('/confirm_create/', methods=['POST'])
-@ok
-def confirm_create(json):
-    image_id = json.get('image_file_id')
-    if image_id:
-        json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
-    del json['coordinates'], json['ratio']
-
-    return Article.save_new_article(g.user_dict['id'], **json).save().get_client_side_dict()
 
 
 @article_bp.route('/update/<string:article_company_id>/', methods=['GET'])
@@ -91,6 +96,7 @@ def show_form_update(article_company_id):
 @article_bp.route('/update/<string:article_company_id>/', methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
+
     action = g.req('action', allowed=['load', 'save', 'validate'])
     article = ArticleCompany.get(article_company_id)
     if action == 'load':
@@ -99,40 +105,38 @@ def load_form_update(json, article_company_id):
         image_id = article.get('image_file_id')
         if image_id:
             try:
-                article['image_file_id'], coordinates = ImageCroped.\
-                get_coordinates_and_original_img(image_id)
+                article['image_file_id'], coordinates = ImageCroped. \
+                    get_coordinates_and_original_img(image_id)
                 article.update(coordinates)
             except NoResultFound:
                 pass
         return article
     else:
-        article.attr({key: val for key, val in json.items() if key in ['keywords', 'title', 'short', 'long']})
+        article.attr({key: val for key, val in json.items() if key in
+                      ['keywords', 'title', 'short', 'long']})
         if action == 'save':
+            image_id = json.get('image_file_id')
+            coordinates = json.get('coordinates')
+            if image_id:
+                if db(ImageCroped, croped_image_id=image_id).count():
+                    update_croped_image(image_id, coordinates)
+                else:
+                    article.image_file_id = crop_image(image_id, coordinates)
 
-            # article.update(ratio=Config.IMAGE_EDITOR_RATIO)
-            # image_id = article.get('image_file_id')
-            # if image_id:
-            #     article['image_file_id'], coordinates = ImageCroped.get_coordinates_and_original_img(image_id)
-            #     article.update(coordinates)
-            return article.save().get_client_side_dict()
+            article = article.get_client_side_dict()
+            # print(article['image_file_id'])
+            return article
         else:
+            return {'errors': {}, 'warnings': {}, 'notices': {}}
             article.detach()
             return article.validate('update')
+
 
 @article_bp.route('/save/<string:article_company_id>/', methods=['POST'])
 @ok
 def save(json, article_company_id):
-    json.pop('company')
-    image_id = json.get('image_file_id')
-    if image_id:
-        if db(ImageCroped, original_image_id=image_id).count():
-            update_croped_image(image_id, json.get('coordinates'))
-            del json['image_file_id']
-        else:
-            json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
-    del json['coordinates'], json['ratio']
-    ret = Article.save_edited_version(g.user.id, article_company_id, **json).save().article
-    return ret.get_client_side_dict()
+    pass
+    # return ret.get_client_side_dict()
 
 
 @article_bp.route('/details/<string:article_id>/', methods=['GET'])

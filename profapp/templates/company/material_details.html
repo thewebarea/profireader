@@ -80,6 +80,7 @@ module.filter('propsFilter', function() {
 });
 
 module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, $http, $ok) {
+
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
     $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
@@ -88,6 +89,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
         if ($scope.data && (newValue !== oldValue)){
             res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
 		    res.success(function(data, status, headers, config) {
+                $scope.tagsObject.tags = []; // TODO (AA to AA): it works but...
                 $scope.availableTags = data.data.availableTags;
 		    });
 		    res.error(function(data, status, headers, config) {
@@ -126,20 +128,62 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
 
 }]);
         module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
+{#            $scope.$af = $af;#}
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
             $scope.selectedUser = null;
             $scope.selectedUser_sending = false;
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
-            $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
-            $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
+            $scope.url_update_status = {{ raw_url_for('company.update_material_status')|safe }};
+            $scope.url_submit_to_portal = '{{ url_for('portal.submit_to_portal')|safe }}';
+{#            $scope.url_submit_to_portal = {{ raw_url_for('portal.submit_to_portal')|safe }};#}
             $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
             $scope.url_send_article_user = {{ raw_url_for('company.send_article_to_user')|safe }};
             $scope.data_resp = '';
             $scope.data_resp_user = '';
             $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
-            $scope.statuses = '';
+
+            $scope.saveData =function(data, tags){
+                var passData = {
+                    article: data.article,
+                    tags: tags,
+                    selected_division: data.selected_division
+                };
+                $ok($scope.url_submit_to_portal,
+                        passData,
+                        function (resp) {
+                            $scope.data_resp_portal = resp.portal;
+                        }
+                );
+            };
+
+{#            $ok($scope.url_search_for_company(), {article_id: $scope.data.id, search: val}, function (resp) {#}
+{#                    return resp.length ? resp : [{id: false, name: 'No results'}];#}
+{#                });#}
+
+
+{#            (data, tagsObject.tags)#}
+
+            $scope.changeStatus = function(new_status) {
+                url_send_request = $scope.url_update_status({'company_id': $scope.data.article.company_id, 'article_id': $scope.data.article.id});
+                $ok(url_send_request, {new_status: new_status}, function (resp) {
+                    $scope.data.article.status = resp.article_new_status;
+                    $scope.data.allowed_statuses = resp.allowed_statuses;
+                    $scope.change_status_to = $scope.data.allowed_statuses[0];
+                });
+            };
+
+            $scope.loadArticle = function () {
+                $ok('', {}, function (resp) {
+                    $scope.data = resp;
+                    $scope.change_status_to = $scope.data.allowed_statuses[0];
+                });
+            };
+
+            $scope.afterLoadArticle = function (resp, default_after_load) {
+                default_after_load(resp);
+            };
 
             $scope.tagsObject = {};
             $scope.tagsObject.tags = [];
@@ -149,21 +193,21 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 $.each(portals, function (k, v) {
                     divisions[k] = v;
                 });
-                {#    var count = Object.keys(portals).length; #}
                 return divisions;
             };
-            $scope.change_status = function (status) {
-                $scope.statuses = status;
-            };
+
             $scope.resp_data = function (resp) {
                 $scope.data_resp = resp;
             };
+
             $scope.resp_data_user = function (resp) {
                 $scope.data_resp_user = resp;
             };
+
             $scope.resp_data_portal = function (resp) {
                 $scope.data_resp_portal = resp;
             };
+
             $scope.myRights = function () {
                 for (var i = 0; i < arguments.length; i++) {
                     if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
@@ -172,14 +216,11 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 }
                 return true;
             };
-            $scope.getData = function () {
-                $scope.data.tags = $scope.tagsObject.tags;
-                return $scope.data;
-            };
 
             $scope.cancel = function () {
                 return false;
             };
+
             $scope.afterSave = function (resp) {
                 window.location.href =
                         $scope.url_article_details({
@@ -188,7 +229,8 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                         })
             };
 
-        $scope.onSelect = function ($item, $model, $label) {
+
+            $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {
                     $scope.selectedUser_name = '';
                     $scope.selectedUser = null;
@@ -197,6 +239,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     $scope.selectedUser = $item;
                 }
             };
+
             $scope.searchForUserToJoin = function (val) {
                 return $ok($scope.url_search_for_user({company_id: $scope.data.company.id}), {
                     company_id: $scope.data.company_id,
@@ -205,6 +248,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     return resp.length ? resp : [{id: false, profireader_name: 'No results'}];
                 });
             };
+
             $scope.joinToUser = function () {
                 $ok($scope.url_send_article_user(), {
                 send_to_user:{'id':$scope.selectedUser.id, 'profireader_name': $scope.selectedUser.profireader_name}}, function (resp) {
@@ -218,7 +262,9 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 }).finally(function () {
                     $scope.selectedUser_sending = false;
                 });
-            };      }]);
+            };
+
+        }]);
         </script>
     {% raw %}
     <script type="text/ng-template" id="customTemplate.html">
@@ -232,7 +278,16 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             color: #f00;
         }
     </style>
-    <div ng-init="loadData()" ng-controller="materials_articles">
+    <div ng-init="loadArticle()" ng-controller="materials_articles">
+
+<!--        <div af
+             af-before-load="beforeLoadArticle"
+             af-before-save="getData"
+             af-before-validate="getData"
+             af-after-load="afterLoadArticle"
+             af-url-validate="{{ url_submit_to_portal({action: 'validate'}) }}"
+             af-url-save="{{ url_submit_to_portal({action: 'save'}) }}"
+             ang-model="data"> -->
 
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
@@ -244,30 +299,20 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             <br>
 
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                Current status is <span ng-if="!data_resp.article.status">{{ original_data.article.status }}</span>{{
-                data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(original_data.article.status) }}</span>
-                <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
+                <hr/>
+                Current article status: `<span class="..." ng-if="!data_resp.article.status">{{ data.article.status }}</span>`<br/>
+                Change material status to
+                <select ng-model="change_status_to">
+                    <option value="{{ changeto }}" ng-repeat="changeto in data.allowed_statuses">{{ changeto }}</option>
+                </select>
+                <input ng-click="changeStatus(change_status_to)" ng-disabled="!data.allowed_statuses" type="submit" ng-if="data.allowed_statuses" value="Submit status">
 
-                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData" ng-action="url_update_status">
-                    <div ng-if="!data_resp.status">
-                        Change material status to
-                        <select ng-init="data.article.status = data.status[0]"
-                                ng-model="data.article.status"
-                                ng-options="stat for stat in data.status">
-                            <option value="" selected hidden/>
-                        </select>
-                        <input type="submit" ng-if="data.status" value="Submit status">
-                        <input type="submit" ng-if="!data.status" value="Submit status" disabled>
-                    </div>
-                    <div ng-if="data_resp.status">
-                        Status was successfully changed
-                    </div>
 
-                </form>
                 <br/>
             </div>
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                                    <h3> {{ _('Search for user') }} </h3>
+                <hr/>
+                <h3> {{ _('Search for user') }} </h3>
         <input disabled typeahead-on-select="onSelect($item, $model, $label)"
                                                typeahead-template-url="customTemplate.html"
                                                typeahead-loading="loadingUsers"
@@ -284,7 +329,22 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     data_resp_user_search.user.profireader_name }}
                 </div>
                 <div ng-if="!data_resp_user.user">
-                    <form ng-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
+                    <hr/>
+                    <div>
+                        Introduce user to work with this material
+                        <select disabled
+                                ng-init="data.send_to_user = data.company.employees[0]"
+                                ng-model="data.send_to_user"
+                                ng-options="user.profireader_name for user in data.company.employees">
+                            <option value="" selected hidden/>
+                        </select>
+                        <input disabled type="submit" value="Send article">
+                    </div>
+
+
+<!--                    <form ng-ok
+                          ng-onsuccess="resp_data_user"
+                          ng-onsubmit="getData"
                           ng-action="url_send_article_to_user">
                         Introduce user to work with this material
                         <select disabled ng-init="data.send_to_user = data.company.employees[0]"
@@ -293,8 +353,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                             <option value="" selected hidden/>
                         </select>
                         <input disabled type="submit" value="Send article">
-                    </form>
-
+                    </form>  -->
 
                 </div>
                 <div ng-if="data_resp_user.user">
@@ -305,9 +364,11 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             </div>
             <div ng-if="myRights('publish')">
                 <div ng-if="!data_resp_portal.portal">
-                    <form ng-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal">
+                    <hr>
+                    <!-- <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal"> -->
+                    <form ng-action="url_submit_to_portal">
                     Publish this material to portal
-                    <span ng-if="statuses=='accepted'">
+
                     <select ng-model="data.selected_division">
                         <option disabled>---Below materials sent---</option>
                         <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
@@ -316,10 +377,10 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                             </option>
                         </optgroup>
                         <optgroup ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
-                        <option ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
-                            {{ division.name }}
-                        </option>
-                    </optgroup>
+                            <option ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
+                                {{ division.name }}
+                            </option>
+                        </optgroup>
                     </select>
                     <br/>
                     <hr>
@@ -328,7 +389,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                         <ui-select multiple ng-model="tagsObject.tags" theme="select2" ng-disabled="disabled" style="width: 300px;">
                             <ui-select-match placeholder="Select tags...">{{$item}}</ui-select-match>
                             <ui-select-choices repeat="tag in availableTags | filter:$select.search">
-                                {{tag}}
+                                {{ tag }}
                             </ui-select-choices>
                         </ui-select>
                         <p>Selected: {{tagsObject.tags}}</p>
@@ -336,24 +397,19 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     </div>
                     <br/>
                     <span>
-                        <input type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
+                        <!--<input ng-click="$af.save(data)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish"> -->
+                        <input ng-click="saveData(data, tagsObject.tags)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
                     </span>
-                    </span>
-                    <span ng-if="statuses!='accepted'">
-                <select disabled>
-                    <optgroup label="Change article status to accepted first">
-                        <option>Change article status to accepted first</option>
-                    </optgroup>
-                </select>
-                <input type="submit" value="Publish" disabled>
-            </span>
+                    
+
                     </form>
                 </div>
-                <span ng-if="data_resp_portal.portal">
-                    Article {{ data.article.title }} successfully was published at portal {{ data_resp_portal.portal }}
+                <span ng-if="data_resp_portal">
+                    Article "{{ data.article.title }}" successfully was published at portal "{{ data_resp_portal }}"
                 </span>
             </div>
         </div>
+    </div>
     </div>
 
     {% endraw %}

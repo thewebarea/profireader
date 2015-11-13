@@ -2,7 +2,7 @@ import os
 from flask import render_template, g, make_response
 from flask.ext.login import current_user
 from profapp.models.files import File, FileContent, YoutubeApi
-from .blueprints import filemanager_bp
+from .blueprints_declaration import filemanager_bp
 from .request_wrapers import ok
 from functools import wraps
 from time import sleep
