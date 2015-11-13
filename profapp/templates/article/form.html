@@ -12,21 +12,7 @@
             $scope.save_article = '{{ url_for('article.load_form_create')|safe }}';
         {% endif %}
 
-
-        $scope.afterSave = function (resp) {
-            window.location.href = $scope.details_article({article_id: resp['id']})
-        };
-
-        {#        $scope.getData = function (model, defaultfunction) {#}
-        {##}
-        {#            return true;#}
-
         $scope.data = {};
-
-        $scope.init_cropper = function () {
-            {#        debugger;#}
-            {#        init_cropper();#}
-        };
 
 
         $scope.afterSave = function (resp) {
@@ -34,7 +20,6 @@
         };
 
         $scope.getData = function (model, deff) {
-
             var x = document.getElementById("dataX");
             var y = document.getElementById("dataY");
             var width = document.getElementById("dataWidth");
@@ -50,21 +35,14 @@
 
 
         $scope.tinymceImageOptions['height'] = '450px';
-        $scope.change_picture_in_croper = function (image_file_url) {
-
-            var $image = $('.img-container > img');
-
-            $image.cropper('replace', image_file_url);
-
-        };
-
-
         $scope.articleImageSelected = function (item) {
             console.log(item);
             $scope.data.image_file_id = item.id;
             $scope.setImageUrl($scope.data);
             closeFileManager();
-            {#            $('#replace-toggle').click();#}
+            var $image = $('.img-container > img');
+            $image.cropper('replace', $scope.image_file_url);
+            $scope.change_picture_in_croper();
 
         };
         $scope.default_image = true;
@@ -75,19 +53,25 @@
         };
 
 
-        $scope.change_picture_in_croper = function (image_file_url) {
-            var $image = $('.img-container > img');
-            $image.cropper('replace', image_file_url);
+        $scope.change_picture_in_croper = function (coordinates) {
+            setTimeout(function () {
+                    init_cropper($scope.cropAreaChanged, $scope.data.ratio , coordinates);
+                },5000);
+
+        };
+
+        $scope.cropAreaChanged = function(new_coordinates) {
+            $scope.coordinates = new_coordinates;
         };
 
         $scope.articleAfterLoad = function (resp, deff) {
             deff(resp);
 
             setTimeout(function () {
-                init_cropper();
                 $scope.setImageUrl($scope.data);
+                $scope.change_picture_in_croper($scope.data.coordinates);
             }, 0);
-            {#        init_cropper();#}
+{#                    init_cropper();#}
             return true;
         };
 
@@ -97,7 +81,7 @@
             if (image != "{{ url_for('static', filename='images/choose_image.jpg') }}") {
                 $scope.default_image = false;
             }
-            $scope.change_picture_in_croper(image);
+{#            $scope.change_picture_in_croper(image);#}
             return model;
         };
 

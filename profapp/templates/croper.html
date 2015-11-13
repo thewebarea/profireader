@@ -14,9 +14,26 @@
                 <!-- <h3 class="page-header">Preview:</h3> -->
 
 
-                <div>
+                <div class="docs-data">
+                    <div class="input-group">
+                        <input class="form-control" id="dataX" name="x" type="hidden" placeholder="x">
 
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataY" name="y" type="hidden" placeholder="y">
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataWidth" type="hidden" name="width" placeholder="width">
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataHeight" type="hidden" name="height" placeholder="height">
+                    </div>
+                    <div class="input-group">
+                        <input class="form-control" id="dataRotate" type="hidden" name="rotate" placeholder="rotate">
+                    </div>
                 </div>
+            </div>
+
                 <!-- <h3 class="page-header">Data:</h3> -->
                 <div class="docs-data">
                     <div class="input-group">
@@ -76,6 +93,7 @@
 
                 </div>
 
+
                 <div class="btn-group" ng-if="!default_image">
                     <button class="btn btn-primary" data-method="zoom" data-option="0.1" type="button" title="Zoom In">
             <span class="docs-tooltip" data-toggle="tooltip" title="$().cropper(&quot;zoom&quot;, 0.1)">
@@ -106,13 +124,6 @@
                     </button>
 
                 </div>
-                <input type="hidden" id="dataRatio" value="{{ data.ratio }}">
-                <input type="hidden" id="coordinate_x" value="{{ data.coordinates.x }}">
-                <input type="hidden" id="coordinate_y" value="{{ data.coordinates.y }}">
-                <input type="hidden" id="coordinate_width" value="{{ data.coordinates.width }}">
-                <input type="hidden" id="coordinate_height" value="{{ data.coordinates.height }}">
-                <input type="hidden" id="coordinate_rotate" value="{{ data.coordinates.rotate }}">
-                <input type="hidden" id="default_image" value="{{ default_image }}">
                 <!-- Show the cropped image in modal -->
                 <div class="modal fade docs-cropped" id="getCroppedCanvasModal" aria-hidden="true"
                      aria-labelledby="getCroppedCanvasTitle" role="dialog" tabindex="-1">
