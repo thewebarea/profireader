@@ -5,7 +5,9 @@
     }
 
     var AppendParameter = function (url, var_val) {
-        return url + (url.match(/\?/) ? '&' : '?') + var_val;
+        var hashpart =  url.match(/^([^#]*)(#(.*))?$/)
+        var ret = hashpart[1] + (hashpart[1].match(/\?/) ? '&' : '?') + var_val + (hashpart[2]?hashpart[2]:'')
+        return ret
     };
 
     var cloneIfExistsAttributes = function (cloneto, defaultparams, params) {
