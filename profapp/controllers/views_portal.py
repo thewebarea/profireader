@@ -55,7 +55,7 @@ def create_save(json, create_or_update, company_id):
         ret = {'company_id': company_id,
                'company_logo': company_logo,
                'portal_company_members': member_companies,
-               'portal': {'company_id': company_id, 'name': '', 'host': '',
+               'portal': {'company_owner_id': company_id, 'name': '', 'host': '',
                           'logo_file_id': company.logo_file_id,
                           'portal_layout_id': layouts[0]['id'],
                           'divisions': [
@@ -71,18 +71,29 @@ def create_save(json, create_or_update, company_id):
             # ret['portal'] =
         return ret
     else:
-        portal = json['portal']
+        portal_json = {key: val for key, val in json['portal'].items() if key in
+                       ['name', 'company_owner_id', 'logo_file_id', 'portal_layout_id', 'host']}
+
         if create_or_update == 'update':
             pass
-        else:
-            portal = Portal(**json['portal'])
-        portal.divisions = [PortalDivision(portal_id=portal.id, **division) for division in json['divisions']]
+        elif create_or_update == 'create':
+            portal = Portal(**portal_json)
+            divisions = []
+            for division_json in json['portal']['divisions']:
+                custom_settings_data = {}
+                if division_json['portal_division_type_id'] == 'company_subportal':
+                    custom_settings_data['CompanyPortal'] = CompanyPortal(portal=portal,
+                                                                          company=Company.get(company_id))
 
+                divisions.append(
+                    PortalDivision(portal, PortalDivisionType.get(division_json['portal_division_type_id']),
+                                   name=division_json['name'], settings_data=custom_settings_data))
+            # self, portal=portal, portal_division_type=portal_division_type, name='', settings={}
+            portal.divisions = divisions
         if action == 'save':
             Portal.setup_created_portal(json['logo_file_id']).save()
-
-
-
+        else:
+            return portal.validate(create_or_update)
 
 
 # member_company = Portal.companies
@@ -538,16 +549,16 @@ def update_article_portal(json, article_id):
 # @ok
 # def submit_to_portal(json, action):
 #     json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
-    #
-    # article = ArticleCompany.get(json['article']['id'])
-    # if action == 'validate':
-    #     return article.validate('update')
-    # if action == 'save':
-    #     portal_division_id = json['selected_division']
-    #     article_portal = article.clone_for_portal(portal_division_id, json['tags'])
-    #     article.save()
-    #     portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
-    #     return {'portal': portal.name}
+#
+# article = ArticleCompany.get(json['article']['id'])
+# if action == 'validate':
+#     return article.validate('update')
+# if action == 'save':
+#     portal_division_id = json['selected_division']
+#     article_portal = article.clone_for_portal(portal_division_id, json['tags'])
+#     article.save()
+#     portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
+#     return {'portal': portal.name}
 
 
 @portal_bp.route('/submit_to_portal/', methods=['POST'])
