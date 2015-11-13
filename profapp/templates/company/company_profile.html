@@ -14,8 +14,6 @@
     {% endblock company_base %}
 
     <h2><img src="{{ company_logo }}" height="100" width="100"> {{ company.name }}
-
-
         {% if 'manage_rights_company' in user_rights %}
             <a href="{{ url_for('company.update', company_id=company.id) }}">Edit company</a>
         {% endif %}
