@@ -12,6 +12,7 @@ from .tag import TagPortalDivision
 import itertools
 from sqlalchemy import orm
 import itertools
+from .files import File
 
 
 class Portal(Base, PRBase):
@@ -129,7 +130,7 @@ class Portal(Base, PRBase):
         self.portal_layout_id = portal_layout_id if portal_layout_id \
             else db(PortalLayout).first().id
 
-    def create_portal(self):
+    def setup_created_portal(self, logo_file_id = None):
         """This method create portal in db. Before define this method you have to create
         instance of class with parameters: name, host, portal_layout_id, company_owner_id,
         divisions. Return portal)"""
@@ -137,10 +138,15 @@ class Portal(Base, PRBase):
         # except errors.PortalAlreadyExist as e:
         #     details = e.args[0]
         #     print(details['message'])
-        self.own_company = db(Company, id=self.company_owner_id).one()
+        self.own_company = Company.get(self.company_owner_id)
         company_assoc = CompanyPortal(company_portal_plan_id=self.portal_plan_id)
         company_assoc.portal = self
         company_assoc.company = self.own_company
+        if logo_file_id:
+            self.logo_file_id = File.get(logo_file_id).copy_file(
+                company_id=self.company_owner_id,
+                parent_folder_id=self.own_company.system_folder_file_id,
+                article_portal_division_id=None).save().id
         return self
 
     def validate(self):
