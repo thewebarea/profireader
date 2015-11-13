@@ -9,6 +9,7 @@
                 description: model && model.description || '',
                 add_all: model && model.add_all || '',
                 path: path || [],
+                path_to: model && model.path_to || '',
                 type: model && model.type || 'file',
                 size: model && model.size || 0,
                 date: convertDate(model && model.date),
@@ -97,8 +98,8 @@
                 "id" : self.model.id,
                 'add_all': self.tempModel.add_all,
                 "name": self.tempModel.name.trim() === self.model.name.trim() ? 'None': self.tempModel.name.trim(),
-                "author_name":self.tempModel.author_name.trim(),
-                "description": self.tempModel.description,
+                "author_name": self.tempModel.author_name === ''? '':self.tempModel.author_name,
+                "description": self.tempModel.description === ''? '':self.tempModel.description,
                 "mode": "properties",
                 "path": self.model.fullPath(),
                 "newPath": self.tempModel.fullPath()
@@ -338,6 +339,11 @@
             return $http.post(fileManagerConfig.can_paste, data).success(function(data) {
                 self.defineCallback(data, success, error);
             })
+        };
+        Item.prototype.title = function(){
+            var size = this.isFolder()? '':'('+this.model.sizeKb()+')kb';
+            var p = this.model.path_to;
+            return 'Name: ' + this.model.name + size + '\n'+ 'Full path: '+p
         };
 
         Item.prototype.isFolder = function() {

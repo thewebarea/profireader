@@ -3,12 +3,19 @@ import re
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from utils.db_utils import db
 from sqlalchemy.orm import relationship, backref
-from flask import url_for, g
+from flask import g
 from .pr_base import PRBase, Base
-from flask import make_response
+from ..controllers.errors import VideoAlreadyExistInPlaylist
+import json
+from config import Config
+from urllib import request as req
+from flask import session
+from urllib.error import HTTPError as response_code
+from urllib import parse
+from sqlalchemy import desc
+from .google import GoogleAuthorize,GoogleToken
+import sys
 
-
-# TODO: (AA to AA): change article_portal_id to article_portal_division_id in table
 class File(Base, PRBase):
     __tablename__ = 'file'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
@@ -35,18 +42,18 @@ class File(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     ac_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     youtube_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('youtube_video.id'))
-    file_content = relationship('FileContent', uselist=False)
 
     UniqueConstraint('name', 'parent_id', name='unique_name_in_folder')
 
     owner = relationship('User',
                          backref=backref('files', lazy='dynamic'),
-                         foreign_keys='File.author_user_id')
+                         foreign_keys='File.author_user_id',
+                         cascade='save-update,delete')
 
     def __init__(self, parent_id=None, name=None, mime='text/plain', size=0,
                  user_id=None, cr_tm=None, md_tm=None, ac_tm=None,
                  root_folder_id=None, youtube_id=None,
-                 company_id=None, author_user_id=None, image_croped=None, file_content=None):
+                 company_id=None, author_user_id=None, image_croped=None):
         super(File, self).__init__()
         self.parent_id = parent_id
         self.name = name
@@ -61,7 +68,6 @@ class File(Base, PRBase):
         self.company_id = company_id
         self.youtube_id = youtube_id
         self.image_croped = image_croped
-        self.file_content = file_content
 
     def __repr__(self):
         return "<File(name='%s', mime=%s', id='%s', parent_id='%s')>" % (
@@ -113,57 +119,120 @@ class File(Base, PRBase):
         return True
 
     @staticmethod
-    def ancestors(folder_id=None):
+    def ancestors(folder_id=None, path=False):
         ret = []
         nextf = g.db.query(File).get(folder_id)
         while nextf and len(ret) < 50:
-            ret.append(nextf.id)
-            nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
+            if path:
+                ret.append(nextf.name)
+                nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
+            else:
+                ret.append(nextf.id)
+                nextf = g.db.query(File).get(nextf.parent_id) if nextf.parent_id else None
         return ret[::-1]
+
+
+    @staticmethod
+    def sort_search(name, files):
+        rel_sort = []
+        sort = []
+        for file in files:
+            if re.match(r'^'+name+'.*', file.name.lower()):
+                rel_sort.append(file)
+            else:
+                sort.append(file)
+        return rel_sort + sort
+
+    @staticmethod
+    def search(name, folder_id, actions, file_manager_called_for=''):
+        if name == None:
+            return None
+        actions['paste'] = lambda file: None
+        name = name.lower()
+        all_files = File.get_all_in_dir_rev(folder_id)[::-1]
+        sort_dirs = []; sort_files = []
+        for file in all_files:
+            if re.match(r'.*'+name+'.*', file.name.lower()):
+                sort_dirs.append(file) if file.mime == 'directory' else sort_files.append(file)
+        sort_d = File.sort_search(name, sort_dirs)
+        sort_f = File.sort_search(name, sort_files)
+        s =  sort_d+sort_f
+        ret = list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
+                                'type': File.type(file),
+                                'date': str(file.md_tm).split('.')[0],
+                    'url': file.url(),
+                    'path_to': File.path(file),
+                    'author_name': file.copyright_author_name,
+                    'description': file.description,
+                    'actions': {action: actions[action](file) for action in actions}
+                    }
+                                        for file in s)
+        return ret
 
     # GETTERS
 
     @staticmethod
-    def list(parent_id=None, file_manager_called_for=''):
+    def list(parent_id=None, file_manager_called_for='', name=None):
+        show = lambda file: True
 
         default_actions = {}
+        files = [file for file in db(File, parent_id = parent_id) if show(file)]
         # default_actions['choose'] = lambda file: None
         default_actions['download'] = lambda file: None if ((file.mime == 'directory') or (file.mime == 'root')) else True
         actions = {act: default_actions[act] for act in default_actions}
-        show = lambda file: True
+
         actions['remove'] = lambda file: None if file.mime == "root" else True
         actions['copy'] = lambda file: None if file.mime == "root" else True
         actions['paste'] = lambda file: None if file == None else True
         actions['cut'] = lambda file: None if file.mime == "root" else True
         actions['properties'] = lambda file: None if file.mime == "root" else True
 
-        parent = File.get(parent_id)
-
         if file_manager_called_for == 'file_browse_image':
             actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
 
-
+        search_files = File.search(name, parent_id, actions, file_manager_called_for)
+        parent = File.get(parent_id)
+        if search_files != None:
+            ret = search_files
+        else:
             # 'cropable': True if File.is_cropable(file) else False,
-        ret = list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
-                                'type': 'dir' if ((file.mime == 'directory') or (file.mime == 'root')) else 'file',
-                                'date': str(file.md_tm).split('.')[0],
-                    'url': file.url(),
-                    'author_name': file.copyright_author_name,
-                    'description': file.description,
-                    'actions': {action: actions[action](file) for action in actions},
-                    }
-                                        for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
-        ret.append({'name': parent.name, 'id': parent.id, 'parent_id': parent.parent_id,
-                                'type': 'parent',
-                                'date': str(parent.md_tm).split('.')[0],
-                    'url': parent.url(),
-                    'author_name': parent.copyright_author_name,
-                    'description': parent.description,
-                    'actions': {action: actions[action](parent) for action in actions},
-                    })
+            ret = list({'size': file.size, 'name': file.name, 'id': file.id, 'parent_id': file.parent_id,
+                                    'type': File.type(file),
+                                    'date': str(file.md_tm).split('.')[0],
+                        'url': file.url(),
+                        'path_to': File.path(file),
+                        'author_name': file.copyright_author_name,
+                        'description': file.description,
+                        'actions': {action: actions[action](file) for action in actions},
+                        }
+                                            for file in db(File, parent_id = parent_id) if show(file))# we need all records from the table "file"
+            ret.append({ 'id': parent.id, 'parent_id': parent.parent_id,
+                                    'type': 'parent',
+                                    'date': str(parent.md_tm).split('.')[0],
+                        'url': parent.url(),
+                        'author_name': parent.copyright_author_name,
+                        'description': parent.description,
+                        'actions': {action: actions[action](parent) for action in actions},
+                        })
 
         return ret
 
+    def type(self):
+        if self.mime == 'root' or self.mime == 'directory':
+            return 'dir'
+        elif self.mime == 'video/*':
+            return 'file_video'
+        else:
+            return 'file'
+
+    def path(self):
+        parents = File.ancestors(self.parent_id, True)
+        del parents[0]
+        path = '/'
+        for dir in parents:
+            path += dir+'/'
+        path += self.name
+        return path
 
     def url(self):
         server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', self.id)
@@ -219,7 +288,7 @@ class File(Base, PRBase):
             name = File.if_copy(name)
             list = []
             for n in db(File,parent_id = parent_id, mime=mime):
-                if re.match(r'name'+'\(\d+\)'+'ext', n.name):
+                if re.match(r'^'+name+'\(\d+\)'+''+ext+'', n.name):
                     pos = (len(n.name) - 2) - len(ext)
                     list.append(int(n.name[pos:pos+1]))
             if list == []:
@@ -262,38 +331,17 @@ class File(Base, PRBase):
         g.db.commit()
         return self
 
-    @staticmethod
-    def search(serch_text, folder_id):
-        # files = []
-        # prop = []
-        # name = name.lower()
-        # prog = re.compile(r'.*'+name+'.*')
-        # for root in roots:
-        #     for file in db(File, root_folder_id=root):
-        #         if re.match(r'^'+name+'.*',file.name.lower()):
-        #             prop.append(file)
-        #         elif re.match(r'.*'+name+'.*',file.name.lower()):
-        #             files.append(file)
-        # prop.extend(files)
-        sub_query = File.get_all_in_dir_rev(folder_id)
-        # if search_text:
-        #     sub_query = sub_query.filter(ArticleCompany.title.ilike("%" + search_text + "%"))
-        # if kwargs.get('portal_id') or kwargs.get('status'):
-        #     sub_query = sub_query.filter(db(ArticlePortal, article_company_id=ArticleCompany.id,
-        #                                     **kwargs).exists())
-
-        return sub_query
-
-
-    def set_properties(self, add_all,**kwargs):
+    def set_properties(self, add_all, **kwargs):
         if self == None:
             return False
-        attr = {f:kwargs[f] for f in kwargs if kwargs[f] != ''}
+        attr = {f:kwargs[f] for f in kwargs}
         check = File.is_name(attr['name'], self.mime, self.parent_id) if attr['name'] != 'None' else True
         if attr['name'] == 'None':
             del attr['name']
         self.updates(attr)
         if add_all:
+            if 'name' in attr.keys():
+                del attr['name']
             files = File.get_all_in_dir_rev(self.id)
             for file in files:
                 file.updates(attr)
@@ -318,23 +366,35 @@ class File(Base, PRBase):
             for f in list:
                 if f.mime == 'directory':
                     File.delfile(f)
+                elif f.mime == 'video/*':
+                    File.delfile(File.get(f.id))
+                    YoutubeVideo.delfile(YoutubeVideo.get(f.youtube_id))
                 else:
-                    File.delfile(FileContent.get(f.id))
-            b = File.delfile(file)
+                    FileContent.delfile(FileContent.get(f.id))
+            File.delfile(file)
+        elif file.mime == 'video/*':
+            File.delfile(File.get(file.id))
+            YoutubeVideo.delfile(YoutubeVideo.get(file.youtube_id))
         else:
-            b = File.delfile(FileContent.get(file_id))
+            FileContent.delfile(FileContent.get(file_id))
         resp = (False if File.get(file_id) else "Success")
         return resp
 
     @staticmethod
     def save_files(files, new_id, attr):
         for file in files:
-            file_content = FileContent.get(file.id).detach()
-            attr['parent_id'] = new_id
-            file.detach().attr(attr)
-            file.save()
-            file_content.id = file.id
-            file.file_content = file_content
+            if file.mime == 'video/*':
+                youtube_video = YoutubeVideo.get(file.youtube_id).detach()
+                attr['parent_id'] = new_id
+                file.detach().attr(attr)
+                file.save()
+                file.youtube_video = youtube_video
+            else:
+                file_content = FileContent.get(file.id).detach()
+                attr['parent_id'] = new_id
+                file.detach().attr(attr)
+                file.save()
+                file.file_content = file_content
         return files
 
     @staticmethod
@@ -407,13 +467,12 @@ class File(Base, PRBase):
                 fil.updates(attr)
         return files_in_parent
 
-
-
     def copy_file(self, parent_id, **kwargs):
         folder = File.get(parent_id)
         if self == None or folder == None:
             return False
         id = self.id
+        youtube_id = self.youtube_id
         root = folder.root_folder_id
         if folder.root_folder_id == None:
             root = folder.id
@@ -425,13 +484,14 @@ class File(Base, PRBase):
         copy_file.save()
         if self.mime == 'directory':
             all_in_dir = File.save_all(id, attr, copy_file.id)
+        elif self.mime == 'video/*':
+            youtube_video = YoutubeVideo.get(youtube_id).detach()
+            copy_file.youtube_video = youtube_video
         else:
             file_content = FileContent.get(id).detach()
-            # file_content.id = copy_file.id
             copy_file.file_content = file_content
 
-        # return copy_file.id
-        return self
+        return copy_file.id
 
     def move_to(self, parent_id, **kwargs):
         folder = File.get(parent_id)
@@ -450,7 +510,7 @@ class File(Base, PRBase):
         attr['root_folder_id'] = root
         self.updates(attr)
         if self.mime == 'directory':
-            b = File.update_all(self.id,attr)
+            b = File.update_all(self.id, attr)
         return self.id
 
 
@@ -459,7 +519,10 @@ class FileContent(Base, PRBase):
     id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
                 primary_key=True)
     content = Column(Binary, nullable=False)
-    file = relationship('File', uselist=False)
+    file = relationship('File',
+                                uselist=False,
+                                backref=backref('file_content', uselist=False),
+                                cascade='save-update,delete')
 
     def __init__(self, file=None, content=None):
         self.file = file
@@ -528,3 +591,322 @@ class ImageCroped(Base, PRBase):
     def get_coordinates_and_original_img(croped_image_id):
         coor_img = db(ImageCroped, croped_image_id=croped_image_id).one()
         return coor_img.original_image_id, {'coordinates': coor_img.get_client_side_dict()}
+
+
+class YoutubeApi(GoogleAuthorize):
+    """ Use this class for upload videos, get videos, create channels.
+        To udpload videos body should be dict like this:
+        {
+         "title": "My video title",
+         "description": "This is a description of my video",
+         "tags": ["profireader", "video", "more keywords"],
+         "categoryId": 22
+         "status": "public"
+         }
+         Video will uploaded via chunks .You should, pass chunk info (dict) to constructor like:
+         chunk_size = 10240 (in bytes) must be multiple 256kb, chunk_number = 0-n (from zero),
+         total_size = 1000000
+         Requirements : parts = 'snippet' .Pass to this what would you like to return from
+          youtube server. (id, snippet, status, contentDetails, fileDetails, player,
+          processingDetails, recordingDetails, statistics, suggestions, topicDetails)"""
+
+    def __init__(self, parts=None, video_file=None, body_dict=None, chunk_info=None,
+                 company_id=None, root_folder_id=None, parent_folder_id=None):
+        super(YoutubeApi, self).__init__()
+        self.video_file = video_file
+        self.body_dict = body_dict
+        self.chunk_info = chunk_info
+        self.resumable = True if self.chunk_info else False
+        self.parts = parts
+        self.start_session = Config.YOUTUBE_API['UPLOAD']['SEND_URI']
+        self.company_id = company_id
+        self.root_folder_id = root_folder_id
+        self.parent_folder_id = parent_folder_id
+
+    def make_body_for_start_upload(self):
+        """ make body to create request. category_id default 22, status default 'public'. """
+
+        body = dict(snippet=dict(
+                    title=self.body_dict.get('title') or '',
+                    description=self.body_dict.get('description') or '',
+                    tags=self.body_dict.get('tags'),
+                    categoryId=self.body_dict.get('category_id') or 22),
+                    status=dict(
+                    privacyStatus=self.body_dict.get('status') or 'public'))
+        return body
+
+    def make_headers_for_start_upload(self, content_length):
+        """ This method make headers for preupload request to get url for upload binary data.
+         content_length should be body length in bytes. First step to start upload """
+        authorization = GoogleToken.get_credentials_from_db().access_token
+        session['authorization'] = authorization
+        headers = {'authorization': 'Bearer {0}'.format(authorization),
+                   'content-type': 'application/json; charset=utf-8',
+                   'content-length': content_length,
+                   'x-upload-content-length': self.chunk_info.get('total_size'),
+                   'x-upload-content-type': 'application/octet-stream'}
+
+        return headers
+
+    def make_encoded_url_for_upload(self, body_keys, **kwargs):
+        """ This method make values of header url encoded.
+         body_keys are values which you want to return from youtube server """
+        values = parse.urlencode(dict(uploadType='resumable', part=",".join(body_keys)))
+        url_encoded = self.start_session % values
+        return url_encoded
+
+    def set_youtube_upload_service_url_to_session(self):
+
+        """ This method add to flask session video_id and url from youtube server and url for upload
+         videos. If raise except - bad credentials """
+        body = self.make_body_for_start_upload()
+        url = self.make_encoded_url_for_upload(body.keys())
+        body = json.dumps(body).encode('utf8')
+        headers = self.make_headers_for_start_upload(sys.getsizeof(body))
+        r = req.Request(url=url, headers=headers,  method='POST')
+        response = req.urlopen(r, data=body)
+        session['video_id'] = response.headers.get('X-Goog-Correlation-Id')
+        session['url'] = response.headers.get('Location')
+
+    def make_headers_for_upload(self):
+        """ This method make headers for upload videos. Second  step to start upload """
+        headers = {'authorization': 'Bearer {0}'.format(session.get('access_token')),
+                   'content-type': 'application/octet-stream',
+                   'content-length': self.chunk_info.get('chunk_size'),
+                   'content-range': 'bytes 0-{0}/{1}'.format(
+                       self.chunk_info.get('chunk_size')-1, self.chunk_info.get('total_size'))}
+        return headers
+
+    def make_headers_for_resumable_upload(self):
+        """ This method make headers for resumable upload videos. Thirst step to start upload """
+        video = db(YoutubeVideo, id=session['video_id']).one()
+        last_byte = self.chunk_info.get('chunk_size') + video.size - 1
+        last_byte = self.chunk_info.get('total_size') - 1 if (self.chunk_info.get(
+            'chunk_size') + video.size - 1) > self.chunk_info.get('total_size') else last_byte
+        headers = {'authorization': 'Bearer {0}'.format(video.authorization),
+                   'content-type': 'application/octet-stream',
+                   'content-length': self.chunk_info.get('total_size')-video.size - 1,
+                   'content-range': 'bytes {0}-{1}/{2}'.format(video.size,
+                                                               last_byte,
+                                                               self.chunk_info.get('total_size'))}
+        return headers
+
+    def check_upload_status(self):
+        """ You can use this method to check upload status. If except you will get error
+        code from youtube server """
+        headers = {'authorization': 'Bearer {0}'.format(session.get('access_token')),
+                   'content-range': 'bytes */{0}'.format(self.chunk_info.get('total_size')),
+                   'content-length': 0}
+        r = req.Request(url=session['url'], headers=headers,  method='PUT')
+        try:
+            response = req.urlopen(r)
+            return response
+        except response_code as e:
+            print(e.code)
+
+    def upload(self):
+
+        """ Use this method for upload videos. If video_id you can get from session['video_id'].
+          If except error 308 - video has not yet been uploaded, call resumable_upload().
+          If chunk > 0 run resumable_upload method. If video was uploaded return 200 or 201 code:
+          success """
+        chunk_number = self.chunk_info.get('chunk_number')
+        if not chunk_number:
+            self.set_youtube_upload_service_url_to_session()
+        headers = self.make_headers_for_upload()
+        playlist = YoutubePlaylist.get_not_full_company_playlist(self.company_id)
+        try:
+            if not chunk_number:
+                r = req.Request(url=session['url'], headers=headers, method='PUT')
+                response = req.urlopen(r, data=self.video_file,)
+                if response.code == 200 or response.code == 201:
+                    youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                                           size=self.chunk_info.get('total_size'),
+                                           user_id=g.user_dict['id'],
+                                           video_id=session['video_id'],
+                                           status='uploaded',
+                                           playlist=playlist).save()
+                    session['video_id'] = youtube.id
+                    youtube.put_video_in_playlist()
+                    return 'success'
+        except response_code as e:
+            if e.code == 308 and not chunk_number:
+                youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                                       size=int(e.headers.get('Range').split('-')[-1])+1,
+                                       user_id=g.user_dict['id'],
+                                       video_id=session['video_id'],
+                                       playlist=playlist).save()
+                session['video_id'] = youtube.id
+                youtube.put_video_in_playlist()
+                return 'uploading'
+        if chunk_number:
+            return self.resumable_upload()
+
+    def resumable_upload(self):
+        """ This method is useful when you upload video via chunks. Pass video_id from db to flask
+        session. """
+        headers = self.make_headers_for_resumable_upload()
+        r = req.Request(url=session['url'], headers=headers, method='PUT')
+
+        try:
+            response = req.urlopen(r, data=self.video_file)
+            if response.code == 200 or response.code == 201:
+                video = db(YoutubeVideo, id=session['video_id'])
+                video.update({'size': self.chunk_info.get('total_size'), 'status': 'uploaded'})
+                name = File.get_unique_name(self.body_dict['title'],'video/*',self.parent_folder_id)
+                File(parent_id=self.parent_folder_id,
+                     root_folder_id=self.root_folder_id,
+                     name=name,
+                     size=self.chunk_info.get('total_size'),
+                     mime='video/*',
+                     youtube_id=session['video_id']).save()
+                return 'success'
+        except response_code as e:
+            if e.code == 308:
+                db(YoutubeVideo, id=session['video_id']).update(
+                    {'size': int(e.headers.get('Range').split('-')[-1])+1})
+            return 'uploading'
+
+
+class YoutubeVideo(Base, PRBase):
+    """ This class make models for youtube videos.
+     status video should be 'uploading' or 'uploaded' """
+    __tablename__ = 'youtube_video'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    video_id = Column(TABLE_TYPES['short_text'])
+    title = Column(TABLE_TYPES['name'], default='Title')
+    authorization = Column(TABLE_TYPES['token'])
+    size = Column(TABLE_TYPES['bigint'])
+    user_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('user.id'))
+    status = Column(TABLE_TYPES['string_30'], default='uploading')
+    playlist_id = Column(TABLE_TYPES['short_text'], ForeignKey('youtube_playlist.playlist_id'),
+                         nullable=False)
+    playlist = relationship('YoutubePlaylist', uselist=False)
+    file = relationship('File',
+                                uselist=False,
+                                backref=backref('youtube_video', uselist=False),
+                                cascade='save-update,delete')
+
+    def __init__(self, title='Title', authorization=None, size=None, user_id=None, video_id=None,
+                 status='uploading', playlist_id=None, playlist=None, file=None):
+        super(YoutubeVideo, self).__init__()
+        self.title = title
+        self.authorization = authorization
+        self.size = size
+        self.user_id = user_id
+        self.video_id = video_id
+        self.status = status
+        self.playlist_id = playlist_id
+        self.playlist = playlist
+        self.file = file
+
+    def put_video_in_playlist(self):
+
+        """ This method put video to playlist and return response """
+        body = self.make_body_to_put_video_in_playlist()
+        url = self.make_encoded_url_to_put_video_in_playlist()
+        body = json.dumps(body).encode('utf8')
+        headers = self.make_headers_to_put_video_in_playlist(sys.getsizeof(body))
+        try:
+            r = req.Request(url=url, headers=headers,  method='POST')
+            response = req.urlopen(r, data=body)
+            response_str_from_bytes = response.readall().decode('utf-8')
+            fields = json.loads(response_str_from_bytes)
+            return fields
+        except response_code as e:
+            if e.reason == 'duplicate':
+                raise VideoAlreadyExistInPlaylist({'message': 'Video already exist in playlist'})
+            elif e.reason == 'forbidden':
+                self.playlist.add_video_to_cloned_playlist_with_new_name(self)
+
+    def make_encoded_url_to_put_video_in_playlist(self):
+        """ This method make values of header url encoded.
+         part are values which you want to send to youtube server """
+        values = parse.urlencode(dict(part='snippet'))
+        url_encoded = Config.YOUTUBE_API['PLAYLIST_ITEMS']['SEND_URI'] % values
+        return url_encoded
+
+    def make_body_to_put_video_in_playlist(self):
+        """ make body """
+        body = dict(snippet=dict(playlistId=self.playlist_id,
+                                 resourceId=dict(videoId=self.video_id, kind='youtube#video')))
+        return body
+
+    def make_headers_to_put_video_in_playlist(self, content_length):
+        """ This method make headers .
+         content_length should be body length in bytes. """
+        authorization = GoogleToken.get_credentials_from_db().access_token
+        headers = {'authorization': 'Bearer {0}'.format(authorization),
+                   'content-type': 'application/json; charset=utf-8',
+                   'content-length': content_length}
+        return headers
+
+
+class YoutubePlaylist(Base, PRBase):
+    __tablename__ = 'youtube_playlist'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    playlist_id = Column(TABLE_TYPES['short_text'], nullable=False, unique=True)
+    name = Column(TABLE_TYPES['short_text'], unique=True)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    company_owner = relationship('Company', uselist=False)
+    md_tm = Column(TABLE_TYPES['timestamp'])
+
+    def __init__(self, name=None, company_id=None, company_owner=None):
+        super(YoutubePlaylist, self).__init__()
+        self.name = name
+        self.company_id = company_id
+        self.company_owner = company_owner
+        self.playlist_id = self.create_new_playlist().get('id')
+        self.save()
+
+    def create_new_playlist(self):
+
+        """ This method create playlist and return response """
+        body = self.make_body_to_get_playlist_url()
+        url = self.make_encoded_url_for_playlists()
+        body = json.dumps(body).encode('utf8')
+        headers = self.make_headers_to_get_playlists(sys.getsizeof(body))
+        r = req.Request(url=url, headers=headers,  method='POST')
+        response = req.urlopen(r, data=body)
+        response_str_from_bytes = response.readall().decode('utf-8')
+        fields = json.loads(response_str_from_bytes)
+        return fields
+
+    def make_body_to_get_playlist_url(self):
+        """ make body to create playlist """
+
+        body = dict(snippet=dict(title=self.name),
+                    status=dict(privacyStatus='public'))
+        return body
+
+    def make_encoded_url_for_playlists(self):
+        """ This method make values of header url encoded.
+         part are values which you want to send to youtube server """
+        values = parse.urlencode(dict(part='snippet,status'))
+        url_encoded = Config.YOUTUBE_API['CREATE_PLAYLIST']['SEND_URI'] % values
+        return url_encoded
+
+    def make_headers_to_get_playlists(self, content_length):
+        """ This method make headers for create playlist.
+         content_length should be body length in bytes. """
+        authorization = GoogleToken.get_credentials_from_db().access_token
+        session['authorization'] = authorization
+        headers = {'authorization': 'Bearer {0}'.format(authorization),
+                   'content-type': 'application/json; charset=utf-8',
+                   'content-length': content_length}
+        return headers
+
+    @staticmethod
+    def get_not_full_company_playlist(company_id):
+        """ Return not full company playlist. Pass company id. """
+        playlist = db(YoutubePlaylist, company_id=company_id).order_by(
+            desc(YoutubePlaylist.md_tm)).first()
+        return playlist
+
+    def add_video_to_cloned_playlist_with_new_name(self, video):
+        # TODO DOES NOT TESTED YET !!! IF DOES NOT WORK ASK VIKTOR
+        playlist = self.detach()
+        playlist.name = self.name + '*'
+        playlist.save()
+        video.playlist = playlist
+        return playlist
