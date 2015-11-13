@@ -24,7 +24,7 @@
         $scope.cut_file_id = '';
         $scope.timer = false;
         $scope.name = '';
-        $scope.chunkSize = '1024KB';
+        $scope.chunkSize = '128KB';
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
