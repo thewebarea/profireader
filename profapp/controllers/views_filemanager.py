@@ -112,25 +112,49 @@ def remove(file_id):
 
 @filemanager_bp.route('/upload/<string:parent_id>/', methods=['POST'])
 def upload(parent_id):
-    sleep(0.1)
+    # sleep(0.1)
+    # parent = File.get(parent_id)
+    # root_id = parent.root_folder_id
+    # ret = {}
+    # data = request.form
+    # uploaded_file = request.files['file']
+    # uploaded_file.seek(0, os.SEEK_END)
+    # size = uploaded_file.tell()
+    # uploaded_file.seek(0, os.SEEK_SET)
+    # uploaded_file.tell()
+    # name = File.get_unique_name(uploaded_file.filename, uploaded_file.content_type, parent.id)
+    # file = File(parent_id=parent.id,
+    #                 root_folder_id=root_id,
+    #                 name=name,
+    #                 mime=data.get('ftype'),
+    #                 size=size
+    #                 )
+    # uploaded = file.upload(content=uploaded_file.stream.read(-1))
+    # ret[uploaded.id] = True
+    file = request.files['file']
     parent = File.get(parent_id)
-    root_id = parent.root_folder_id
-    ret = {}
+    root = parent.root_folder_id
+    if parent.mime == 'root':
+        root = parent.id
     data = request.form
-    uploaded_file = request.files['file']
-    uploaded_file.seek(0, os.SEEK_END)
-    size = uploaded_file.tell()
-    uploaded_file.seek(0, os.SEEK_SET)
-    uploaded_file.tell()
-    name = File.get_unique_name(uploaded_file.filename, uploaded_file.content_type, parent.id)
-    file = File(parent_id=parent.id,
-                    root_folder_id=root_id,
-                    name=name,
-                    mime=data.get('ftype'),
-                    size=size
-                    )
-    uploaded = file.upload(content=uploaded_file.stream.read(-1))
-    ret[uploaded.id] = True
+    company = db(Company, journalist_folder_file_id=root).one()
+    body = {'title': file.filename,
+            'description': '',
+            'status': 'public'}
+    # file.seek(0, os.SEEK_END)
+    # size = file.tell()
+    # file.seek(0, os.SEEK_SET)
+    # file.tell()
+    name = File.get_unique_name(file.filename, 'video/*', parent_id)
+    file = YoutubeApi(body_dict=body,
+                         video_file=file.stream.read(-1),
+                         chunk_info=dict(chunk_size=int(data.get('chunkSize')),
+                                         chunk_number=int(data.get('chunkNumber')),
+                                         total_size=int(data.get('totalSize'))),
+                         company_id=company.id,
+                         root_folder_id=company.journalist_folder_file_id,
+                         parent_folder_id=parent_id)
+    file.upload()
     return jsonify({'result': {'size': 0}})
 
 @filemanager_bp.route('/uploader/', methods=['GET', 'POST'])

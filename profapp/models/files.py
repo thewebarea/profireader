@@ -325,11 +325,39 @@ class File(Base, PRBase):
         for x in company.company_folder:
             return x.id
 
-    def upload(self, content):
-        file_cont = FileContent(file=self, content=content)
-        g.db.add(self, file_cont)
-        g.db.commit()
-        return self
+    def upload(self):
+        chunk_number = self.chunk_info.get('chunk_number')
+        # file_cont = FileContent(file=self, content=content)
+        # g.db.add(self, file_cont)
+        # g.db.commit()
+        # return self
+        headers = self.make_headers_for_upload()
+        try:
+            if not chunk_number:
+                r = req.Request(url=session['url'], headers=headers, method='PUT')
+                response = req.urlopen(r, data=self.video_file,)
+                if response.code == 200 or response.code == 201:
+                    youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                                           size=self.chunk_info.get('total_size'),
+                                           user_id=g.user_dict['id'],
+                                           video_id=session['video_id'],
+                                           status='uploaded',
+                                           playlist=playlist).save()
+                    session['video_id'] = youtube.id
+                    youtube.put_video_in_playlist()
+                    return 'success'
+        except response_code as e:
+            if e.code == 308 and not chunk_number:
+                youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                                       size=int(e.headers.get('Range').split('-')[-1])+1,
+                                       user_id=g.user_dict['id'],
+                                       video_id=session['video_id'],
+                                       playlist=playlist).save()
+                session['video_id'] = youtube.id
+                youtube.put_video_in_playlist()
+                return 'uploading'
+        if chunk_number:
+            return self.resumable_upload()
 
     def set_properties(self, add_all, **kwargs):
         if self == None:
