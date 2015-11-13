@@ -590,7 +590,8 @@ module.config(function ($provide) {
 });
 
 module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_called_for', 'file_manager_on_action',
-    function ($scope, $modalInstance, file_manager_called_for, file_manager_on_action) {
+    'file_manager_default_action',
+    function ($scope, $modalInstance, file_manager_called_for, file_manager_on_action, file_manager_default_action) {
 
 //TODO: SW fix this pls
 
@@ -611,6 +612,10 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
         }
         if (file_manager_on_action) {
             params['file_manager_on_action'] = angular.toJson(file_manager_on_action);
+        }
+
+        if (file_manager_default_action) {
+            params['file_manager_default_action'] = file_manager_default_action;
         }
         $scope.src = $scope.src + '?' + $.param(params);
     }]);
@@ -678,7 +683,7 @@ module.run(function ($rootScope, $ok) {
             //},
             file_browser_callback: function (field_name, url, type, win) {
                 var cmsURL = '/filemanager/?file_manager_called_for=file_browse_' + type +
-                    '&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
+                    '&file_manager_default_action=choose&file_manager_on_action=' + encodeURIComponent(angular.toJson({choose: 'parent.file_choose'}));
                 tinymce.activeEditor.windowManager.open({
                         file: cmsURL,
                         title: 'Select an Image',
