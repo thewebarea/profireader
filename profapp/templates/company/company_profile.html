@@ -17,7 +17,6 @@
 
 
         {% if 'manage_rights_company' in user_rights %}
-            <a href="{{ url_for('filemanager.uploader', company_id=company_id) }}">Uploader TEST. AFTER TEST REMOVE</a>
             <a href="{{ url_for('company.update', company_id=company.id) }}">Edit company</a>
         {% endif %}
     </h2>
