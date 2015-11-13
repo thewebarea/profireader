@@ -189,7 +189,7 @@
                 }
             }else if ($scope.file_manager_on_action[actionname] !== '' &&  actionname === 'choose') {
                 try {
-                    eval($scope.file_manager_on_action[actionname] + '(item);');
+                    eval($scope.file_manager_on_action[actionname] + '(item.model);');
                 }
                 catch(e) {
 
