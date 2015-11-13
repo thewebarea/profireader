@@ -60,6 +60,7 @@
 
 
         $scope.articleImageSelected = function (item) {
+            console.log(item);
             $scope.data.image_file_id = item.id;
             $scope.setImageUrl($scope.data);
             closeFileManager();
