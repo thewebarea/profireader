@@ -150,15 +150,29 @@ a:focus {
 h1 {
     display: inline-block;
     width: auto;
-    background: #CA2027;
+    /*background: #CA2027;*/
+    background: #777777;
     color: #fff;
-    margin-left: -15px;
-    padding: 10px 15px;
+    margin-left: -25px;
+    padding: 10px 15px 10px 25px;
     font-size: 28px;
     line-height: 28px;
     font-weight: normal;
-    font-family: 'PT Serif', serif;
+    font-family: 'Open Sans', sans-serif;
+    position: relative;
 }
+
+
+h1 span{
+    position: absolute;
+    top: -10px;
+    left: 0;
+    display: block;
+    width: 10px;
+    height: 10px;
+    background: transparent url("../../static/front/img/corner.png") no-repeat;
+}
+
 
 h2 {
     font-size: 22px;
