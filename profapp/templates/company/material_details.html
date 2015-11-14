@@ -397,7 +397,9 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     </div>
                     <br/>
                     <span>
-                        <!--<input ng-click="$af.save(data)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish"> -->
+                        <!--<input ng-click="$af.save(data)" type="submit"
+                        ng-disabled="!$af.isActionAllowed(data, 'save')"
+                        value="Publish"> -->
                         <input ng-click="saveData(data, tagsObject.tags)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
                     </span>
                     

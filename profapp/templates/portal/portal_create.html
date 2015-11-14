@@ -8,6 +8,9 @@
     {% endblock company_base %}
     <script>
         module.controller('portal_create', ['$scope', '$modal', '$ok', '$af', function ($scope, $modal, $ok, $af) {
+
+            $scope.$af = $af;
+
             {#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
             $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};
 
@@ -162,10 +165,11 @@
 
             <div class="item text-align-right">
 
-                <input ng-disabled="data_state != 'valid' && data_state != 'clean'"
+                <input
                        type="submit"
-                       ng-click="af.save(data)"
-                       value="{{ data.id ? 'save' : 'create' }} ({{ data_state }})"/>
+                       ng-disabled="!$af.isActionAllowed(data, 'save')"
+                       ng-click="$af.save(data)"
+                       value="{{ data.id ? 'save' : 'create' }}"/>
 
             </div>
 

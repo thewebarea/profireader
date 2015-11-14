@@ -232,7 +232,7 @@ function menu_modules {
     conf_comm "
 cd `pwd`
 source $destdir/bin/activate
-pip3 install -r $req" nosudo bower_components_dev
+pip3 install -I -r $req" nosudo bower_components_dev
     }
 
 function menu_port {
