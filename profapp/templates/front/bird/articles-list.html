@@ -6,16 +6,17 @@
             </div>
             <h2 class="item-title">
                 <a href="{{ url_for('front.details', article_portal_division_id=articles[article_id]['id']) }}">{{ articles[article_id]['title']|safe }}</a>
-                {% for tag_id in articles[article_id]['main_tags'] %}
-                    <span class="tag_in_article">{{ articles[article_id]['main_tags'][tag_id] }}</span> {% endfor %}
             </h2>
+
+            <div class="...">
+                Теги:
+                {% for elem in articles[article_id]['tags'] %}
+                    {{ elem }}
+                {% endfor %}
+            </div>
 
             <div class="item-short-content">
                 <p>{{ articles[article_id]['short']|safe }}</p>
-            </div>
-
-            <div class="...">
-                Теги: ...
             </div>
 
             <div class="item-additional-info">

@@ -10,6 +10,7 @@ from config import Config
 from .pagination import pagination
 from sqlalchemy import Column, ForeignKey, text
 
+
 def get_division_for_subportal(portal_id, member_company_id):
     q = g.db().query(PortalDivisionSettings_company_subportal). \
         join(CompanyPortal,
@@ -58,9 +59,20 @@ def index(page=1):
                                                       portal_division_type_id='index').one()
     articles, pages, page = pagination(query=sub_query, page=page)
 
+
+    a = articles[0]
+    b = a.tags
+    x = {a.id: dict(list(a.get_client_side_dict().items()) +
+                    list({'tags': a.tags}.items()))}
+    # y = {a.id: dict(list(a.get_client_side_dict().items()) +
+    #                 list({'tags': a.tags}))}
+
     return render_template('front/bird/index.html',
+                           # articles={a.id: dict(list(a.get_client_side_dict().items()) +
+                           #                      list({'tags': a.tags}))
+                           #           for a in articles},
                            articles={a.id: dict(list(a.get_client_side_dict().items()) +
-                                              list({'main_tags': {'foo': 'one_tag'}}.items()))
+                                                list({'tags': a.tags}.items()))
                                      for a in articles},
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
@@ -70,8 +82,8 @@ def index(page=1):
                            search_text=search_text)
 
 
-@front_bp.route('<string:division_name>/', methods=['GET'])
-@front_bp.route('<string:division_name>/<int:page>/', methods=['GET'])
+@front_bp.route('<string:division_name>/+', methods=['GET'])
+@front_bp.route('<string:division_name>/<int:page>/+', methods=['GET'])
 def division(division_name, page=1):
     search_text, portal, sub_query = get_params()
     if division_name == 'Компанії' and search_text:
