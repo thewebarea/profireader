@@ -74,11 +74,12 @@ class ArticlePortalDivision(Base, PRBase):
 
     @property
     def tags(self):
-        query = g.db.query(Tag.name).select_from(Tag).\
+        query = g.db.query(Tag.name).\
             join(TagPortalDivision).\
             join(TagPortalDivisionArticle).\
             filter(TagPortalDivisionArticle.article_portal_division_id==self.id)
-        return query.all()
+        tags = map(lambda x: x[0], query.all())
+        return tags
 
     portal = relationship('Portal',
                           secondary='portal_division',

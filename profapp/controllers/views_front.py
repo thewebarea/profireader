@@ -131,7 +131,9 @@ def details(article_portal_division_id):
                                    'publishing_tm, keywords, status, long, image_file_id,'
                                    'division.name, division.portal.id,'
                                    'company.name')
-    article_dict['tags'] = {'foo': 'one tag', 'bar': 'second tag'}
+    article_dict['tags'] = article.tags
+
+    print(article_dict['tags'])
 
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
@@ -144,10 +146,8 @@ def details(article_portal_division_id):
                            current_division=division.get_client_side_dict(),
                            articles_related={a.id: a.to_dict('id, title, cr_tm, company.name|id') for a
                                              in related_articles},
-                           article=article.to_dict('id, title,short, cr_tm, md_tm, '
-                                                   'publishing_tm, status, long, image_file_id,'
-                                                   'division.name, division.portal.id,'
-                                                   'company.name|id'))
+                           article=article_dict
+                           )
 
 
 @front_bp.route(

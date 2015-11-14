@@ -8,10 +8,9 @@
                 <a href="{{ url_for('front.details', article_portal_division_id=articles[article_id]['id']) }}">{{ articles[article_id]['title']|safe }}</a>
             </h2>
 
-            <div class="...">
-                Теги:
-                {% for elem in articles[article_id]['tags'] %}
-                    {{ elem }}
+            <div class="tag-list">
+                {% for tag in articles[article_id]['tags'] %}
+                    <a href="#">{{ tag }}</a>
                 {% endfor %}
             </div>
 
