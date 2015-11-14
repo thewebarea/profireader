@@ -267,17 +267,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
         }]);
         </script>
     {% raw %}
-    <script type="text/ng-template" id="customTemplate.html">
-        <a href="#">
-            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
-            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
-        </a>
-    </script>
-    <style>
-        ul.dropdown-menu li a strong {
-            color: #f00;
-        }
-    </style>
     <div ng-init="loadArticle()" ng-controller="materials_articles">
 
 <!--        <div af
@@ -314,7 +303,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 <hr/>
                 <h3> {{ _('Search for user') }} </h3>
         <input disabled typeahead-on-select="onSelect($item, $model, $label)"
-                                               typeahead-template-url="customTemplate.html"
+                                               typeahead-template-url="typeaheadTemplate.html"
                                                typeahead-loading="loadingUsers"
                                                ng-model="selectedUser_name"
                                                typeahead="user as user.profireader_name for user in searchForUserToJoin($viewValue)"
@@ -397,7 +386,9 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     </div>
                     <br/>
                     <span>
-                        <!--<input ng-click="$af.save(data)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish"> -->
+                        <!--<input ng-click="$af.save(data)" type="submit"
+                        ng-disabled="!$af.isActionAllowed(data, 'save')"
+                        value="Publish"> -->
                         <input ng-click="saveData(data, tagsObject.tags)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
                     </span>
                     

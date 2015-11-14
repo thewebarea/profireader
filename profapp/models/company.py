@@ -27,23 +27,24 @@ from .files import YoutubePlaylist
 class Company(Base, PRBase):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    name = Column(TABLE_TYPES['name'], unique=True)
-    logo_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    name = Column(TABLE_TYPES['name'], unique=True, nullable=False, default='')
+    logo_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
     # corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
                             nullable=False)
-    country = Column(TABLE_TYPES['name'])
-    region = Column(TABLE_TYPES['name'])
-    address = Column(TABLE_TYPES['name'])
-    phone = Column(TABLE_TYPES['phone'])
-    phone2 = Column(TABLE_TYPES['phone'])
-    email = Column(TABLE_TYPES['email'])
-    short_description = Column(TABLE_TYPES['text'])
-    about = Column(TABLE_TYPES['text'])
+    country = Column(TABLE_TYPES['name'], nullable=False, default='')
+    region = Column(TABLE_TYPES['name'], nullable=False, default='')
+    address = Column(TABLE_TYPES['name'], nullable=False, default='')
+    phone = Column(TABLE_TYPES['phone'], nullable=False, default='')
+    phone2 = Column(TABLE_TYPES['phone'], nullable=False, default='')
+    email = Column(TABLE_TYPES['email'], nullable=False, default='')
+    short_description = Column(TABLE_TYPES['text'], nullable=False, default='')
+    about = Column(TABLE_TYPES['text'], nullable=False, default='')
+
     portal = relationship('Portal', secondary='company_portal', back_populates='companies')
 
     own_portal = relationship('Portal',
@@ -140,7 +141,7 @@ class Company(Base, PRBase):
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 
-    def get_client_side_dict(self, fields='id,name,author_user_id,country,region,address,phone,phone2,email,short_description,logo_file_id,about'):
+    def get_client_side_dict(self, fields='id,name,author_user_id,country,region,address,phone,phone2,email,short_description,logo_file_id,about,own_portal.id|host'):
         """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 

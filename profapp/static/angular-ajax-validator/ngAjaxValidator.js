@@ -5,7 +5,9 @@
     }
 
     var AppendParameter = function (url, var_val) {
-        return url + (url.match(/\?/) ? '&' : '?') + var_val;
+        var hashpart = url.match(/^([^#]*)(#(.*))?$/)
+        var ret = hashpart[1] + (hashpart[1].match(/\?/) ? '&' : '?') + var_val + (hashpart[2] ? hashpart[2] : '')
+        return ret
     };
 
     var cloneIfExistsAttributes = function (cloneto, defaultparams, params) {
@@ -60,28 +62,54 @@
 
         ret.$callDirectiveMethod = function (model, method, action) {
             var found = false;
+            var ret = null;
             $.each(modelsForValidation, function (ind, val) {
                 if (val && val['model'].$modelValue === model) {
-                    found = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method]());
+                    found = true;
+                    ret = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method]());
                 }
             });
-            return null;
+            //console.log(found?ret:null);
+            return found?ret:null;
         };
 
         ret.save = function (model, action) {
-            ret.$callDirectiveMethod(model, 'save');
+            return ret.$callDirectiveMethod(model, 'save');
         };
         ret.load = function (model) {
-            ret.$callDirectiveMethod(model, 'load');
+            return ret.$callDirectiveMethod(model, 'load');
         };
         ret.validate = function (model) {
-            ret.$callDirectiveMethod(model, 'validate');
+            return ret.$callDirectiveMethod(model, 'validate');
         };
-        ret.isActionAllowed = function (model) {
-            ret.$callDirectiveMethod(model, 'isActionAllowed', action);
+        ret.isActionAllowed = function (model, action) {
+            return ret.$callDirectiveMethod(model, 'isActionAllowed', action);
         };
         return ret;
 
+    }]).directive('afValidationAnswer', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+
+
+        var watch_functions = {};
+        return {
+            restrict: "A",
+            replace: false,
+            template: function (tElement, tAttrs) {
+                var model_fields = tAttrs['afValidationAnswer'].split(':');
+                var model_name = model_fields[0];
+                var field_name = model_fields[1];
+                var erm = '' + model_name + '.errors.' + field_name;
+                var ewm = '' + model_name + '.warnings.' + field_name;
+                var enm = '' + model_name + '.notices.' + field_name;
+                return '<span class="error"   ng-if="' + erm + '"><span class="glyphicon glyphicon-remove-sign"></span> {{ ' + erm + ' }}</span>' +
+                       '<span class="warning" ng-if="!' + erm + ' && ' + ewm + '"><span class="glyphicon glyphicon-info-sign"></span> {{ ' + ewm + ' }}</span>' +
+                       '<span class="notice"  ng-if="!' + erm + ' && ! ' + ewm + ' && ' + enm + '"><span class="glyphicon glyphicon-ok-sign"></span> {{ ' + enm + ' }}</span>';
+            },
+            scope: false,
+            link: function ($scope, iElement, iAttrs, ngModelCtrl) {
+
+            }
+        }
     }]).directive('af', ['$af', '$ok', function ($af, $ok) {
 
         return {
@@ -103,15 +131,6 @@
 
 
                 var params = {};
-
-                // validation watch params
-                //cloneIfExists(params, {
-                //    afWatch: '',
-                //    afValidateDebounce: '500'
-                //}, attrs);
-
-                //SetIfEmpty(params, 'afWatch', params['ngData']);
-                //params['afDebounce'] = parseInt(params['afDebounce']);
 
 
                 cloneIfExistsAttributes(params, {'af-url': window.location.href}, attrs);
@@ -285,6 +304,7 @@
                         return validate_or_load_states.indexOf($parent[params['afState']]) !== -1
                     }
                     if (action === 'save') {
+                        //console.log(action, $parent[params['afState']], save_states, save_states.indexOf($parent[params['afState']])!==-1);
                         return save_states.indexOf($parent[params['afState']]) !== -1
                     }
                 };
@@ -297,9 +317,9 @@
 
                 var watchfunc = function (oldval, newval) {
                     //if (-1 !== ['clean', 'saving_failed', 'valid', 'loading_failed', 'dirty', 'validating_failed', 'invalid', 'saving', 'validating'].indexOf($parent[params['afState']])) {
-                        setInParent('afState', 'dirty');
-                        debouncedvalidate();
-                        //}
+                    setInParent('afState', 'dirty');
+                    debouncedvalidate();
+                    //}
                 };
 
                 $scope.$watch('model', watchfunc, true);

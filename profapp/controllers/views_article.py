@@ -40,7 +40,7 @@ def load_mine(json):
 
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
-                                               items_per_page=2)
+                                               items_per_page=10)
 
     all, companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
     statuses = {status: status for status in ARTICLE_STATUS_IN_COMPANY.all}
@@ -51,7 +51,7 @@ def load_mine(json):
                          for a in articles],
             'companies': companies,
             'search_text': json.get('search_text') or '',
-            'original_search_text': str(json.get('search_text')) or '',
+            'original_search_text': json.get('search_text') or '',
             'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
@@ -81,8 +81,9 @@ def load_form_create(json):
         if image_id:
             json['image_file_id'] = crop_image(image_id, json.get('coordinates'))
         del json['coordinates'], json['ratio']
-
-        return Article.save_new_article(g.user_dict['id'], **json).get_client_side_dict()
+        article = Article.save_new_article(g.user_dict['id'], **json)
+        g.db.add(article)
+        return article.get_client_side_dict()
 
 
 
@@ -118,16 +119,17 @@ def load_form_update(json, article_company_id):
             image_id = json.get('image_file_id')
             coordinates = json.get('coordinates')
             if image_id:
-                if db(ImageCroped, croped_image_id=image_id).count():
+                if db(ImageCroped, original_image_id=image_id).count():
                     update_croped_image(image_id, coordinates)
                 else:
                     article.image_file_id = crop_image(image_id, coordinates)
+                    article.save()
 
             article = article.get_client_side_dict()
             # print(article['image_file_id'])
             return article
         else:
-            return {'errors': {}, 'warnings': {}, 'notices': {}}
+            # return {'errors': {}, 'warnings': {}, 'notices': {}}
             article.detach()
             return article.validate('update')
 

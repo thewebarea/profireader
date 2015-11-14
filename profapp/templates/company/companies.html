@@ -65,29 +65,20 @@
         }]);
     </script>
     {% raw %}
-    <script type="text/ng-template" id="customTemplate.html">
-        <a href="#">
-            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
-            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
-        </a>
-    </script>
-    <style>
-        ul.dropdown-menu li a strong {
-            color: #f00;
-        }
-    </style>
 
     <div ng-init="loadData()" ng-controller="companies_list">
-        <h1>COMPANY LIST</h1><a class="title-btn add" href="{{ url_create_own_company }}">{{ _('CREATE OWN COMPANY') }}</a>
+        <h1>COMPANY LIST</h1>
+        <a class="" href="{{ url_create_own_company }}">{{ _('CREATE OWN COMPANY') }}</a>
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
             <div ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">
-                <div ng-if="my_emploer.author_user_id==data.user_id">
-                <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{ _('Company name is `%(name)s` - YOUR OWN COMPANY',
-                    my_emploer) }}</a><br/></div>
-                <div ng-if="my_emploer.author_user_id!=data.user_id">
-                <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{ _('Company name is `%(name)s`',
-                    my_emploer) }}</a><br/></div>
+
+                <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{
+                    _('Company name is `%(name)s`' + (my_emploer.author_user_id==data.user_id?' - YOUR OWN COMPANY':''), my_emploer) }}
+                </a>
+                (<span ng-if="!my_emploer.own_portal.host">no portal created</span><a ng-if="my_emploer.own_portal.host" href="http://{{ my_emploer.own_portal.host }}">http://{{ my_emploer.own_portal.host }}</a>)
+                <br/>
+
             </div>
             <div ng-repeat="non_active_employer in data.non_active_user_company_status" id="joined_company_{{ non_active_employer.id }}">
                 <a href="{{ url_company_profile({company_id: non_active_employer.id}) }}">{{ _('Company name is `%(name)s` - NON ACTIVE',
@@ -97,7 +88,7 @@
 
         <hr/>
         {{ _('join also to company') }} <input typeahead-on-select="onSelect($item, $model, $label)"
-                                               typeahead-template-url="customTemplate.html"
+                                               typeahead-template-url="typeaheadTemplate.html"
                                                typeahead-loading="loadingCompanies"
                                                ng-model="selectedCompany_name"
                                                typeahead="company as company.name for company in searchForCompanyToJoin($viewValue)"

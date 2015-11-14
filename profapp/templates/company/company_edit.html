@@ -66,6 +66,9 @@
                             return {
                                 choose: "parent.angularControllerFunction('company_create', 'articleImageSelected')"
                             }
+                        },
+                        file_manager_default_action: function () {
+                            return 'choose'
                         }
                     }
                 });
@@ -122,8 +125,10 @@
                           ng-model="data.about"></textarea><br/>
             </div>
 
-            <input ng-click="$af.save(data)" ng-disabled="data_state != 'valid' && data_state != 'clean'" type="submit"
-                   value="{{ data.id ? 'save' : 'create' }} ({{ data_state }})"/>
+            <input ng-click="$af.save(data)"
+                   ng-disabled="!$af.isActionAllowed(data, 'save')"
+                   type="submit"
+                   value="{{ data.id ? 'save' : 'create' }}"/>
         </div>
 
     </div>

@@ -12,7 +12,6 @@ from ..models.company import simple_permissions
 from ..models.rights import Right
 from profapp.models.rights import RIGHTS
 from ..controllers import errors
-from ..models.files import File, FileContent
 import copy
 from .pagination import pagination
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_PORTAL
@@ -32,89 +31,116 @@ def create(company_id):
                            company_logo=company_logo)
 
 
-@portal_bp.route('/<any(create,update):action>/<any(validate,save):state>/<string:company_id>/',
+# @portal_bp.route('/create/<string:company_id>/', methods=['POST'])
+# @ok
+# # @check_rights(simple_permissions([]))
+# def load_create(json, company_id):
+#     return {}
+
+
+@portal_bp.route('/<any(create,update):create_or_update>/<string:company_id>/',
                  methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
 @ok
-def create_save(json, action, state, company_id):
+def create_save(json, create_or_update, company_id):
+    action = g.req('action', allowed=['load', 'save', 'validate'])
     layouts = [x.get_client_side_dict() for x in db(PortalLayout).all()]
-    types = {x.id: x.get_client_side_dict() for x in
-             PortalDivisionType.get_division_types()}
-
-    # member_company = Portal.companies
+    types = {x.id: x.get_client_side_dict() for x in PortalDivisionType.get_division_types()}
     company = Company.get(company_id)
     member_companies = {company_id: company.get_client_side_dict()}
-    company_logo = company.logo_file_relationship.url() \
-            if company.logo_file_id else '/static/img/company_no_logo.png'
-    return {'company_id': company_id,
-            'company_logo': company_logo,
-            'portal_company_members': member_companies,
-            'portal': {'company_id': company_id, 'name': '', 'host': '',
-                       'logo_file_id': company.logo_file_id,
-                       'portal_layout_id': layouts[0]['id'],
-                       'divisions': [
-                           {'name': 'index page', 'portal_division_type_id': 'index'},
-                           {'name': 'news', 'portal_division_type_id': 'news'},
-                           {'name': 'events', 'portal_division_type_id': 'events'},
-                           {'name': 'catalog', 'portal_division_type_id': 'catalog'},
-                           {'name': 'our subportal', 'portal_division_type_id': 'company_subportal',
-                            'settings': {'company_id': company_id}},
-                       ]},
-            'layouts': layouts, 'division_types': types}
+    company_logo = company.logo_file_relationship.url() if company.logo_file_id else '/static/img/company_no_logo.png'
 
-
-@portal_bp.route('/confirm_create/<string:company_id>/', methods=['POST'])
-@login_required
-# @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
-@ok
-def confirm_create(json, company_id):
-    portal = Portal(name=json['name'], host=json['host'], portal_layout_id=json['portal_layout_id'],
-                    company_owner_id=company_id).create_portal().save()
-
-    portal.divisions = [PortalDivision(portal_id=portal.id, **division) for division in
-                        json['divisions']]
-
-    validation_result = portal.validate()
-
-    if '__validation' in json:
-        db = getattr(g, 'db', None)
-        db.rollback()
-        return validation_result
-    elif len(validation_result['errors'].keys()):
-        raise errors.ValidationException(validation_result)
+    if action == 'load':
+        ret = {'company_id': company_id,
+               'company_logo': company_logo,
+               'portal_company_members': member_companies,
+               'portal': {'company_owner_id': company_id, 'name': '', 'host': '',
+                          'logo_file_id': company.logo_file_id,
+                          'portal_layout_id': layouts[0]['id'],
+                          'divisions': [
+                              {'name': 'index page', 'portal_division_type_id': 'index'},
+                              {'name': 'news', 'portal_division_type_id': 'news'},
+                              {'name': 'events', 'portal_division_type_id': 'events'},
+                              {'name': 'catalog', 'portal_division_type_id': 'catalog'},
+                              {'name': 'our subportal', 'portal_division_type_id': 'company_subportal',
+                               'settings': {'company_id': company_id}}]},
+               'layouts': layouts, 'division_types': types}
+        if create_or_update == 'update':
+            pass
+            # ret['portal'] =
+        return ret
     else:
-        company_owner = Company.get(company_id)
-        portal.logo_file_id = File.get(json['logo_file_id']).copy_file(
-            company_id=company_id, root_folder_id=company_owner.system_folder_file_id,
-            parent_folder_id=company_owner.system_folder_file_id,
-            article_portal_division_id=None).save().id
-        
-        company_logo = company_owner.logo_file_relationship.url() \
-            if company_owner.logo_file_id else '/static/img/company_no_logo.png'
+        portal_json = {key: val for key, val in json['portal'].items() if key in
+                       ['name', 'company_owner_id', 'logo_file_id', 'portal_layout_id', 'host']}
 
-    ret = {
-        'company_id': company_id,
-        'company_logo': company_logo,
-        'layouts': layouts,
-        'division_types': {x.id: x.get_client_side_dict() for x in
-                           PortalDivisionType.get_division_types()}
-    }
+        if create_or_update == 'update':
+            pass
+        elif create_or_update == 'create':
+            portal = Portal(**portal_json)
+            divisions = []
+            for division_json in json['portal']['divisions']:
+                custom_settings_data = {}
+                if division_json['portal_division_type_id'] == 'company_subportal':
+                    custom_settings_data['CompanyPortal'] = CompanyPortal(portal=portal,
+                                                                          company=Company.get(company_id))
 
-    if action == 'create':
-        ret['portal'] = {'company_id': company_id, 'name': '', 'host': '',
-                         'portal_layout_id': layouts[0]['id'],
-                         'divisions': [
-                             {'name': 'index page', 'portal_division_type_id': 'index'},
-                             {'name': 'news', 'portal_division_type_id': 'news'},
-                             {'name': 'events', 'portal_division_type_id': 'events'},
-                             {'name': 'catalog', 'portal_division_type_id': 'catalog'},
-                             {'name': 'about', 'portal_division_type_id': 'about'},
-                         ]}
-    else:
-        ret['portal'] = {}
+                divisions.append(
+                    PortalDivision(portal, PortalDivisionType.get(division_json['portal_division_type_id']),
+                                   name=division_json['name'], settings_data=custom_settings_data))
+            # self, portal=portal, portal_division_type=portal_division_type, name='', settings={}
+            portal.divisions = divisions
+        if action == 'save':
+            Portal.setup_created_portal(json['logo_file_id']).save()
+        else:
+            return portal.validate(create_or_update)
 
-    return ret
+
+# member_company = Portal.companies
+
+
+# @portal_bp.route('/confirm_create/<string:company_id>/', methods=['POST'])
+# @login_required
+# # @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
+# @ok
+# def confirm_create(json, company_id):
+#
+#
+#
+#
+#     validation_result = portal.validate()
+#
+#     if '__validation' in json:
+#         db = getattr(g, 'db', None)
+#         db.rollback()
+#         return validation_result
+#     elif len(validation_result['errors'].keys()):
+#         raise errors.ValidationException(validation_result)
+#     else:
+#
+#
+#     ret = {
+#         'company_id': company_id,
+#         'company_logo': company_logo,
+#         'layouts': layouts,
+#         'division_types': {x.id: x.get_client_side_dict() for x in
+#                            PortalDivisionType.get_division_types()}
+#     }
+#
+#     if action == 'create':
+#         ret['portal'] = {'company_id': company_id, 'name': '', 'host': '',
+#                          'portal_layout_id': layouts[0]['id'],
+#                          'divisions': [
+#                              {'name': 'index page', 'portal_division_type_id': 'index'},
+#                              {'name': 'news', 'portal_division_type_id': 'news'},
+#                              {'name': 'events', 'portal_division_type_id': 'events'},
+#                              {'name': 'catalog', 'portal_division_type_id': 'catalog'},
+#                              {'name': 'about', 'portal_division_type_id': 'about'},
+#                          ]}
+#     else:
+#         ret['portal'] = {}
+#
+#     return ret
 
 
 @portal_bp.route('/', methods=['POST'])
@@ -126,7 +152,7 @@ def apply_company(json):
                                           portal_id=json['portal_id'])
     return {'portals_partners': [portal.portal.to_dict(
         'name, company_owner_id,id') for portal in CompanyPortal.get_portals(json['company_id'])],
-        'company_id': json['company_id']}
+            'company_id': json['company_id']}
 
 
 @portal_bp.route('/profile/<string:portal_id>/', methods=['GET'])
@@ -264,18 +290,18 @@ def profile_edit_load(json, portal_id):
 
         actually_added_tags = set()
         for tag_name in added_tag_names:
-            other_portal_with_added_tags = g.db.query(Portal.id).filter(Portal.id!=portal_id). \
+            other_portal_with_added_tags = g.db.query(Portal.id).filter(Portal.id != portal_id). \
                 join(PortalDivision). \
                 join(TagPortalDivision). \
                 join(Tag). \
-                filter(Tag.name==tag_name).first()
+                filter(Tag.name == tag_name).first()
 
             if not other_portal_with_added_tags:
                 other_portal_with_added_tags = g.db.query(Portal.id). \
-                    filter(Portal.id!=portal_id). \
+                    filter(Portal.id != portal_id). \
                     join(TagPortal). \
                     join(Tag). \
-                    filter(Tag.name==tag_name).first()
+                    filter(Tag.name == tag_name).first()
 
                 if not other_portal_with_added_tags:
                     actually_added_tags.add(tag_name)
@@ -346,11 +372,11 @@ def profile_edit_load(json, portal_id):
 
         g.db.add_all(add_tag_portal_bound_list + add_tag_portal_notbound_list)
         # read this: http://stackoverflow.com/questions/7892618/sqlalchemy-delete-subquery
-        g.db.query(TagPortalDivision).\
-            filter(TagPortalDivision.id.in_([x.id for x in delete_tag_portal_bound_list])).\
+        g.db.query(TagPortalDivision). \
+            filter(TagPortalDivision.id.in_([x.id for x in delete_tag_portal_bound_list])). \
             delete(synchronize_session=False)
-        g.db.query(TagPortal).\
-            filter(TagPortal.id.in_([x.id for x in delete_tag_portal_notbound_list])).\
+        g.db.query(TagPortal). \
+            filter(TagPortal.id.in_([x.id for x in delete_tag_portal_notbound_list])). \
             delete(synchronize_session=False)
         g.db.expire_all()
 
@@ -363,8 +389,8 @@ def profile_edit_load(json, portal_id):
 
         print('+++++++++++++++++++')
 
-        #portal.portal_bound_tags_dynamic = ...
-        #portal.portal_notbound_tags_dynamic = ...
+        # portal.portal_bound_tags_dynamic = ...
+        # portal.portal_notbound_tags_dynamic = ...
 
         # added_bound_tag_names = new_bound_tag_names - (new_bound_tag_names & curr_portal_bound_tag_names)
         # added_notbound_tag_names = new_notbound_tag_names - (new_notbound_tag_names & curr_portal_notbound_tag_names)
@@ -407,7 +433,7 @@ def partners_load(json, company_id):
                           portal.companies] if portal else []
     portals_partners = [port.portal.to_dict('name, company_owner_id, id')
                         for port in CompanyPortal.get_portals(
-                        company_id) if port]
+            company_id) if port]
     user_rights = list(g.user.user_rights_in_company(company_id))
     return {'portal': portal.to_dict('name') if portal else [],
             'companies_partners': companies_partners,
@@ -523,16 +549,16 @@ def update_article_portal(json, article_id):
 # @ok
 # def submit_to_portal(json, action):
 #     json['tags'] = ['money', 'sex', 'rock and roll']; tag position is important
-    #
-    # article = ArticleCompany.get(json['article']['id'])
-    # if action == 'validate':
-    #     return article.validate('update')
-    # if action == 'save':
-    #     portal_division_id = json['selected_division']
-    #     article_portal = article.clone_for_portal(portal_division_id, json['tags'])
-    #     article.save()
-    #     portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
-    #     return {'portal': portal.name}
+#
+# article = ArticleCompany.get(json['article']['id'])
+# if action == 'validate':
+#     return article.validate('update')
+# if action == 'save':
+#     portal_division_id = json['selected_division']
+#     article_portal = article.clone_for_portal(portal_division_id, json['tags'])
+#     article.save()
+#     portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
+#     return {'portal': portal.name}
 
 
 @portal_bp.route('/submit_to_portal/', methods=['POST'])
