@@ -491,7 +491,7 @@ class File(Base, PRBase):
             file_content = FileContent.get(id).detach()
             copy_file.file_content = file_content
 
-        return copy_file.id
+        return copy_file
 
     def move_to(self, parent_id, **kwargs):
         folder = File.get(parent_id)

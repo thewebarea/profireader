@@ -69,7 +69,7 @@
                     ret = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method]());
                 }
             });
-            console.log(found?ret:null);
+            //console.log(found?ret:null);
             return found?ret:null;
         };
 
@@ -304,7 +304,7 @@
                         return validate_or_load_states.indexOf($parent[params['afState']]) !== -1
                     }
                     if (action === 'save') {
-                        console.log(action, $parent[params['afState']], save_states, save_states.indexOf($parent[params['afState']])!==-1);
+                        //console.log(action, $parent[params['afState']], save_states, save_states.indexOf($parent[params['afState']])!==-1);
                         return save_states.indexOf($parent[params['afState']]) !== -1
                     }
                 };
