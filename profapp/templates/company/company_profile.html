@@ -27,7 +27,7 @@
         <a href="{{ url_for('portal.profile', portal_id=company.own_portal.id) }}">[portal profile]</a>
     {% endif %}
 
-    
+
     {{ company.short_description|safe }}
 
 {% endblock portal_content %}
