@@ -62,25 +62,28 @@
 
         ret.$callDirectiveMethod = function (model, method, action) {
             var found = false;
+            var ret = null;
             $.each(modelsForValidation, function (ind, val) {
                 if (val && val['model'].$modelValue === model) {
-                    found = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method]());
+                    found = true;
+                    ret = (action ? modelsForValidation[ind]['scope'][method](action) : modelsForValidation[ind]['scope'][method]());
                 }
             });
-            return null;
+            console.log(found?ret:null);
+            return found?ret:null;
         };
 
         ret.save = function (model, action) {
-            ret.$callDirectiveMethod(model, 'save');
+            return ret.$callDirectiveMethod(model, 'save');
         };
         ret.load = function (model) {
-            ret.$callDirectiveMethod(model, 'load');
+            return ret.$callDirectiveMethod(model, 'load');
         };
         ret.validate = function (model) {
-            ret.$callDirectiveMethod(model, 'validate');
+            return ret.$callDirectiveMethod(model, 'validate');
         };
-        ret.isActionAllowed = function (model) {
-            ret.$callDirectiveMethod(model, 'isActionAllowed', action);
+        ret.isActionAllowed = function (model, action) {
+            return ret.$callDirectiveMethod(model, 'isActionAllowed', action);
         };
         return ret;
 
@@ -98,64 +101,13 @@
                 var erm = '' + model_name + '.errors.' + field_name;
                 var ewm = '' + model_name + '.warnings.' + field_name;
                 var enm = '' + model_name + '.notices.' + field_name;
-                return '<span class="ok glyphicon glyphicon-thumbs-up" ng-if="!'+erm+' && !'+ewm+' && !'+enm+'"></span><span class="error glyphicon glyphicon-thumbs-down" ng-if="' + erm + '">{{ ' + erm + ' }}</span><span class="warning glyphicon glyphicon-hand-up" ng-if="!' + erm + ' && ' + ewm + '">{{ ' + ewm + ' }}</span class="notice glyphicon glyphicon-thumbs-up"><span ng-if="!' + erm + ' ! ' + ewm + ' && ' + enm + '">{{ ' + enm + ' }}</span>';
+                return '<span class="error"   ng-if="' + erm + '"><span class="glyphicon glyphicon-remove-sign"></span> {{ ' + erm + ' }}</span>' +
+                       '<span class="warning" ng-if="!' + erm + ' && ' + ewm + '"><span class="glyphicon glyphicon-info-sign"></span> {{ ' + ewm + ' }}</span>' +
+                       '<span class="notice"  ng-if="!' + erm + ' && ! ' + ewm + ' && ' + enm + '"><span class="glyphicon glyphicon-ok-sign"></span> {{ ' + enm + ' }}</span>';
             },
             scope: false,
             link: function ($scope, iElement, iAttrs, ngModelCtrl) {
-                //var $parent = $scope['$parent'];
-                //
 
-                //
-                //if (!$parent.$$afValidationAnswerWatches) {
-                //    $parent.$$afValidationAnswerWatches = {}
-                //}
-                //if (!$parent.$$afValidationAnswerWatches[model_name]) {
-                //    $parent.$$afValidationAnswerWatches[model_name] = {
-                //        watcher: $parent.$watch(model_name, function (oldv, newv) {}, true),
-                //        element: iElement,
-                //        field: field_name,
-                //    };
-                //}
-                //else {
-                //
-                //}
-                //$parent.$$afValidationAnswerWatches
-                //
-                //$parent.$watch('')
-                //
-                ////var $ie = $(iElement);
-                //
-                //console.log(model_fields);
-                //if (!scope['$validation_watcher']) {
-                //    scope['$validation_watcher'] = {};
-                //}
-                //
-                //if (!scope['$validation_watcher'][model_name]) {
-                //    scope['$validation_watcher'][model_name] = [];
-                //    scope.$watch(model_fields[0], function () {
-                //        $.each(scope['$validation_watcher'][model_name], function (ind, el_field) {
-                //            var el = el_field[0];
-                //            var fld = el_field[1];
-                //            console.log(scope[model_name]);
-                //            if (scope[model_name]) {
-                //                var sn = scope[model_name];
-                //                if (sn['errors'] && sn['errors'][field_name]) {
-                //                    iElement.attr('class', 'error glyphicon glyphicon-thumbs-down').html(sn['errors'][field_name]);
-                //                }
-                //                else if (sn['warnings'] && sn['warnings'][field_name]) {
-                //                    iElement.attr('class', 'warning glyphicon glyphicon-hand-up').html(sn['warnings'][field_name]);
-                //                }
-                //                else if (sn['notices'] && sn['notices'][field_name]) {
-                //                    iElement.attr('class', 'notice glyphicon glyphicon-thumbs-up').html(sn['notices'][field_name]);
-                //                }
-                //                else {
-                //                    iElement.attr('class', 'ok glyphicon glyphicon-thumbs-up').html('');
-                //                }
-                //            }
-                //        });
-                //    }, true);
-                //}
-                //scope['$validation_watcher'][model_name].push([iElement, model_fields]);
             }
         }
     }]).directive('af', ['$af', '$ok', function ($af, $ok) {
@@ -179,15 +131,6 @@
 
 
                 var params = {};
-
-                // validation watch params
-                //cloneIfExists(params, {
-                //    afWatch: '',
-                //    afValidateDebounce: '500'
-                //}, attrs);
-
-                //SetIfEmpty(params, 'afWatch', params['ngData']);
-                //params['afDebounce'] = parseInt(params['afDebounce']);
 
 
                 cloneIfExistsAttributes(params, {'af-url': window.location.href}, attrs);
@@ -361,6 +304,7 @@
                         return validate_or_load_states.indexOf($parent[params['afState']]) !== -1
                     }
                     if (action === 'save') {
+                        console.log(action, $parent[params['afState']], save_states, save_states.indexOf($parent[params['afState']])!==-1);
                         return save_states.indexOf($parent[params['afState']]) !== -1
                     }
                 };

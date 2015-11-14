@@ -4,7 +4,7 @@
 <script>
 
     module.controller('article_edit', ['$scope', '$modal', '$af', function ($scope, $modal, $af) {
-        $scope.af = $af;
+        $scope.$af = $af;
         $scope.details_article = {{ raw_url_for('article.details')|safe }};
         {% if article_company_id %}
             $scope.save_article = '{{ url_for('article.save', article_company_id = article_company_id)|safe }}';
@@ -55,12 +55,12 @@
 
         $scope.change_picture_in_croper = function (coordinates) {
             setTimeout(function () {
-                    init_cropper($scope.cropAreaChanged, $scope.data.ratio , coordinates);
-                },5000);
+                init_cropper($scope.cropAreaChanged, $scope.data.ratio, coordinates);
+            }, 5000);
 
         };
 
-        $scope.cropAreaChanged = function(new_coordinates) {
+        $scope.cropAreaChanged = function (new_coordinates) {
             $scope.coordinates = new_coordinates;
         };
 
@@ -71,7 +71,7 @@
                 $scope.setImageUrl($scope.data);
                 $scope.change_picture_in_croper($scope.data.coordinates);
             }, 0);
-{#                    init_cropper();#}
+            {#                    init_cropper();#}
             return true;
         };
 
@@ -81,7 +81,7 @@
             if (image != "{{ url_for('static', filename='images/choose_image.jpg') }}") {
                 $scope.default_image = false;
             }
-{#            $scope.change_picture_in_croper(image);#}
+            {#            $scope.change_picture_in_croper(image);#}
             return model;
         };
 
@@ -135,11 +135,11 @@
 
                 <input type="hidden" ang-model="data.id"/>
 
-                {{ _('Article title') }} {{ validation.errors.title }}
+                {{ _('Article title') }} <span af-validation-answer="data_validation:name"></span>
                 <input style="width: 100%" type="text" ng-model="data.title">
-                {{ _('Short Description') }}
+                {{ _('Short Description') }} <span af-validation-answer="data_validation:short"></span>
                 <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>
-                {{ _('KeyWords') }}
+                {{ _('KeyWords') }} <span af-validation-answer="data_validation:keywords"></span>
                 <input style="width: 100%" ng-model="data.keywords"/>
 
             </td>
@@ -157,10 +157,10 @@
 
             </td>
             <td style="position: relative"><input style="position: absolute; bottom: 0px; right: 0px;"
-                                                  ng-disabled="data_state != 'valid' && data_state != 'clean'"
+                                                  ng-disabled="!$af.isActionAllowed(data, 'save')"
+                                                  ng-click="$af.save(data)"
                                                   type="submit"
-                                                  ng-click="af.save(data)"
-                                                  value="{{ data.id ? 'save' : 'create' }} ({{ data_state }})"/>
+                                                  value="{{ data.id ? 'save' : 'create' }}"/>
             </td>
         </tr>
     </table>
