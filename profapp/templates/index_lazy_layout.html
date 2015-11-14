@@ -1,16 +1,22 @@
 {% extends "index_layout.html" %}
 
 {% block content %}
-<!-- TODO: OZ by OZ: move this templates to separate .js file -->
-{% include 'pager.html' %}
+    <!-- TODO: OZ by OZ: move this templates to separate .js file -->
+    {% include 'pager.html' %}
+    <script type="text/ng-template" id="typeaheadTemplate.html">
+        <a class="typeahead-item" href="#">
+            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
+        </a>
+    </script>
 
 
     <div class="container">
         {% for message in get_flashed_messages() %}
-        <div class="alert alert-warning">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ message }}
-        </div>
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
         {% endfor %}
 
         {% block portal_content %}

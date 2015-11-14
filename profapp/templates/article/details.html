@@ -80,16 +80,7 @@
         }]);
     </script>
     {% raw %}
-    <script type="text/ng-template" id="customTemplate.html">
-        <a class="typeahead-item" href="#">
 
-            <span ng-show="match.model.id" bind-html-unsafe=" | typeaheadHighlight:query">{{ match.model.name | typeaheadHighlight:query }}</span>
-            <em ng-show="!match.model.id" bind-html-unsafe="match.model.name"></em>
-        </a>
-    </script>
-    <style>
-
-    </style>
     <div ng-init="loadData()" ng-controller="article_my_versions">
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
@@ -100,7 +91,7 @@
                     href="{{ url_update({article_company_id: data.mine_version.id}) }}">edit</a>]</h4>
 
             {{ _('submit my article to company') }} <input typeahead-on-select="onSelect($item, $model, $label)"
-                                                           typeahead-template-url="customTemplate.html"
+                                                           typeahead-template-url="typeaheadTemplate.html"
                                                            typeahead-loading="loadingCompanies"
                                                            ng-model="selectedCompany_name"
                                                            typeahead="company as company.name for company in searchForCompanyToSubmit($viewValue)"
