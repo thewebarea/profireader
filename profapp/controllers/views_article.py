@@ -75,7 +75,8 @@ def load_form_create(json):
                 'ratio': Config.IMAGE_EDITOR_RATIO}
     if action == 'validate':
         del json['coordinates'], json['ratio']
-        return Article.save_new_article(g.user_dict['id'], **json).validate('insert')
+
+        return Article.save_new_article(g.user_dict['id'], **g.filter_json(json, 'title,short,long,keywords')).mine_version.validate('insert')
     else:
         image_id = json.get('image_file_id')
         if image_id:

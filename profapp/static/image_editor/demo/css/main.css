@@ -5,7 +5,7 @@
 /* Icons
  * -------------------------------------------------------------------------- */
 
-.icon {
+.cropericon {
   display: inline-block;
   width: 20px;
   height: 20px;
@@ -13,59 +13,59 @@
   vertical-align: middle;
 }
 
-.icon-move {
+.cropericon-move {
   background-position: 0 0;
 }
 
-.icon-crop {
+.cropericon-crop {
   background-position: -30px 0;
 }
 
-.icon-zoom-in {
+.cropericon-zoom-in {
   background-position: -60px 0;
 }
 
-.icon-zoom-out {
+.cropericon-zoom-out {
   background-position: -90px 0;
 }
 
-.icon-rotate-left {
+.cropericon-rotate-left {
   background-position: -120px 0;
 }
 
-.icon-rotate-right {
+.cropericon-rotate-right {
   background-position: -150px 0;
 }
 
-.icon-lock {
+.cropericon-lock {
   background-position: -180px 0;
 }
 
-.icon-unlock {
+.cropericon-unlock {
   background-position: -210px 0;
 }
 
-.icon-remove {
+.cropericon-remove {
   background-position: -240px 0;
 }
 
-.icon-refresh {
+.cropericon-refresh {
   background-position: -270px 0;
 }
 
-.icon-upload {
+.cropericon-upload {
   background-position: -300px 0;
 }
 
-.icon-off {
+.cropericon-off {
   background-position: -330px 0;
 }
 
-.icon-info {
+.cropericon-info {
   background-position: -360px 0;
 }
 
-.icon-ok {
+.cropericon-ok {
   background-position: -390px 0;
 }
 

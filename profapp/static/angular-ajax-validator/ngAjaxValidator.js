@@ -101,9 +101,9 @@
                 var erm = '' + model_name + '.errors.' + field_name;
                 var ewm = '' + model_name + '.warnings.' + field_name;
                 var enm = '' + model_name + '.notices.' + field_name;
-                return '<span class="error"   ng-if="' + erm + '"><span class="glyphicon glyphicon-remove-sign"></span> {{ ' + erm + ' }}</span>' +
-                       '<span class="warning" ng-if="!' + erm + ' && ' + ewm + '"><span class="glyphicon glyphicon-info-sign"></span> {{ ' + ewm + ' }}</span>' +
-                       '<span class="notice"  ng-if="!' + erm + ' && ! ' + ewm + ' && ' + enm + '"><span class="glyphicon glyphicon-ok-sign"></span> {{ ' + enm + ' }}</span>';
+                return '<span class="error"   ng-if="' + erm + '"><span class="icon icon-stop"></span> {{ ' + erm + ' }}</span>' +
+                       '<span class="warning" ng-if="!' + erm + ' && ' + ewm + '"><span class="icon icon-warning"></span> {{ ' + ewm + ' }}</span>' +
+                       '<span class="notice"  ng-if="!' + erm + ' && ! ' + ewm + ' && ' + enm + '"><span class="icon icon-check"></span> {{ ' + enm + ' }}</span>';
             },
             scope: false,
             link: function ($scope, iElement, iAttrs, ngModelCtrl) {

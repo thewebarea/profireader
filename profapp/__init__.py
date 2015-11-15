@@ -38,6 +38,88 @@ def req(name, allowed=None, default=None, exception=True):
         return None
 
 
+def filter_json(json, *args, prefix='', NoneTo='', ExceptionOnNotPresent = False):
+    ret = {}
+    req_columns = {}
+    req_relationships = {}
+
+    for arguments in args:
+        for argument in re.compile('\s*,\s*').split(arguments):
+            columnsdevided = argument.split('.')
+            column_names = columnsdevided.pop(0)
+            for column_name in column_names.split('|'):
+                if len(columnsdevided) == 0:
+                    req_columns[column_name] = NoneTo if (column_name not in json or json[column_name] is None) else json[column_name]
+                else:
+                    if column_name not in req_relationships:
+                        req_relationships[column_name] = []
+                    req_relationships[column_name].append(
+                        '.'.join(columnsdevided))
+
+    for col in json:
+        if col in req_columns or '*' in req_columns:
+            ret[col] = NoneTo if (col not in json or json[col] is None) else json[col]
+            if col in req_columns:
+                del req_columns[col]
+    if '*' in req_columns:
+        del req_columns['*']
+
+    if len(req_columns) > 0:
+        columns_not_in_relations = list(set(req_columns.keys()) - set(json.keys()))
+        if len(columns_not_in_relations) > 0:
+            if ExceptionOnNotPresent:
+                raise ValueError(
+                    "you requested not existing json value(s) `%s%s`" % (
+                        prefix, '`, `'.join(columns_not_in_relations),))
+            else:
+                for notpresent in columns_not_in_relations:
+                    ret[notpresent] = NoneTo
+
+        else:
+            raise ValueError("you requested for attribute(s) but "
+                             "relationships found `%s%s`" % (
+                                 prefix, '`, `'.join(set(json.keys()).
+                                     intersection(
+                                     req_columns.keys())),))
+
+    for relationname, relation in json.items():
+        if relationname in req_relationships or '*' in \
+                req_relationships:
+            if relationname in req_relationships:
+                nextlevelargs = req_relationships[relationname]
+                del req_relationships[relationname]
+            else:
+                nextlevelargs = req_relationships['*']
+            related_obj = relation
+            if type(json) is dict:
+                ret[relationname] = [
+                    child.filter_json(*nextlevelargs,
+                                      prefix=prefix + relationname + '.'
+                                      ) for child in
+                    related_obj]
+            else:
+                ret[relationname] = None if related_obj is None else related_obj.filter_json(*nextlevelargs,
+                                                                                             prefix=prefix + relationname + '.')
+
+    if '*' in req_relationships:
+        del req_relationships['*']
+
+    if len(req_relationships) > 0:
+        relations_not_in_columns = list(set(
+            req_relationships.keys()) - set(json))
+        if len(relations_not_in_columns) > 0:
+            raise ValueError(
+                "you requested not existing json(s) `%s%s`" % (
+                    prefix, '`, `'.join(relations_not_in_columns),))
+        else:
+            raise ValueError("you requested for json deeper than json is(s) but "
+                             "column(s) found `%s%s`" % (
+                                 prefix, '`, `'.join(set(json).intersection(
+                                     req_relationships)),))
+
+    return ret
+
+
 def load_database(db_config):
     def load_db():
         from sqlalchemy import create_engine
@@ -49,6 +131,7 @@ def load_database(db_config):
                                                  bind=engine))
         g.db = db_session
         g.req = req
+        g.filter_json = filter_json
 
     return load_db
 
@@ -204,16 +287,16 @@ login_manager.login_view = 'auth.login'
 
 class AnonymousUser(AnonymousUserMixin):
     id = 0
-    #def gravatar(self, size=100, default='identicon', rating='g'):
-        #if request.is_secure:
-        #    url = 'https://secure.gravatar.com/avatar'
-        #else:
-        #    url = 'http://www.gravatar.com/avatar'
-        #hash = hashlib.md5(
-        #    'guest@profireader.com'.encode('utf-8')).hexdigest()
-        #return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
-        #    url=url, hash=hash, size=size, default=default, rating=rating)
-        #return '/static/no_avatar.png'
+    # def gravatar(self, size=100, default='identicon', rating='g'):
+    # if request.is_secure:
+    #    url = 'https://secure.gravatar.com/avatar'
+    # else:
+    #    url = 'http://www.gravatar.com/avatar'
+    # hash = hashlib.md5(
+    #    'guest@profireader.com'.encode('utf-8')).hexdigest()
+    # return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
+    #    url=url, hash=hash, size=size, default=default, rating=rating)
+    # return '/static/no_avatar.png'
 
     @staticmethod
     def check_rights(permissions):
@@ -310,5 +393,3 @@ def create_app(config='config.ProductionDevelopmentConfig',
     #     # db_session.remove()
 
     return app
-
-
