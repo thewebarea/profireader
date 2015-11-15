@@ -349,50 +349,6 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
             }
         }
     }])
-    .directive('validationFor', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
-        var watch_functions = {};
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, iElement, iAttrs, ngModelCtrl) {
-                //var $ie = $(iElement);
-                var model_fields = iAttrs['validationFor'].split(':');
-                var model_name = model_fields[0];
-                var field_name = model_fields[1];
-                console.log(model_fields);
-                if (!scope['$validation_watcher']) {
-                    scope['$validation_watcher'] = {};
-                }
-
-                if (!scope['$validation_watcher'][model_name]) {
-                    scope['$validation_watcher'][model_name] = [];
-                    scope.$watch(model_fields[0], function () {
-                        $.each(scope['$validation_watcher'][model_name], function (ind, el_field) {
-                            var el = el_field[0];
-                            var fld = el_field[1];
-                            console.log(scope[model_name]);
-                            if (scope[model_name]) {
-                                var sn = scope[model_name];
-                                if (sn['errors'] && sn['errors'][field_name]) {
-                                    iElement.attr('class', 'error glyphicon glyphicon-thumbs-down').html(sn['errors'][field_name]);
-                                }
-                                else if (sn['warnings'] && sn['warnings'][field_name]) {
-                                    iElement.attr('class', 'warning glyphicon glyphicon-hand-up').html(sn['warnings'][field_name]);
-                                }
-                                else if (sn['notices'] && sn['notices'][field_name]) {
-                                    iElement.attr('class', 'notice glyphicon glyphicon-thumbs-up').html(sn['notices'][field_name]);
-                                }
-                                else {
-                                    iElement.attr('class', 'ok glyphicon glyphicon-thumbs-up').html('');
-                                }
-                            }
-                        });
-                    }, true);
-                }
-                scope['$validation_watcher'][model_name].push([iElement, model_fields]);
-            }
-        }
-    }])
     .directive('ngAjaxFormOld', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
         return {
             restrict: 'A',

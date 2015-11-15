@@ -103,7 +103,6 @@ class PRBase:
         req_relationships = {}
 
         for arguments in args:
-
             for argument in re.compile('\s*,\s*').split(arguments):
                 columnsdevided = argument.split('.')
                 column_names = columnsdevided.pop(0)
@@ -199,9 +198,9 @@ class PRBase:
     @staticmethod
     def add_to_search(mapper, connection, target):
 
-        if not target.id:
-            target.save()
         if hasattr(target, 'search_fields'):
+            if not target.id:
+                target.save()
             add_to_db = []
             for field in target.search_fields:
                 search_setter = Search(index=target.id, table_name=target.__tablename__,
@@ -215,7 +214,6 @@ class PRBase:
         if hasattr(target, 'search_fields'):
             for field in target.search_fields:
                 db(Search, index=target.id, kind=field).update({'text': getattr(target, field)})
-                print(getattr(target, field))
 
     @classmethod
     def __declare_last__(cls):

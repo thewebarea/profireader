@@ -11,7 +11,7 @@
 
 {% block portal_content %}
 <div>
-    <h1>Change Your Email Address</h1>
+    <h1 class="nice-title">Change Your Email Address<span></span></h1>
 </div>
 <form action="{{ url_for('auth.change_email_request') }}" method="POST">
     {{ form.email(placeholder='yourname@email.com', maxlength="100", type="email") }} <br/>

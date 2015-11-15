@@ -86,7 +86,7 @@
              af-after-load="afterLoad"
              ng-model="data">
 
-            <h1>{{ data.id ? 'Edit company profile' : 'New company Account' }}</h1>
+            <h1 class="nice-title">{{ data.id ? 'Edit company profile' : 'New company Account' }}<span></span></h1>
 
             <div style="width: 400px;">
                 <div ng-click="chooseImage()"
@@ -125,8 +125,10 @@
                           ng-model="data.about"></textarea><br/>
             </div>
 
-            <input ng-click="$af.save(data)" ng-disabled="data_state != 'valid' && data_state != 'clean'" type="submit"
-                   value="{{ data.id ? 'save' : 'create' }} ({{ data_state }})"/>
+            <input ng-click="$af.save(data)"
+                   ng-disabled="!$af.isActionAllowed(data, 'save')"
+                   type="submit"
+                   value="{{ data.id ? 'save' : 'create' }}"/>
         </div>
 
     </div>

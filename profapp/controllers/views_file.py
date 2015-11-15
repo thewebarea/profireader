@@ -241,14 +241,15 @@ def crop_image(image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
             File(parent_id=company_owner.system_folder_file_id, name=image_query.name+'_original',
                  mime=image_query.mime, size=image_query.size, user_id=g.user.id,
                  root_folder_id=company_owner.system_folder_file_id, author_user_id=g.user.id)
-        cfc = FileContent(content=image_query.file_content.content, file=copy_original_image_to_system_folder)
+        cfc = FileContent(content=image_query.file_content.content,
+                          file=copy_original_image_to_system_folder)
         g.db.add_all([croped, fc, copy_original_image_to_system_folder, cfc])
-        g.db.commit()
+        g.db.flush()
         ImageCroped(original_image_id=copy_original_image_to_system_folder.id,
                     croped_image_id=croped.id,
                     x=int(coordinates['x']), y=int(coordinates['y']),
                     width=int(coordinates['width']),
-                    height=int(coordinates['height']), rotate=int(coordinates['rotate']))
+                    height=int(coordinates['height']), rotate=int(coordinates['rotate'])).save()
         return croped.id
     else:
         g.db.rollback()
@@ -282,7 +283,6 @@ def update_croped_image(original_image_id, coordinates, ratio=Config.IMAGE_EDITO
         image_croped_assoc.width = int(coordinates['width'])
         image_croped_assoc.height = int(coordinates['height'])
         image_croped_assoc.rotate = int(coordinates['rotate'])
-        print(image_croped_assoc)
 
         return croped.id
 

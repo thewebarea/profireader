@@ -28,9 +28,10 @@ function a() {
     // Demo
     // -------------------------------------------------------------------------
 
-    init_cropper = function () {
+    init_cropper = function (ff, ratio, coordinates) {
 
         //debugger;
+        //console.log(data);
 
         var $image = $('.img-container > img'),
             $dataX = $('#dataX'),
@@ -38,13 +39,20 @@ function a() {
             $dataHeight = $('#dataHeight'),
             $dataWidth = $('#dataWidth'),
             $dataRotate = $('#dataRotate'),
+        //    $dataX = $('#dataX'),
+        //    $dataY = $('#dataY'),
+        //    $dataHeight = $('#dataHeight'),
+        //    $dataWidth = $('#dataWidth'),
+        //    $dataRotate = $('#dataRotate'),
+
             options = {
-                //data: {
-                //  x: 32,
-                //  y: 0,
-                //  width: 106,
-                //  height: 80
-                //},
+            //    data: {
+            //    x: parseInt($('#coordinate_x').val()),
+            //    y: parseInt($('#coordinate_y').val()),
+            //    width: parseInt($('#coordinate_width').val()),
+            //    height: parseInt($('#coordinate_height').val()),
+            //    rotate: parseInt($('#coordinate_rotate').val())
+            //    },
                 // strict: false,
                 // responsive: false,
                 // checkImageOrigin: false
@@ -82,9 +90,10 @@ function a() {
                 // zoomin: null,
                 // zoomout: null,
 
-                aspectRatio: $('#dataRatio').val(),
-                preview: '.img-preview',
+                aspectRatio: ratio,
+                //preview: '.img-preview',
                 crop: function (data) {
+
                     $dataX.val(Math.round(data.x));
                     $dataY.val(Math.round(data.y));
                     $dataHeight.val(Math.round(data.height));
@@ -93,16 +102,20 @@ function a() {
                 }
             };
 
-        if ($('#default_image').val() == 'false') {
-
-            options.data = {
-                x: parseInt($('#coordinate_x').val()),
-                y: parseInt($('#coordinate_y').val()),
-                width: parseInt($('#coordinate_width').val()),
-                height: parseInt($('#coordinate_height').val()),
-                rotate: parseInt($('#coordinate_rotate').val())
-            };
-        }
+        //setTimeout(function () {
+        // if ($('#default_image').val() == 'false') {
+        ////    console.log($('#default_image').val());
+        //    options.data = {
+        //        x: parseInt($('#coordinate_x').val()),
+        //        y: parseInt($('#coordinate_y').val()),
+        //        width: parseInt($('#coordinate_width').val()),
+        //        height: parseInt($('#coordinate_height').val()),
+        //        rotate: parseInt($('#coordinate_rotate').val())
+        //
+        //    };
+        //    console.log(options.data);
+        //}},10);
+        if (coordinates) options.data = coordinates;
         $image.on({
             'build.cropper': function (e) {
                 console.log(e.type);
@@ -134,9 +147,9 @@ function a() {
         // Methods
         $(document.body).on('click', '[data-method]', function () {
             var data = $(this).data(),
+
                 $target,
                 result;
-
             if (!$image.data('cropper')) {
                 return;
             }

@@ -8,12 +8,15 @@
     {% endblock company_base %}
     <script>
         module.controller('portal_create', ['$scope', '$modal', '$ok', '$af', function ($scope, $modal, $ok, $af) {
+
+            $scope.$af = $af;
+
             {#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
             $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};
 
-            $scope.getData = function (validation) {
-                ret = $.extend({__validation: validation});
-            };
+            {#            $scope.getData = function (validation) {#}
+            {#                ret = $.extend({__validation: validation});#}
+            {#            };#}
 
             $scope.afterSave = function (resp) {
                 window.location.href = $scope.url_after_save({company_id: resp.company_id})
@@ -79,21 +82,15 @@
         }]);
     </script>
     {% raw %}
-    {{ data.portal.divisions }}
 
 
-    <style>
 
-        .ng-dirty {
-            border-color: #00468c;
-        }
-    </style>
+
 
     <div ng-controller="portal_create">
         <h2>Cteate portal</h2>
 
         <div af ng-model="data">
-
 
             <div ng-click="chooseImage()"
                  style="float: left; width: 190px; height: 100px; border: 1px solid #aaa;
@@ -111,15 +108,14 @@
                                                                         placeholder="Portal name"
                                                                         ng-model-options="{updateOn : 'change keypress'}"
                                                                         ng-model="data.portal.name">
-                    <span class="error">{{ __validated.errors.name }}</span>
+                    <span af-validation-answer="data_validation:name"></span>
                 </div>
                 <div class="item">
                         <span class="input_label">portal host: <span
                                 style="color: black">http://</span></span><input type="text"
                                                                                  placeholder="Host name"
                                                                                  ng-model="data.portal.host">
-                    <span class="error">{{ __validated.errors.host }}</span>
-                    <span ng-if="!__validated.errors.host" class="warning">{{ __validated.warnings.host }}</span>
+                    <span af-validation-answer="data_validation:host"></span>
                 </div>
                 <div class="item">
                     <span class="input_label">portal layout:</span><select
@@ -157,22 +153,23 @@
                         portal_member_company.name }}
                     </option>
                 </select>
-                <span class="error">{{ __validated.errors['divisions'][division_index] }}</span>
                     <span class="link error" style="float: right"
                           ng-click="removeDivision($index)">X</span>
             </div>
             <div class="item">
                 <input type="text" style="visibility: hidden"/>
                 <button type="button" ng-click="addDivision()">add division</button>
-                <span class="error">{{ __validated.errors.add_division }}</span>
+                <span af-validation-answer="data_validation:add_division"></span>
             </div>
 
 
             <div class="item text-align-right">
 
-                <input ng-disabled="!areAllEmpty(__validated.errors) || __validation"
+                <input
                        type="submit"
-                       value="Create portal"/>
+                       ng-disabled="!$af.isActionAllowed(data, 'save')"
+                       ng-click="$af.save(data)"
+                       value="{{ data.id ? 'save' : 'create' }}"/>
 
             </div>
 

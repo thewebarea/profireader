@@ -1,6 +1,6 @@
 {% extends "index_lazy_layout.html" %}
 
-{% block title %}Profireader - Create article{% endblock title %}
+{% block title %}Profireader - Articles list{% endblock title %}
 
 {% block portal_content %}
 
@@ -58,7 +58,7 @@
     </script>
     {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
-        <h2><a href="{{ url_create_article() }}">Create article</a></h2>
+        <h2><a href="{{ url_create_article() }}"><span class="icon icon-draw-pen-add" ></span>Create article</a></h2>
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">

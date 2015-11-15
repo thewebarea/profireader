@@ -102,7 +102,8 @@ def rename(json):
 @ok
 def copy(json):
     file = File.get(request.json['params']['id'])
-    return file.copy_file(request.json['params']['folder_id'])
+    file.copy_file(request.json['params']['folder_id'])
+    return file.id
 
 @filemanager_bp.route('/cut/', methods=['POST'])
 @ok
