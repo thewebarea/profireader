@@ -125,8 +125,6 @@ def details(article_portal_division_id):
                                    'company.name')
     article_dict['tags'] = article.tags
 
-    print(article_dict['tags'])
-
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
     related_articles = g.db().query(ArticlePortalDivision).filter(
