@@ -327,26 +327,26 @@ class File(Base, PRBase):
 
     @staticmethod
     def upload(name, data, parent, root, content):
-        if 'f_id' not in session.keys():
+        id = data.get('upload_file_id')
+        if data.get('chunkNumber') == '0':
             file = File(parent_id=parent,
                          root_folder_id=root,
                          name=name,
                          mime=data.get('ftype'),
-                         size=data.get('chunkNumber')
-                         )
+                         size=data.get('totalSize')
+                         ).save()
             file_cont = FileContent(file=file, content=content)
             g.db.add(file, file_cont)
             g.db.commit()
             session['f_id'] = file.id
-        if data.get('chunkNumber') == 0:
-            file = File.get(session['f_id'])
-            file_cont = FileContent(file=file, content=content)
-            g.db.add(file, file_cont)
-            g.db.commit()
+            return file.id
         else:
-            file_cont = db(FileContent, id=session['f_id'])
-            file_cont.update({'content':content})
-        return name
+            id = session['f_id']
+            file_cont = FileContent.get(id)
+            cont = bytes(file_cont.content)
+            c =cont + bytes(content)
+            file_cont.updates({'content': c})
+            return id
 
     def set_properties(self, add_all, **kwargs):
         if self == None:

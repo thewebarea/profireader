@@ -18,13 +18,15 @@
         $scope.rootdirs = library;
         $scope.file_manager_called_for = file_manager_called_for;
         $scope.file_manager_on_action = file_manager_on_action;
+        $scope.file_manager_default_action = file_manager_default_action;
         $scope.root_id = '';
         $scope.root_name = '';
         $scope.copy_file_id = '';
         $scope.cut_file_id = '';
         $scope.timer = false;
         $scope.name = '';
-        $scope.chunkSize = '128KB';
+        $scope.chunkSize = '32KB';
+        $scope.upload_file_id = '';
 
         $scope.setTemplate = function(name) {
             $scope.viewTemplate = $cookies.viewTemplate = name;
@@ -210,20 +212,15 @@
 
         $scope.uploadUsingUpload=function() {
             var file = $scope.uploadFileList[0];
-            var re = '^video/.*';
             $scope.f = file;
-            var ext = $scope.f.type.match(re);
-            if(ext){
-                var url = '/filemanager/send/' + $scope.fileNavigator.getCurrentFolder() + '/'
-            }else{
-                var url = '/filemanager/upload/' + $scope.fileNavigator.getCurrentFolder() + '/'
-            }
+            var url = '/filemanager/send/' + $scope.fileNavigator.getCurrentFolder() + '/';
             console.log(file.type);
             file.upload = Upload.upload({url: url,
                 data: $scope.name,
                 resumeSizeUrl: '/filemanager/resumeopload/',
                 resumeChunkSize: $scope.chunkSize,
                 ftype: $scope.f.type,
+                upload_file_id: $scope.upload_file_id ,
                 headers: {
                     'optional-header': 'header-value'
                 },
@@ -233,7 +230,7 @@
             file.upload.progress(function (evt) {
                 file.progress = Math.min(100, parseInt(100.0 *
                     evt.loaded / evt.total));
-            }).success(function () {
+            }).success(function (data) {
                     $scope.fileNavigator.refresh();
                     $('#uploadfile').modal('hide');
                 }).error(function (data) {
