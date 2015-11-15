@@ -277,7 +277,7 @@ def load(json, company_id=None):
     if action == 'load':
         return company.get_client_side_dict()
     else:
-        company.attr({key: val for key, val in json.items() if key in
+        company.attr({key: ('' if val is None else val)  for key, val in json.items() if key in
                       ['about', 'address', 'country', 'email', 'name', 'phone', 'phone2', 'region', 'short_description', 'logo_file_id']})
         if action == 'save':
             if company_id is None:

@@ -103,7 +103,6 @@ class PRBase:
         req_relationships = {}
 
         for arguments in args:
-
             for argument in re.compile('\s*,\s*').split(arguments):
                 columnsdevided = argument.split('.')
                 column_names = columnsdevided.pop(0)
