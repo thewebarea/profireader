@@ -74,8 +74,8 @@ def index(page=1):
                            search_text=search_text)
 
 
-@front_bp.route('<string:division_name>/+', methods=['GET'])
-@front_bp.route('<string:division_name>/<int:page>/+', methods=['GET'])
+@front_bp.route('<string:division_name>/', methods=['GET'])
+@front_bp.route('<string:division_name>/<int:page>/', methods=['GET'])
 def division(division_name, page=1):
     search_text, portal, sub_query = get_params()
     if division_name == 'Компанії' and search_text:
