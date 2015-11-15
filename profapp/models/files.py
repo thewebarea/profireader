@@ -325,11 +325,28 @@ class File(Base, PRBase):
         for x in company.company_folder:
             return x.id
 
-    def upload(self, content):
-        file_cont = FileContent(file=self, content=content)
-        g.db.add(self, file_cont)
-        g.db.commit()
-        return self
+    @staticmethod
+    def upload(name, data, parent, root, content):
+        id = data.get('upload_file_id')
+        if data.get('chunkNumber') == '0':
+            file = File(parent_id=parent,
+                         root_folder_id=root,
+                         name=name,
+                         mime=data.get('ftype'),
+                         size=data.get('totalSize')
+                         ).save()
+            file_cont = FileContent(file=file, content=content)
+            g.db.add(file, file_cont)
+            g.db.commit()
+            session['f_id'] = file.id
+            return file.id
+        else:
+            id = session['f_id']
+            file_cont = FileContent.get(id)
+            cont = bytes(file_cont.content)
+            c =cont + bytes(content)
+            file_cont.updates({'content': c})
+            return id
 
     def set_properties(self, add_all, **kwargs):
         if self == None:
