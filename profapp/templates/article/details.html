@@ -55,7 +55,7 @@
                 }).finally(function () {
                     $scope.selectedCompany_sending = false;
                 });
-            };
+            }
 
             $scope.resubmit = function (article_company_id) {
                 $ok($scope.url_resubmit({article_company_id: article_company_id}), {}, function (resp) {
