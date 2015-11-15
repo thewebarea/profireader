@@ -40,9 +40,11 @@ class MLStripper(HTMLParser):
         return self.get_data()
 
 
+# TODO: (AA to AA) ArticlePortal -> ArticlePortalDivision
 class ArticlePortalDivision(Base, PRBase):
     __tablename__ = 'article_portal_division'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True, nullable=False)
+    # TODO: (AA to AA) delete portal_id!
     article_company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_company.id'))
     # portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
@@ -71,15 +73,6 @@ class ArticlePortalDivision(Base, PRBase):
 
     tag_assoc_select = relationship('TagPortalDivisionArticle',
                                     back_populates='article_portal_division_select')
-
-    @property
-    def tags(self):
-        query = g.db.query(Tag.name).\
-            join(TagPortalDivision).\
-            join(TagPortalDivisionArticle).\
-            filter(TagPortalDivisionArticle.article_portal_division_id==self.id)
-        tags = map(lambda x: x[0], query.all())
-        return tags
 
     portal = relationship('Portal',
                           secondary='portal_division',
