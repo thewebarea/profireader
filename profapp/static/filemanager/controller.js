@@ -25,7 +25,7 @@
         $scope.cut_file_id = '';
         $scope.timer = false;
         $scope.name = '';
-        $scope.chunkSize = '32KB';
+        $scope.chunkSize = '256KB';
         $scope.upload_file_id = '';
 
         $scope.setTemplate = function(name) {
@@ -48,7 +48,21 @@
                 return $scope.fileNavigator.folderClick(item);
             }
             if (item.isImage()) {
-                return item.preview();
+                if($scope.file_manager_default_action === 'choose') {
+                    try {
+                    eval($scope.file_manager_on_action['choose'] + '(item.model);');
+                    }
+                    catch(e) {
+
+                    }
+                }else {
+                    try {
+                    eval('item'+'.'+'download'+'();');//$scope.file_manager_on_action[actionname] + '(item);');
+                    }
+                    catch(e) {
+
+                    }
+                }
             }
             if (item.isEditable()) {
                 item.getContent();
@@ -191,7 +205,7 @@
                 }
             }else if ($scope.file_manager_on_action[actionname] !== '' &&  actionname === 'choose') {
                 try {
-                    eval($scope.file_manager_on_action[actionname] + '(item.model);');
+                    eval($scope.file_manager_on_action[actionname] + '(item);');
                 }
                 catch(e) {
 
