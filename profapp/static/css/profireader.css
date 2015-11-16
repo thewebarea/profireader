@@ -54,8 +54,17 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 }
 
 .topbar-menu-links a.navbar-brand {
-    padding: 0px 5px;
+    padding: 0px;
+    /*position: absolute;*/
 }
+
+.topbar-menu-links .navbar-brand img,
+.topbar-menu-links .navbar-brand{
+    height: 30px;
+    width: auto;
+}
+
+
 
 ul.user-auth li a {
     height: 100%;
@@ -101,7 +110,7 @@ ul.dropdown-menu li a {
 }
 
 ul.dropdown-menu li a:hover {
-    border-color:;
+
 }
 
 .modal-filemanager-fullscreen {
@@ -163,7 +172,11 @@ h1 {
 }
 
 
-h1 span{
+h1.nice-title{
+    padding-bottom: 11px;
+}
+
+h1.nice-title span{
     position: absolute;
     top: -10px;
     left: 0;
@@ -782,7 +795,7 @@ hr {
 
 .aside-widget header {
     background-image: -webkit-gradient(linear, left 0%, left 100%, from(#f6f5f5), to(#ebeaea));
-    background-image: -webkit-linear-gradient(top, #f6f5f5, 0%, #ebeaea, 100%);
+    background-image: -webkit-linear-gradient(top, #f6f5f5 0%, #ebeaea 100%);
     background-image: -moz-linear-gradient(top, #f6f5f5 0%, #ebeaea 100%);
     background-image: linear-gradient(to bottom, #f6f5f5 0%, #ebeaea 100%);
     background-repeat: repeat-x;
@@ -839,9 +852,9 @@ hr {
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    -webkit-box-shadow: 0px 1px 5px #a8a8a8;
-    -moz-box-shadow: 0px 1px 5px #a8a8a8;
-    box-shadow: 0px 1px 5px #a8a8a8;
+    -webkit-box-shadow: 0 1px 5px #a8a8a8;
+    -moz-box-shadow: 0 1px 5px #a8a8a8;
+    box-shadow: 0 1px 5px #a8a8a8;
     margin-bottom: 40px;
 }
 
@@ -1411,7 +1424,7 @@ aside.comments .comment .body {
     background-color: #69bc87;
     border-color: #549f6f;
     background-image: -webkit-gradient(linear, left 0%, left 100%, from(#69bc87), to(#48a068));
-    background-image: -webkit-linear-gradient(top, #69bc87, 0%, #48a068, 100%);
+    background-image: -webkit-linear-gradient(top, #69bc87 0%, #48a068 100%);
     background-image: -moz-linear-gradient(top, #69bc87 0%, #48a068 100%);
     background-image: linear-gradient(to bottom, #69bc87 0%, #48a068 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff69bc87', endColorstr='#ff48a068', GradientType=0);
@@ -1475,7 +1488,7 @@ fieldset[disabled] .btn-tales-one.active {
     background-color: #485561;
     border-color: #3c4852;
     background-image: -webkit-gradient(linear, left 0%, left 100%, from(#485561), to(#2e363e));
-    background-image: -webkit-linear-gradient(top, #485561, 0%, #2e363e, 100%);
+    background-image: -webkit-linear-gradient(top, #485561 0%, #2e363e 100%);
     background-image: -moz-linear-gradient(top, #485561 0%, #2e363e 100%);
     background-image: linear-gradient(to bottom, #485561 0%, #2e363e 100%);
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff485561', endColorstr='#ff2e363e', GradientType=0);
@@ -1719,7 +1732,7 @@ form {
     display: block;
     width: 1170px;
     margin-left: -15px;
-    background: #fcc;
+    background: #dadada;
     font-size: 0;
 }
 
@@ -1733,7 +1746,7 @@ form {
 .topbar-menu-links span {
     font-size: 16px;
     padding: 7px 15px;
-    border-right: 1px #fff dotted;
+    border-right: 1px #bbb dotted;
 
     background: transparent;
 }
@@ -1893,13 +1906,13 @@ input[type=radio]:not(old):checked + label {
 }
 
 select:active, select:hover {
-    outline-color: none !important;
+    /*outline-color: none !important;*/
     box-shadow: 0 0 10px 100px #fff inset;
 }
 
 a.title-btn {
     display: inline-block;
-    padding-left: 5px 5px 5px 50px !important;
+    padding: 5px 5px 5px 50px !important;
     font-size: 12px !important;
     margin-left: 10px;
     height: 48px;
@@ -2042,4 +2055,42 @@ a.title-btn {
     border: 1px solid #ccc;
     padding: 15px;
     margin-top: -1px;
+}
+
+.h1-btn{
+    position: relative;
+    display: inline-block;
+    background-color: #656565;
+    color: #eee;
+    font-weight: bolder;
+    padding: 11px;
+    top: -3px;
+}
+
+
+.h1-btn:hover{
+    color: #fff;
+    background: #CA2027;
+}
+
+.company-item{
+    position: relative;
+    display: inline-block;
+    width: 300px;
+    height: 300px;
+    background: #eee;
+    border-color: #ccc;
+    padding: 10px;
+    margin: 0px 15px 15px 0px;
+}
+
+.one-company{
+    display: inline-block;
+}
+
+.company-logo{
+    height: 150px;
+    width: 100%;
+    background-color: #ccc;
+
 }
