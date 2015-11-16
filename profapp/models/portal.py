@@ -360,7 +360,7 @@ class PortalDivisionSettings_company_subportal(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
 
     portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
-    company_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('member_company_portal.id'))
+    member_company_portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('member_company_portal.id'))
 
     member_company_portal = relationship(MemberCompanyPortal)
 
