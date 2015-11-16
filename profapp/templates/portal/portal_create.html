@@ -11,27 +11,12 @@
 
             $scope.$af = $af;
 
-            {#            $scope.url_confirm_create = {{ raw_url_for('portal.confirm_create')|safe }};#}
             $scope.url_after_save = {{ raw_url_for('company.profile')|safe }};
 
-            {#            $scope.getData = function (validation) {#}
-            {#                ret = $.extend({__validation: validation});#}
-            {#            };#}
-
             $scope.afterSave = function (resp) {
-                window.location.href = $scope.url_after_save({company_id: resp.company_id})
+                window.location.href = $scope.url_after_save({company_id: resp.company_owner_id})
             };
 
-            {#            $scope.loadData = function (validation) {#}
-            {#                $ok('', {}, function (resp) {#}
-            {#                    $scope.data = resp;#}
-            {#                });#}
-            {#            };#}
-
-            {#            ang-ok="url_confirm_create({company_id: data.company_id})"#}
-            {#                ng-watch="data.portal"#}
-            {#                ng-before="getData"#}
-            {#                ng-after="afterSave"#}
 
             $scope.addDivision = function () {
                 $scope.data.portal.divisions.push({
@@ -45,7 +30,7 @@
                 $scope.data.portal.divisions.splice(index, 1);
             };
 
-            $scope.articleImageSelected = function (item) {
+            $scope.portalImageSelected = function (item) {
 
                 $scope.data.portal.logo_file_id = item.id;
                 $scope.setImageUrl();
@@ -67,7 +52,7 @@
                         },
                         file_manager_on_action: function () {
                             return {
-                                choose: "parent.angularControllerFunction('portal_create', 'articleImageSelected')"
+                                choose: "parent.angularControllerFunction('portal_create', 'portalImageSelected')"
                             }
                         },
                         file_manager_default_action: function () {
@@ -149,10 +134,10 @@
                         ng-model="division.settings.company_id">
                     <option ng-selected="portal_member_company.id == division.settings.company_id"
                             ng-repeat="(portal_member_company_id, portal_member_company) in data.portal_company_members"
-                            value="{{ portal_member_company_id }}">{{
-                        portal_member_company.name }}
+                            value="{{ portal_member_company_id }}">{{ portal_member_company.name }}
                     </option>
                 </select>
+                    <span af-validation-answer="data_validation:divisions[division_index]"></span>
                     <span class="link error" style="float: right"
                           ng-click="removeDivision($index)">X</span>
             </div>
@@ -164,12 +149,13 @@
 
 
             <div class="item text-align-right">
-
+                <span af-validation-answer="data_validation:form"></span>
                 <input
-                       type="submit"
-                       ng-disabled="!$af.isActionAllowed(data, 'save')"
-                       ng-click="$af.save(data)"
-                       value="{{ data.id ? 'save' : 'create' }}"/>
+                        type="submit"
+                        ng-disabled="!$af.isActionAllowed(data, 'save')"
+                        ng-click="$af.save(data)"
+                        value="{{ data.id ? 'save' : 'create' }}"/>
+
 
             </div>
 
