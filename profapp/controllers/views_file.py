@@ -8,7 +8,7 @@ from time import gmtime, strftime
 import sys
 import re
 from ..models.articles import Article, ArticlePortalDivision
-from ..models.portal import CompanyPortal, PortalDivision, Portal
+from ..models.portal import MemberCompanyPortal, PortalDivision, Portal
 from config import Config
 from utils.db_utils import db
 from ..models.company import Company
@@ -210,82 +210,71 @@ def file_query(table, file_id):
     return query
 
 
-def crop_image(image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
-               height=Config.HEIGHT_IMAGE):
+def crop_image(image_id, coordinates):
 
-    size = (int(ratio*height), height)
     image_query = db(File, id=image_id).one()
-    image = Image.open(BytesIO(image_query.file_content.content))
+
     company_owner = db(Company, journalist_folder_file_id=image_query.root_folder_id).one()
-    area = [int(a) for a in (coordinates['x'], coordinates['y'], coordinates['width'],
-                             coordinates['height'])
-            if int(a) in range(0, max(image.size))]
-    if area:
-        angle = int(coordinates["rotate"])*-1
-        area[2] = (area[0]+area[2])
-        area[3] = (area[1]+area[3])
-        rotated_image = image.rotate(angle)
-        cropped_image = rotated_image.crop(area).resize(size)
-        bytes_file = BytesIO()
-        cropped_image.save(bytes_file, image_query.mime.split('/')[-1].upper())
-        #
-        croped = File()
-        croped.md_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-        croped.size = sys.getsizeof(bytes_file.getvalue())
-        croped.name = image_query.name + '_croped'
-        croped.parent_id = company_owner.system_folder_file_id
-        croped.root_folder_id = company_owner.system_folder_file_id
-        croped.mime = image_query.mime
-        fc = FileContent(content=bytes_file.getvalue(), file=croped)
-        copy_original_image_to_system_folder = \
-            File(parent_id=company_owner.system_folder_file_id, name=image_query.name+'_original',
-                 mime=image_query.mime, size=image_query.size, user_id=g.user.id,
-                 root_folder_id=company_owner.system_folder_file_id, author_user_id=g.user.id)
-        cfc = FileContent(content=image_query.file_content.content,
-                          file=copy_original_image_to_system_folder)
-        g.db.add_all([croped, fc, copy_original_image_to_system_folder, cfc])
-        g.db.flush()
-        ImageCroped(original_image_id=copy_original_image_to_system_folder.id,
-                    croped_image_id=croped.id,
-                    x=int(coordinates['x']), y=int(coordinates['y']),
-                    width=int(coordinates['width']),
-                    height=int(coordinates['height']), rotate=int(coordinates['rotate'])).save()
-        return croped.id
-    else:
-        g.db.rollback()
-        raise BadCoordinates
+    bytes_file = crop_with_coordinates(image_query, coordinates)
+    croped = File()
+    croped.md_tm = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    croped.size = sys.getsizeof(bytes_file.getvalue())
+    croped.name = image_query.name + '_croped'
+    croped.parent_id = company_owner.system_folder_file_id
+    croped.root_folder_id = company_owner.system_folder_file_id
+    croped.mime = image_query.mime
+    fc = FileContent(content=bytes_file.getvalue(), file=croped)
+    copy_original_image_to_system_folder = \
+        File(parent_id=company_owner.system_folder_file_id, name=image_query.name+'_original',
+             mime=image_query.mime, size=image_query.size, user_id=g.user.id,
+             root_folder_id=company_owner.system_folder_file_id, author_user_id=g.user.id)
+    cfc = FileContent(content=image_query.file_content.content,
+                      file=copy_original_image_to_system_folder)
+    g.db.add_all([croped, fc, copy_original_image_to_system_folder, cfc])
+    g.db.flush()
+    ImageCroped(original_image_id=copy_original_image_to_system_folder.id,
+                croped_image_id=croped.id,
+                x=int(coordinates['x']), y=int(coordinates['y']),
+                width=int(coordinates['width']),
+                height=int(coordinates['height']), rotate=int(coordinates['rotate'])).save()
+    return croped.id
 
 
 
-def update_croped_image(original_image_id, coordinates, ratio=Config.IMAGE_EDITOR_RATIO,
-                        height=Config.HEIGHT_IMAGE):
+def update_croped_image(original_image_id, coordinates):
     image_croped_assoc = db(ImageCroped, original_image_id=original_image_id).one()
     croped = db(File, id=image_croped_assoc.croped_image_id).one()
-    size = (int(ratio*height), height)
+
     image_query = file_query(File, image_croped_assoc.original_image_id)
-    image = Image.open(BytesIO(image_query.file_content.content))
+    bytes_file = crop_with_coordinates(image_query, coordinates, )
+    croped.size = sys.getsizeof(bytes_file.getvalue())
+    croped.file_content.content = bytes_file.getvalue()
+    image_croped_assoc.x = int(coordinates['x'])
+    image_croped_assoc.y = int(coordinates['y'])
+    image_croped_assoc.width = int(coordinates['width'])
+    image_croped_assoc.height = int(coordinates['height'])
+    image_croped_assoc.rotate = int(coordinates['rotate'])
+
+    return croped.id
+
+
+def crop_with_coordinates(image, coordinates,  ratio=Config.IMAGE_EDITOR_RATIO,
+                          height=Config.HEIGHT_IMAGE):
+    size = (int(ratio*height), height)
+    image_pil = Image.open(BytesIO(image.file_content.content))
     area = [int(a) for a in (coordinates['x'], coordinates['y'], coordinates['width'],
                              coordinates['height'])
-            if int(a) in range(0, max(image.size))]
+            if int(a) in range(0, max(image_pil.size))]
 
     if area:
         angle = int(coordinates["rotate"])*-1
         area[2] = (area[0]+area[2])
         area[3] = (area[1]+area[3])
-        rotated = image.rotate(angle)
+        rotated = image_pil.rotate(angle)
         cropped = rotated.crop(area).resize(size)
         bytes_file = BytesIO()
-        cropped.save(bytes_file, image_query.mime.split('/')[-1].upper())
-        croped.size = sys.getsizeof(bytes_file.getvalue())
-        croped.file_content.content = bytes_file.getvalue()
-        image_croped_assoc.x = int(coordinates['x'])
-        image_croped_assoc.y = int(coordinates['y'])
-        image_croped_assoc.width = int(coordinates['width'])
-        image_croped_assoc.height = int(coordinates['height'])
-        image_croped_assoc.rotate = int(coordinates['rotate'])
-
-        return croped.id
-
+        cropped.save(bytes_file, image.mime.split('/')[-1].upper())
+        return bytes_file
     else:
         g.db.rollback()
         raise BadCoordinates
