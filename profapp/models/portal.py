@@ -22,7 +22,7 @@ class Portal(Base, PRBase):
     name = Column(TABLE_TYPES['name'])
     host = Column(TABLE_TYPES['short_name'])
     company_owner_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'), unique=True)
-    portal_plan_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_plan.id'))
+    # portal_plan_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('member_company_portal_plan.id'))
     portal_layout_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_layout.id'))
 
     logo_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
@@ -52,11 +52,11 @@ class Portal(Base, PRBase):
                             back_populates='portal',
                             uselist=False)
 
-    member_companies = relationship('Company'
-                                    , secondary='member_company_portal'
-                                    # back_populates='portal',
-                                    # lazy='dynamic'
-                                    )
+    company_members = relationship('MemberCompanyPortal',
+                                   # secondary='member_company_portal'
+                                   # back_populates='portal',
+                                   # lazy='dynamic'
+                                   )
     # see: http://docs.sqlalchemy.org/en/rel_0_9/orm/join_conditions.html#composite-secondary-joins
     # see: http://docs.sqlalchemy.org/en/rel_0_9/orm/join_conditions.html#creating-custom-foreign-conditions
     # see!!!: http://docs.sqlalchemy.org/en/rel_0_8/orm/relationships.html#association-object
@@ -120,30 +120,34 @@ class Portal(Base, PRBase):
     #                        secondaryjoin="ArticleCompany.company_id == Company.id",
     #                        viewonly=True, uselist=False)
 
-    def __init__(self, name=None, portal_plan_id=None, logo_file_id=None,
-                 company_owner_id=None, host=None, divisions=[], portal_layout_id=None):
+    def __init__(self, name=None,
+                 # portal_plan_id=None,
+                 logo_file_id=None,
+                 company_owner=None,
+                 host=None, divisions=[], portal_layout_id=None):
         self.name = name
         self.logo_file_id = logo_file_id
-        self.company_owner_id = company_owner_id
+        # self.company_owner_id = company_owner_id
         # self.articles = articles
         self.host = host
         self.divisions = divisions
-        self.portal_plan_id = portal_plan_id if portal_plan_id else db(PortalPlan).first().id
-        self.portal_layout_id = portal_layout_id if portal_layout_id \
-            else db(PortalLayout).first().id
+        # self.portal_plan_id = portal_plan_id if portal_plan_id else db(MemberCompanyPortalPlan).first().id
+        self.portal_layout_id = portal_layout_id if portal_layout_id else db(PortalLayout).first().id
 
-        self.own_company = Company.get(self.company_owner_id)
+        self.own_company = company_owner
 
-        self.own_company.company_portals = db(PortalPlan).first()
+        self.company_members = [MemberCompanyPortal(portal=self, company=company_owner, plan=db(MemberCompanyPortalPlan).first())]
 
-        db(PortalPlan).first().portal_companies.add(MemberCompanyPortal(company=self.own_company))
+        # self.own_company.company_portals = db(MemberCompanyPortalPlan).first()
 
-        self.member_companies = [self.own_company]
+        # db(MemberCompanyPortalPlan).first().portal_companies.add(MemberCompanyPortal(company=self.own_company))
+
+
 
 
         # self.company_assoc = [MemberCompanyPortal(portal = self,
         #                                     company = self.own_company,
-        #                                     company_portal_plan_id=db(PortalPlan).first().id)]
+        #                                     company_portal_plan_id=db(MemberCompanyPortalPlan).first().id)]
 
 
         pass
@@ -221,8 +225,58 @@ class Portal(Base, PRBase):
                                   ).filter(Portal.name.ilike("%" + searchtext + "%")).all()]
 
 
-class PortalPlan(Base, PRBase):
-    __tablename__ = 'portal_plan'
+class MemberCompanyPortal(Base, PRBase):
+    __tablename__ = 'member_company_portal'
+    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
+    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
+
+    member_company_portal_plan_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('member_company_portal_plan.id'))
+
+    portal = relationship(Portal
+                          # ,back_populates = 'company_members'
+                          # , back_populates='member_companies'
+                          )
+
+    company = relationship(Company
+                           # ,back_populates = 'portal_members'
+                           #                        ,backref = 'portal'
+                           #                         ,backref='member_companies'
+                           )
+
+    plan = relationship('MemberCompanyPortalPlan'
+                        # , backref='partner_portals'
+                        )
+
+    def __init__(self, company_id=None, portal=None, company=None, plan=None):
+        self.company_id = company_id
+        self.portal = portal
+        self.company = company
+        self.plan = plan
+
+    @staticmethod
+    def apply_company_to_portal(company_id, portal_id):
+        """Add company to MemberCompanyPortal table. Company will be partner of this portal"""
+        g.db.add(MemberCompanyPortal(company=db(Company, id=company_id).one(),
+                                     portal=db(Portal, id=portal_id).one(),
+                                     company_portal_plan_id=db(Portal, id=portal_id).one().
+                                     portal_plan_id))
+        g.db.flush()
+
+    # @staticmethod
+    # def show_companies_on_my_portal(company_id):
+    #     """Return all companies partners at portal"""
+    #     portal = Portal().own_portal(company_id).companies
+    #     return portal
+
+    @staticmethod
+    def get_portals(company_id):
+        """This method return all portals-partners current company"""
+        return db(MemberCompanyPortal, company_id=company_id).all()
+
+
+class ReaderUserPortalPlan(Base, PRBase):
+    __tablename__ = 'reader_user_portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False,
                 primary_key=True)
     name = Column(TABLE_TYPES['name'], nullable=False)
@@ -249,53 +303,6 @@ class MemberCompanyPortalPlan(Base, PRBase):
     __tablename__ = 'member_company_portal_plan'
     id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
     name = Column(TABLE_TYPES['short_name'], default='')
-
-
-class MemberCompanyPortal(Base, PRBase):
-    __tablename__ = 'member_company_portal'
-    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
-    company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('company.id'))
-    portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
-    member_company_portal_plan_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('member_company_portal_plan.id'))
-
-    portal = relationship(Portal
-                          # , back_populates='member_companies'
-                          )
-    company = relationship(Company
-                           # , backref='partner_portals'
-                           )
-
-    plan = relationship(MemberCompanyPortalPlan
-                        # , backref='partner_portals'
-                        )
-
-    def __init__(self, company_id=None, portal_id=None, portal=None, company=None,
-                 company_portal_plan_id=None):
-        self.company_id = company_id
-        self.portal = portal
-        self.company = company
-        self.portal_id = portal_id
-        self.company_portal_plan_id = company_portal_plan_id
-
-    @staticmethod
-    def apply_company_to_portal(company_id, portal_id):
-        """Add company to MemberCompanyPortal table. Company will be partner of this portal"""
-        g.db.add(MemberCompanyPortal(company=db(Company, id=company_id).one(),
-                                     portal=db(Portal, id=portal_id).one(),
-                                     company_portal_plan_id=db(Portal, id=portal_id).one().
-                                     portal_plan_id))
-        g.db.flush()
-
-    # @staticmethod
-    # def show_companies_on_my_portal(company_id):
-    #     """Return all companies partners at portal"""
-    #     portal = Portal().own_portal(company_id).companies
-    #     return portal
-
-    @staticmethod
-    def get_portals(company_id):
-        """This method return all portals-partners current company"""
-        return db(MemberCompanyPortal, company_id=company_id).all()
 
 
 class PortalDivision(Base, PRBase):
@@ -385,7 +392,7 @@ class UserPortalReader(Base, PRBase):
                         ForeignKey('company.id'))
     status = Column(TABLE_TYPES['id_profireader'])
     portal_plan_id = Column(TABLE_TYPES['id_profireader'],
-                            ForeignKey('portal_plan.id'))
+                            ForeignKey('reader_user_portal_plan.id'))
 
     def __init__(self, user_id=None, company_id=None, status=None,
                  portal_plan_id=None):

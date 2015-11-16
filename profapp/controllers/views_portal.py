@@ -38,8 +38,7 @@ def create(company_id):
 #     return {}
 
 
-@portal_bp.route('/<any(create,update):create_or_update>/<string:company_id>/',
-                 methods=['POST'])
+@portal_bp.route('/<any(create,update):create_or_update>/<string:company_id>/', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([Right[RIGHTS.MANAGE_PORTAL()]]))
 @ok
@@ -50,7 +49,6 @@ def create_save(json, create_or_update, company_id):
     company = Company.get(company_id)
     member_companies = {company_id: company.get_client_side_dict()}
     company_logo = company.logo_file_relationship.url() if company.logo_file_id else '/static/img/company_no_logo.png'
-
 
     if action == 'load':
         ret = {'company_id': company_id,
@@ -76,13 +74,13 @@ def create_save(json, create_or_update, company_id):
         if create_or_update == 'update':
             pass
         elif create_or_update == 'create':
-            portal = Portal(**g.filter_json(json_portal, 'name', 'company_owner_id', 'portal_layout_id', 'host'))
+            portal = Portal(company_owner = company, **g.filter_json(json_portal, 'name', 'portal_layout_id', 'host'))
             divisions = []
             for division_json in json['portal']['divisions']:
                 custom_settings_data = {}
                 if division_json['portal_division_type_id'] == 'company_subportal':
                     custom_settings_data['MemberCompanyPortal'] = MemberCompanyPortal(portal=portal,
-                                                                          company=Company.get(company_id))
+                                                                                      company=Company.get(company_id))
 
                 divisions.append(
                     PortalDivision(portal, PortalDivisionType.get(division_json['portal_division_type_id']),
@@ -149,7 +147,7 @@ def create_save(json, create_or_update, company_id):
 @ok
 def apply_company(json):
     MemberCompanyPortal.apply_company_to_portal(company_id=json['company_id'],
-                                          portal_id=json['portal_id'])
+                                                portal_id=json['portal_id'])
     return {'portals_partners': [portal.portal.to_dict(
         'name, company_owner_id,id') for portal in MemberCompanyPortal.get_portals(json['company_id'])],
             'company_id': json['company_id']}
