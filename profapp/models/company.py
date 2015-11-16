@@ -45,12 +45,16 @@ class Company(Base, PRBase):
     short_description = Column(TABLE_TYPES['text'], nullable=False, default='')
     about = Column(TABLE_TYPES['text'], nullable=False, default='')
 
-    portal = relationship('Portal', secondary='company_portal', back_populates='companies')
+    portal = relationship('Portal', secondary='member_company_portal', back_populates='member_companies')
 
     own_portal = relationship('Portal',
                               back_populates='own_company', uselist=False,
-                              foreign_keys='Portal.company_owner_id',
-                              )
+                              foreign_keys='Portal.company_owner_id')
+
+    member_portal_plan = relationship('Portal',
+                              back_populates='own_company', uselist=False,
+                              foreign_keys='Portal.company_owner_id')
+
     user_owner = relationship('User', back_populates='companies')
     employees = relationship('User',
                              secondary='user_company',

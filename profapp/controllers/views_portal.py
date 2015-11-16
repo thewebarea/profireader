@@ -4,7 +4,7 @@ from ..models.company import Company
 from flask.ext.login import current_user, login_required
 from ..models.portal import PortalDivisionType
 from utils.db_utils import db
-from ..models.portal import CompanyPortal, Portal, PortalLayout, PortalDivision
+from ..models.portal import MemberCompanyPortal, Portal, PortalLayout, PortalDivision
 from ..models.tag import Tag, TagPortal, TagPortalDivision
 from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortalDivision, ArticleCompany
@@ -51,6 +51,7 @@ def create_save(json, create_or_update, company_id):
     member_companies = {company_id: company.get_client_side_dict()}
     company_logo = company.logo_file_relationship.url() if company.logo_file_id else '/static/img/company_no_logo.png'
 
+
     if action == 'load':
         ret = {'company_id': company_id,
                'company_logo': company_logo,
@@ -71,27 +72,26 @@ def create_save(json, create_or_update, company_id):
             # ret['portal'] =
         return ret
     else:
-        portal_json = {key: val for key, val in json['portal'].items() if key in
-                       ['name', 'company_owner_id', 'logo_file_id', 'portal_layout_id', 'host']}
-
+        json_portal = json['portal']
         if create_or_update == 'update':
             pass
         elif create_or_update == 'create':
-            portal = Portal(**portal_json)
+            portal = Portal(**g.filter_json(json_portal, 'name', 'company_owner_id', 'portal_layout_id', 'host'))
             divisions = []
             for division_json in json['portal']['divisions']:
                 custom_settings_data = {}
                 if division_json['portal_division_type_id'] == 'company_subportal':
-                    custom_settings_data['CompanyPortal'] = CompanyPortal(portal=portal,
+                    custom_settings_data['MemberCompanyPortal'] = MemberCompanyPortal(portal=portal,
                                                                           company=Company.get(company_id))
 
                 divisions.append(
                     PortalDivision(portal, PortalDivisionType.get(division_json['portal_division_type_id']),
+                                   position=len(json['portal']['divisions']) - len(divisions),
                                    name=division_json['name'], settings_data=custom_settings_data))
             # self, portal=portal, portal_division_type=portal_division_type, name='', settings={}
             portal.divisions = divisions
         if action == 'save':
-            Portal.setup_created_portal(json['logo_file_id']).save()
+            return portal.setup_created_portal(g.filter_json(json_portal, 'logo_file_id')).save().get_client_side_dict()
         else:
             return portal.validate(create_or_update)
 
@@ -148,10 +148,10 @@ def create_save(json, create_or_update, company_id):
 # @check_rights(simple_permissions([]))
 @ok
 def apply_company(json):
-    CompanyPortal.apply_company_to_portal(company_id=json['company_id'],
+    MemberCompanyPortal.apply_company_to_portal(company_id=json['company_id'],
                                           portal_id=json['portal_id'])
     return {'portals_partners': [portal.portal.to_dict(
-        'name, company_owner_id,id') for portal in CompanyPortal.get_portals(json['company_id'])],
+        'name, company_owner_id,id') for portal in MemberCompanyPortal.get_portals(json['company_id'])],
             'company_id': json['company_id']}
 
 
@@ -430,9 +430,9 @@ def partners(company_id):
 def partners_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
     companies_partners = [comp.to_dict('id, name') for comp in
-                          portal.companies] if portal else []
+                          portal.member_companies] if portal else []
     portals_partners = [port.portal.to_dict('name, company_owner_id, id')
-                        for port in CompanyPortal.get_portals(
+                        for port in MemberCompanyPortal.get_portals(
             company_id) if port]
     user_rights = list(g.user.user_rights_in_company(company_id))
     return {'portal': portal.to_dict('name') if portal else [],
