@@ -91,7 +91,7 @@ def create_save(json, create_or_update, company_id):
             # self, portal=portal, portal_division_type=portal_division_type, name='', settings={}
             portal.divisions = divisions
         if action == 'save':
-            Portal.setup_created_portal(json['logo_file_id']).save()
+            Portal.setup_created_portal(json['company_logo']).save()
         else:
             return portal.validate(create_or_update)
 
@@ -416,28 +416,46 @@ def profile_edit_load(json, portal_id):
             'tag': tags_dict}
 
 
-@portal_bp.route('/partners/<string:company_id>/', methods=['GET'])
+@portal_bp.route('/portals_partners/<string:company_id>/', methods=['GET'])
 @login_required
 # @check_rights(simple_permissions([]))
-def partners(company_id):
-    return render_template('company/company_partners.html', company_id=company_id)
+def portals_partners(company_id):
+    return render_template('company/portals_partners.html', company_id=company_id)
 
 
-@portal_bp.route('/partners/<string:company_id>/', methods=['POST'])
+@portal_bp.route('/portals_partners/<string:company_id>/', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([]))
 @ok
-def partners_load(json, company_id):
+def portals_partners_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
-    companies_partners = [comp.to_dict('id, name') for comp in
-                          portal.companies] if portal else []
     portals_partners = [port.portal.to_dict('name, company_owner_id, id')
                         for port in CompanyPortal.get_portals(
             company_id) if port]
     user_rights = list(g.user.user_rights_in_company(company_id))
     return {'portal': portal.to_dict('name') if portal else [],
-            'companies_partners': companies_partners,
             'portals_partners': portals_partners,
+            'company_id': company_id,
+            'user_rights': user_rights}
+
+@portal_bp.route('/companies_partners/<string:company_id>/', methods=['GET'])
+@login_required
+# @check_rights(simple_permissions([]))
+def companies_partners(company_id):
+    return render_template('company/companies_partners.html', company_id=company_id)
+
+
+@portal_bp.route('/companies_partners/<string:company_id>/', methods=['POST'])
+@login_required
+# @check_rights(simple_permissions([]))
+@ok
+def companies_partners_load(json, company_id):
+    portal = db(Company, id=company_id).one().own_portal
+    companies_partners = [comp.to_dict('id, name') for comp in
+                          portal.companies] if portal else []
+    user_rights = list(g.user.user_rights_in_company(company_id))
+    return {'portal': portal.to_dict('name') if portal else [],
+            'companies_partners': companies_partners,
             'company_id': company_id,
             'user_rights': user_rights}
 
