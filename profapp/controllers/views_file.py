@@ -8,7 +8,7 @@ from time import gmtime, strftime
 import sys
 import re
 from ..models.articles import Article, ArticlePortalDivision
-from ..models.portal import CompanyPortal, PortalDivision, Portal
+from ..models.portal import MemberCompanyPortal, PortalDivision, Portal
 from config import Config
 from utils.db_utils import db
 from ..models.company import Company
