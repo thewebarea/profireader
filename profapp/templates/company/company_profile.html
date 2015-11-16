@@ -13,11 +13,14 @@
         {% include 'company/company_base.html' %}
     {% endblock company_base %}
 
-    <h2><img src="{{ company_logo }}" height="100" width="100"> {{ company.name }}
-        {% if 'manage_rights_company' in user_rights %}
-            <a href="{{ url_for('company.update', company_id=company.id) }}">Edit company</a>
+    <h1 class="nice-title">{{ company.name }}<span></span></h1>
+    {% if 'manage_rights_company' in user_rights %}
+            <a class="h1-btn icon icon-draw-pen" href="{{ url_for('company.update', company_id=company.id) }}" title="Edit company"></a>
         {% endif %}
-    </h2>
+
+    <br />
+
+    <img src="{{ company_logo }}" height="200" width="200">
 
     {% if 'manage_rights_company' in user_rights and not company.own_portal %}
         <a href="{{ url_for('portal.create', company_id=company.id) }}">Create Portal</a>

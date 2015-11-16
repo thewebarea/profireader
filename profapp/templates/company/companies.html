@@ -48,7 +48,7 @@
                     $scope.selectedCompany = null;
                     $scope.selectedCompany_name = null;
                     $scope.data['companies'] = resp['companies'];
-{#TODO OZ BY VK: javascript error                #}
+                    {#TODO OZ BY VK: javascript error                #}
                     setTimeout(function () {
                         scrool($('#joined_company_' + resp['companies']['id']), {
                             afterScroll: function () {
@@ -68,21 +68,32 @@
 
     <div ng-init="loadData()" ng-controller="companies_list">
         <h1 class="nice-title">COMPANY LIST<span></span></h1>
-        <a class="" href="{{ url_create_own_company }}">{{ _('CREATE OWN COMPANY') }}</a>
+        <a class="h1-btn icon icon-add" href="{{ url_create_own_company }}" title="{{ _('CREATE OWN COMPANY') }}"></a>
+
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
-            <div ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">
-
-                <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{
-                    _('Company name is `%(name)s`' + (my_emploer.author_user_id==data.user_id?' - YOUR OWN COMPANY':''), my_emploer) }}
-                </a>
-                (<span ng-if="!my_emploer.own_portal.host">no portal created</span><a ng-if="my_emploer.own_portal.host" href="http://{{ my_emploer.own_portal.host }}">http://{{ my_emploer.own_portal.host }}</a>)
-                <br/>
+            <div class="one-company" ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">
+                <div class="company-item">
+                    <img src="" />
+                    <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{
+                        _('Company name is `%(name)s`' + (my_emploer.author_user_id==data.user_id?' - YOUR OWN
+                        COMPANY':''), my_emploer) }}
+                    </a>
+                    (<span ng-if="!my_emploer.own_portal.host">no portal created</span><a
+                        ng-if="my_emploer.own_portal.host" href="http://{{ my_emploer.own_portal.host }}">http://{{
+                    my_emploer.own_portal.host }}</a>)
+                    <br/>
+                </div>
 
             </div>
-            <div ng-repeat="non_active_employer in data.non_active_user_company_status" id="joined_company_{{ non_active_employer.id }}">
-                <a href="{{ url_company_profile({company_id: non_active_employer.id}) }}">{{ _('Company name is `%(name)s` - NON ACTIVE',
-                    non_active_employer) }}</a><br/>
+            <br />
+            <div class="one-company" ng-repeat="non_active_employer in data.non_active_user_company_status"
+                 id="joined_company_{{ non_active_employer.id }}">
+                <div class="company-item">
+                    <a href="{{ url_company_profile({company_id: non_active_employer.id}) }}">{{ _('Company name is
+                        `%(name)s` - NON ACTIVE',
+                        non_active_employer) }}</a>
+                </div>
             </div>
         </div>
 
