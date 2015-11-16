@@ -261,16 +261,16 @@ def update_croped_image(original_image_id, coordinates):
 def crop_with_coordinates(image, coordinates,  ratio=Config.IMAGE_EDITOR_RATIO,
                           height=Config.HEIGHT_IMAGE):
     size = (int(ratio*height), height)
-    image = Image.open(BytesIO(image.file_content.content))
+    image_pil = Image.open(BytesIO(image.file_content.content))
     area = [int(a) for a in (coordinates['x'], coordinates['y'], coordinates['width'],
                              coordinates['height'])
-            if int(a) in range(0, max(image.size))]
+            if int(a) in range(0, max(image_pil.size))]
 
     if area:
         angle = int(coordinates["rotate"])*-1
         area[2] = (area[0]+area[2])
         area[3] = (area[1]+area[3])
-        rotated = image.rotate(angle)
+        rotated = image_pil.rotate(angle)
         cropped = rotated.crop(area).resize(size)
         bytes_file = BytesIO()
         cropped.save(bytes_file, image.mime.split('/')[-1].upper())
