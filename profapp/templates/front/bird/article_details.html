@@ -23,7 +23,9 @@
 {#            <img class="article-cover"#}
 {#             style="background-image: url({{ file_url(article['image_file_id']) }});"/>#}
             <div class="s-cover-l"
-             style="background-image: url({{ file_url(article['image_file_id']) }});"/></div> {{ article['long'] | safe }} </div>
+             style="background-image: url({{ file_url(article['image_file_id']) }});"></div>
+           {{ article['long'] | safe }}
+        </div>
 
 
         <!--                <a class="btn btn-primary" href="#">Read More <span-->

@@ -78,7 +78,7 @@ class ArticlePortalDivision(Base, PRBase):
             join(TagPortalDivision).\
             join(TagPortalDivisionArticle).\
             filter(TagPortalDivisionArticle.article_portal_division_id==self.id)
-        tags = map(lambda x: x[0], query.all())
+        tags = list(map(lambda x: x[0], query.all()))
         return tags
 
     portal = relationship('Portal',

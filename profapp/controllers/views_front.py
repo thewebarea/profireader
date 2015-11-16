@@ -58,14 +58,12 @@ def index(page=1):
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
                                                       portal_division_type_id='index').one()
     articles, pages, page = pagination(query=sub_query, page=page)
+    articles_dict = {a.id: dict(list(a.get_client_side_dict().items()) +
+                                list({'tags': a.tags}.items()))
+                     for a in articles}
 
     return render_template('front/bird/index.html',
-                           # articles={a.id: dict(list(a.get_client_side_dict().items()) +
-                           #                      list({'tags': a.tags}))
-                           #           for a in articles},
-                           articles={a.id: dict(list(a.get_client_side_dict().items()) +
-                                                list({'tags': a.tags}.items()))
-                                     for a in articles},
+                           articles=articles_dict,
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
                            pages=pages,
