@@ -14,8 +14,10 @@
                 <p>{{ articles[article_id]['short']|safe }}</p>
             </div>
 
-            <div class="...">
-                Теги: ...
+            <div class="tag-list">
+                {% for tag in articles[article_id]['tags'] %}
+                    <a href="#">{{ tag }}</a>
+                {% endfor %}
             </div>
 
             <div class="item-additional-info">

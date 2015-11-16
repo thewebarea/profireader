@@ -31,12 +31,9 @@
 
 
         <div class="tag-list">
-            <a href="#">tag1</a>
-            <a href="#">tag2</a>
-            <a href="#">tag3</a>
-            <a href="#">tag4</a>
-            <a href="#">tag5</a>
-            <a href="#">tag6</a>
+            {% for tag in article['tags'] %}
+                <a href="#">{{ tag }}</a>
+            {% endfor %}
         </div>
 
     </div>
