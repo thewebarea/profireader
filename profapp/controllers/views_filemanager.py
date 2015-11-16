@@ -50,8 +50,8 @@ def filemanager():
     err = True if len(library) == 0 else False
     return render_template('filemanager.html', library=library,err=err,
                            file_manager_called_for=file_manager_called_for,
-                           file_manager_on_action = file_manager_on_action,
-                           file_manager_default_action = file_manager_default_action)
+                           file_manager_on_action=file_manager_on_action,
+                           file_manager_default_action=file_manager_default_action)
 
 
 @filemanager_bp.route('/list/', methods=['POST'])

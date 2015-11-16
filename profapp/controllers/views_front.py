@@ -10,6 +10,7 @@ from config import Config
 from .pagination import pagination
 from sqlalchemy import Column, ForeignKey, text
 
+
 def get_division_for_subportal(portal_id, member_company_id):
     q = g.db().query(PortalDivisionSettings_company_subportal). \
         join(MemberCompanyPortal,
@@ -57,11 +58,12 @@ def index(page=1):
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
                                                       portal_division_type_id='index').one()
     articles, pages, page = pagination(query=sub_query, page=page)
+    articles_dict = {a.id: dict(list(a.get_client_side_dict().items()) +
+                                list({'tags': a.tags}.items()))
+                     for a in articles}
 
     return render_template('front/bird/index.html',
-                           articles={a.id: dict(list(a.get_client_side_dict().items()) +
-                                              list({'main_tags': {'foo': 'one_tag'}}.items()))
-                                     for a in articles},
+                           articles=articles_dict,
                            portal=portal_and_settings(portal),
                            current_division=division.get_client_side_dict(),
                            pages=pages,
@@ -119,7 +121,7 @@ def details(article_portal_division_id):
                                    'publishing_tm, keywords, status, long, image_file_id,'
                                    'division.name, division.portal.id,'
                                    'company.name')
-    article_dict['tags'] = {'foo': 'one tag', 'bar': 'second tag'}
+    article_dict['tags'] = article.tags
 
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
@@ -132,10 +134,8 @@ def details(article_portal_division_id):
                            current_division=division.get_client_side_dict(),
                            articles_related={a.id: a.to_dict('id, title, cr_tm, company.name|id') for a
                                              in related_articles},
-                           article=article.to_dict('id, title,short, cr_tm, md_tm, '
-                                                   'publishing_tm, status, long, image_file_id,'
-                                                   'division.name, division.portal.id,'
-                                                   'company.name|id'))
+                           article=article_dict
+                           )
 
 
 @front_bp.route(
@@ -175,7 +175,6 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
                            current_page=page,
                            page_buttons=Config.PAGINATION_BUTTONS,
                            search_text=search_text)
-
 
 
 @front_bp.route('_c/<string:member_company_id>/<string:member_company_name>/')
