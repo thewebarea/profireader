@@ -171,7 +171,6 @@ def send(parent_id):
                              parent_folder_id=parent_id)
         youtube.upload()
     else:
-
         File.upload(name, data, parent.id, root, content=uploaded_file.stream.read(-1))
     return jsonify({'result': {'size': 0}})
 
