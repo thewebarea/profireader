@@ -15,6 +15,7 @@
         module.controller('companies_list', ['$scope', '$ok', function ($scope, $ok) {
 
             $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
+            $scope.url_portal_profile = {{ raw_url_for('portal.profile')|safe }};
             $scope.url_search_for_company = {{ raw_url_for('company.search_for_company_to_join')|safe }};
             $scope.url_join = {{ raw_url_for('company.join_to_company')|safe }};
             $scope.url_create_own_company = '{{ url_for('company.update')|safe }}';
@@ -72,16 +73,17 @@
 
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
-            <div class="one-company" ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">
+            <div class="one-company" ng-repeat="my_employer in data.companies" id="joined_company_{{ my_employer.id }}">
                 <div class="company-item">
                     <img class="company-logo" src="{{ company_logo }}">
-                    <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{
-                        _('Company name is `%(name)s`' + (my_emploer.author_user_id==data.user_id?' - YOUR OWN
-                        COMPANY':''), my_emploer) }}
+                    <a href="{{ url_company_profile({company_id: my_employer.id}) }}">{{
+                        _('Company name is `%(name)s`' + (my_employer.author_user_id==data.user_id?' - YOUR OWN
+                        COMPANY':''), my_employer) }}
                     </a>
-                    (<span ng-if="!my_emploer.own_portal.host">no portal created</span><a
-                        ng-if="my_emploer.own_portal.host" href="http://{{ my_emploer.own_portal.host }}">http://{{
-                    my_emploer.own_portal.host }}</a>)
+                    (<span ng-if="!my_employer.own_portal.host">no portal created</span><a
+                        ng-if="my_employer.own_portal.host" href="http://{{ my_employer.own_portal.host }}">http://{{
+                    my_employer.own_portal.host }}</a>)
+                    <!-- <a href="{{ url_portal_profile({portal_id: my_employer.own_portal.id}) }}">[edit portal profile]</a> -->
                     <br/>
                 </div>
 

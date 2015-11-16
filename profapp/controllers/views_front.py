@@ -177,7 +177,6 @@ def subportal_division(division_name, member_company_id, member_company_name, pa
                            search_text=search_text)
 
 
-
 @front_bp.route('_c/<string:member_company_id>/<string:member_company_name>/')
 def subportal(member_company_id, member_company_name, page=1):
     search_text, portal, sub_query = get_params()
