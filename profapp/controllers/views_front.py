@@ -14,7 +14,7 @@ from sqlalchemy import Column, ForeignKey, text
 def get_division_for_subportal(portal_id, member_company_id):
     q = g.db().query(PortalDivisionSettings_company_subportal). \
         join(MemberCompanyPortal,
-             MemberCompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
+             MemberCompanyPortal.id == PortalDivisionSettings_company_subportal.member_company_portal_id). \
         join(PortalDivision,
              PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
         filter(MemberCompanyPortal.company_id == member_company_id). \
@@ -44,7 +44,7 @@ def portal_and_settings(portal):
         if di['portal_division_type_id'] == 'company_subportal':
             pdset = g.db().query(PortalDivisionSettings_company_subportal).\
                 filter_by(portal_division_id=di['id']).one()
-            com_port = g.db().query(MemberCompanyPortal).get(pdset.company_portal_id)
+            com_port = g.db().query(MemberCompanyPortal).get(pdset.member_company_portal_id)
             di['member_company'] = Company.get(com_port.company_id)
         newd.append(di)
     ret['divisions'] = newd
