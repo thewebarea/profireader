@@ -2087,3 +2087,10 @@ a.title-btn {
 .one-company{
     display: inline-block;
 }
+
+.company-logo{
+    height: 150px;
+    width: 100%;
+    background-color: #ccc;
+
+}

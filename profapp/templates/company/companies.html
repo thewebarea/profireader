@@ -67,14 +67,14 @@
     {% raw %}
 
     <div ng-init="loadData()" ng-controller="companies_list">
-        <h1 class="nice-title">COMPANY LIST<span></span></h1>
+        <h1 class="nice-title">Company list<span></span></h1>
         <a class="h1-btn icon icon-add" href="{{ url_create_own_company }}" title="{{ _('CREATE OWN COMPANY') }}"></a>
 
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
             <div class="one-company" ng-repeat="my_emploer in data.companies" id="joined_company_{{ my_emploer.id }}">
                 <div class="company-item">
-                    <img src="" />
+                    <img class="company-logo" src="{{ company_logo }}">
                     <a href="{{ url_company_profile({company_id: my_emploer.id}) }}">{{
                         _('Company name is `%(name)s`' + (my_emploer.author_user_id==data.user_id?' - YOUR OWN
                         COMPANY':''), my_emploer) }}
@@ -90,6 +90,7 @@
             <div class="one-company" ng-repeat="non_active_employer in data.non_active_user_company_status"
                  id="joined_company_{{ non_active_employer.id }}">
                 <div class="company-item">
+                    <img class="company-logo" src="{{ company_logo }}">
                     <a href="{{ url_company_profile({company_id: non_active_employer.id}) }}">{{ _('Company name is
                         `%(name)s` - NON ACTIVE',
                         non_active_employer) }}</a>
@@ -98,7 +99,10 @@
         </div>
 
         <hr/>
-        {{ _('join also to company') }} <input typeahead-on-select="onSelect($item, $model, $label)"
+        <h1 class="nice-title">{{ _('Join also to company') }}<span></span></h1>
+        <br />
+
+        <input typeahead-on-select="onSelect($item, $model, $label)"
                                                typeahead-template-url="typeaheadTemplate.html"
                                                typeahead-loading="loadingCompanies"
                                                ng-model="selectedCompany_name"

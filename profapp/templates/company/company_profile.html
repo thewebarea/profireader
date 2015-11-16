@@ -20,7 +20,7 @@
 
     <br />
 
-    <img src="{{ company_logo }}" height="200" width="200">
+    <img src="{{ company_logo }}" height="200" width="200" vspace="10">
 
     {% if 'manage_rights_company' in user_rights and not company.own_portal %}
         <a href="{{ url_for('portal.create', company_id=company.id) }}">Create Portal</a>
