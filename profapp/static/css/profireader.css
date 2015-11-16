@@ -54,8 +54,17 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 }
 
 .topbar-menu-links a.navbar-brand {
-    padding: 0 5px;
+    padding: 0px;
+    /*position: absolute;*/
 }
+
+.topbar-menu-links .navbar-brand img,
+.topbar-menu-links .navbar-brand{
+    height: 30px;
+    width: auto;
+}
+
+
 
 ul.user-auth li a {
     height: 100%;
@@ -163,7 +172,11 @@ h1 {
 }
 
 
-h1 span{
+h1.nice-title{
+    padding-bottom: 11px;
+}
+
+h1.nice-title span{
     position: absolute;
     top: -10px;
     left: 0;
@@ -1719,7 +1732,7 @@ form {
     display: block;
     width: 1170px;
     margin-left: -15px;
-    background: #fcc;
+    background: #dadada;
     font-size: 0;
 }
 
@@ -1733,7 +1746,7 @@ form {
 .topbar-menu-links span {
     font-size: 16px;
     padding: 7px 15px;
-    border-right: 1px #fff dotted;
+    border-right: 1px #bbb dotted;
 
     background: transparent;
 }
@@ -2042,4 +2055,42 @@ a.title-btn {
     border: 1px solid #ccc;
     padding: 15px;
     margin-top: -1px;
+}
+
+.h1-btn{
+    position: relative;
+    display: inline-block;
+    background-color: #656565;
+    color: #eee;
+    font-weight: bolder;
+    padding: 11px;
+    top: -3px;
+}
+
+
+.h1-btn:hover{
+    color: #fff;
+    background: #CA2027;
+}
+
+.company-item{
+    position: relative;
+    display: inline-block;
+    width: 300px;
+    height: 300px;
+    background: #eee;
+    border-color: #ccc;
+    padding: 10px;
+    margin: 0px 15px 15px 0px;
+}
+
+.one-company{
+    display: inline-block;
+}
+
+.company-logo{
+    height: 150px;
+    width: 100%;
+    background-color: #ccc;
+
 }
