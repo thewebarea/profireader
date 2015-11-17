@@ -511,19 +511,12 @@ def publications_load(json, company_id):
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
 
-    return {'articles': [a.get_client_side_dict() for a in articles],
+    return {'materials': [{'article': a.get_client_side_dict() for a in articles}],
             'companies': companies,
-            'search_text': json.get('search_text') or '',
-            'original_search_text': json.get('search_text') or '',
-            'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS},
-            'company_id': company_id,
-            'chosen_status': article_status or statuses['All'],
-            'statuses': statuses,
-            'original_chosen_status': original_chosen_status,
-            'user_rights': list(g.user.user_rights_in_company(company_id))}
+            'statuses': statuses}
 
 
 @portal_bp.route('/publication_details/<string:article_id>/<string:company_id>', methods=['GET'])

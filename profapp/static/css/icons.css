@@ -1047,18 +1047,18 @@
 .icon-draw-paintbrush:before {
   content: "\e0f0";
 }
-.icon-draw-pen:before {
-  content: "\e0f1";
-}
-.icon-draw-pen-add:before {
-  content: "\e0f2";
-}
-.icon-draw-pen-minus:before {
-  content: "\e0f3";
-}
-.icon-draw-pen-reflection:before {
-  content: "\e0f4";
-}
+/*.icon-draw-pen:before {*/
+  /*content: "\e0f1";*/
+/*}*/
+/*.icon-draw-pen-add:before {*/
+  /*content: "\e0f2";*/
+/*}*/
+/*.icon-draw-pen-minus:before {*/
+  /*content: "\e0f3";*/
+/*}*/
+/*.icon-draw-pen-reflection:before {*/
+  /*content: "\e0f4";*/
+/*}*/
 .icon-draw-pencil:before {
   content: "\e0f5";
 }

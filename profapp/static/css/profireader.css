@@ -202,6 +202,7 @@ h3 {
 
 hr {
     border-top-color: #ced5db;
+    clear: both;
 }
 
 /* Font Awesome Icons */
@@ -2076,7 +2077,6 @@ a.title-btn {
 .company-item{
     position: relative;
     display: inline-block;
-    text-align: center;
     width: 300px;
     height: 300px;
     background: #eee;
@@ -2086,7 +2086,7 @@ a.title-btn {
 }
 
 .one-company{
-    display: inline-block;
+    float: left;
 }
 
 .company-logo{
