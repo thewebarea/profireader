@@ -21,9 +21,10 @@
                 return false;
             };
 
-            $scope.portal_id = undefined;
+            $scope.portal_id = ' ';
             $scope.status = undefined;
-            $scope.statuses = {all: undefined};
+            $scope.statuses = {'-- all --': undefined};
+            $scope.portals = {' ': {name: '-- all --'}};
 
             $scope.data = {
                 search_text: '',
@@ -31,45 +32,28 @@
                 portal_id: null,
                 status: null
             };
-            {#            $scope.setFirstPage = function (new_search) {#}
-            {##}
-            {#                var data = $.extend({}, $scope.data);#}
-            {#                if (new_search) {#}
-            {#                    data['search_text'] = new_search;#}
-            {#                }#}
-            {#                $scope.loading = true;#}
-            {#                console.log('aaaaaaa/   ',data);#}
-            {#                $ok($scope.url_search_article({company_id: '{{ company_id }}'}), data, function (resp) {#}
-            {#                    $scope.materials = resp['materials'];#}
-            {#                    $scope.portals = resp['portals'];#}
-            {#                    $scope.statuses = resp['statuses'];#}
-            {#                    $scope.data = resp['data']#}
-            {#                }).finally(function () {#}
-            {##}
-            {#                    $scope.loading = false;#}
-            {#                });#}
-            {#            };#}
+
 
             $scope.new_search_text = '';
 
-            $scope.od = function(o) {
-                return (typeof o) + ' ' + o;
-            };
 
             $scope.sendData = function () {
                 var data = {}
                 data.search_text = $scope.new_search_text;
-                data.status = $scope.status ? $scope.status: null;
-                data.portal_id = $scope.portal_id ? $scope.portal_id: null;
+                data.status = $scope.status ? $scope.status : null;
+                data.portal_id = ($scope.portal_id !== ' ') ? $scope.portal_id : null;
                 data.page = $scope.data.pages.current_page;
                 $ok($scope.url_search_article({company_id: '{{ company_id }}'}), data, function (resp) {
+
                     $scope.data = {pages: resp.pages};
                     $scope.materials = resp.materials;
+
                     $scope.portals = resp.portals;
-                    {#                    $scope.portals.unshift({id: null, name: 'All'});#}
-                    console.log($scope.portals);
+                    $scope.portals[' '] = {name: '-- all --'};
+
                     $scope.statuses = resp.statuses;
-                    $scope.statuses['all'] = undefined;
+                    $scope.statuses['-- all --'] = undefined;
+
                     $scope.search_text = $scope.new_search_text;
                 })
             };
@@ -77,8 +61,6 @@
 
             $scope.change_text_color = function (full_text, search_text) {
                 var re = new RegExp(search_text, "g");
-                {#                full_text = full_text.replace(/#/g, '');#}
-                {#                full_text = full_text.replace(re, '#');#}
                 return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
             }
         }]);
@@ -87,6 +69,7 @@
     {% include 'company/company_base_angular.html' %}
     {% raw %}
     <div ng-init="sendData()" ng-controller="article_list">
+        
         <table style="width:100%">
             <tr>
                 <th width="250px">Date</th>
@@ -101,11 +84,10 @@
                            ng-model="new_search_text"></td>
                 <td>
                     <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="portal_id"
-                            ng-options="port.name for port in portals | orderBy:'id' track by port.id">
+                            ng-options="port_id as port.name for (port_id, port) in portals">
                     </select>
-                    {{ portal_id }}
                 </td>
-                <td>{{ status }}{{ od(status) }}
+                <td>
                     <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="status"
                             ng-options="lab for (lab, val) in statuses track by val">
                     </select>
@@ -124,7 +106,7 @@
                 </a></td>
                 <td>
                     <div ng-repeat="material_portal in material.article.portal_article">
-                        {{ material_portal.portal.name }}<span>{{ material_portal.status }}</span>
+                        {{ material_portal.portal.name }} - <span>{{ material_portal.status }}</span>
                     </div>
 
                     <div ng_if="!material.portals_count">{{ _('not sent') }}</div>
