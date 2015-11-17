@@ -71,7 +71,6 @@ def materials(company_id):
 @login_required
 @ok
 def materials_load(json, company_id):
-    json['status'] = 'published'
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
