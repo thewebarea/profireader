@@ -41,7 +41,7 @@ class File(Base, PRBase):
     cr_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     md_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
     ac_tm = Column(TABLE_TYPES['timestamp'], nullable=False)
-    youtube_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('youtube_video.id'))
+    # youtube_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('youtube_video.id'))
 
     UniqueConstraint('name', 'parent_id', name='unique_name_in_folder')
 
@@ -188,6 +188,7 @@ class File(Base, PRBase):
         actions['properties'] = lambda file: None if file.mime == "root" else True
 
         if file_manager_called_for == 'file_browse_image':
+            default_actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
             actions['choose'] = lambda file: False if None == re.search('^image/.*', file.mime) else True
 
         search_files = File.search(name, parent_id, actions, file_manager_called_for)
@@ -309,8 +310,6 @@ class File(Base, PRBase):
         f = File(parent_id=parent_id, author_user_id=author_user_id,
                  root_folder_id = root_folder_id,
                  name=name, size=0, company_id=company_id, mime='directory')
-        # f = File(parent_id=parent_id, author_user_id=author_user_id, 
-        #          name=name, size=0, company_id=company_id, copyright=copyright, mime='directory')
         g.db.add(f)
         g.db.commit()
         return f.id
@@ -324,29 +323,6 @@ class File(Base, PRBase):
         g.db.commit()
         for x in company.company_folder:
             return x.id
-
-    @staticmethod
-    def upload(name, data, parent, root, content):
-        id = data.get('upload_file_id')
-        if data.get('chunkNumber') == '0':
-            file = File(parent_id=parent,
-                         root_folder_id=root,
-                         name=name,
-                         mime=data.get('ftype'),
-                         size=data.get('totalSize')
-                         ).save()
-            file_cont = FileContent(file=file, content=content)
-            g.db.add(file, file_cont)
-            g.db.commit()
-            session['f_id'] = file.id
-            return file.id
-        else:
-            id = session['f_id']
-            file_cont = FileContent.get(id)
-            cont = bytes(file_cont.content)
-            c =cont + bytes(content)
-            file_cont.updates({'content': c})
-            return id
 
     def set_properties(self, add_all, **kwargs):
         if self == None:
@@ -384,14 +360,12 @@ class File(Base, PRBase):
                 if f.mime == 'directory':
                     File.delfile(f)
                 elif f.mime == 'video/*':
-                    File.delfile(File.get(f.id))
-                    YoutubeVideo.delfile(YoutubeVideo.get(f.youtube_id))
+                    YoutubeVideo.delfile(YoutubeVideo.get(f.id))
                 else:
                     FileContent.delfile(FileContent.get(f.id))
             File.delfile(file)
         elif file.mime == 'video/*':
-            File.delfile(File.get(file.id))
-            YoutubeVideo.delfile(YoutubeVideo.get(file.youtube_id))
+            YoutubeVideo.delfile(YoutubeVideo.get(file.id))
         else:
             FileContent.delfile(FileContent.get(file_id))
         resp = (False if File.get(file_id) else "Success")
@@ -430,7 +404,7 @@ class File(Base, PRBase):
                 dir.detach().attr(attr)
                 dir.save()
                 new_list.append(dir)
-                f = File.save_files(files, dir.id, attr)
+                File.save_files(files, dir.id, attr)
             else:
                 old_list.append(dir.id)
                 files = [file for file in db(File, parent_id=dir.id) if file.mime != 'directory']
@@ -440,8 +414,30 @@ class File(Base, PRBase):
                 dir.detach().attr(attr)
                 dir.save()
                 new_list.append(dir)
-                f = File.save_files(files, dir.id, attr)
+                File.save_files(files, dir.id, attr)
         return old_list, new_list
+
+    @staticmethod
+    def upload(name, data, parent, root, content):
+        if data.get('chunkNumber') == '0':
+            file = File(parent_id=parent,
+                        root_folder_id=root,
+                        name=name,
+                        mime=data.get('ftype'),
+                        size=data.get('totalSize')
+                        ).save()
+            file_cont = FileContent(file=file, content=content)
+            g.db.add(file, file_cont)
+            g.db.commit()
+            session['f_id'] = file.id
+            return file.id
+        else:
+            id = session['f_id']
+            file_cont = FileContent.get(id)
+            cont = bytes(file_cont.content)
+            c = cont + bytes(content)
+            file_cont.updates({'content': c})
+            return id
 
     @staticmethod
     def update_files(files,attr):
@@ -455,7 +451,7 @@ class File(Base, PRBase):
         files = [file for file in db(File, parent_id = id) if file.mime != 'directory']
         c = len(lists)
         c_ = 1
-        f = File.update_files(files, attr)
+        File.update_files(files, attr)
         new_list = []
         for list in lists:
             if c_ <= c:
@@ -479,7 +475,7 @@ class File(Base, PRBase):
         for fil in files_in_parent:
             if fil.mime == 'directory':
                 fil.updates(attr)
-                update_all_dir = File.update_all_in_dir(fil.id, attr)
+                File.update_all_in_dir(fil.id, attr)
             else:
                 fil.updates(attr)
         return files_in_parent
@@ -493,14 +489,14 @@ class File(Base, PRBase):
         root = folder.root_folder_id
         if folder.root_folder_id == None:
             root = folder.id
-        attr = {f:kwargs[f] for f in kwargs}
+        attr = {f: kwargs[f] for f in kwargs}
         attr['name'] = File.get_unique_name(self.name, self.mime, parent_id)
         attr['parent_id'] = parent_id
         attr['root_folder_id'] = root
         copy_file = self.detach().attr(attr)
         copy_file.save()
         if self.mime == 'directory':
-            all_in_dir = File.save_all(id, attr, copy_file.id)
+            File.save_all(id, attr, copy_file.id)
         elif self.mime == 'video/*':
             youtube_video = YoutubeVideo.get(youtube_id).detach()
             copy_file.youtube_video = youtube_video
@@ -527,7 +523,7 @@ class File(Base, PRBase):
         attr['root_folder_id'] = root
         self.updates(attr)
         if self.mime == 'directory':
-            b = File.update_all(self.id, attr)
+            File.update_all(self.id, attr)
         return self.id
 
 
@@ -696,7 +692,7 @@ class YoutubeApi(GoogleAuthorize):
 
     def make_headers_for_resumable_upload(self):
         """ This method make headers for resumable upload videos. Thirst step to start upload """
-        video = db(YoutubeVideo, id=session['video_id']).one()
+        video = db(YoutubeVideo, id=session['id']).one()
         last_byte = self.chunk_info.get('chunk_size') + video.size - 1
         last_byte = self.chunk_info.get('total_size') - 1 if (self.chunk_info.get(
             'chunk_size') + video.size - 1) > self.chunk_info.get('total_size') else last_byte
@@ -737,23 +733,40 @@ class YoutubeApi(GoogleAuthorize):
                 r = req.Request(url=session['url'], headers=headers, method='PUT')
                 response = req.urlopen(r, data=self.video_file,)
                 if response.code == 200 or response.code == 201:
-                    youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                    name = File.get_unique_name(self.body_dict['title'], 'video/*', self.parent_folder_id)
+                    file = File(parent_id=self.parent_folder_id,
+                                root_folder_id=self.root_folder_id,
+                                name=name,
+                                size=self.chunk_info.get('total_size'),
+                                mime='video/*')
+                    youtube = YoutubeVideo(file=file, authorization=session['authorization'].split(' ')[-1],
                                            size=self.chunk_info.get('total_size'),
                                            user_id=g.user_dict['id'],
                                            video_id=session['video_id'],
                                            status='uploaded',
-                                           playlist=playlist).save()
-                    session['video_id'] = youtube.id
+                                           playlist=playlist)
+                    g.db.add(file, youtube)
+                    g.db.commit()
+                    session['id'] = file.id
                     youtube.put_video_in_playlist()
                     return 'success'
         except response_code as e:
             if e.code == 308 and not chunk_number:
-                youtube = YoutubeVideo(authorization=session['authorization'].split(' ')[-1],
+                name = File.get_unique_name(self.body_dict['title'], 'video/*', self.parent_folder_id)
+                file = File(parent_id=self.parent_folder_id,
+                            root_folder_id=self.root_folder_id,
+                            name=name,
+                            size=self.chunk_info.get('total_size'),
+                            mime='video/*')
+                youtube = YoutubeVideo(file=file, authorization=session['authorization'].split(' ')[-1],
                                        size=int(e.headers.get('Range').split('-')[-1])+1,
                                        user_id=g.user_dict['id'],
                                        video_id=session['video_id'],
-                                       playlist=playlist).save()
-                session['video_id'] = youtube.id
+                                       playlist=playlist
+                                       )
+                g.db.add(file, youtube)
+                g.db.commit()
+                session['id'] = file.id
                 youtube.put_video_in_playlist()
                 return 'uploading'
         if chunk_number:
@@ -768,19 +781,12 @@ class YoutubeApi(GoogleAuthorize):
         try:
             response = req.urlopen(r, data=self.video_file)
             if response.code == 200 or response.code == 201:
-                video = db(YoutubeVideo, id=session['video_id'])
+                video = db(YoutubeVideo, id=session['id'])
                 video.update({'size': self.chunk_info.get('total_size'), 'status': 'uploaded'})
-                name = File.get_unique_name(self.body_dict['title'],'video/*',self.parent_folder_id)
-                File(parent_id=self.parent_folder_id,
-                     root_folder_id=self.root_folder_id,
-                     name=name,
-                     size=self.chunk_info.get('total_size'),
-                     mime='video/*',
-                     youtube_id=session['video_id']).save()
                 return 'success'
         except response_code as e:
             if e.code == 308:
-                db(YoutubeVideo, id=session['video_id']).update(
+                db(YoutubeVideo, id=session['id']).update(
                     {'size': int(e.headers.get('Range').split('-')[-1])+1})
             return 'uploading'
 
@@ -789,7 +795,9 @@ class YoutubeVideo(Base, PRBase):
     """ This class make models for youtube videos.
      status video should be 'uploading' or 'uploaded' """
     __tablename__ = 'youtube_video'
-    id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    # id = Column(TABLE_TYPES['id_profireader'], nullable=False, primary_key=True)
+    id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'),
+                primary_key=True)
     video_id = Column(TABLE_TYPES['short_text'])
     title = Column(TABLE_TYPES['name'], default='Title')
     authorization = Column(TABLE_TYPES['token'])
@@ -804,9 +812,10 @@ class YoutubeVideo(Base, PRBase):
                                 backref=backref('youtube_video', uselist=False),
                                 cascade='save-update,delete')
 
-    def __init__(self, title='Title', authorization=None, size=None, user_id=None, video_id=None,
-                 status='uploading', playlist_id=None, playlist=None, file=None):
+    def __init__(self, file=None, title='Title', authorization=None, size=None, user_id=None, video_id=None,
+                 status='uploading', playlist_id=None, playlist=None):
         super(YoutubeVideo, self).__init__()
+        self.file = file
         self.title = title
         self.authorization = authorization
         self.size = size
@@ -815,7 +824,6 @@ class YoutubeVideo(Base, PRBase):
         self.status = status
         self.playlist_id = playlist_id
         self.playlist = playlist
-        self.file = file
 
     def put_video_in_playlist(self):
 
