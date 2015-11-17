@@ -1,7 +1,4 @@
-
-
 {% extends "index_lazy_layout.html" %}
-
 {% block title %}Profireader - Articles{% endblock title %}
 
 {% block portal_content %}
@@ -44,6 +41,7 @@
                     status: null
                 };
 
+
             $scope.materials = [];
 
             $scope.setFirstPage = function () {
@@ -75,12 +73,12 @@
         }]);
 
     </script>
-    {#TODO: VK by OZ: Move this template to separatre js file (take look at filemanager templates)#}
     {% include 'company/company_base_angular.html' %}
     {% raw %}
-    <div ng-init="setFirstPage()" ng-controller="article_list">
+    <div af ng-model="data">
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
+
             <table style="width:100%">
                 <tr>
                     <td>
