@@ -130,16 +130,16 @@ class ArticlePortalDivision(Base, PRBase):
 
     @staticmethod
     def get_companies_which_send_article_to_portal(portal_id):
-        all = {'name': 'All', 'id': 0}
-        companies = []
-        companies.append(all)
+        # all = {'name': 'All', 'id': 0}
+        companies = {}
+        # companies.append(all)
         articles = g.db.query(ArticlePortalDivision).\
             join(ArticlePortalDivision.portal).\
-            filter(Portal.id==portal_id).all()
+            filter(Portal.id == portal_id).all()
         # for article in db(ArticlePortalDivision, portal_id=portal_id).all():
         for article in articles:
-            companies.append(article.company.to_dict('id,name'))
-        return all, [dict(port) for port in set([tuple(p.items()) for p in companies])]
+            companies[article.company.id] = article.company.to_dict('name')
+        return companies
 
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
@@ -148,11 +148,11 @@ class ArticlePortalDivision(Base, PRBase):
 
     @staticmethod
     def subquery_portal_articles(search_text=None, portal_id=None, **kwargs):
-        sub_query = g.db.query(ArticlePortalDivision).\
+        sub_query = g.db.query(ArticlePortalDivision).filter_by(**kwargs).\
             join(ArticlePortalDivision.division).\
             join(PortalDivision.portal).\
-            filter(Portal.id == portal_id).\
-            filter_by(**kwargs)
+            filter(Portal.id == portal_id)\
+
         if search_text:
             sub_query = sub_query.filter(ArticlePortalDivision.title.ilike("%" + search_text + "%"))
         return sub_query
