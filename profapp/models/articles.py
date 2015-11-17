@@ -223,14 +223,14 @@ class ArticleCompany(Base, PRBase):
 
     @staticmethod
     def subquery_user_articles(search_text=None, user_id=None, **kwargs):
-        article_filter = db(ArticleCompany, article_id=Article.id, **kwargs)
-        # article_filter = db(ArticleCompany, **kwargs) # TODO (AA to OZ): it is my suggestion
+        # article_filter = db(ArticleCompany, article_id=Article.id, **kwargs)
+        article_filter = db(ArticleCompany, **kwargs)  # TODO (AA to OZ): it is my suggestion
         if search_text:
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
                 "%" + repr(search_text).strip("'") + "%"))
 
         # TODO (AA to OZ): below is my suggestion
-        # return db(Article, author_user_id=user_id).join(ArticleCompany).order_by(ArticleCompany.md_tm).filter(article_filter.exists())
+        # return db(Article, author_user_id=user_id).join(ArticleCompany).order_by(ArticleCompany.md_tm).filter(article_filter.exists()).filter(ArticleCompany.company_id==None)
         return db(Article, author_user_id=user_id).order_by(Article.mine_version.md_tm).filter(article_filter.exists())
 
     @staticmethod
