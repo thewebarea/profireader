@@ -123,6 +123,7 @@ class ArticlePortalDivision(Base, PRBase):
         for article in db(ArticleCompany, company_id=company_id).all():
             for port in article.portal_article:
                 portals.append(port.portal.to_dict('id,name'))
+        return []
         return all, [dict(port) for port in set([tuple(p.items()) for p in portals])]
 
     @staticmethod
