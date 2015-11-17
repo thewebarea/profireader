@@ -67,50 +67,48 @@
     {% include 'company/company_base_angular.html' %}
     {% raw %}
     <div ng-init="setFirstPage({})" ng-controller="article_list">
-        <div ng-if="loading">Loading...</div>
-        <div ng-if="!loading">
-            <table style="width:100%">
-                <tr>
-                    <th width="250px">Date</th>
-                    <th width="250px">Title</th>
-                    <th width="250px">Portals</th>
-                    <th><p>Status</p></th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="search.text"></td>
-                    <td>
-                        <select style="width: 100%; padding: 5px;" ng-model="data.portal_id"
-                                ng-options="port.name for port in portals | orderBy:'id' track by port.id"></select>
-                    </td>
-                    <td>
-                        <select style="width: 100%; padding: 5px;" ng-model="data.status">
-                            <option ng-repeat="status in statuses">{{ status }}</option>
-                        </select>
-                    </td>
-                    <td><input ng-click="setFirstPage(typed_text)" type="submit" value="search" style="width: 75%;">
-                    </td>
+        <table style="width:100%">
+            <tr>
+                <th width="250px">Date</th>
+                <th width="250px">Title</th>
+                <th width="250px">Portals</th>
+                <th><p>Status</p></th>
+                <th></th>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input ng-disabled="loading" style="width: 98%" type="text" placeholder="Search"
+                           ng-model="search.text"></td>
+                <td>
+                    <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="data.portal_id"
+                            ng-options="port.name for port in portals | orderBy:'id' track by port.id"></select>
+                </td>
+                <td>
+                    <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="data.status">
+                        <option ng-repeat="status in statuses">{{ status }}</option>
+                    </select>
+                </td>
+                <td><input ng-disabled="loading" ng-click="setFirstPage(typed_text)" type="submit" value="{{ loading?'loading...':'search' }}"
+                           style="width: 75%;">
+                </td>
 
-                </tr>
-                <tr ng-repeat="material in materials">
-                    <td>material.md_tm</td>
-                    <td>material.title</td>
-                    <td>
-                        <div ng-repeat="material_portal_id in material.portals">{{ portals[material_portal_id].name }}
-                        </div>
-                        <div ng_if="!material.portals.length">{{ _(''not sent) }}</div>
-                    </td>
-                    <td>material.status</td>
-                    <td></td>
-                </tr>
+            </tr>
+            <tr ng-repeat="material in materials">
+                <td>material.md_tm</td>
+                <td>material.title</td>
+                <td>
+                    <div ng-repeat="material_portal_id in material.portals">{{ portals[material_portal_id].name }}
+                    </div>
+                    <div ng_if="!material.portals.length">{{ _('not sent') }}</div>
+                </td>
+                <td>material.status</td>
+                <td></td>
+            </tr>
 
 
-            </table>
+        </table>
 
-        </div>
-
-        <div ng-include="'pagination.html'"></div>
+        <div ng-show="!loading" ng-include="'pagination.html'"></div>
 
     </div>
     {% endraw %}
