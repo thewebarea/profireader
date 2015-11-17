@@ -446,8 +446,8 @@ def companies_partners(company_id):
 @ok
 def companies_partners_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
-    companies_partners = [comp.to_dict('id, name') for comp in
-                          portal.companies] if portal else []
+    companies_partners = [comp.to_dict('company.id, company.name') for comp in
+                          portal.company_members] if portal else []
     user_rights = list(g.user.user_rights_in_company(company_id))
     return {'portal': portal.to_dict('name') if portal else [],
             'companies_partners': companies_partners,
@@ -489,39 +489,27 @@ def publications_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
     if not portal:
         return dict(portal_not_exist=True)
-    current_page = json.get('pages')['current_page'] if json.get('pages') else 1
-    chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
+    current_page = json.get('page') or 1
     params = {'search_text': json.get('search_text'), 'portal_id': portal.id}
-    article_status = json.get('chosen_status')
-    original_chosen_status = None
-
-    if article_status and article_status != 'All':
-        params['status'] = original_chosen_status = article_status
+    if json.get('status'):
+        params['status'] = json.get('status')
     subquery = ArticlePortalDivision.subquery_portal_articles(**params)
-    if chosen_company_id:
+    if json.get('company_id'):
         subquery = subquery.filter(db(ArticleCompany,
-                                      company_id=chosen_company_id,
+                                      company_id=json.get('company_id'),
                                       id=ArticlePortalDivision.article_company_id).exists())
     articles, pages, current_page = pagination(subquery,
                                                page=current_page,
                                                items_per_page=5)
-    all, companies = ArticlePortalDivision.get_companies_which_send_article_to_portal(portal.id)
+    companies = ArticlePortalDivision.get_companies_which_send_article_to_portal(portal.id)
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
-    statuses['All'] = 'All'
 
-    return {'articles': [a.get_client_side_dict() for a in articles],
+    return {'materials': [{'article': a.get_client_side_dict() for a in articles}],
             'companies': companies,
-            'search_text': json.get('search_text') or '',
-            'original_search_text': json.get('search_text') or '',
-            'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS},
-            'company_id': company_id,
-            'chosen_status': article_status or statuses['All'],
-            'statuses': statuses,
-            'original_chosen_status': original_chosen_status,
-            'user_rights': list(g.user.user_rights_in_company(company_id))}
+            'statuses': statuses}
 
 
 @portal_bp.route('/publication_details/<string:article_id>/<string:company_id>', methods=['GET'])
