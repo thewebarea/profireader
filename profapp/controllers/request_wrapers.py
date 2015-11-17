@@ -9,17 +9,24 @@ from ..models.rights import Right
 from ..constants.STATUS import STATUS_RIGHTS
 from .errors import ImproperRightsDecoratorUse
 from ..controllers import errors
+from ..models.translate import TranslateTemplate
+from utils.db_utils import db
 
 def ok(func):
     @wraps(func)
     def function_json(*args, **kwargs):
         try:
         # sleep(0.5)
+
             if 'json' in kwargs:
                 del kwargs['json']
             a = request.json
             ret = func(a, *args, **kwargs)
-            return jsonify({'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'})
+            ret = {'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'}
+            template = g.req('__translate', default='')
+            if template != '':
+                ret['__translate'] = db(TranslateTemplate, template=template)
+            return jsonify(ret)
         # except Exception as e:
         except errors.ValidationException as e:
             db = getattr(g, 'db', None)

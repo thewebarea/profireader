@@ -52,8 +52,8 @@ function getObjectsDifference(a, b, setval, notstrict) {
 
 angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
     .factory('$ok', ['$http', function ($http) {
-        return function (url, data, ifok, iferror) {
-
+        return function (url, data, ifok, iferror, translate) {
+            //console.log($scope);
             function error(result, error_code) {
                 if (iferror) {
                     iferror(result, error_code)
@@ -63,7 +63,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 }
             }
 
-            return $http.post(url, data).then(
+            return $http.post(url, $.extend({},data, translate?{__translate:translate}:{})).then(
                 function (resp) {
                     if (!resp || !resp['data'] || typeof resp['data'] !== 'object' || resp === null) {
                         return error('wrong response', -1);
@@ -580,8 +580,24 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
 module.run(function ($rootScope, $ok) {
     angular.extend($rootScope, {
         _: function (phrase, dict) {
-            //console.log(this.controllerName);
+            console.log(phrase, dict);
             var scope = this;
+            if (!scope.$$translate) {
+                scope.$$translate = {};
+            }
+            //TODO OZ by OZ hasOwnProperty
+            if (!scope.$$translate[phrase]) {
+                $ok('/url/', {template: this.controllerName, phrase: phrase}, function (resp) {
+                    scope.$$translate[phrase] = resp;
+                });
+                scope.$$translate[phrase] = phrase;
+
+            }
+
+                phrase = scope.$$translate[phrase];
+            alert(scope.$$translate);
+
+
             try {
                 return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {
                     var indexes = g1.split('.')
