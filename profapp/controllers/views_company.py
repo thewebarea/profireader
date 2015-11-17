@@ -76,7 +76,7 @@ def materials_load(json, company_id):
         if company.logo_file_id else '/static/img/company_no_logo.png'
 
     page = json.get('search')['page'] if json.get('search') else 1
-    search_text = json.get('search')['text'] if json.get('search')['text'] else None
+    search_text = json.get('search_text')
     # params = {'search_text': json.get('search_text'), 'company_id': company_id}
     # article_status = json.get('chosen_status')
     # original_chosen_status = None
@@ -94,9 +94,9 @@ def materials_load(json, company_id):
         'id|title|short|long|keywords|cr_tm|md_tm|company_id|article_id|image_file_id|status, company.name, portal_article.status,'
         'portal_article.portal.id') for a in articles}
 
-    portals = db(ArticlePortalDivision.article_company_id, ArticlePortalDivision.portal_division_id).\
+    portals = db(ArticlePortalDivision.article_company_id, ArticlePortalDivision.portal_division_id). \
         join(Company).filter().filter(Company.id == company_id).all()
-        # .get_portals_where_company_send_article(company_id)
+    # .get_portals_where_company_send_article(company_id)
 
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
@@ -106,7 +106,9 @@ def materials_load(json, company_id):
             # 'search_text': json.get('search_text') or '',
             # 'original_search_text': json.get('search_text') or '',
             # 'chosen_portal': json.get('chosen_portal') or all,
+
             'pages': {'total': pages, 'current_page': current_page, 'page_buttons': Config.PAGINATION_BUTTONS},
+
             # 'company_id': company_id,
             # 'chosen_status': article_status or statuses['All'],
             'statuses': statuses,
@@ -282,7 +284,10 @@ def load(json, company_id=None):
         return company.get_client_side_dict()
     else:
         company.attr(g.filter_json(json, 'about', 'address', 'country', 'email', 'name', 'phone',
-                                   'phone2', 'region', 'short_description', 'logo_file_id'))
+                                   'phone2', 'region', 'short_description'))
+        if json['logo_file_id']:
+            company.logo_file_id = json['logo_file_id']
+
         if action == 'save':
             if company_id is None:
                 company.setup_new_company()
