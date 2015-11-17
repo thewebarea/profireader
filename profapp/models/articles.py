@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, aliased
 from sqlalchemy.sql import expression
 from ..constants.TABLE_TYPES import TABLE_TYPES
 # from db_init import db_session
@@ -135,8 +135,8 @@ class ArticlePortalDivision(Base, PRBase):
         # all = {'name': 'All', 'id': 0}
         companies = {}
         # companies.append(all)
-        articles = g.db.query(ArticlePortalDivision).\
-            join(ArticlePortalDivision.portal).\
+        articles = g.db.query(ArticlePortalDivision). \
+            join(ArticlePortalDivision.portal). \
             filter(Portal.id == portal_id).all()
         # for article in db(ArticlePortalDivision, portal_id=portal_id).all():
         for article in articles:
@@ -150,9 +150,9 @@ class ArticlePortalDivision(Base, PRBase):
 
     @staticmethod
     def subquery_portal_articles(search_text=None, portal_id=None, **kwargs):
-        sub_query = g.db.query(ArticlePortalDivision).filter_by(**kwargs).\
-            join(ArticlePortalDivision.division).\
-            join(PortalDivision.portal).\
+        sub_query = g.db.query(ArticlePortalDivision).filter_by(**kwargs). \
+            join(ArticlePortalDivision.division). \
+            join(PortalDivision.portal). \
             filter(Portal.id == portal_id).order_by(expression.desc(ArticlePortalDivision.publishing_tm))
 
         if search_text:
@@ -228,7 +228,13 @@ class ArticleCompany(Base, PRBase):
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
                 "%" + repr(search_text).strip("'") + "%"))
 
-        return db(Article, author_user_id=user_id).filter(article_filter.exists())
+        own_article = aliased(ArticleCompany, name="OwnArticle")
+
+        return db(Article, own_article.md_tm, author_user_id=user_id). \
+            join(own_article,
+                 and_(Article.id == own_article.article_id, own_article.company_id == None)). \
+            order_by(expression.desc(own_article.md_tm)). \
+            filter(article_filter.exists())
 
     @staticmethod
     def subquery_company_articles(search_text=None, company_id=None, portal_id=None, **kwargs):
