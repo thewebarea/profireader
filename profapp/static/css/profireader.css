@@ -162,7 +162,7 @@ h1 {
     /*background: #CA2027;*/
     background: #777777;
     color: #fff;
-    margin-left: -25px;
+    /*margin-left: -25px;*/
     padding: 10px 15px 10px 25px;
     font-size: 28px;
     line-height: 28px;
@@ -1608,22 +1608,22 @@ fieldset[disabled] .btn-tales-two.active {
 }
 
 a {
-    color: #b31f26;
+    color: #3E090B;
 }
 
 a:hover {
-    color: #fc222d;
+    color: #8A2121;
 }
 
 input {
     width: 300px;
-    margin: 3px;
+    /*margin: 3px;*/
     padding: 1px 3px;
 }
 
 textarea {
     width: 300px;
-    margin: 3px;
+    /*margin: 3px;*/
     padding: 1px 3px;
 }
 
@@ -2076,12 +2076,13 @@ a.title-btn {
 .company-item{
     position: relative;
     display: inline-block;
+    text-align: center;
     width: 300px;
     height: 300px;
     background: #eee;
     border-color: #ccc;
-    padding: 10px;
-    margin: 0px 15px 15px 0px;
+    padding-top: 20px;
+    margin: 0px 25px 15px 0px;
 }
 
 .one-company{
