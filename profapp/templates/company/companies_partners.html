@@ -23,10 +23,6 @@
                 }
                 return true;
             };
-            $scope.companies_partners_text = '';
-            $scope.companies_partner = function (a) {
-            $scope.companies_partners_text = a
-            };
             $scope.afterSave = function (resp) {
             window.location.href = $scope.partners({company_id: resp['company_id']})
             };
@@ -38,14 +34,10 @@
         <h3>This company does not have portal</h3>
     </div>
     <div ng-if="data.portal!=''">
-        <span ng-if="data.companies_partners!=''">
-            <h3>{{ companies_partners_text }}
-                {{ companies_partner('There are no companies partners on this portal') }}
+        <span>
+            <h3>Companies partners :
                 <span ng-repeat="company in data.companies_partners">
                     <span ng-if="company.id!=data.company_id">
-                        <span hidden>
-                            {{ companies_partner('Companies partners :') }}
-                        </span>
                     <a href="{{ url_company_profile({company_id: company.id}) }}"> "{{ company.name }}"</a>
                     </span>
                </span>

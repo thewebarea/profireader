@@ -14,6 +14,7 @@
 
     <div class="form info">
         {#<img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}"><br>#}
+
         <div class="profile-thumbnail" style="background-image: url('{{ user.profireader_avatar_url }}');">
             <div class="control">
                 <a ng-click="mySwitch = !mySwitch">
@@ -25,6 +26,7 @@
                 </form>
             </div>
         </div>
+
 
         {#<a>#}
         {#    <span ng-hide="mySwitch">[use gravatar]</span>#}
@@ -38,7 +40,6 @@
         </form>
 
         </div>
-
         <form action="{{ url_for('user.edit_profile', user_id=user.id) }}" onsubmit="return AjaxPost()" method="post">
             <div class="item"><span>Your display name:</span><input type="text" placeholder="name" name="name"
                                                                     value="{{ user.profireader_name }}"></div>
@@ -72,7 +73,6 @@
             </div>
             <div class="item"><span></span><input type="submit" value="Update Profile" name="submit"></div>
         </form>
-
     </div>
 
     {#<form class="send coordinates" action="{{ url_for('article.update', article_version_id = article_version.id) }}" onsubmit="return AjaxPost()" id="edit" method="post">#}

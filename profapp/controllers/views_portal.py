@@ -448,8 +448,8 @@ def companies_partners(company_id):
 @ok
 def companies_partners_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
-    companies_partners = [comp.to_dict('id, name') for comp in
-                          portal.companies] if portal else []
+    companies_partners = [comp.to_dict('company.id, company.name') for comp in
+                          portal.company_members] if portal else []
     user_rights = list(g.user.user_rights_in_company(company_id))
     return {'portal': portal.to_dict('name') if portal else [],
             'companies_partners': companies_partners,

@@ -117,16 +117,16 @@ class ArticlePortalDivision(Base, PRBase):
     @staticmethod
     def get_portals_where_company_send_article(company_id):
 
-        return db(ArticlePortalDivision, company_id=company_id).group_by.all()
+        # return db(ArticlePortalDivision, company_id=company_id).group_by.all()
 
-        all = {'name': 'All', 'id': 0}
-        portals = []
-        portals.append(all)
+        # all = {'name': 'All', 'id': 0}
+        portals = {}
+        # portals['0'] = {'name': 'All'}
+        # portals.append(all)
         for article in db(ArticleCompany, company_id=company_id).all():
             for port in article.portal_article:
-                portals.append(port.portal.to_dict('id,name'))
-        return []
-        return all, [dict(port) for port in set([tuple(p.items()) for p in portals])]
+                portals[port.portal.id] = port.portal.to_dict('name')
+        return portals
 
     @staticmethod
     def get_companies_which_send_article_to_portal(portal_id):
@@ -190,7 +190,7 @@ class ArticleCompany(Base, PRBase):
                                           'long|keywords|cr_tm|md_tm|company_id|'
                                           'article_id|image_file_id|'
                                           'status, company.name, portal_article.status,'
-                                          'portal_article.portal.name'):
+                                          'portal_article.portal.name,portal_article.portal.id'):
         return self.to_dict(fields)
 
     def validate(self, action):
