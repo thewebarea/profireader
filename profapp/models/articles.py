@@ -117,6 +117,8 @@ class ArticlePortalDivision(Base, PRBase):
     @staticmethod
     def get_portals_where_company_send_article(company_id):
 
+        return db(ArticlePortalDivision, company_id=company_id).group_by.all()
+
         all = {'name': 'All', 'id': 0}
         portals = []
         portals.append(all)
