@@ -75,7 +75,7 @@ def materials_load(json, company_id):
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
 
-    page = json.get('page') if json.get('search') else 1
+    page = json.get('page') or 1
     search_text = json.get('search_text')
     params = {}
     if json.get('status'):
