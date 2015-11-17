@@ -3,18 +3,18 @@ from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompany, Right, RightHumnReadible
-# from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
 from ..models.portal import PortalDivision
-from ..models.tag import TagPortalDivisionArticle
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import MemberCompanyPortal
 from ..models.articles import ArticleCompany, ArticlePortalDivision
 from utils.db_utils import db
 from collections import OrderedDict
+from ..models.tag import TagPortalDivisionArticle
+# from ..models.rights import list_of_RightAtomic_attributes
 # from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
