@@ -75,21 +75,23 @@ def materials_load(json, company_id):
     company_logo = company.logo_file_relationship.url() \
         if company.logo_file_id else '/static/img/company_no_logo.png'
 
-    current_page = json.get('pages')['current_page'] if json.get('pages') else 1
-    chosen_portal_id = json.get('chosen_portal')['id'] if json.get('chosen_portal') else 0
-    params = {'search_text': json.get('search_text'), 'company_id': company_id}
-    article_status = json.get('chosen_status')
-    original_chosen_status = None
+    page = json.get('search')['page'] if json.get('search') else 1
+    search_text = json.get('search')['text'] if json.get('search')['text'] else None
+    # params = {'search_text': json.get('search_text'), 'company_id': company_id}
+    # article_status = json.get('chosen_status')
+    # original_chosen_status = None
+    # original_chosen_status
 
-    if chosen_portal_id:
-        params['portal_id'] = chosen_portal_id
-    if article_status and article_status != 'All':
-        params['status'] = original_chosen_status = article_status
-    subquery = ArticleCompany.subquery_company_articles(**params)
-    articles, pages, current_page = pagination(subquery,
-                                               page=current_page,
-                                               items_per_page=5)
-    all, portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
+    # if chosen_portal_id:
+    #     params['portal_id'] = chosen_portal_id
+    # if article_status:
+    #     params['status'] = article_status
+    subquery = ArticleCompany.subquery_company_articles(search_text=search_text, company_id=company_id,
+                                                        **json.get('filter'))
+    articles, pages, current_page = pagination(subquery, page=page, items_per_page=5)
+    portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
+
+
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
 
@@ -97,17 +99,16 @@ def materials_load(json, company_id):
                           'portals_count': len(a.get_client_side_dict()['portal_article']) + 1}
                          for a in articles],
             'portals': portals,
-            'search_text': json.get('search_text') or '',
-            'original_search_text': json.get('search_text') or '',
-            'chosen_portal': json.get('chosen_portal') or all,
-            'pages': {'total': pages,
-                      'current_page': current_page,
-                      'page_buttons': Config.PAGINATION_BUTTONS},
-            'company_id': company_id,
-            'chosen_status': article_status or statuses['All'],
+            # 'search_text': json.get('search_text') or '',
+            # 'original_search_text': json.get('search_text') or '',
+            # 'chosen_portal': json.get('chosen_portal') or all,
+            'pages': {'total': pages, 'current_page': current_page, 'page_buttons': Config.PAGINATION_BUTTONS},
+            # 'company_id': company_id,
+            # 'chosen_status': article_status or statuses['All'],
             'statuses': statuses,
-            'original_chosen_status': original_chosen_status,
-            'company_logo': company_logo}
+            # 'original_chosen_status': original_chosen_status,
+            # 'company_logo': company_logo
+            }
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['GET'])
@@ -214,7 +215,6 @@ def profile(company_id):
 @login_required
 # @check_rights(simple_permissions([]))
 def employees(company_id):
-
     company_user_rights = UserCompany.show_rights(company_id)
     # print(company_user_rights[list(company_user_rights.keys())[0]])
     # print(company_user_rights[list(company_user_rights.keys())[0]]['position'])
