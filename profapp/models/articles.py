@@ -16,7 +16,7 @@ from .pr_base import PRBase, Base
 from utils.db_utils import db
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from flask import g
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, and_
 from sqlalchemy.sql import expression
 import re
 from sqlalchemy import event
@@ -153,7 +153,7 @@ class ArticlePortalDivision(Base, PRBase):
         sub_query = g.db.query(ArticlePortalDivision).filter_by(**kwargs).\
             join(ArticlePortalDivision.division).\
             join(PortalDivision.portal).\
-            filter(Portal.id == portal_id)\
+            filter(Portal.id == portal_id).order_by(expression.desc(ArticlePortalDivision.publishing_tm))
 
         if search_text:
             sub_query = sub_query.filter(ArticlePortalDivision.title.ilike("%" + search_text + "%"))
@@ -228,7 +228,7 @@ class ArticleCompany(Base, PRBase):
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
                 "%" + repr(search_text).strip("'") + "%"))
 
-        return db(Article, author_user_id=user_id).filter(article_filter.exists())
+        return db(Article, author_user_id=user_id).order_by(Article.mine_version.md_tm).filter(article_filter.exists())
 
     @staticmethod
     def subquery_company_articles(search_text=None, company_id=None, portal_id=None, **kwargs):

@@ -58,15 +58,6 @@
                 })
             };
 
-
-            $scope.change_text_color = function (full_text, search_text) {
-                console.log(search_text, typeof search_text, search_text.length);
-                if (search_text !== '' && search_text !== undefined) {
-                    var re = new RegExp(search_text, "g");
-                    return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
-                }
-                return $sce.trustAsHtml(full_text);
-            }
         }]);
 
     </script>
@@ -102,7 +93,7 @@
 
                 <td>{{ material.article.md_tm }}</td>
                 <td><a href="{{ url_details({company_id:company_id, article_id:material.article.id}) }}"
-                       ng-bind-html="change_text_color(material.article.title, data.search_text)"></a></td>
+                       ng-bind-html="highlightSearchResults(material.article.title, data.search_text)"></a></td>
                 <td>
                     <div ng-repeat="material_portal in material.article.portal_article">
                         {{ material_portal.portal.name }} - <span>{{ material_portal.status }}</span>

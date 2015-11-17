@@ -576,10 +576,17 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
         $scope.src = $scope.src + '?' + $.param(params);
     }]);
 
-module.run(function ($rootScope, $ok) {
+module.run(function ($rootScope, $ok, $sce) {
     angular.extend($rootScope, {
         fileUrl: function (file_id, down, if_no_file) {
             return fileUrl(file_id, down, if_no_file);
+        },
+        highlightSearchResults: function (full_text, search_text) {
+            if (search_text !== '' && search_text !== undefined) {
+                var re = new RegExp(search_text, "g");
+                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
+            }
+            return $sce.trustAsHtml(full_text);
         },
         _: function (phrase, dict) {
             var scope = this;
@@ -780,9 +787,9 @@ function angularControllerFunction(controller_attr, function_name) {
 
 function fileUrl(id, down, if_no_file) {
 
-    if (!id) return (if_no_file?if_no_file:'');
+    if (!id) return (if_no_file ? if_no_file : '');
 
-    if (!id.match(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1")) return (if_no_file?if_no_file:'');
+    if (!id.match(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1")) return (if_no_file ? if_no_file : '');
 
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
     if (down) {

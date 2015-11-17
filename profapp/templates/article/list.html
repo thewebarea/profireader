@@ -49,10 +49,7 @@
                 $scope.getCompanies = submitted_viersions
             };
 
-            $scope.change_text_color = function (full_text, search_text) {
-                var re = new RegExp(search_text, "g");
-                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
-            }
+
         }]);
 
     </script>
@@ -98,7 +95,7 @@
                     </td>
                     <td rowspan="{{ article_dict.company_count }}" width="250px"><a
                             href="{{ url_details({company_id:'0',article_id:article_dict.article.id}) }}"
-                            ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text)">
+                            ng-bind-html="highlightSearchResults(article_dict.article.mine_version.title, data.original_search_text)">
                     </a></td>
                 </tr>
                 <tr ng-if="article_dict.company_count>1"
@@ -116,7 +113,7 @@
                     <td width="250px">{{ article_dict.article.mine_version.md_tm }}</td>
                     <td width="250px"><a href="{{ url_details({company_id:'0',article_id:article_dict.article.id}) }}"
                                          id="{{ article_dict.article.id }}"
-                                         ng-bind-html="change_text_color(article_dict.article.mine_version.title, data.original_search_text)"></a>
+                                         ng-bind-html="highlightSearchResults(article_dict.article.mine_version.title, data.original_search_text)"></a>
                     </td>
                     <td width="250px">Not sent to any company yet</td>
                     <td>Not sent</td>

@@ -506,7 +506,7 @@ def publications_load(json, company_id):
     companies = ArticlePortalDivision.get_companies_which_send_article_to_portal(portal.id)
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
 
-    return {'materials': [{'article': a.get_client_side_dict() for a in articles}],
+    return {'materials': {a.id: a.get_client_side_dict() for a in articles},
             'companies': companies,
             'pages': {'total': pages,
                       'current_page': current_page,

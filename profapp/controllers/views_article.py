@@ -39,8 +39,7 @@ def load_mine(json):
     subquery = ArticleCompany.subquery_user_articles(**params)
 
     articles, pages, current_page = pagination(subquery,
-                                               page=current_page,
-                                               items_per_page=10)
+                                               page=current_page)
 
     all, companies = ArticleCompany.get_companies_where_user_send_article(g.user_dict['id'])
     statuses = {status: status for status in ARTICLE_STATUS_IN_COMPANY.all}

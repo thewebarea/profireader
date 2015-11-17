@@ -57,10 +57,6 @@
             };
 
 
-            $scope.change_text_color = function (full_text, search_text) {
-                var re = new RegExp(search_text, "g");
-                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
-            }
         }]);
 
     </script>
@@ -72,8 +68,7 @@
             <tr>
                 <th width="250px">Date</th>
                 <th width="250px">Title</th>
-                <th width="250px">Companies</th>
-                <th><p>Status</p></th>
+                <th width="250px">Company - publication status</th>
                 <th></th>
             </tr>
             <tr valign="top">
@@ -81,15 +76,13 @@
                 <td><input ng-disabled="loading" style="width: 98%" type="text" placeholder="Search"
                            ng-model="new_search_text"></td>
                 <td>
-                    <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="company_id"
+                    <select ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="company_id"
                             ng-options="comp_id as comp.name for (comp_id, comp) in companies">
-                    </select>
-                </td>
-                <td>
-                    <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="status"
+                    </select> - <select ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="status"
                             ng-options="lab for (lab, val) in statuses track by val">
                     </select>
                 </td>
+                <td></td>
                 <td><input ng-disabled="loading" ng-click="sendData()" type="submit"
                            value="{{ loading?'loading...':'search' }}"
                            style="width: 75%;">
@@ -97,21 +90,30 @@
 
             </tr>
             <tr ng-repeat="material in materials" valign="top">
-                <td>{{ material.article.md_tm }}</td>
-                <td><a href="{{ url_details({company_id:company_id, article_id:material.article.id}) }}"
-                       ng-bind-html="change_text_color(material.article.title, search_text)">
+                <td>{{ material.md_tm }}</td>
+                <td><a href="{{ url_details({company_id:company_id, article_id:material.company_article.article_id}) }}"
+                       ng-bind-html="highlightSearchResults(material.company_article.title, search_text)">
                 </a></td>
                 <td>
                     <div>
-                        {{ material.company.name }} - <span>{{ material.article.status }}</span>
+                        {{ companies[material.company_article.company_id].name }} - <span>{{ material.company_article.status }}</span>
                     </div>
+                </td>
+            </tr>
+
+            <tr ng-show="!loading && !areAllEmpty(materials)">
+                <td colspan="4">
+                    <div ng-show="!loading" ng-include="'pagination.html'"></div>
+                </td>
+            </tr>
+            <tr ng-show="!loading && areAllEmpty(materials)">
+                <td colspan="4">
+                    No publications
                 </td>
             </tr>
 
 
         </table>
-
-        <div ng-show="!loading" ng-include="'pagination.html'"></div>
 
     </div>
     {% endraw %}
