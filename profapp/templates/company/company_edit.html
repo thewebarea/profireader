@@ -43,13 +43,13 @@
             {#                      ng-action="save_company_url"#}
 
             $scope.articleImageSelected = function (item) {
+                console.log(item);
                 $scope.data.logo_file_id = item.id;
                 $scope.setImageUrl($scope.data.logo_file_id);
                 closeFileManager();
             }
 
             $scope.setImageUrl = function (logo_file_id) {
-                console.log(logo_file_id);
                 $scope.logo_file_url = fileUrl(logo_file_id);
             }
 
