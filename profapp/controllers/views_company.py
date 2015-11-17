@@ -84,7 +84,7 @@ def materials_load(json, company_id):
                                                         company_id=company_id,
                                                         portal_id=json.get('portal_id'),
                                                         **params)
-    articles, pages, current_page = pagination(subquery, page=page, items_per_page=5)
+    articles, pages, current_page = pagination(subquery, page=page, items_per_page=2)
     portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
 
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}

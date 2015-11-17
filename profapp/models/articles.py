@@ -17,10 +17,12 @@ from utils.db_utils import db
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from flask import g
 from sqlalchemy.sql import or_
+from sqlalchemy.sql import expression
 import re
 from sqlalchemy import event
 from html.parser import HTMLParser
 from ..controllers import errors
+
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -75,10 +77,10 @@ class ArticlePortalDivision(Base, PRBase):
 
     @property
     def tags(self):
-        query = g.db.query(Tag.name).\
-            join(TagPortalDivision).\
-            join(TagPortalDivisionArticle).\
-            filter(TagPortalDivisionArticle.article_portal_division_id==self.id)
+        query = g.db.query(Tag.name). \
+            join(TagPortalDivision). \
+            join(TagPortalDivisionArticle). \
+            filter(TagPortalDivisionArticle.article_portal_division_id == self.id)
         tags = list(map(lambda x: x[0], query.all()))
         return tags
 
@@ -197,7 +199,7 @@ class ArticleCompany(Base, PRBase):
         ret = super().validate(action)
         # TODO: (AA to OZ): regexp doesn't work
 
-        if not re.match('.*\S{3,}.*',self.title):
+        if not re.match('.*\S{3,}.*', self.title):
             ret['errors']['title'] = 'pls enter title longer than 3 letters'
         if not re.match('\S+.*', self.keywords):
             ret['warnings']['keywords'] = 'pls enter at least one keyword'
@@ -240,6 +242,8 @@ class ArticleCompany(Base, PRBase):
         if portal_id:
             sub_query = sub_query.filter(db(PortalDivision, portal_id=portal_id).exists())
 
+        sub_query = sub_query.order_by(expression.desc(ArticleCompany.md_tm))
+
         return sub_query
 
         # self.portal_devision_id = portal_devision_id
@@ -277,13 +281,13 @@ class ArticleCompany(Base, PRBase):
 
         tags_portal_division_article = []
         for i in range(len(tag_names)):
-            tag_portal_division_article = TagPortalDivisionArticle(position=i+1)
+            tag_portal_division_article = TagPortalDivisionArticle(position=i + 1)
             tag_portal_division = \
-                g.db.query(TagPortalDivision).\
-                    select_from(TagPortalDivision).\
-                    join(Tag).\
-                    filter(TagPortalDivision.portal_division_id==portal_division_id).\
-                    filter(Tag.name==tag_names[i]).one()
+                g.db.query(TagPortalDivision). \
+                    select_from(TagPortalDivision). \
+                    join(Tag). \
+                    filter(TagPortalDivision.portal_division_id == portal_division_id). \
+                    filter(Tag.name == tag_names[i]).one()
 
             tag_portal_division_article.tag_portal_division = tag_portal_division
             tags_portal_division_article.append(tag_portal_division_article)
@@ -305,7 +309,7 @@ class ArticleCompany(Base, PRBase):
         for old_image_id in filesintext:
             long_text = long_text.replace('http://file001.profireader.com/%s/' % (old_image_id,),
                                           'http://file001.profireader.com/%s/' % (
-                                          filesintext[old_image_id],))
+                                              filesintext[old_image_id],))
 
         article_portal_division.long = long_text
 
@@ -323,6 +327,8 @@ class ArticleCompany(Base, PRBase):
 
 def set_long_striped(mapper, connection, target):
     target.long_stripped = MLStripper().strip_tags(target.long)
+
+
 event.listen(ArticlePortalDivision, 'before_update', set_long_striped)
 event.listen(ArticlePortalDivision, 'before_insert', set_long_striped)
 event.listen(ArticleCompany, 'before_update', set_long_striped)
@@ -362,7 +368,8 @@ class Article(Base, PRBase):
 
     def get_article_with_html_tag(self, text_into_html):
         article = self.get_client_side_dict()
-        article['mine_version']['title'] = article['mine_version']['title'].replace(text_into_html, '<span class=colored>%s</span>' % text_into_html)
+        article['mine_version']['title'] = article['mine_version']['title'].replace(text_into_html,
+                                                                                    '<span class=colored>%s</span>' % text_into_html)
         return article
 
     @staticmethod
@@ -410,11 +417,11 @@ class Article(Base, PRBase):
             portal_id = kwargs['portal_id']
             kwargs.pop('portal_id', None)
 
-        sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs).\
+        sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
             order_by(ArticlePortalDivision.publishing_tm.desc()).filter(text(' "publishing_tm" < clock_timestamp() '))
 
         if portal_id:
-            sub_query = sub_query.join(PortalDivision).join(Portal).filter(Portal.id==portal_id)
+            sub_query = sub_query.join(PortalDivision).join(Portal).filter(Portal.id == portal_id)
 
         if search_text:
             sub_query = sub_query. \
