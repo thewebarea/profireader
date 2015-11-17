@@ -17,8 +17,7 @@
 
 
             $scope.page_changed = function () {
-                $scope.setFirstPage();
-                return false;
+                $scope.sendData(false);
             };
 
             $scope.portal_id = ' ';
@@ -37,9 +36,9 @@
             $scope.new_search_text = '';
 
 
-            $scope.sendData = function () {
+            $scope.sendData = function (new_search_text) {
                 var data = {}
-                data.search_text = $scope.new_search_text;
+                data.search_text = (new_search_text !== false) ? new_search_text : $scope.data['search_text'];
                 data.status = $scope.status ? $scope.status : null;
                 data.portal_id = ($scope.portal_id !== ' ') ? $scope.portal_id : null;
                 data.page = $scope.data.pages.current_page;
@@ -54,65 +53,60 @@
                     $scope.statuses = resp.statuses;
                     $scope.statuses['-- all --'] = undefined;
 
-                    $scope.search_text = $scope.new_search_text;
+                    $scope.data.search_text = (new_search_text !== false) ? new_search_text : $scope.data['search_text'];
                 })
             };
 
 
             $scope.change_text_color = function (full_text, search_text) {
-                var re = new RegExp(search_text, "g");
-                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
+                if (search_text!=='') {
+                    var re = new RegExp(search_text, "g");
+                    return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
+                }
+                return $sce.trustAsHtml(full_text);
             }
         }]);
 
     </script>
     {% include 'company/company_base_angular.html' %}
     {% raw %}
-    <div ng-init="sendData()" ng-controller="article_list">
-        
+    <div ng-init="sendData('')" ng-controller="article_list">
+
         <table style="width:100%">
             <tr>
                 <th width="250px">Date</th>
                 <th width="250px">Title</th>
                 <th width="250px">Portals</th>
-                <th><p>Status</p></th>
+                <th>Status</th>
                 <th></th>
             </tr>
             <tr valign="top">
                 <td></td>
                 <td><input ng-disabled="loading" style="width: 98%" type="text" placeholder="Search"
                            ng-model="new_search_text"></td>
-                <td>
-                    <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="portal_id"
+                <td><select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="portal_id"
                             ng-options="port_id as port.name for (port_id, port) in portals">
-                    </select>
-                </td>
-                <td>
-                    <select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="status"
+                </select></td>
+                <td><select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="status"
                             ng-options="lab for (lab, val) in statuses track by val">
-                    </select>
-                </td>
-                <td><input ng-disabled="loading" ng-click="sendData()" type="submit"
+                </select></td>
+                <td><input ng-disabled="loading" ng-click="sendData(new_search_text)" type="submit" ng-model="new_search_text"
                            value="{{ loading?'loading...':'search' }}"
-                           style="width: 75%;">
-                </td>
+                           style="width: 75%;"></td>
 
             </tr>
             <tr ng-repeat="material in materials" valign="top">
 
                 <td>{{ material.article.md_tm }}</td>
                 <td><a href="{{ url_details({company_id:company_id, article_id:material.article.id}) }}"
-                       ng-bind-html="change_text_color(material.article.title, search_text)">
-                </a></td>
+                       ng-bind-html="change_text_color(material.article.title, data.search_text)"></a></td>
                 <td>
                     <div ng-repeat="material_portal in material.article.portal_article">
                         {{ material_portal.portal.name }} - <span>{{ material_portal.status }}</span>
                     </div>
-
                     <div ng_if="!material.portals_count">{{ _('not sent') }}</div>
                 </td>
             </tr>
-
 
         </table>
 
