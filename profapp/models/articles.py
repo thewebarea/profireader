@@ -228,7 +228,7 @@ class ArticleCompany(Base, PRBase):
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
                 "%" + repr(search_text).strip("'") + "%"))
 
-        return db(Article, author_user_id=user_id).order_by(Article.mine_version.md_tm).filter(article_filter.exists())
+        return db(Article, author_user_id=user_id).filter(article_filter.exists())
 
     @staticmethod
     def subquery_company_articles(search_text=None, company_id=None, portal_id=None, **kwargs):

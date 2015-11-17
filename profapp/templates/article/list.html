@@ -119,17 +119,9 @@
                     <td>Not sent</td>
                 </tr>
 
-                <tr ng-show="!loading && !areAllEmpty(data.articles)">
-                    <td colspan="4">
-                        <div ng-show="!loading" ng-include="'pagination.html'"></div>
-                    </td>
-                </tr>
-                <tr ng-show="!loading && areAllEmpty(data.articles)">
-                    <td colspan="4">
-                        No publications
-                    </td>
-                </tr>
             </table>
+            <div ng-show="!loading && !areAllEmpty(data.articles)" ng-include="'pagination.html'"></div>
+            <div ng-show="!loading && areAllEmpty(data.articles)">No publications</div>
         </div>
     </div>
     {% endraw %}
