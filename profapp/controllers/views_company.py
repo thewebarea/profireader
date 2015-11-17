@@ -76,7 +76,7 @@ def materials_load(json, company_id):
         if company.logo_file_id else '/static/img/company_no_logo.png'
 
     page = json.get('search')['page'] if json.get('search') else 1
-    search_text = json.get('search')['text'] if json.get('search')['text'] else None
+    search_text = json.get('search_text')
     # params = {'search_text': json.get('search_text'), 'company_id': company_id}
     # article_status = json.get('chosen_status')
     # original_chosen_status = None
@@ -277,7 +277,10 @@ def load(json, company_id=None):
         return company.get_client_side_dict()
     else:
         company.attr(g.filter_json(json, 'about', 'address', 'country', 'email', 'name', 'phone',
-                                   'phone2', 'region', 'short_description', 'logo_file_id'))
+                                   'phone2', 'region', 'short_description'))
+        if json['logo_file_id']:
+            company.logo_file_id = json['logo_file_id']
+
         if action == 'save':
             if company_id is None:
                 company.setup_new_company()
