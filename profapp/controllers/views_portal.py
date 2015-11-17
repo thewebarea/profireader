@@ -4,7 +4,8 @@ from ..models.company import Company
 from flask.ext.login import current_user, login_required
 from ..models.portal import PortalDivisionType
 from utils.db_utils import db
-from ..models.portal import MemberCompanyPortal, Portal, PortalLayout, PortalDivision
+from ..models.portal import MemberCompanyPortal, Portal, PortalLayout, PortalDivision, \
+    PortalDivisionSettings_company_subportal
 from ..models.tag import Tag, TagPortal, TagPortalDivision
 from .request_wrapers import ok, check_rights
 from ..models.articles import ArticlePortalDivision, ArticleCompany
@@ -74,18 +75,15 @@ def create_save(json, create_or_update, company_id):
         if create_or_update == 'update':
             pass
         elif create_or_update == 'create':
-            portal = Portal(company_owner = company, **g.filter_json(json_portal, 'name', 'portal_layout_id', 'host'))
+            portal = Portal(company_owner=company, **g.filter_json(json_portal, 'name', 'portal_layout_id', 'host'))
             divisions = []
             for division_json in json['portal']['divisions']:
-                custom_settings_data = {}
+                division = PortalDivision(portal, portal_division_type_id = division_json['portal_division_type_id'],
+                                          position=len(json['portal']['divisions']) - len(divisions),
+                                          name=division_json['name'])
                 if division_json['portal_division_type_id'] == 'company_subportal':
-                    custom_settings_data['MemberCompanyPortal'] = MemberCompanyPortal(portal=portal,
-                                                                                      company=Company.get(company_id))
-
-                divisions.append(
-                    PortalDivision(portal, PortalDivisionType.get(division_json['portal_division_type_id']),
-                                   position=len(json['portal']['divisions']) - len(divisions),
-                                   name=division_json['name'], settings_data=custom_settings_data))
+                    division.settings = {'member_company_portal': portal.company_members[0]}
+                divisions.append(division)
             # self, portal=portal, portal_division_type=portal_division_type, name='', settings={}
             portal.divisions = divisions
         if action == 'save':
@@ -435,6 +433,7 @@ def portals_partners_load(json, company_id):
             'portals_partners': portals_partners,
             'company_id': company_id,
             'user_rights': user_rights}
+
 
 @portal_bp.route('/companies_partners/<string:company_id>/', methods=['GET'])
 @login_required
