@@ -52,10 +52,7 @@ function getObjectsDifference(a, b, setval, notstrict) {
 
 angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
     .factory('$ok', ['$http', function ($http) {
-        return function (url, data, ifok, iferror, template) {
-            //if(template === false){
-            //    data.
-            //}
+        return function (url, data, ifok, iferror) {
 
             function error(result, error_code) {
                 if (iferror) {
@@ -583,7 +580,7 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
 module.run(function ($rootScope, $ok) {
     angular.extend($rootScope, {
         _: function (phrase, dict) {
-            console.log(this.controllerName);
+            //console.log(this.controllerName);
             var scope = this;
             try {
                 return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {

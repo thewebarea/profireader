@@ -84,7 +84,7 @@ def createdir(json, parent_id=None):
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
     name = TranslateTemplate.saveTranslate('ctrl', 'can', 'могти', 'can')
-    return render_template('tmp-test.html', file=name)
+    return render_template('tmp-test.html', file=name.id)
 
 @filemanager_bp.route('/properties/', methods=['POST'])
 @ok
