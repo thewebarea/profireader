@@ -188,7 +188,7 @@ class ArticleCompany(Base, PRBase):
 
         if not re.match('.*\S{3,}.*',self.title):
             ret['errors']['title'] = 'pls enter title longer than 3 letters'
-        if not re.match('.*\S+.*', self.keywords):
+        if not re.match('\S+.*', self.keywords):
             ret['warnings']['keywords'] = 'pls enter at least one keyword'
         return ret
 
