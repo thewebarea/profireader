@@ -84,8 +84,8 @@ def materials_load(json, company_id):
     params = {}
     if json.get('portal_id'):
         params['portal_id'] = json.get('portal_id')
-    # if article_status:
-    #     params['status'] = article_status
+    if json.get('status'):
+        params['status'] = json.get('status')
     # print(json.get('filter'))
     # print(company_id)
     subquery = ArticleCompany.subquery_company_articles(search_text=search_text,
@@ -95,7 +95,7 @@ def materials_load(json, company_id):
     portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
 
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
-    statuses['All'] = 'All'
+    # statuses['All'] = 'All'
 
     return {'materials': [{'article': a.get_client_side_dict(),
                           'portals_count': len(a.get_client_side_dict()['portal_article']) + 1}
