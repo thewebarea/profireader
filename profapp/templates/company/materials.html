@@ -44,7 +44,7 @@
                 data.page = $scope.data.pages.current_page;
                 $ok($scope.url_search_article({company_id: '{{ company_id }}'}), data, function (resp) {
 
-                    $scope.data = {pages: resp.pages};
+                    $scope.data['pages'] = resp.pages;
                     $scope.materials = resp.materials;
 
                     $scope.portals = resp.portals;
@@ -54,12 +54,14 @@
                     $scope.statuses['-- all --'] = undefined;
 
                     $scope.data.search_text = (new_search_text !== false) ? new_search_text : $scope.data['search_text'];
+                    console.log($scope.data);
                 })
             };
 
 
             $scope.change_text_color = function (full_text, search_text) {
-                if (search_text!=='') {
+                console.log(search_text, typeof search_text, search_text.length);
+                if (search_text !== '' && search_text !== undefined) {
                     var re = new RegExp(search_text, "g");
                     return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
                 }
@@ -76,21 +78,22 @@
             <tr>
                 <th width="250px">Date</th>
                 <th width="250px">Title</th>
-                <th width="250px">Portals</th>
-                <th>Status</th>
+                <th width="250px">Portals - Bublication status</th>
+                <th>Material status</th>
                 <th></th>
             </tr>
             <tr valign="top">
                 <td></td>
                 <td><input ng-disabled="loading" style="width: 98%" type="text" placeholder="Search"
                            ng-model="new_search_text"></td>
-                <td><select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="portal_id"
+                <td><select ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="portal_id"
                             ng-options="port_id as port.name for (port_id, port) in portals">
+                </select> - <select ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="status"
+                                    ng-options="lab for (lab, val) in statuses track by val">
                 </select></td>
-                <td><select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="status"
-                            ng-options="lab for (lab, val) in statuses track by val">
-                </select></td>
-                <td><input ng-disabled="loading" ng-click="sendData(new_search_text)" type="submit" ng-model="new_search_text"
+                <td></td>
+                <td><input ng-disabled="loading" ng-click="sendData(new_search_text)" type="submit"
+                           ng-model="new_search_text"
                            value="{{ loading?'loading...':'search' }}"
                            style="width: 75%;"></td>
 
@@ -109,9 +112,18 @@
                 <td>{{ material.article.status }}</td>
             </tr>
 
+            <tr ng-show="!loading && !areAllEmpty(materials)">
+                <td colspan="5">
+                    <div ng-show="!loading" ng-include="'pagination.html'"></div>
+                </td>
+            </tr>
+            <tr ng-show="!loading && areAllEmpty(materials)">
+                <td colspan="5">
+                    No materials
+                </td>
+            </tr>
         </table>
 
-        <div ng-show="!loading" ng-include="'pagination.html'"></div>
 
     </div>
     {% endraw %}

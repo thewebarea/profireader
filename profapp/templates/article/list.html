@@ -58,7 +58,7 @@
     </script>
     {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
-        <h2><a href="{{ url_create_article() }}"><span class="icon icon-draw-pen-add" ></span>Create article</a></h2>
+        <h2><a href="{{ url_create_article() }}"><span class="icon icon-draw-pen-add"></span>Create article</a></h2>
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
@@ -122,11 +122,18 @@
                     <td>Not sent</td>
                 </tr>
 
-
+                <tr ng-show="!loading && !areAllEmpty(data.articles)">
+                    <td colspan="4">
+                        <div ng-show="!loading" ng-include="'pagination.html'"></div>
+                    </td>
+                </tr>
+                <tr ng-show="!loading && areAllEmpty(data.articles)">
+                    <td colspan="4">
+                        No publications
+                    </td>
+                </tr>
             </table>
-
         </div>
-        <div ng-include="'pagination.html'"></div>
     </div>
     {% endraw %}
 

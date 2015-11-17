@@ -578,6 +578,9 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
 
 module.run(function ($rootScope, $ok) {
     angular.extend($rootScope, {
+        fileUrl: function (file_id, down, if_no_file) {
+            return fileUrl(file_id, down, if_no_file);
+        },
         _: function (phrase, dict) {
             var scope = this;
             try {
@@ -775,8 +778,12 @@ function angularControllerFunction(controller_attr, function_name) {
     };
 }
 
-function fileUrl(id, down) {
-    if (!id) return '';
+function fileUrl(id, down, if_no_file) {
+
+    if (!id) return (if_no_file?if_no_file:'');
+
+    if (!id.match(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1")) return (if_no_file?if_no_file:'');
+
     var server = id.replace(/^[^-]*-[^-]*-4([^-]*)-.*$/, "$1");
     if (down) {
         return 'http://file' + server + '.profireader.com/' + id + '?d'

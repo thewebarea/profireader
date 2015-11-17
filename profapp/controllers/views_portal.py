@@ -25,7 +25,7 @@ from config import Config
 def create(company_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
 
     return render_template('portal/portal_create.html',
                            company_id=company_id,
@@ -49,7 +49,7 @@ def create_save(json, create_or_update, company_id):
     types = {x.id: x.get_client_side_dict() for x in PortalDivisionType.get_division_types()}
     company = Company.get(company_id)
     member_companies = {company_id: company.get_client_side_dict()}
-    company_logo = company.logo_file_relationship.url() if company.logo_file_id else '/static/img/company_no_logo.png'
+    company_logo = company.logo_file_relationship.url() if company.logo_file_id else '/static/images/company_no_logo.png'
 
     if action == 'load':
         ret = {'company_id': company_id,
@@ -158,7 +158,7 @@ def profile(portal_id):
     portal = db(Portal, id=portal_id).one()
     company = portal.own_company
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return render_template('portal/portal_profile.html',
                            company_id=company.id,
                            company_logo=company_logo)
@@ -188,7 +188,7 @@ def profile_edit(portal_id):
     # company_id = portal.company_owner_id
 
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return render_template('portal/portal_profile_edit.html',
                            company_id=company.id,
                            company_logo=company_logo)
@@ -400,7 +400,7 @@ def profile_edit_load(json, portal_id):
 
     company = portal.own_company
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return {'portal': portal.to_dict('*, '
                                      'divisions.*, '
                                      'own_company.*, '
@@ -473,7 +473,7 @@ def search_for_portal_to_join(json):
 def publications(company_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
 
     return render_template(
         'portal/portal_publications.html',
