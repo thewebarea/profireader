@@ -89,15 +89,19 @@ def materials_load(json, company_id):
     subquery = ArticleCompany.subquery_company_articles(search_text=search_text, company_id=company_id,
                                                         **json.get('filter'))
     articles, pages, current_page = pagination(subquery, page=page, items_per_page=5)
-    portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
 
+    articles = {a.id: a.get_client_side_dict(
+        'id|title|short|long|keywords|cr_tm|md_tm|company_id|article_id|image_file_id|status, company.name, portal_article.status,'
+        'portal_article.portal.id') for a in articles}
+
+    portals = db(ArticlePortalDivision.article_company_id, ArticlePortalDivision.portal_division_id).\
+        join(Company).filter().filter(Company.id == company_id).all()
+        # .get_portals_where_company_send_article(company_id)
 
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
     statuses['All'] = 'All'
 
-    return {'articles': [{'article': a.get_client_side_dict(),
-                          'portals_count': len(a.get_client_side_dict()['portal_article']) + 1}
-                         for a in articles],
+    return {'articles': articles,
             'portals': portals,
             # 'search_text': json.get('search_text') or '',
             # 'original_search_text': json.get('search_text') or '',
