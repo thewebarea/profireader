@@ -1,5 +1,6 @@
 from sqlalchemy import Column, ForeignKey, text
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import expression
 from ..constants.TABLE_TYPES import TABLE_TYPES
 # from db_init import db_session
 from ..models.company import Company
@@ -116,12 +117,15 @@ class ArticlePortalDivision(Base, PRBase):
     @staticmethod
     def get_portals_where_company_send_article(company_id):
 
+        return db(ArticlePortalDivision, company_id=company_id).group_by.all()
+
         all = {'name': 'All', 'id': 0}
         portals = []
         portals.append(all)
         for article in db(ArticleCompany, company_id=company_id).all():
             for port in article.portal_article:
                 portals.append(port.portal.to_dict('id,name'))
+        return []
         return all, [dict(port) for port in set([tuple(p.items()) for p in portals])]
 
     @staticmethod
@@ -193,10 +197,10 @@ class ArticleCompany(Base, PRBase):
         ret = super().validate(action)
         # TODO: (AA to OZ): regexp doesn't work
 
-        # if not re.compile(r'[^\s]{3,}',re.U).match(self.title):
-        #     ret['errors']['title'] = 'pls enter title longer than 3 letters'
-        # if not re.match('\S+', self.keywords):
-        #     ret['warnings']['keywords'] = 'pls enter at least one keyword'
+        if not re.match('.*\S{3,}.*',self.title):
+            ret['errors']['title'] = 'pls enter title longer than 3 letters'
+        if not re.match('\S+.*', self.keywords):
+            ret['warnings']['keywords'] = 'pls enter at least one keyword'
         return ret
 
     @staticmethod
@@ -405,7 +409,7 @@ class Article(Base, PRBase):
             kwargs.pop('portal_id', None)
 
         sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs).\
-            order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() '))
+            order_by(ArticlePortalDivision.publishing_tm.desc()).filter(text(' "publishing_tm" < clock_timestamp() '))
 
         if portal_id:
             sub_query = sub_query.join(PortalDivision).join(Portal).filter(Portal.id==portal_id)

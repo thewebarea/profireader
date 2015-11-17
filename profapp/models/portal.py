@@ -8,6 +8,7 @@ from .company import Company
 from .pr_base import PRBase, Base
 import re
 from .tag import TagPortalDivision
+from sqlalchemy import event
 
 import itertools
 from sqlalchemy import orm
@@ -136,7 +137,8 @@ class Portal(Base, PRBase):
 
         self.own_company = company_owner
 
-        self.company_members = [MemberCompanyPortal(portal=self, company=company_owner, plan=db(MemberCompanyPortalPlan).first())]
+        self.company_members = [
+            MemberCompanyPortal(portal=self, company=company_owner, plan=db(MemberCompanyPortalPlan).first())]
 
         # self.own_company.company_portals = db(MemberCompanyPortalPlan).first()
 
@@ -153,6 +155,7 @@ class Portal(Base, PRBase):
         pass
 
     def setup_created_portal(self, logo_file_id=None):
+# TODO: OZ by OZ: move this to some event maybe
         """This method create portal in db. Before define this method you have to create
         instance of class with parameters: name, host, portal_layout_id, company_owner_id,
         divisions. Return portal)"""
@@ -165,6 +168,12 @@ class Portal(Base, PRBase):
         # self.company_assoc.portal =
         # self.company_assoc.company =
 
+        for division in self.divisions:
+            if division.portal_division_type_id == 'company_subportal':
+                PortalDivisionSettings_company_subportal(
+                    member_company_portal=division.settings['member_company_portal'],
+                    portal_division=division).save()
+
         if logo_file_id:
             originalfile = File.get(logo_file_id)
             if originalfile:
@@ -176,7 +185,7 @@ class Portal(Base, PRBase):
 
     def validate(self, action):
         ret = super().validate(action)
-        if db(Portal, company_owner_id=self.company_owner_id).filter(Portal.id != self.id).count():
+        if db(Portal, company_owner_id=self.own_company.id).filter(Portal.id != self.id).count():
             ret['errors']['form'] = 'portal for company already exists'
         if not re.match('[^\s]{3,}', self.name):
             ret['errors']['name'] = 'pls enter a bit longer name'
@@ -194,10 +203,10 @@ class Portal(Base, PRBase):
                 if not 'divisions' in ret['errors']:
                     ret['errors']['divisions'] = {}
                 ret['errors']['divisions'][inddiv] = 'pls enter valid name'
-            if div.portal_division_type.id in grouped:
-                grouped[div.portal_division_type.id] += 1
+            if div.portal_division_type_id in grouped:
+                grouped[div.portal_division_type_id] += 1
             else:
-                grouped[div.portal_division_type.id] = 1
+                grouped[div.portal_division_type_id] = 1
 
         for check_division in db(PortalDivisionType).all():
             if check_division.id not in grouped:
@@ -211,7 +220,7 @@ class Portal(Base, PRBase):
                     check_division.max, check_division.id)
         return ret
 
-    def get_client_side_dict(self, fields='id|name, divisions.*, layout.*, logo_file_id'):
+    def get_client_side_dict(self, fields='id|name, divisions.*, layout.*, logo_file_id, company_owner_id'):
         """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 
@@ -259,8 +268,7 @@ class MemberCompanyPortal(Base, PRBase):
         """Add company to MemberCompanyPortal table. Company will be partner of this portal"""
         g.db.add(MemberCompanyPortal(company=db(Company, id=company_id).one(),
                                      portal=db(Portal, id=portal_id).one(),
-                                     company_portal_plan_id=db(Portal, id=portal_id).one().
-                                     portal_plan_id))
+                                     plan=db(MemberCompanyPortalPlan).first()))
         g.db.flush()
 
     # @staticmethod
@@ -323,16 +331,23 @@ class PortalDivision(Base, PRBase):
 
     settings = None
 
-    def __init__(self, portal=portal, portal_division_type=portal_division_type, name='', settings_data={}, position=0):
+    def __init__(self, portal=portal, portal_division_type_id = portal_division_type_id, name='', settings=None, position=0):
         self.position = position
         self.portal = portal
-        self.portal_division_type = portal_division_type
+        self.portal_division_type_id = portal_division_type_id
         self.name = name
+        self.settings = settings
 
-        if portal_division_type.id == 'company_subportal':
-            self.settings = PortalDivisionSettings_company_subportal(
-                member_company_portal=settings_data['MemberCompanyPortal'],
-                portal_division=self)
+    # @staticmethod
+    # def after_attach(session, target):
+    #     #     pass
+    #     if target.portal_division_type_id == 'company_subportal':
+    #         # member_company_portal = db(MemberCompanyPortal, company_id = target.settings['company_id'], portal_id = target.portal_id).one()
+    #         addsettings = PortalDivisionSettings_company_subportal(
+    #             member_company_portal=target.settings['member_company_portal'], portal_division=target)
+    #         g.db.add(addsettings)
+    #         # target.settings = db(PortalDivisionSettings_company_subportal).filter_by(
+    #         #     portal_division_id=self.id).one()
 
     @orm.reconstructor
     def init_on_load(self):
@@ -350,6 +365,10 @@ class PortalDivision(Base, PRBase):
         #     return PortalDivision(portal_id=portal_id,
         #                           name=name,
         #                           portal_division_type_id=division_type)
+
+
+# @event.listens_for(g.db, 'after_attach')
+# event.listen(PortalDivision, 'after_attach', PortalDivision.after_attach)
 
 
 class PortalDivisionSettings_company_subportal(Base, PRBase):
