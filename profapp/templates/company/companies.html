@@ -80,6 +80,7 @@
                         _('Company name is `%(name)s`' + (my_employer.author_user_id==data.user_id?' - YOUR OWN
                         COMPANY':''), my_employer) }}
                     </a>
+                    <br/>
                     (<span ng-if="!my_employer.own_portal.host">no portal created</span><a
                         ng-if="my_employer.own_portal.host" href="http://{{ my_employer.own_portal.host }}">http://{{
                     my_employer.own_portal.host }}</a>)

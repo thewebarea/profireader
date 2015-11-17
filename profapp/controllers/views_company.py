@@ -278,7 +278,7 @@ def load(json, company_id=None):
         return company.get_client_side_dict()
     else:
         company.attr(g.filter_json(json, 'about', 'address', 'country', 'email', 'name', 'phone',
-                                   'phone2', 'region', 'short_description', 'logo_file_id'))
+                                   'phone2', 'region', 'short_description'))
         if action == 'save':
             if company_id is None:
                 company.setup_new_company()
