@@ -78,7 +78,7 @@ def create_save(json, create_or_update, company_id):
             portal = Portal(company_owner=company, **g.filter_json(json_portal, 'name', 'portal_layout_id', 'host'))
             divisions = []
             for division_json in json['portal']['divisions']:
-                division = PortalDivision(portal, portal_division_type_id = division_json['portal_division_type_id'],
+                division = PortalDivision(portal, portal_division_type_id=division_json['portal_division_type_id'],
                                           position=len(json['portal']['divisions']) - len(divisions),
                                           name=division_json['name'])
                 if division_json['portal_division_type_id'] == 'company_subportal':
@@ -501,12 +501,17 @@ def publications_load(json, company_id):
                                       company_id=json.get('company_id'),
                                       id=ArticlePortalDivision.article_company_id).exists())
     articles, pages, current_page = pagination(subquery,
-                                               page=current_page,
-                                               items_per_page=5)
+                                               page=current_page)
+
     companies = ArticlePortalDivision.get_companies_which_send_article_to_portal(portal.id)
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
+    publications = []
+    for a in articles:
+        a = a.get_client_side_dict()
+        del a['long']
+        publications.append(a)
 
-    return {'materials': {a.id: a.get_client_side_dict() for a in articles},
+    return {'publications': publications,
             'companies': companies,
             'pages': {'total': pages,
                       'current_page': current_page,
