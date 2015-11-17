@@ -58,7 +58,7 @@ def load_companies(json):
 def materials(company_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return render_template(
         'company/materials.html',
         company_id=company_id,
@@ -73,7 +73,7 @@ def materials(company_id):
 def materials_load(json, company_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
 
     page = json.get('page') or 1
     search_text = json.get('search_text')
@@ -84,7 +84,7 @@ def materials_load(json, company_id):
                                                         company_id=company_id,
                                                         portal_id=json.get('portal_id'),
                                                         **params)
-    articles, pages, current_page = pagination(subquery, page=page, items_per_page=2)
+    articles, pages, current_page = pagination(subquery, page=page, items_per_page=Config.ITEMS_PER_PAGE)
     portals = ArticlePortalDivision.get_portals_where_company_send_article(company_id)
 
     statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
@@ -105,7 +105,7 @@ def materials_load(json, company_id):
 def material_details(company_id, article_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return render_template('company/material_details.html',
                            company_id=company_id,
                            article_id=article_id,
@@ -137,7 +137,7 @@ def load_material_details(json, company_id, article_id):
 
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
 
     return {'article': article,
             'allowed_statuses': ARTICLE_STATUS_IN_COMPANY.can_user_change_status_to(article['status']),
@@ -188,9 +188,9 @@ def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = list(g.user.user_rights_in_company(company_id))
     # company_logo = File.get(company.logo_file).url() \
-    #     if company.logo_file else '/static/img/company_no_logo.png'
+    #     if company.logo_file else '/static/images/company_no_logo.png'
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return render_template('company/company_profile.html',
                            company=company.to_dict('*, own_portal.*'),
                            user_rights=user_rights,
@@ -221,7 +221,7 @@ def employees(company_id):
     current_company = db(Company, id=company_id).one()
 
     company_logo = current_company.logo_file_relationship.url() \
-        if current_company.logo_file_id else '/static/img/company_no_logo.png'
+        if current_company.logo_file_id else '/static/images/company_no_logo.png'
 
     return render_template('company/company_employees.html',
                            company=current_company,
