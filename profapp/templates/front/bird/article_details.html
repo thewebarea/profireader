@@ -1,97 +1,45 @@
-<!DOCTYPE html>
-<html lang="{{ lang }}">
-<head>
-    {% include 'front/bird/head.html' %}
-</head>
-
-<body>
-{% include 'front/bird/nav.html' %}
+{% extends 'front/bird/layout.html' %}
 {% block content %}
 
-    <div class="container">
+    <div class="block-item full-block-info" style="height: auto;">
 
-        <div class="row">
-            <!-- Blog Entries Column -->
-            <div class="col-md-9">
+{#        <img class="article-cover"#}
+{#             style="background-size: cover; background-image: url({{ file_url(article['image_file_id']) }});"/>#}
+{#        <div class="item-type article">{{ article['division']['name']|safe }}</div>#}
+        <h2 class="item-title">{{ article['title']|safe }}</h2>
 
-                <!--                <h1 class="page-header">-->
-                <!--                    Page Heading-->
-                <!--                    <small>Secondary Text</small>-->
-                <!--                </h1>-->
+        <h3 class="item-subtitle">Покроковий план досягнення успіху</h3>
 
-                <!-- Blog Posts -->
-
-
-                    <div class="block-item full-block-info" style="height: auto;">
-{#                        {{ dump articles }}#}
-
-                        <div class="item-type article">{{ article['division']['name']|safe }}</div>
-<<<<<<< HEAD
-=======
-                        <h2 class="item-title">{{ article['title']|safe }}</h2>
-                        <div class="">
-                            <i>{{ article['short']|safe }}</i>
-                        </div>
->>>>>>> origin/master
-                        <p>
-<img style="width: 300px; height: 240px; background-size: cover; background-image: url({{ file_url(article['image_file_id']) }}); float: left" />
-{{ article['title'] | safe }}<br/>
-{{ article['short'] | safe }}<br/>
-{% for tag_id in article['tags'] %}<span class="tag_in_article">{{ article['tags'][tag_id] }}</span> {% endfor %}
-{{ article['long'] | safe }}<br/>
-{{ article['keywords']|safe }}
-</p>
-                        <div class="item-additional-info">
-                            <div class="item-company">{{ article['company']['name']|safe }}</div>
-                            <div class="item-publication-date">{{ article['publishing_tm']|safe }}</div>
-                        </div>
-
-
-                        <!--                <a class="btn btn-primary" href="#">Read More <span-->
-                        <!--                        class="glyphicon glyphicon-chevron-right"></span></a>-->
-                    </div>
-
-
-            </div>
-
-
-            <!-- Blog Sidebar Widgets Column -->
-            <div class="col-md-3">
-
-{#                Blog Search Well#}
-                <div class="well">
-		    <h4>Search</h4>
-                    <div class="input-group">
-                        <form action="{{ url_for('front.division', division_name=article['division']['name'], page=1, search_text='%') }}">
-                            <input type="text" name="search_text" class="form-control">
-                            <span class="input-group-btn">
-                                <button class="btn btn-default" type="submit">
-                                    <span class="glyphicon glyphicon-search"></span>
-                                </button>
-                            </span>
-                        </form>
-                    </div>
-
-                    {#                 /.input-group #}
-                </div>
-
-                {#                 Blog Categories Well #}
-                <div class="well">
-                    {% include 'front/bird/tags.html' %}
-                    {#                 /.row #}
-                </div>
-
-
-            </div>
-
+        <div class="item-additional-info-top"
+             style="display: block; width: 100%; padding-bottom: 5px; border-bottom: 1px #ccc solid; margin-bottom: 15px;">
+            <div class="item-company"><a href="{{ url_for('front.subportal', member_company_id = article['company']['id'], member_company_name = article['company']['name']) }}">{{ article['company']['name']|safe }}</a></div>
+            <div class="item-publication-date">{{ article['publishing_tm']|safe }}</div>
+            <div class="item-comments">Коментарів 77</div>
         </div>
-        <!-- /.row -->
+        <div class="article-short">
+            {{ article['short']|safe }}
+        </div>
+        <div class="article-content">
+{#            <img class="article-cover"#}
+{#             style="background-image: url({{ file_url(article['image_file_id']) }});"/>#}
+            <div class="s-cover-l"
+             style="background-image: url({{ file_url(article['image_file_id']) }});"/></div> {{ article['long'] | safe }} </div>
+
+
+        <!--                <a class="btn btn-primary" href="#">Read More <span-->
+        <!--                        class="glyphicon glyphicon-chevron-right"></span></a>-->
+
+
+        <div class="tag-list">
+            <a href="#">tag1</a>
+            <a href="#">tag2</a>
+            <a href="#">tag3</a>
+            <a href="#">tag4</a>
+            <a href="#">tag5</a>
+            <a href="#">tag6</a>
+        </div>
+
     </div>
 
+
 {% endblock content %}
-
-{% include 'front/bird/footer.html' %}
-
-
-</body>
-</html>

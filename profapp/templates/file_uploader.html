@@ -19,34 +19,35 @@
 {#     <script src="/static/file_uploader/demo/src/main/webapp/js/upload.js"></script>#}
 <script>
 var app = angular.module('fileUpload', ['ngFileUpload']);
-
 app.controller('MyCtrl', ['$scope', 'Upload', '$timeout', function ($scope, Upload, $timeout) {
+    $scope.name = '';
+      $scope.chunkSize = '20480KB';
 
-      $scope.chunkSize = '1000MB';
   $scope.uploadUsingUpload=function(file) {
       $scope.f = file;
       console.log(file);
     file.upload = Upload.upload({
-      url: 'http://aprofi.d.ntaxa.com/filemanager/send/',
-      resumeSizeUrl: 'http://aprofi.d.ntaxa.com/filemanager/resumeopload/',
+
+      url: 'http://profireader.com/filemanager/send/{{ company_id }}/',
+        data : $scope.name,
+      resumeSizeUrl: 'http://profireader.com/filemanager/resumeopload/',
       resumeChunkSize: $scope.chunkSize,
       headers: {
         'optional-header': 'header-value'
       },
+
       fields: {username: $scope.username},
       file: file});
                 file.upload.progress(function (evt) {
                 file.progress = Math.min(100, parseInt(100.0 *
                                                        evt.loaded / evt.total));
             });
-
-
   };
 }]);
 </script>
 {% raw %}
 <body ng-app="fileUpload" ng-controller="MyCtrl">
-  <h4>Upload on file select</h4>
+  <h4>Upload on file select</h4>{{ resp }}
   <button type="file" ngf-select="uploadUsingUpload($file)" ngf-max-size="10000MB">
       Select File</button>
   <br><br>
@@ -56,6 +57,6 @@ app.controller('MyCtrl', ['$scope', 'Upload', '$timeout', function ($scope, Uplo
           <div ng-bind="f.progress + '%'"></div>
       </span>
   </div>
-  {{errorMsg}}
+  {
 </body>
 {% endraw %}

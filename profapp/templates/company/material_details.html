@@ -2,46 +2,212 @@
 
 {% block title %}Profireader - Company materials{% endblock title %}
 
+
+{% block styles %}
+    {{ super() }}
+    <!-- <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.css"> -->
+    <!-- ui-select files -->
+    <link rel="stylesheet" href="/static/css/select.css">
+
+        <!-- Select2 theme -->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/select2/3.4.5/select2.css">
+
+    <!--
+      Selectize theme
+      Less versions are available at https://github.com/brianreavis/selectize.js/tree/master/dist/less
+    -->
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.default.css">
+    <!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.bootstrap2.css"> -->
+    <!-- <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.bootstrap3.css"> -->
+
+    <link rel="stylesheet" href="/static/css/andriy.css">
+{%- endblock styles %}
+
 {% block portal_content %}
     {% block company_base %}
         {% include 'company/company_base.html' %}
     {% endblock company_base %}
+        <!--
+      IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
+      For Firefox 3.6, you will also need to include jQuery and ECMAScript 5 shim
+    -->
+    <!--[if lt IE 9]>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/es5-shim/2.2.0/es5-shim.js"></script>
     <script>
-        module.controller('materials_articles', ['$scope','$ok', function ($scope,$ok) {
+        document.createElement('ui-select');
+        document.createElement('ui-select-match');
+        document.createElement('ui-select-choices');
+    </script>
+    <![endif]-->
+
+    <script>
+    /**
+ * AngularJS default filter with the following expression:
+ * "tag in tags | filter: {name: $select.search, age: $select.search}"
+ * performs a AND between 'name: $select.search' and 'age: $select.search'.
+ * We want to perform a OR.
+ */
+module.filter('propsFilter', function() {
+    return function(items, props) {
+        var out = [];
+
+        if (angular.isArray(items)) {
+            items.forEach(function(item) {
+                var itemMatches = false;
+
+                var keys = Object.keys(props);
+                for (var i = 0; i < keys.length; i++) {
+                    var prop = keys[i];
+                    var text = props[prop].toLowerCase();
+                    if (item[prop].toString().toLowerCase().indexOf(text) !== -1) {
+                        itemMatches = true;
+                        break;
+                    }
+                }
+
+                if (itemMatches) {
+                    out.push(item);
+                }
+            });
+        } else {
+            // Let the output be the input untouched
+            out = items;
+        }
+
+        return out;
+    };
+});
+
+module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, $http, $ok) {
+
+    $scope.disabled = undefined;
+    $scope.searchEnabled = undefined;
+    $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
+
+    $scope.$watch("data.selected_division", function(newValue, oldValue) {
+        if ($scope.data && (newValue !== oldValue)){
+            res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
+		    res.success(function(data, status, headers, config) {
+                $scope.tagsObject.tags = []; // TODO (AA to AA): it works but...
+                $scope.availableTags = data.data.availableTags;
+		    });
+		    res.error(function(data, status, headers, config) {
+			    alert( "failure message: " + JSON.stringify({data: data}));
+		    });
+        }
+    });
+
+    $scope.getData = function () {
+        $scope.loading = true;
+    };
+
+    $scope.respData = function () {
+        $scope.loading = false;
+        return true;
+    };
+
+    $scope.enable = function() {
+        $scope.disabled = false;
+    };
+
+    $scope.disable = function() {
+        $scope.disabled = true;
+    };
+
+    $scope.enableSearch = function() {
+        $scope.searchEnabled = true;
+    };
+
+    $scope.disableSearch = function() {
+        $scope.searchEnabled = false;
+    };
+
+    $scope.availableTags = [];
+    $scope.selectedTags = [];
+
+}]);
+        module.controller('materials_articles', ['$scope','$ok', function ($scope, $ok) {
+{#            $scope.$af = $af;#}
             $scope.url_search_for_user = {{ raw_url_for('company.search_for_user')|safe }};
             $scope.selectedUser_name = '';
             $scope.selectedUser = null;
             $scope.selectedUser_sending = false;
             $scope.url_article_details = {{ raw_url_for('company.material_details')|safe }};
-            $scope.url_update_status = '{{ url_for('company.update_article')|safe }}';
-            $scope.url_submit_to_portal = '{{ url_for('company.submit_to_portal')|safe }}';
+            $scope.url_update_status = {{ raw_url_for('company.update_material_status')|safe }};
+            $scope.url_submit_to_portal = '{{ url_for('portal.submit_to_portal')|safe }}';
+{#            $scope.url_submit_to_portal = {{ raw_url_for('portal.submit_to_portal')|safe }};#}
             $scope.url_send_article_to_user = '{{ url_for('company.send_article_to_user')|safe }}';
             $scope.url_send_article_user = {{ raw_url_for('company.send_article_to_user')|safe }};
             $scope.data_resp = '';
             $scope.data_resp_user = '';
             $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
-            $scope.statuses = '';
+
+            $scope.saveData =function(data, tags){
+                var passData = {
+                    article: data.article,
+                    tags: tags,
+                    selected_division: data.selected_division
+                };
+                $ok($scope.url_submit_to_portal,
+                        passData,
+                        function (resp) {
+                            $scope.data_resp_portal = resp.portal;
+                        }
+                );
+            };
+
+{#            $ok($scope.url_search_for_company(), {article_id: $scope.data.id, search: val}, function (resp) {#}
+{#                    return resp.length ? resp : [{id: false, name: 'No results'}];#}
+{#                });#}
+
+
+{#            (data, tagsObject.tags)#}
+
+            $scope.changeStatus = function(new_status) {
+                url_send_request = $scope.url_update_status({'company_id': $scope.data.article.company_id, 'article_id': $scope.data.article.id});
+                $ok(url_send_request, {new_status: new_status}, function (resp) {
+                    $scope.data.article.status = resp.article_new_status;
+                    $scope.data.allowed_statuses = resp.allowed_statuses;
+                    $scope.change_status_to = $scope.data.allowed_statuses[0];
+                });
+            };
+
+            $scope.loadArticle = function () {
+                $ok('', {}, function (resp) {
+                    $scope.data = resp;
+                    $scope.change_status_to = $scope.data.allowed_statuses[0];
+                });
+            };
+
+            $scope.afterLoadArticle = function (resp, default_after_load) {
+                default_after_load(resp);
+            };
+
+            $scope.tagsObject = {};
+            $scope.tagsObject.tags = [];
+
             $scope.porals_divisions = function (portals) {
                 var divisions = {};
                 $.each(portals, function (k, v) {
                     divisions[k] = v;
                 });
-                {#    var count = Object.keys(portals).length; #}
                 return divisions;
             };
-            $scope.change_status = function (status) {
-                $scope.statuses = status;
-            };
+
             $scope.resp_data = function (resp) {
                 $scope.data_resp = resp;
             };
+
             $scope.resp_data_user = function (resp) {
                 $scope.data_resp_user = resp;
             };
+
             $scope.resp_data_portal = function (resp) {
                 $scope.data_resp_portal = resp;
             };
+
             $scope.myRights = function () {
                 for (var i = 0; i < arguments.length; i++) {
                     if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
@@ -50,12 +216,11 @@
                 }
                 return true;
             };
-            $scope.getData = function () {
-                return $scope.data;
-            };
+
             $scope.cancel = function () {
                 return false;
             };
+
             $scope.afterSave = function (resp) {
                 window.location.href =
                         $scope.url_article_details({
@@ -64,7 +229,8 @@
                         })
             };
 
-        $scope.onSelect = function ($item, $model, $label) {
+
+            $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {
                     $scope.selectedUser_name = '';
                     $scope.selectedUser = null;
@@ -73,6 +239,7 @@
                     $scope.selectedUser = $item;
                 }
             };
+
             $scope.searchForUserToJoin = function (val) {
                 return $ok($scope.url_search_for_user({company_id: $scope.data.company.id}), {
                     company_id: $scope.data.company_id,
@@ -81,6 +248,7 @@
                     return resp.length ? resp : [{id: false, profireader_name: 'No results'}];
                 });
             };
+
             $scope.joinToUser = function () {
                 $ok($scope.url_send_article_user(), {
                 send_to_user:{'id':$scope.selectedUser.id, 'profireader_name': $scope.selectedUser.profireader_name}}, function (resp) {
@@ -94,21 +262,21 @@
                 }).finally(function () {
                     $scope.selectedUser_sending = false;
                 });
-            };      }]);
+            };
+
+        }]);
         </script>
     {% raw %}
-    <script type="text/ng-template" id="customTemplate.html">
-        <a href="#">
-            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
-            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
-        </a>
-    </script>
-    <style>
-        ul.dropdown-menu li a strong {
-            color: #f00;
-        }
-    </style>
-    <div ng-init="loadData()" ng-controller="materials_articles">
+    <div ng-init="loadArticle()" ng-controller="materials_articles">
+
+<!--        <div af
+             af-before-load="beforeLoadArticle"
+             af-before-save="getData"
+             af-before-validate="getData"
+             af-after-load="afterLoadArticle"
+             af-url-validate="{{ url_submit_to_portal({action: 'validate'}) }}"
+             af-url-save="{{ url_submit_to_portal({action: 'save'}) }}"
+             ang-model="data"> -->
 
         <div ng-if="!data">{{ _('Loading...') }}</div>
         <div ng-if="data">
@@ -120,33 +288,22 @@
             <br>
 
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                Current status is <span ng-if="!data_resp.article.status">{{ original_data.article.status }}</span>{{
-                data_resp.article.status }}<br><span ng-if="!data_resp.article.status">{{ change_status(original_data.article.status) }}</span>
-                <span ng-if="data_resp.article.status">{{ change_status(data_resp.article.status) }}</span>
+                <hr/>
+                Current article status: `<span class="..." ng-if="!data_resp.article.status">{{ data.article.status }}</span>`<br/>
+                Change material status to
+                <select ng-model="change_status_to">
+                    <option value="{{ changeto }}" ng-repeat="changeto in data.allowed_statuses">{{ changeto }}</option>
+                </select>
+                <input ng-click="changeStatus(change_status_to)" ng-disabled="!data.allowed_statuses" type="submit" ng-if="data.allowed_statuses" value="Submit status">
 
-                <form ng-ok ng-onsuccess="resp_data" ng-onsubmit="getData"
-                      ng-action="url_update_status">
-                    <div ng-if="!data_resp.status">
-                        Change material status to
-                        <select ng-init="data.article.status = data.status[0]"
-                                ng-model="data.article.status"
-                                ng-options="stat for stat in data.status">
-                            <option value="" selected hidden/>
-                        </select>
-                        <input type="submit" ng-if="data.status" value="Submit status">
-                        <input type="submit" ng-if="!data.status" value="Submit status" disabled>
-                    </div>
-                    <div ng-if="data_resp.status">
-                        Status was successfully changed
-                    </div>
 
-                </form>
                 <br/>
             </div>
             <div ng-if="myRights('publish', 'unpublish', 'edit')">
-                                    <h3> {{ _('Search for user') }} </h3>
+                <hr/>
+                <h3> {{ _('Search for user') }} </h3>
         <input disabled typeahead-on-select="onSelect($item, $model, $label)"
-                                               typeahead-template-url="customTemplate.html"
+                                               typeahead-template-url="typeaheadTemplate.html"
                                                typeahead-loading="loadingUsers"
                                                ng-model="selectedUser_name"
                                                typeahead="user as user.profireader_name for user in searchForUserToJoin($viewValue)"
@@ -161,7 +318,22 @@
                     data_resp_user_search.user.profireader_name }}
                 </div>
                 <div ng-if="!data_resp_user.user">
-                    <form ng-ok ng-onsuccess="resp_data_user" ng-onsubmit="getData"
+                    <hr/>
+                    <div>
+                        Introduce user to work with this material
+                        <select disabled
+                                ng-init="data.send_to_user = data.company.employees[0]"
+                                ng-model="data.send_to_user"
+                                ng-options="user.profireader_name for user in data.company.employees">
+                            <option value="" selected hidden/>
+                        </select>
+                        <input disabled type="submit" value="Send article">
+                    </div>
+
+
+<!--                    <form ng-ok
+                          ng-onsuccess="resp_data_user"
+                          ng-onsubmit="getData"
                           ng-action="url_send_article_to_user">
                         Introduce user to work with this material
                         <select disabled ng-init="data.send_to_user = data.company.employees[0]"
@@ -170,65 +342,65 @@
                             <option value="" selected hidden/>
                         </select>
                         <input disabled type="submit" value="Send article">
-                    </form>
-
+                    </form>  -->
 
                 </div>
                 <div ng-if="data_resp_user.user">
-                    Article "{{ data.article.title }}" was successfully sent to user {{
-                    data_resp_user.user.profireader_name }}
+                    Article "{{ data.article.title }}" was successfully sent to user
+                    {{ data_resp_user.user.profireader_name }}
                 </div>
-
-
 
             </div>
             <div ng-if="myRights('publish')">
                 <div ng-if="!data_resp_portal.portal">
-                    <form ng-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData"
-                      ng-action="url_submit_to_portal">
-                    Publish this material at portal
-            <span ng-if="statuses=='accepted'">
-                <select ng-model="data.selected_division">
-                    <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
-                        <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}"  ng-selected="selected">
-                            {{ division.name }} {{ division.portal_division_type_id }}
-                        </option>
-                    </optgroup>
-                    <!-- END OF IMPORTANT GROUP -->
-                    <option disabled>---Below materials sent---</option>
-                    <optgroup ng-repeat="joined_portal in data.joined_portals"
-                              label="| {{ joined_portal.name }} |" disabled>
-                        <option disabled ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
-                            {{ division.name }}
-                        </option>
-                    </optgroup>
-                </select>
-                    <br/>
-                    My form for keywords:
+                    <hr>
+                    <!-- <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal"> -->
+                    <form ng-action="url_submit_to_portal">
+                    Publish this material to portal
 
-                    <select>
-                        <option>Hello!</option>
-                        <option ng-selected="selected">Greetings!</option>
+                    <select ng-model="data.selected_division">
+                        <option disabled>---Below materials sent---</option>
+                        <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
+                            <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}"  ng-selected="selected">
+                                {{ division.name }} {{ division.portal_division_type_id }}
+                            </option>
+                        </optgroup>
+                        <optgroup ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
+                            <option ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
+                                {{ division.name }}
+                            </option>
+                        </optgroup>
                     </select>
-                <span>
-                    <input type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
-                </span>
-            </span>
-            <span ng-if="statuses!='accepted'">
-                <select disabled>
-                    <optgroup label="Change article status to accepted first">
-                        <option>Change article status to accepted first</option>
-                    </optgroup>
-                </select>
-                <input type="submit" value="Publish" disabled>
-            </span>
-                </form>
+                    <br/>
+                    <hr>
+                    <div ng-controller="SelectTagsCtrl">
+                        <h3>Add tags:</h3>
+                        <ui-select multiple ng-model="tagsObject.tags" theme="select2" ng-disabled="disabled" style="width: 300px;">
+                            <ui-select-match placeholder="Select tags...">{{$item}}</ui-select-match>
+                            <ui-select-choices repeat="tag in availableTags | filter:$select.search">
+                                {{ tag }}
+                            </ui-select-choices>
+                        </ui-select>
+                        <p>Selected: {{tagsObject.tags}}</p>
+
+                    </div>
+                    <br/>
+                    <span>
+                        <!--<input ng-click="$af.save(data)" type="submit"
+                        ng-disabled="!$af.isActionAllowed(data, 'save')"
+                        value="Publish"> -->
+                        <input ng-click="saveData(data, tagsObject.tags)" type="submit" ng-disabled="!data.selected_division[0]" value="Publish">
+                    </span>
+                    
+
+                    </form>
                 </div>
-                <span ng-if="data_resp_portal.portal">
-                    Article {{ data.article.title }} successfully was published at portal {{ data_resp_portal.portal }}
+                <span ng-if="data_resp_portal">
+                    Article "{{ data.article.title }}" successfully was published at portal "{{ data_resp_portal }}"
                 </span>
             </div>
         </div>
+    </div>
     </div>
 
     {% endraw %}

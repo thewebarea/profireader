@@ -1,11 +1,15 @@
 (function(window, angular, $) {
     "use strict";
-    angular.module('FileManagerApp').factory('item', ['$http', '$translate', 'fileManagerConfig', 'chmod', function($http, $translate, fileManagerConfig, Chmod) {
+    angular.module('FileManagerApp').factory('item', ['$http', '$translate','$cookies', 'fileManagerConfig', 'chmod', function($http, $cookies, $translate, fileManagerConfig, Chmod) {
 
         var Item = function(model, path) {
             var rawModel = {
                 name: model && model.name || '',
+                author_name: model && model.author_name || '',
+                description: model && model.description || '',
+                add_all: model && model.add_all || '',
                 path: path || [],
+                path_to: model && model.path_to || '',
                 type: model && model.type || 'file',
                 size: model && model.size || 0,
                 date: convertDate(model && model.date),
@@ -88,22 +92,27 @@
             }
         };
 
-        Item.prototype.rename = function(success, error) {
+        Item.prototype.set_properties = function(success, error) {
             var self = this;
             var data = {params: {
-                "mode": "rename",
+                "id" : self.model.id,
+                'add_all': self.tempModel.add_all,
+                "name": self.tempModel.name.trim() === self.model.name.trim() ? 'None': self.tempModel.name.trim(),
+                "author_name": self.tempModel.author_name === ''? '':self.tempModel.author_name,
+                "description": self.tempModel.description === ''? '':self.tempModel.description,
+                "mode": "properties",
                 "path": self.model.fullPath(),
                 "newPath": self.tempModel.fullPath()
             }};
             if (self.tempModel.name.trim()) {
                 self.inprocess = true;
                 self.error = '';
-                return $http.post(fileManagerConfig.renameUrl, data).success(function(data) {
+                return $http.post(fileManagerConfig.set_properties, data).success(function(data) {
                     self.defineCallback(data, success, error);
                 }).error(function(data) {
                     self.error = data.result && data.result.error ?
                         data.result.error:
-                        $translate.instant('error_renaming');
+                        $translate.instant('error_set_properties');
                     typeof error === 'function' && error(data);
                 })['finally'](function() {
                     self.inprocess = false;
@@ -111,22 +120,56 @@
             }
         };
 
-        Item.prototype.copy = function(success, error) {
+        Item.prototype.cut = function(success, error){
             var self = this;
+            var id = $cookies.cut_file_id = self.model.id;
+        };
+
+        Item.prototype.copy = function(success, error){
+            var self = this;
+            var id = $cookies.copy_file_id = self.model.id;
+        };
+
+        Item.prototype.paste = function(success, error) {
+            var self = this;
+            var parent_id = '';
+            if(self.model.id === self.tempModel.id){
+                parent_id = self.tempModel.folder_id;
+            }else if(self.isFolder() && self.tempModel.len !== 0){
+                parent_id = self.model.id;
+            }else{
+                parent_id =  self.tempModel.folder_id;
+            }
             var data = {params: {
-                mode: "copy",
+                id: self.tempModel.id,
+                mode: "paste",
                 path: self.model.fullPath(),
-                newPath: self.tempModel.fullPath()
+                folder_id: parent_id
             }};
-            if (self.tempModel.name.trim()) {
-                self.inprocess = true;
-                self.error = '';
-                return $http.post(fileManagerConfig.copyUrl, data).success(function(data) {
+            self.inprocess = true;
+            self.error = '';
+            if(self.tempModel.mode == 'copy') {
+                return $http.post(fileManagerConfig.copyUrl, data).success(function (data) {
+                    self.er = data.data === false ? self.tempModel.time_o: null;
+                    self.error = data.data === '' ? self.tempModel.error: null;
                     self.defineCallback(data, success, error);
                 }).error(function(data) {
                     self.error = data.result && data.result.error ?
                         data.result.error:
-                        $translate.instant('error_copying');
+                        $translate.instant('error_copy');
+                    typeof error === 'function' && error(data);
+                })['finally'](function() {
+                    self.inprocess = false;
+                });
+            }else{
+                return $http.post(fileManagerConfig.cutUrl, data).success(function (data) {
+                    self.er = data.data === false ? self.tempModel.time_o: null;
+                    self.error = data.data === false ? self.tempModel.error: null;
+                    self.defineCallback(data, success, error);
+                }).error(function(data) {
+                    self.error = data.result && data.result.error ?
+                        data.result.error:
+                        $translate.instant('error_cut');
                     typeof error === 'function' && error(data);
                 })['finally'](function() {
                     self.inprocess = false;
@@ -180,17 +223,16 @@
             });
         };
 
-        Item.prototype.download = function(preview) {
+        Item.prototype.download = function() {
             var self = this;
-            var data = {
-                mode: "download",
-                preview: preview,
-                path: self.model.fullPath()
-            };
-            var url = [fileManagerConfig.downloadFileUrl, $.param(data)].join('?');
+            var url = self.fileUrl(self.model.id, true);
             if (self.model.type !== 'dir') {
                 window.open(url, '_blank', '');
             }
+        };
+
+        Item.prototype.fileUrl = function(id, down){
+            return fileUrl(id, down)
         };
 
         Item.prototype.choose = function() {
@@ -231,12 +273,12 @@
             }};
             self.inprocess = true;
             self.error = '';
-            return $http.post(fileManagerConfig.removeUrl, data).success(function(data) {
+            return $http.post(fileManagerConfig.removeUrl+self.model.id, data).success(function(data) {
                 self.defineCallback(data, success, error);
             }).error(function(data) {
                 self.error = data.result && data.result.error ?
                     data.result.error:
-                    $translate.instant('error_deleting');
+                    self.tempModel.error;
                 typeof error === 'function' && error(data);
             })['finally'](function() {
                 self.inprocess = false;
@@ -286,6 +328,22 @@
             })['finally'](function() {
                 self.inprocess = false;
             });
+        };
+
+        Item.prototype.canPaste = function(id, folder_id){
+            var data = {params: {
+                perms: self.tempModel.perms.toOctal(),
+                permsCode: self.tempModel.perms.toCode(),
+                recursive: self.tempModel.recursive
+            }};
+            return $http.post(fileManagerConfig.can_paste, data).success(function(data) {
+                self.defineCallback(data, success, error);
+            })
+        };
+        Item.prototype.title = function(){
+            var size = this.isFolder()? '':'('+this.model.sizeKb()+')kb';
+            var p = this.model.path_to;
+            return 'Name: ' + this.model.name + size + '\n'+ 'Full path: '+p
         };
 
         Item.prototype.isFolder = function() {

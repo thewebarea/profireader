@@ -2,8 +2,8 @@
 {% if articles %}
     <li class="previous">
         {% if current_page != 1 %}
-        <a href="{{ url_for('front.division', division_name=current_division.name, page=current_page - 1, search_text=search_text) }}">&larr; Older</a>
-        {% else %} &larr; Older
+        <a href="{{ url_for('front.division', division_name=current_division.name, page=current_page - 1, search_text=search_text) }}"></a>
+        {% else %}
         {% endif %}
     </li>
     {% for button in range(page_buttons)|reverse %}
@@ -14,7 +14,7 @@
         {% endif %}
     {% endfor %}
     <li class="current-page">
-        <a href="{{ url_for('front.division', division_name=current_division.name, page=current_page, search_text=search_text) }}"><h4>{{ current_page }}</h4></a>
+        <a href="{{ url_for('front.division', division_name=current_division.name, page=current_page, search_text=search_text) }}">{{ current_page }}</a>
     </li>
     {% for button in range(page_buttons) %}
         {% if current_page + (button + 1)< pages %}
@@ -36,8 +36,8 @@
 
     <li class="next">
         {% if current_page != pages %}
-        <a href="{{ url_for('front.division', division_name=current_division.name, page=current_page + 1, search_text=search_text) }}">Newer &rarr;</a>
-        {% else %} Newer &rarr;
+        <a href="{{ url_for('front.division', division_name=current_division.name, page=current_page + 1, search_text=search_text) }}"></a>
+        {% else %}
         {% endif %}
     </li>
 {% endif %}

@@ -1,33 +1,89 @@
+{#TODO: OZ by OZ move this code to one file#}
+<link href="/static/image_editor/dist/cropper.css" rel="stylesheet">
+<link href="/static/image_editor/demo/css/main.css" rel="stylesheet">
 <script>
 
-    module.controller('article_edit', ['$scope', '$modal', function ($scope, $modal) {
-
+    module.controller('article_edit', ['$scope', '$modal', '$af', function ($scope, $modal, $af) {
+        $scope.$af = $af;
         $scope.details_article = {{ raw_url_for('article.details')|safe }};
         {% if article_company_id %}
             $scope.save_article = '{{ url_for('article.save', article_company_id = article_company_id)|safe }}';
         {% else %}
-            $scope.save_article = '{{ url_for('article.confirm_create')|safe }}';
+            $scope.save_article = '{{ url_for('article.load_form_create')|safe }}';
         {% endif %}
+
+        $scope.data = {};
 
 
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
         };
 
-        $scope.getData = function () {
-            return $scope.data;
+        $scope.getData = function (model, deff) {
+            var x = document.getElementById("dataX");
+            var y = document.getElementById("dataY");
+            var width = document.getElementById("dataWidth");
+            var height = document.getElementById("dataHeight");
+            var rotate = document.getElementById("dataRotate");
+            model.coordinates = {
+                'x': angular.element(x).val(), 'y': angular.element(y).val(),
+                'width': angular.element(width).val(), 'height': angular.element(height).val(),
+                'rotate': angular.element(rotate).val()
+            };
+            return deff(model);
         };
 
 
+        $scope.tinymceImageOptions['height'] = '450px';
         $scope.articleImageSelected = function (item) {
+            console.log(item);
             $scope.data.image_file_id = item.id;
-            $scope.setImageUrl();
+            $scope.setImageUrl($scope.data);
             closeFileManager();
-        }
+            var $image = $('.img-container > img');
+            $image.cropper('replace', $scope.image_file_url);
+            $scope.change_picture_in_croper();
 
-        $scope.setImageUrl = function () {
-            $scope.image_file_url = fileUrl($scope.data.image_file_id);
-        }
+        };
+        $scope.default_image = true;
+
+        $scope.cleanUpHtml = function (data) {
+            data.long = cleanup_html(data.long);
+            return data;
+        };
+
+
+        $scope.change_picture_in_croper = function (coordinates) {
+            setTimeout(function () {
+                init_cropper($scope.cropAreaChanged, $scope.data.ratio, coordinates);
+            }, 1000);
+
+        };
+
+        $scope.cropAreaChanged = function (new_coordinates) {
+            $scope.coordinates = new_coordinates;
+        };
+
+        $scope.articleAfterLoad = function (resp, deff) {
+            deff(resp);
+
+            setTimeout(function () {
+                $scope.setImageUrl($scope.data);
+                $scope.change_picture_in_croper($scope.data.coordinates);
+            }, 0);
+            {#                    init_cropper();#}
+            return true;
+        };
+
+        $scope.setImageUrl = function (model) {
+            $scope.image_file_url = fileUrl(model.image_file_id) || "{{ url_for('static', filename='images/choose_image.jpg') }}";
+            var image = $scope.image_file_url;
+            if (image != "{{ url_for('static', filename='images/choose_image.jpg') }}") {
+                $scope.default_image = false;
+            }
+            {#            $scope.change_picture_in_croper(image);#}
+            return model;
+        };
 
 
         $scope.chooseImage = function () {
@@ -43,65 +99,80 @@
                         return {
                             choose: "parent.angularControllerFunction('article_edit', 'articleImageSelected')"
                         }
+                    },
+                    file_manager_default_action: function () {
+                        return 'choose'
                     }
                 }
             });
-
-
         };
-
 
     }]);
 </script>
 
+{% include 'croper.html' %}
+
 {% raw %}
-<div ng-init="loadData(null,{},setImageUrl)" ng-controller="article_edit">
-    <div ng-if="!data">Loading...</div>
-    <div ng-if="data">
 
-        <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
-        <h2 ng-show="data.id && company">{{ _('update version of article for company
-            `%(company.name)s`', company)
-            }}</h2>
+<div ng-controller="article_edit">
 
-        <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
+    <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
-        <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
-                maybe layout selector is apporpriate here-->
+    <h2 ng-show="data.id && company">{{ _('update version of article for company
+        `%(company.name)s`', company)
+        }}</h2>
 
-        <form
-                ng-ok
-                ng-onsuccess="afterSave"
-                ng-onsubmit="getData"
-                ng-action="save_article">
-            <div style="width: 400px; float: left">
-                <input type="hidden" ng-model="data.id"/>
-                {{ _('Article title') }}
+
+    <h2 ng-show="data.id && !company">{{ _('update your version of article') }}</h2>
+
+    <table af af-after-load="articleAfterLoad" af-before-save="getData" af-beforeValidate="getData" ng-model="data">
+        <tr>
+            <td style="width: 60%">
+
+                <!-- TODO: OK by OZ:   this block form should share same classes with layout to look MAXIMUM like in portal
+                        maybe layout selector is apporpriate here-->
+
+                <input type="hidden" ang-model="data.id"/>
+
+                {{ _('Article title') }} <span af-validation-answer="data_validation:title"></span>
                 <input style="width: 100%" type="text" ng-model="data.title">
-                {{ _('Short Description') }}
+                {{ _('Short Description') }} <span af-validation-answer="data_validation:short"></span>
                 <textarea style="width: 100%" placeholder="short" ng-model="data.short"></textarea>
-                {{ _('KeyWords') }}
+                {{ _('KeyWords') }} <span af-validation-answer="data_validation:keywords"></span>
                 <input style="width: 100%" ng-model="data.keywords"/>
-                {{ _('Full text') }}
-                <textarea ui-tinymce="tinymceImageOptions" placeholder="text"
-                          ng-model="data.long"></textarea>
-            </div>
 
-            <div ng-click="chooseImage()"
-                 style="float: left; margin-left: 50px; width: 300px; height: 240px; border: 1px solid #aaa;
-                        background-size: cover; background-image:url({{ image_file_url }});">
-                {{ _('Select main article image') }}
-            </div>
-            
-            <div style="clear: both"></div>
-            <br/>
-            <input type="hidden" ng-model="data.image_file_id">
-            <input style="clear: both;" type="submit"
-                   value="{{ data.id ? 'save' : 'create' }}"/>
+            </td>
+            <td style="width: 40%">
+                <div ng-include="'image_cropper'"></div>
+                <input type="hidden" ng-model="data.image_file_id">
+            </td>
+        </tr>
+        <tr>
+            <td>
 
-        </form>
-    </div>
+                {{ _('Full text') }}<br/>
+            <textarea ui-tinymce="tinymceImageOptions" style="width: 400px;"
+                      ng-model="data.long"></textarea>
+
+            </td>
+            <td style="position: relative"><input style="position: absolute; bottom: 0px; right: 0px;"
+                                                  ng-disabled="!$af.isActionAllowed(data, 'save')"
+                                                  ng-click="$af.save(data)"
+                                                  type="submit"
+                                                  value="{{ data.id ? 'save' : 'create' }}"/>
+            </td>
+        </tr>
+    </table>
+
 </div>
 
+
 {% endraw %}
+
+</div>
+
+<script src="/static/image_editor/dist/cropper.js"></script>
+<script src="/static/image_editor/demo/js/main.js"></script>
+{#TODO: OZ by OZ move this code to one file#}
+

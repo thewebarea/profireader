@@ -34,6 +34,7 @@ TABLE_TYPES = {
     'string_30': String(30),
     'short_name': String(50),
     'title': String(100),
+    'short_text': String(120),
     'keywords': String(1000),
     'credentials': String(1000),
     'text': UnicodeText(length=65535),

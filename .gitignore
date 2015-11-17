@@ -13,6 +13,7 @@ Virtualenviroment/
 .Python
 env/
 env2/
+venv/
 build/
 develop-eggs/
 downloads/
@@ -26,9 +27,11 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
-*client_secrets.json
-/*client_secrets.json
+/solr*/
+solr*
+/solr*
 # PyInstaller
+client_secret.json
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
@@ -69,6 +72,17 @@ target/
 
 # secret data
 secret_data.*
+client_secret.*
+/client_secret.*
+*client_secrets.json
+*client_secret.json
+/*client_secrets.json
+/*client_secret.json
+/client_secret.json
+
+# database
+database_full.*
+/database_full.*
 database.*.bak
 *.sql
 *.bak
@@ -78,5 +92,4 @@ tmp*
 
 **/node_modules
 **/bower_components
-
-*.sql
+**/bower_components_dev

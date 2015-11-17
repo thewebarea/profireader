@@ -6,7 +6,7 @@
 
 (function(window, angular, $) {
     "use strict";
-    var app = angular.module('FileManagerApp', ['pascalprecht.translate', 'ngCookies']);
+    var app = angular.module('FileManagerApp', ['pascalprecht.translate', 'ngCookies','ngFileUpload']);
 
     app.directive('angularFilemanager', ['$parse', 'fileManagerConfig', function($parse, fileManagerConfig) {
         return {
@@ -42,6 +42,20 @@
             });
         };
     }]);
+
+    app.directive('ngEnter', function() {
+        return function(scope, element, attrs) {
+            element.bind("keydown keypress", function(event) {
+                if(event.which === 13) {
+                    scope.$apply(function(){
+                        scope.$eval(attrs.ngEnter, {'event': event});
+                    });
+
+                    event.preventDefault();
+                }
+            });
+        };
+    });
 
     app.filter('strLimit', ['$filter', function($filter) {
         return function(input, limit) {

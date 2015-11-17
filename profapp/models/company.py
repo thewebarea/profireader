@@ -21,45 +21,55 @@ from ..controllers import errors
 from ..constants.STATUS import STATUS_NAME
 from ..models.rights import get_my_attributes
 from functools import wraps
+from .files import YoutubePlaylist
 
 
 class Company(Base, PRBase):
     __tablename__ = 'company'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True)
-    name = Column(TABLE_TYPES['name'], unique=True)
-    logo_file = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
-    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    name = Column(TABLE_TYPES['name'], unique=True, nullable=False, default='')
+    logo_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    journalist_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
+    # corporate_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'))
+    system_folder_file_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('file.id'), nullable=False)
 #    portal_consist = Column(TABLE_TYPES['boolean'])
     author_user_id = Column(TABLE_TYPES['id_profireader'],
                             ForeignKey('user.id'),
                             nullable=False)
-    country = Column(TABLE_TYPES['name'])
-    region = Column(TABLE_TYPES['name'])
-    address = Column(TABLE_TYPES['name'])
-    phone = Column(TABLE_TYPES['phone'])
-    phone2 = Column(TABLE_TYPES['phone'])
-    email = Column(TABLE_TYPES['email'])
-    short_description = Column(TABLE_TYPES['text'])
-    portal = relationship('Portal', secondary='company_portal', backref=backref('companies',
-                                                                                lazy='dynamic'))
+    country = Column(TABLE_TYPES['name'], nullable=False, default='')
+    region = Column(TABLE_TYPES['name'], nullable=False, default='')
+    address = Column(TABLE_TYPES['name'], nullable=False, default='')
+    phone = Column(TABLE_TYPES['phone'], nullable=False, default='')
+    phone2 = Column(TABLE_TYPES['phone'], nullable=False, default='')
+    email = Column(TABLE_TYPES['email'], nullable=False, default='')
+    short_description = Column(TABLE_TYPES['text'], nullable=False, default='')
+    about = Column(TABLE_TYPES['text'], nullable=False, default='')
+
+    portal = relationship('Portal', secondary='company_portal', back_populates='companies')
+
     own_portal = relationship('Portal',
-                              backref="own_company", uselist=False,
+                              back_populates='own_company', uselist=False,
                               foreign_keys='Portal.company_owner_id',
                               )
-    user_owner = relationship('User', backref='companies')
-    # employees = relationship('User', secondary='user_company',
-    #                          lazy='dynamic')
+    user_owner = relationship('User', back_populates='companies')
+    employees = relationship('User',
+                             secondary='user_company',
+                             back_populates='employers',
+                             lazy='dynamic')
+
+    youtube_playlists = relationship('YoutubePlaylist')
+    
     # todo: add company time creation
     logo_file_relationship = relationship('File',
                                           uselist=False,
                                           backref='logo_owner_company',
-                                          foreign_keys='Company.logo_file')
+                                          foreign_keys='Company.logo_file_id')
+
     # get all users in company : company.employees
     # get all users companies : user.employers
 
-    def create_new_company(self):
+# TODO: VK by OZ I think this have to be moved to __init__ and dublication check to validation
+    def setup_new_company(self):
         """Add new company to company table and make all necessary relationships,
         if company with this name already exist raise DublicateName"""
         if db(Company, name=self.name).count():
@@ -67,17 +77,18 @@ class Company(Base, PRBase):
                 'message': 'Company name %(name)s already exist. Please choose another name',
                 'data': self.get_client_side_dict()})
 
-        user_company = UserCompany(status=STATUS.ACTIVE(),
-                                   rights_int=COMPANY_OWNER_RIGHTS
-                                   )
+        user_company = UserCompany(status=STATUS.ACTIVE(), rights_int=COMPANY_OWNER_RIGHTS)
         user_company.employer = self
         g.user.employer_assoc.append(user_company)
         g.user.companies.append(self)
+        self.youtube_playlists.append(YoutubePlaylist(name=self.name, company_owner=self))
+        self.save()
+
         return self
 
     def suspended_employees(self):
-        """Show all suspended employees from company. Before define method you should have
-        query with one company"""
+        """ Show all suspended employees from company. Before define method you should have
+        query with one company """
         suspended_employees = [x.to_dict('md_tm, employee.*,'
                                          'employee.employers.*')
                                for x in self.employee_assoc
@@ -102,23 +113,23 @@ class Company(Base, PRBase):
         return ret
         # return PRBase.searchResult(query_companies)
 
-    @staticmethod
-    def update_comp(company_id, data, passed_file):
-        """Edit company. Pass to data parameters which will be edited"""
-        company = db(Company, id=company_id)
-        upd = {x: y for x, y in zip(data.keys(), data.values())}
-        company.update(upd)
+    # @staticmethod
+    # def update_comp(company_id, data):
+    #     """Edit company. Pass to data parameters which will be edited"""
+    #     company = db(Company, id=company_id)
+    #     upd = {x: y for x, y in zip(data.keys(), data.values())}
+    #     company.update(upd)
 
-        if passed_file:
-            file = File(company_id=company_id,
-                        parent_id=company.one().corporate_folder_file_id,
-                        author_user_id=g.user_dict['id'],
-                        name=passed_file.filename,
-                        mime=passed_file.content_type)
-            company.update(
-                {'logo_file': file.upload(
-                    content=passed_file.stream.read(-1)).id}
-            )
+        # if passed_file:
+        #     file = File(company_id=company_id,
+        #                 parent_id=company.one().system_folder_file_id,
+        #                 author_user_id=g.user_dict['id'],
+        #                 name=passed_file.filename,
+        #                 mime=passed_file.content_type)
+        #     company.update(
+        #         {'logo_file_id': file.upload(
+        #             content=passed_file.stream.read(-1)).id}
+        #     )
         # db_session.flush()
 
     @staticmethod
@@ -130,7 +141,7 @@ class Company(Base, PRBase):
                 filter(Company.name.ilike("%" + searchtext + "%")
                        ).all()]
 
-    def get_client_side_dict(self, fields='id|name'):
+    def get_client_side_dict(self, fields='id,name,author_user_id,country,region,address,phone,phone2,email,short_description,logo_file_id,about,own_portal.id|host'):
         """This method make dictionary from portal object with fields have written above"""
         return self.to_dict(fields)
 
@@ -151,6 +162,7 @@ def forbidden_for_current_user(**kwargs):
 # TODO: see the function params_for_user_company_business_rules.
 def simple_permissions(rights):
     def business_rule(**kwargs):
+        # TODO (AA to AA): Implement json handling when json is available among other parameters.
         params = kwargs['json'] if 'json' in kwargs.keys() else kwargs
 
         keys = params.keys()
@@ -182,9 +194,10 @@ class UserCompany(Base, PRBase):
                                 get_my_attributes(STATUS_NAME))),
                          name='status_name_type'), nullable=False)
 
+    position = Column(TABLE_TYPES['short_name'])
+
     md_tm = Column(TABLE_TYPES['timestamp'])
 
-    # confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
     _banned = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
 
     _rights = Column(TABLE_TYPES['bigint'],
@@ -287,7 +300,8 @@ class UserCompany(Base, PRBase):
         """This method defines for update user-rights in company. Apply list of rights"""
         new_rights_binary = Right.transform_rights_into_integer(new_rights)
         user_company = db(UserCompany, user_id=user_id, company_id=company_id)
-        rights_dict = {'_rights': new_rights_binary}
+        #rights_dict = {'_rights': new_rights_binary}
+        rights_dict = {'rights_int': new_rights_binary}  # TODO (AA to AA): does it work?
         user_company.update(rights_dict)
 
     #  corrected
@@ -296,16 +310,16 @@ class UserCompany(Base, PRBase):
         """Show all rights all users in current company with all statuses"""
         emplo = {}
         for user in db(Company, id=company_id).one().employees:
-            user_company = user.employer_assoc. \
-                filter_by(company_id=company_id).one()
+            user_company = user.employer_assoc.filter_by(company_id=company_id).one()
             emplo[user.id] = {'id': user.id,
                               'name': user.user_name,
-                              # TODO (AA): don't pass user object
+                              # TODO (AA to AA): don't pass user object
                               'user': user,
                               'rights': {},
                               'companies': [user.employers],
                               'status': user_company.status,
-                              'date': user_company.md_tm}
+                              'date': user_company.md_tm,
+                              'position': user_company.position}
 
             # emplo[user.id]['rights'] = \
             #     Right.transform_rights_into_set(user_company.rights_set)

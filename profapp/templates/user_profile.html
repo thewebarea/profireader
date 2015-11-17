@@ -9,7 +9,7 @@
 {% endblock portal_base %}
 
 {% block portal_content %}
-<h1>User Profile</h1>
+<h1 class="nice-title">User Profile<span></span></h1>
 <a href="{{ url_for('user.edit_profile', user_id=user.id) }}">[edit]</a>
 
 <div ng-controller="UserLoginController" class="user-profile">

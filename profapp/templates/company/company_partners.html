@@ -7,14 +7,14 @@
 {% block portal_base %}
     {% include 'partials/portal_base_Profireader.html' %}
 {% endblock portal_base %}
-{% block content %}
+{% block portal_content %}
     {% block company_base %}
 {% include 'company/company_base_angular.html' %}
 {% endblock company_base %}
 
     <script>
         module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
-            $scope.url_company_profile = {{ raw_url_for('company.profile')|safe }};
+            $scope.url_portal_profile = {{ raw_url_for('portal.profile')|safe }};
             $scope.url_search_for_portal = function () { return( '/portal/search_for_portal_to_join/' ); };
 {#            {{ raw_url_for('portal.search_for_portal_to_join')|safe }};#}
             $scope.url_join = {{ raw_url_for('portal.apply_company')|safe }};
@@ -74,23 +74,12 @@
         }]);
     </script>
     {% raw %}
-    <script type="text/ng-template" id="customTemplate.html">
-        <a href="#">
-            <span ng-show="match.model.id" bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
-            <em ng-show="!match.model.id" bind-html-unsafe="match.label"></em>
-        </a>
-    </script>
-    <style>
-        ul.dropdown-menu li a strong {
-            color: #f00;
-        }
-    </style>
     <div ng-init="loadData()" ng-controller="portal_list">
 
         <span ng-if="myRights('subscribe_to_portals')">
         <h3> {{ _('Join to portal') }} </h3>
         <input typeahead-on-select="onSelect($item, $model, $label)"
-                                               typeahead-template-url="customTemplate.html"
+                                               typeahead-template-url="typeaheadTemplate.html"
                                                typeahead-loading="loadingPortals"
                                                ng-model="selectedPortal_name"
                                                typeahead="portal as portal.name for portal in searchForPortalToJoin($viewValue)"
@@ -126,14 +115,11 @@
 
         <div ng-if="data.portals_partners!=''">
             This company portals-partners:
-            <span ng-repeat="portals in data.portals_partners">
-                <a href="{{ url_company_profile({company_id: portals.company_owner_id}) }}">"{{ portals.name }}" </a>
+            <span ng-repeat="portal in data.portals_partners">
+                <a href="{{ url_portal_profile({portal_id: portal.id}) }}">"{{ portal.name }}" </a>
             </span>
         </div>
     </h3>
     </div>
 {% endraw %}
-{% endblock content %}
-{% block footer %}
-    {% include 'partials/portal_footer_Profireader.html' %}
-{% endblock footer %}
+{% endblock portal_content %}

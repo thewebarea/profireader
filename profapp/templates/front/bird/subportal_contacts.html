@@ -1,0 +1,16 @@
+{% extends 'front/bird/layout-wbg.html' %}
+
+{% block content %}
+    <h2>{{ member_company['name'] }}</h2>
+
+    {% for user_id in company_users  %}
+        <div class="person-item">
+        <img width="50" height="50" class="round-avatar" style="background-image: url({{ company_users[user_id]['profireader_small_avatar_url'] }})"/>
+        <b>{{ company_users[user_id]['profireader_name'] }}</b><br/>
+            <div class="role">Один з працівників проекту</div>
+            <div class="phone">+380638188999</div>
+        <a style="clear: both" href="#">email@gmail.com</a>
+        </div>
+    {% endfor %}
+
+{% endblock content %}

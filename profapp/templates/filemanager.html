@@ -1,4 +1,3 @@
-<!doctype html>
 <html lang="en">
 <head>
     <!--
@@ -30,10 +29,6 @@
 <!-- Comment if you need to use raw source code -->
 {#  <link rel="stylesheet" href="dist/angular-filemanager.css">#}
 {#  <script src="dist/angular-filemanager.min.js"></script>#}
-<!-- /Comment if you need to use raw source code -->
-
-
-    {#    <!-- Uncomment if you need to use raw source code#}
     <script src="/static/filemanager/app.js"></script>
   <script src="/static/filemanager/config.js"></script>
   <script src="/static/filemanager/chmod.js"></script>
@@ -45,49 +40,25 @@
   <script src="/static/filemanager/selector-controller.js"></script>
     <script src="/static/filemanager/angular-filemanager.min.js"></script>
   <link rel="stylesheet" href="/static/filemanager/angular-filemanager.css">
-
     <script src="/static/js/underscore-min.js"></script>
+    <script src="/static/file_uploader/dist/ng-file-upload.js"></script>
+    <!--<script src="/static/fileuploader/ng-file-upload.min.js"></script>-->
+    <script src="/static/js/profireader_angular.js"></script>
 
-    <script src="/static/fileuploader/ng-file-upload.min.js"></script>
 
-
-</head>
-
-<body>
 <script>
 
-    var mime_allow = '{{ mime_allow|safe }}';
-    // mime regexp to allow selection
-    var mime_deny = '{{ mime_deny|safe }}';
-    // mime regexp to deny (if allowed by mime_allow)
-    {% if on_choose and max_choose>0 %}
-        var max_choose = {{ max_choose|safe }};
-        // how many files can be selected
-        var on_choose = function (files_selected) {
-            if (_.isFunction({{ on_choose|safe }})) {
-                try {
-                    {{ on_choose|safe }}.
-                    apply(this, [files_selected]);
-                }
-                catch (e) {
 
-                }
-            }
-        }
-        // call this function with dictionary of selected files
-        // on_choose({'file1-uuid': fileModelRetrievedFromServer, 'file2-uuid': anotherFileModelRetrievedFromServer})
-    {% else %}
-        var on_choose = false;
-        var max_choose = 0;
-    {% endif %}
 
 
     var library = {{ library|safe }};
+    var error = '{{ err }}';
     var file_manager_called_for = '{{ file_manager_called_for|safe }}';
     var file_manager_on_action = {{ file_manager_on_action|safe }};
-{#    console.log(file_manager_on_action);#}
-    {#    var app = angular.module('FileUpload', ['ngFileUpload']);#}
+    var file_manager_default_action = '{{ file_manager_default_action|safe }}';
 
+{#    console.log(file_manager_on_action);#}
+{#    var app = angular.module('FileUpload', ['ngFileUpload']);#}
 {#    angular.module('FileManagerApp').controller('MyCtrl', ['$scope', 'Upload', function ($scope, Upload) {#}
 {#        // upload later on form submit or something similar#}
 {#        $scope.submit = function () {#}
@@ -113,6 +84,5 @@
 
 <body ng-app="FileManagerApp">
 <angular-filemanager></angular-filemanager>
-
 </body>
 </html>

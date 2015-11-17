@@ -217,9 +217,13 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
           slice.name = file.name;
           file = slice;
           if (config._chunkSize) {
+
             formData.append('chunkSize', config._end - config._start);
             formData.append('chunkNumber', Math.floor(config._start / config._chunkSize));
+            formData.append('chunkQuantity', Math.floor(config._file.size / config._chunkSize));
             formData.append('totalSize', config._file.size);
+            formData.append('ftype', config._ftype);
+            formData.append('upload_file_id', config._upload_file_id);
           }
         }
         formData.append(key, file, file.fileName || file.name);
@@ -240,7 +244,8 @@ ngFileUpload.service('UploadBase', ['$http', '$q', '$timeout', function ($http, 
 
     config._chunkSize = upload.translateScalars(config.resumeChunkSize);
     config._chunkSize = config._chunkSize ? parseInt(config._chunkSize.toString()) : null;
-
+    config._ftype = config.ftype;
+    config._upload_file_id = config.upload_file_id;
     config.headers = config.headers || {};
     config.headers['Content-Type'] = undefined;
     config.transformRequest = config.transformRequest ?

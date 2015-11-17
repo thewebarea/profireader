@@ -22,7 +22,8 @@ class Config(object):
     # to /etc/hosts
 
     #SERVER_NAME = 'aprofi.a.ntaxa.com'
-    SERVER_NAME = 'aprofi.d.ntaxa.com'
+    SERVER_NAME = 'profireader.com'
+    #SERVER_NAME = 'aprofi.d.ntaxa.com'
     #SERVER_NAME = 'profireader.a:8080'
     #SERVER_NAME = 'profireader.net:8080'
 
@@ -43,6 +44,7 @@ class Config(object):
     PROFIREADER_MAIL_SENDER = 'Profireader Admin ' \
                               '<profireader.service@gmail.com>'
     PROFIREADER_ADMIN = os.environ.get('PROFIREADER_ADMIN') or 'Oles'
+    PROFIREADER_ADMINS = secret_data.PROFIREADER_ADMINS
 
     # Application threads. A common general assumption is
     # using 2 per available processor cores - to handle
@@ -61,23 +63,22 @@ class Config(object):
 
 # Pagination
     ITEMS_PER_PAGE = 5
-    PAGINATION_BUTTONS = 4
+    PAGINATION_BUTTONS = 2
 
 # GOOGLE API
     GOOGLE_API_SECRET_KEY = secret_data.GOOGLE_API_SECRET_KEY
     GOOGLE_API_SECRET_JSON = secret_data.GOOGLE_API_SECRET_JSON
-    YOUTUBE_SCOPES = {'UPLOAD': "https://www.googleapis.com/auth/youtube.upload"}
+    YOUTUBE_API = dict(SCOPE="https://www.googleapis.com/auth/youtube",
+                       UPLOAD=dict(REDIRECT_URI="http://profireader.com/filemanager/uploader/",
+                                   SEND_URI="https://www.googleapis.com/upload/youtube/v3/"
+                                            "videos?%s"),
+                       CREATE_PLAYLIST=dict(SEND_URI="https://www.googleapis.com/youtube/v3/"
+                                                     "playlists?%s"),
+                       PLAYLIST_ITEMS=dict(SEND_URI="https://www.googleapis.com/youtube/v3/"
+                                                    "playlistItems?%s")
+                       )
     YOUTUBE_API_SERVICE_NAME = "youtube"
     YOUTUBE_API_VERSION = "v3"
-    YOUTUBE_REDIRECT_URL = 'http://aprofi.d.ntaxa.com/filemanager/uploader/'
-    # MISSING_CLIENT_SECRETS_MESSAGE = """
-    # WARNING: Please configure OAuth 2.0
-    # To make this sample run you will need to populate the client_secrets.json file
-    # found at:%swith information from the Developers Console
-    # https://console.developers.google.com/
-    # For more information about the client_secrets.json file format, please visit:
-    # https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-    # """ % os.path.abspath()
 
 # Base rights will added when user is confirmed in company
     BASE_RIGHT_IN_COMPANY = ['upload_files', 'submit_publications']
@@ -149,8 +150,8 @@ class ProductionDevelopmentConfig(Config):
         # Statement for enabling the development environment
         DEBUG = True
 
-class FrontConfig(Config):
 
+class FrontConfig(Config):
     SERVER_NAME = 'companyportal.d.ntaxa.com'
     host = os.getenv('PRODUCTION_SERVER_DB_HOST', 'companyportal.d.ntaxa.com')
     username = os.getenv('PRODUCTION_SERVER_DB_USERNAME', Config.username)
@@ -194,10 +195,11 @@ class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
 
     # Define database connection parameters
-    db_name = 'profireader_test'
+    host = secret_data.DB_HOST_UNITTEST
+    database = secret_data.DB_NAME_UNITTEST
 
     # Define the database - we are working with
     SQLALCHEMY_DATABASE_URI = \
-        database_uri(Config.host, Config.username, Config.password, db_name)
+        database_uri(host, Config.username, Config.password, database)
 
     SITE_TITLE = "TEST"

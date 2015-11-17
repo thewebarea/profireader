@@ -1,18 +1,9 @@
 <script>
     module.controller('UserLoginController', ['$scope', '$modal', function ($scope, $modal) {
         $scope.user = {{ g.user_dict|tojson|safe }};
-        $scope.open_filemanager = function () {
-            console.log('dialog opened');
-            var modalInstance = $modal.open({
-                templateUrl: 'filemanager.html',
-                controller: 'filemanagerCtrl',
-                size: 'filemanager-fullscreen'
-            });
 
-            modalInstance.result.then(function () {
-            }, function () {
-                console.log('Modal dismissed at: ' + new Date());
-            });
+        $scope.open_filemanager = function () {
+            window.location.href = '/filemanager/';
         };
     }]);
 
@@ -25,7 +16,8 @@
     <div class="container">
         {% raw %}
         <script type="text/ng-template" id="filemanager.html">
-            <iframe src="{{ src }}" style="border: none; margin: 0px; padding: 0px; width: 100%; height: 100%"></iframe>
+            <iframe src="{{ src }}"
+                    style="border: none; margin: 0px; padding: 0px; width: 100%; height: 100%"></iframe>
         </script>
         {% endraw %}
         <div class="container-fluid">
@@ -38,14 +30,15 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('general.index') }}">Profireader</a>
+                <a class="navbar-brand" href="{{ url_for('general.index') }}"><img
+                        src="/static/front/img/profi.png"/></a>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li ng-cloak ng-show="{{ '{{' }}!user.id{{ '}}' }}">
-                        <ul>
+                        <ul class="user-auth">
                             <li><a href="{{ url_for('auth.login') }}">log in</a></li>
                             <li><a href="{{ url_for('auth.signup') }}">signup</a></li>
                         </ul>
@@ -55,31 +48,35 @@
                             <li class="dropdown">
                                 <a href="#" data-toggle="dropdown">
                                     {#                        <img src="{{ current_user.profireader_small_avatar_url }}" style="width:18px;border:0">#}
-                                    <img src="{{ current_user.profireader_small_avatar_url }}"
-                                         style="width:18px;height:18px;border:0">
+                                    <img class="person-small-cover" src="{{ current_user.profireader_small_avatar_url }}">
                                     {{ '{{' }} user.name {{ '}}' }}
                                     <b class="caret"></b>
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li>
-                                        <a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">Your
-                                            Profile</a></li>
-                                    <li><a href="{{ url_for('auth.change_password') }}">Change
-                                        Password</a></li>
-                                    <li><a href="{{ url_for('auth.change_email_request') }}">Change
-                                        Email</a></li>
+                                    <li><a href="{{ flask_endpoint_to_angular('user.profile', user_id='user.id') }}">My Profile</a></li>
+{#                                    <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>#}
+{#                                    <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>#}
                                     <li><a href="{{ url_for('company.show') }}">Company</a></li>
                                     <li><a href="{{ url_for('article.show_mine') }}">My articles</a>
                                     </li>
                                     <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
-                                    <li><a href="#" ng-click="open_filemanager()">file manager</a>
-                                    </li>
-
+{#                                    <li><a href="#" ng-click="open_filemanager()">file manager</a>#}
+{#                                    </li>#}
                                 </ul>
                             </li>
                         </ul>
                     </li>
 
+
+                </ul>
+                <ul class="top-menu">
+                    <li><a class="messages_btn" href="#" title="All Messages"><span class="tooltip">All Messages</span></a></li>
+                    <li><a class="company_btn" href="{{ url_for('company.show') }}" title="Company"><span class="tooltip">Company</span></a>
+                    </li>
+                    <li><a class="article_btn" href="{{ url_for('article.show_mine') }}" title="My articles"><span class="tooltip">My articles</span></a>
+                    </li>
+                    <li><a class="filemanager_btn" href="#" ng-click="open_filemanager()" title="File manager"><span class="tooltip">File manager</span></a>
+                    </li>
 
                 </ul>
             </div>
