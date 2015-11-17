@@ -92,8 +92,8 @@
             </tr>
             <tr ng-repeat="publication in publications" valign="top">
                 <td>{{ publication.publishing_tm }}</td>
-                <td><a href="{{ url_details({company_id:own_company_id, article_id:publication.company_article.article_id}) }}"
-                       ng-bind-html="highlightSearchResults(publication.title, search_text)">
+                <td><a href="{{ url_details({company_id:own_company_id, article_id:publication.id}) }}"
+                       ng-bind-html="highlightSearchResults(publication.title, data.search_text)">
                 </a></td>
                 <td>
                     <div>
