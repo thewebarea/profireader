@@ -1,7 +1,7 @@
 from .blueprints_declaration import front_bp
 from flask import render_template, request, url_for, redirect, g, current_app
 from ..models.articles import Article, ArticlePortalDivision, ArticleCompany
-from ..models.portal import CompanyPortal, PortalDivision, Portal, Company, \
+from ..models.portal import MemberCompanyPortal, PortalDivision, Portal, Company, \
     PortalDivisionSettings_company_subportal
 from utils.db_utils import db
 from ..models.users import User
@@ -15,13 +15,14 @@ import collections
 
 
 
+
 def get_division_for_subportal(portal_id, member_company_id):
     q = g.db().query(PortalDivisionSettings_company_subportal). \
-        join(CompanyPortal,
-             CompanyPortal.id == PortalDivisionSettings_company_subportal.company_portal_id). \
+        join(MemberCompanyPortal,
+             MemberCompanyPortal.id == PortalDivisionSettings_company_subportal.member_company_portal_id). \
         join(PortalDivision,
              PortalDivision.id == PortalDivisionSettings_company_subportal.portal_division_id). \
-        filter(CompanyPortal.company_id == member_company_id). \
+        filter(MemberCompanyPortal.company_id == member_company_id). \
         filter(PortalDivision.portal_id == portal_id)
 
     PortalDivisionSettings = q.all()
@@ -48,7 +49,7 @@ def portal_and_settings(portal):
         if di['portal_division_type_id'] == 'company_subportal':
             pdset = g.db().query(PortalDivisionSettings_company_subportal). \
                 filter_by(portal_division_id=di['id']).one()
-            com_port = g.db().query(CompanyPortal).get(pdset.company_portal_id)
+            com_port = g.db().query(MemberCompanyPortal).get(pdset.member_company_portal_id)
             di['member_company'] = Company.get(com_port.company_id)
         newd.append(di)
     ret['divisions'] = newd
@@ -112,8 +113,8 @@ def division(division_name, page=1):
         # sub_query = Article.subquery_articles_at_portal(search_text=search_text,
         # articles, pages, page = pagination(query=sub_query, page=page)
 
-        members = {member.company_id: Company.get(member.company_id).get_client_side_dict() for
-                   member in division.portal.company_assoc}
+        members = {member.id: member.get_client_side_dict() for
+                   member in division.portal.member_companies}
 
         return render_template('front/bird/catalog.html',
                                members=members,
@@ -135,7 +136,7 @@ def details(article_portal_division_id):
                                    'publishing_tm, keywords, status, long, image_file_id,'
                                    'division.name, division.portal.id,'
                                    'company.name')
-    article_dict['tags'] = {'foo': 'one tag', 'bar': 'second tag'}
+    article_dict['tags'] = article.tags
 
     division = g.db().query(PortalDivision).filter_by(id=article.portal_division_id).one()
 
@@ -148,10 +149,8 @@ def details(article_portal_division_id):
                            current_division=division.get_client_side_dict(),
                            articles_related={a.id: a.to_dict('id, title, cr_tm, company.name|id') for a
                                              in related_articles},
-                           article=article.to_dict('id, title,short, cr_tm, md_tm, '
-                                                   'publishing_tm, status, long, image_file_id,'
-                                                   'division.name, division.portal.id,'
-                                                   'company.name|id'))
+                           article=article_dict
+                           )
 
 
 @front_bp.route(

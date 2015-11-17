@@ -87,14 +87,18 @@
         };
         return ret;
 
-    }]).directive('afValidationAnswer', ['$http', '$compile', '$ok', function ($http, $compile, $ok) {
+    }]).directive('afValidationAnswer', [function () {
 
 
         var watch_functions = {};
         return {
             restrict: "A",
             replace: false,
+            //$scope: {
+            //    afValidationAnswer: '&'
+            //},
             template: function (tElement, tAttrs) {
+                console.log(tAttrs['afValidationAnswer']);
                 var model_fields = tAttrs['afValidationAnswer'].split(':');
                 var model_name = model_fields[0];
                 var field_name = model_fields[1];

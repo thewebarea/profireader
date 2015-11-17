@@ -11,7 +11,7 @@ from ..models.articles import Article
 from ..models.portal import PortalDivision
 from ..models.tag import TagPortalDivisionArticle
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
-from ..models.portal import CompanyPortal
+from ..models.portal import MemberCompanyPortal
 from ..models.articles import ArticleCompany, ArticlePortalDivision
 from utils.db_utils import db
 from collections import OrderedDict
@@ -132,7 +132,7 @@ def load_material_details(json, company_id, article_id):
     article = Article.get_one_article(article_id)
     # if action == 'load':
     portals = {port.portal_id: port.portal.get_client_side_dict() for port in
-               CompanyPortal.get_portals(company_id)}
+               MemberCompanyPortal.get_portals(company_id)}
     joined_portals = {}
     if article.portal_article:
         joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
@@ -277,8 +277,8 @@ def load(json, company_id=None):
     if action == 'load':
         return company.get_client_side_dict()
     else:
-        company.attr({key: ('' if val is None else val)  for key, val in json.items() if key in
-                      ['about', 'address', 'country', 'email', 'name', 'phone', 'phone2', 'region', 'short_description', 'logo_file_id']})
+        company.attr(g.filter_json(json, 'about', 'address', 'country', 'email', 'name', 'phone',
+                                   'phone2', 'region', 'short_description', 'logo_file_id'))
         if action == 'save':
             if company_id is None:
                 company.setup_new_company()

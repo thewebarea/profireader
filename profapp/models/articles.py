@@ -41,11 +41,9 @@ class MLStripper(HTMLParser):
         return self.get_data()
 
 
-# TODO: (AA to AA) ArticlePortal -> ArticlePortalDivision
 class ArticlePortalDivision(Base, PRBase):
     __tablename__ = 'article_portal_division'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True, nullable=False)
-    # TODO: (AA to AA) delete portal_id!
     article_company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_company.id'))
     # portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
@@ -74,6 +72,15 @@ class ArticlePortalDivision(Base, PRBase):
 
     tag_assoc_select = relationship('TagPortalDivisionArticle',
                                     back_populates='article_portal_division_select')
+
+    @property
+    def tags(self):
+        query = g.db.query(Tag.name).\
+            join(TagPortalDivision).\
+            join(TagPortalDivisionArticle).\
+            filter(TagPortalDivisionArticle.article_portal_division_id==self.id)
+        tags = list(map(lambda x: x[0], query.all()))
+        return tags
 
     portal = relationship('Portal',
                           secondary='portal_division',
@@ -187,10 +194,10 @@ class ArticleCompany(Base, PRBase):
         ret = super().validate(action)
         # TODO: (AA to OZ): regexp doesn't work
 
-        if not re.match('.*\S{3,}.*',self.title):
-            ret['errors']['title'] = 'pls enter title longer than 3 letters'
-        if not re.match('.*\S+.*', self.keywords):
-            ret['warnings']['keywords'] = 'pls enter at least one keyword'
+        # if not re.compile(r'[^\s]{3,}',re.U).match(self.title):
+        #     ret['errors']['title'] = 'pls enter title longer than 3 letters'
+        # if not re.match('\S+', self.keywords):
+        #     ret['warnings']['keywords'] = 'pls enter at least one keyword'
         return ret
 
     @staticmethod
