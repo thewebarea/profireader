@@ -1,5 +1,6 @@
 from sqlalchemy import Column, ForeignKey, text
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import expression
 from ..constants.TABLE_TYPES import TABLE_TYPES
 # from db_init import db_session
 from ..models.company import Company
@@ -40,11 +41,9 @@ class MLStripper(HTMLParser):
         return self.get_data()
 
 
-# TODO: (AA to AA) ArticlePortal -> ArticlePortalDivision
 class ArticlePortalDivision(Base, PRBase):
     __tablename__ = 'article_portal_division'
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True, nullable=False)
-    # TODO: (AA to AA) delete portal_id!
     article_company_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('article_company.id'))
     # portal_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal.id'))
     portal_division_id = Column(TABLE_TYPES['id_profireader'], ForeignKey('portal_division.id'))
@@ -73,6 +72,15 @@ class ArticlePortalDivision(Base, PRBase):
 
     tag_assoc_select = relationship('TagPortalDivisionArticle',
                                     back_populates='article_portal_division_select')
+
+    @property
+    def tags(self):
+        query = g.db.query(Tag.name).\
+            join(TagPortalDivision).\
+            join(TagPortalDivisionArticle).\
+            filter(TagPortalDivisionArticle.article_portal_division_id==self.id)
+        tags = list(map(lambda x: x[0], query.all()))
+        return tags
 
     portal = relationship('Portal',
                           secondary='portal_division',
@@ -188,7 +196,7 @@ class ArticleCompany(Base, PRBase):
 
         if not re.match('.*\S{3,}.*',self.title):
             ret['errors']['title'] = 'pls enter title longer than 3 letters'
-        if not re.match('.*\S+.*', self.keywords):
+        if not re.match('\S+.*', self.keywords):
             ret['warnings']['keywords'] = 'pls enter at least one keyword'
         return ret
 
@@ -398,7 +406,7 @@ class Article(Base, PRBase):
             kwargs.pop('portal_id', None)
 
         sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs).\
-            order_by('publishing_tm').filter(text(' "publishing_tm" < clock_timestamp() '))
+            order_by(ArticlePortalDivision.publishing_tm.desc()).filter(text(' "publishing_tm" < clock_timestamp() '))
 
         if portal_id:
             sub_query = sub_query.join(PortalDivision).join(Portal).filter(Portal.id==portal_id)

@@ -34,7 +34,7 @@
         <h3>This company does not have portal</h3>
     </div>
     <div ng-if="data.portal!=''">
-        <span ng-if="data.companies_partners!=''">
+        <span>
             <h3>Companies partners :
                 <span ng-repeat="company in data.companies_partners">
                     <span ng-if="company.id!=data.company_id">
@@ -43,7 +43,6 @@
                </span>
             </h3>
         </span>
-      <h3>There are no companies partners on this portal</h3>
     </div>
 
     </div>
