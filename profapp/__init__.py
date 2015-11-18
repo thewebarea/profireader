@@ -250,7 +250,7 @@ def file_url(id):
 def translates(template):
 #     pass
     phrases = g.db.query(TranslateTemplate).filter_by(template=template).all()
-    ret = {ph.name: ph.en for ph in phrases}
+    ret = {ph.name: ph.uk for ph in phrases}
     return json.dumps(ret)
 
 def config_variables():

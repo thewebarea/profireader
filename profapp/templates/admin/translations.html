@@ -8,7 +8,8 @@
     <script>
         module.controller('translation_list', ['$scope', '$ok', '$sce', function ($scope, $ok, $sce) {
 
-            $scope.url_search_article = {{ raw_url_for('admin.translations_load')|safe }};
+            $scope.url_search_translations = {{ raw_url_for('admin.translations_load')|safe }};
+            $scope.url_save_translations = {{ raw_url_for('admin.translations_save')|safe }};
 
             $scope.page_changed = function () {
                 $scope.sendData(false);
@@ -22,12 +23,21 @@
 
             $scope.new_search_text = '';
 
+            $scope.saveTranslation = function (id, lang, newval, model) {
+                $ok($scope.url_save_translations(), {id: id, lang: lang, val: newval}, function (resp) {
+                    model.saving = true;
+                }, function () {
+                }).finally(function () {
+                    model.saving = false;
+                });
+            };
+
             $scope.sendData = function (new_search_text) {
                 var data = {}
                 data.search_text = (new_search_text !== false) ? new_search_text : $scope.data['search_text'];
                 data.template = $scope.template ? $scope.template : null;
                 data.page = $scope.data.pages.current_page;
-                $ok($scope.url_search_article({}), data, function (resp) {
+                $ok($scope.url_search_translations({}), data, function (resp) {
 
                     $scope.data['pages'] = resp.pages;
                     $scope.translations = resp.translations;
@@ -45,6 +55,11 @@
 
     </script>
     {% raw %}
+    <style>
+        .editable-buttons {
+            display: none;
+        }
+    </style>
     <div ng-init="sendData('')" ng-controller="translation_list">
 
         <table style="width:100%">
@@ -74,7 +89,9 @@
                 <td>{{ translation.template }}</td>
                 <td>{{ translation.name }}</td>
                 <td ng-repeat="lang in languages">
-                     <span editable-text="translation[lang]" >{{ translation[lang] }}</span>
+                     <span style="margin: 3px;"
+                           onbeforesave="saveTranslation(translation['id'], lang, $data, translation)"
+                           editable-text="translation[lang]">{{ translation[lang] }}</span>
                 </td>
             </tr>
             <tr ng-show="!loading && !areAllEmpty(translations)">
