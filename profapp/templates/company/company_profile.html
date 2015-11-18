@@ -12,10 +12,16 @@
     {% block company_base %}
         {% include 'company/company_base.html' %}
     {% endblock company_base %}
-
+<script>
+    module.controller('CompanyProfile', ['$scope', '$modal','$ok', function ($scope, $modal, $ok) {
+        $scope.user = {{ g.user_dict|tojson|safe }};
+        $scope.$$translate = {{ translates('CompanyProfile')|safe }};
+    }]);
+</script>
+<div ng-controller="CompanyProfile">
     <h1 class="nice-title">{{ company.name }}<span></span></h1>
     {% if 'manage_rights_company' in user_rights %}
-            <a class="h1-btn icon icon-draw-pen" href="{{ url_for('company.update', company_id=company.id) }}" title="Edit company">Edit company</a>
+            <a class="h1-btn icon icon-draw-pen" href="{{ url_for('company.update', company_id=company.id) }}" title="{{ '{{' }}_('Edit company'){{ '}}' }}">{{ '{{' }}_('Edit company'){{ '}}' }}</a>
         {% endif %}
 
     <br />
@@ -23,9 +29,9 @@
     <img src="{{ company_logo }}" height="200" width="200" vspace="10">
 
     {% if 'manage_rights_company' in user_rights and not company.own_portal %}
-        <a href="{{ url_for('portal.create', company_id=company.id) }}">Create Portal</a>
+        <a href="{{ url_for('portal.create', company_id=company.id) }}">{{ '{{' }}_('Create Portal'){{ '}}' }}</a>
     {% else %}
-        portal:
+        {{ '{{' }}_('portal'){{ '}}' }}:
         <a href="http://{{ company.own_portal.host }}">http://{{ company.own_portal.host }}</a>
 {#        <a href="{{ url_for('portal.profile', portal_id=company.own_portal.id) }}">[portal profile]</a>#}
     {% endif %}
@@ -35,7 +41,7 @@
     {{ company.short_description|safe }}
 
 
-
+</div>
 {% endblock portal_content %}
 
 {% block footer %}

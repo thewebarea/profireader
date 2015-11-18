@@ -136,10 +136,19 @@
 
                 var params = {};
 
-
+                console.log(attrs, $parent.controllerName);
                 cloneIfExistsAttributes(params, {'af-url': window.location.href}, attrs);
+                var trans = '';
+                if (attrs['afLoadTranslate']) {
+                    trans = '&__translate=' + attrs['afLoadTranslate'];
+                }
+                else {
+                    if (attrs['afLoadTranslate']==='') {
+                    trans = '&__translate=' + $parent.controllerName;
+                }
+                }
                 cloneIfExistsAttributes(params, {
-                    'afUrlLoad': AppendParameter(params['af-url'], 'action=load'),
+                    'afUrlLoad': AppendParameter(params['af-url'], 'action=load' + trans),
                     'afUrlValidate': AppendParameter(params['af-url'], 'action=validate'),
                     'afUrlSave': AppendParameter(params['af-url'], 'action=save')
                 }, attrs);

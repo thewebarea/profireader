@@ -14,6 +14,7 @@
     <script>
         module.controller('fired', ['$scope', function ($scope) {
             $scope.url_after_seve = {{ raw_url_for('company.profile')|safe }};
+            $scope.$$translate = {{ translates('fired')|safe }};
             $scope.getData = function () {
                 return $scope.data;
             };
@@ -21,15 +22,15 @@
     </script>
     {% raw %}
     <div ng-init="loadData()" ng-controller="fired">
-        <div ng-if="data==''"><h2>There are not fired employees in this company</h2></div>
+        <div ng-if="data==''"><h2>{{_('There are not fired employees in this company')}}</h2></div>
         <div ng-repeat="emplo in data">
             <dt><img src="{{ emplo.employee.profireader_small_avatar_url }}">
                 {{ emplo.employee.profireader_name }}<br>
-                Phone number : {{ emplo.employee.profireader_phone }}<br>
-                Email : {{ emplo.employee.profireader_email }}<br>
-                Suspended : {{ emplo.md_tm }}
+                {{_('Phone number :')}} {{ emplo.employee.profireader_phone }}<br>
+                {{_('Email :')}} {{ emplo.employee.profireader_email }}<br>
+                {{_('Suspended :')}} {{ emplo.md_tm }}
             </dt>
-            <dt> ALL COMPANIES :
+            <dt> {{_('ALL COMPANIES :')}}
                 <div ng-repeat="company in emplo.employee.employers">
                     <a href="{{ url_after_seve({company_id: company.id}) }}">{{ company.name }}</a>
                 </div>
