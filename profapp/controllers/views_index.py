@@ -1,6 +1,6 @@
-from flask import render_template, request, g
+from flask import render_template, redirect, url_for, request, g
 from .blueprints_declaration import general_bp
-from flask.ext.login import current_user
+from flask.ext.login import current_user, login_required
 
 
 @general_bp.route('')
@@ -20,3 +20,12 @@ def index():
                            profireader_content=profireader_content
                            # portal_id=portal_id
                            )
+
+
+@general_bp.route('/subscribe/<string:portal_id>')
+@login_required
+def reader_subscribe(portal_id):
+    # TODO (AA to AA): code here.
+    # portal_id = request.args.get('subscribe', None)
+    print('here a subscription must be done')
+    return redirect(url_for('general.index'))

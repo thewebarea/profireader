@@ -77,12 +77,9 @@
                 <div class="company-item">
                     <img class="company-logo" src="{{ company_logo }}">
                     <a href="{{ url_company_profile({company_id: my_employer.id}) }}">
-
-                        {{
-                        _('Company: `%(name)s`', my_employer ) }}
+                        {{ _('Company: `%(name)s`', my_employer ) }}
                         <br>
-                        {{
-                        _((my_employer.author_user_id==data.user_id?' Type: OWN
+                        {{ _((my_employer.author_user_id==data.user_id?' Type: OWN
                         COMPANY':''), my_employer) }}
                     </a>
                     <br/>
