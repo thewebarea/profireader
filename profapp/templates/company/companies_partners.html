@@ -5,12 +5,13 @@
 {% endblock head %}
 
 {% block portal_base %}
-    {% include 'partials/portal_base_Profireader.html' %}
+    {% include 'partials/portal_base_Profireader_auth_user.html' %}
 {% endblock portal_base %}
+
 {% block portal_content %}
     {% block company_base %}
-{% include 'company/company_base_angular.html' %}
-{% endblock company_base %}
+        {% include 'company/company_base_angular.html' %}
+    {% endblock company_base %}
 
     <script>
         module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
@@ -23,10 +24,6 @@
                 }
                 return true;
             };
-            $scope.companies_partners_text = '';
-            $scope.companies_partner = function (a) {
-            $scope.companies_partners_text = a
-            };
             $scope.afterSave = function (resp) {
             window.location.href = $scope.partners({company_id: resp['company_id']})
             };
@@ -38,14 +35,10 @@
         <h3>This company does not have portal</h3>
     </div>
     <div ng-if="data.portal!=''">
-        <span ng-if="data.companies_partners!=''">
-            <h3>{{ companies_partners_text }}
-                {{ companies_partner('There are no companies partners on this portal') }}
+        <span>
+            <h3>Companies partners :
                 <span ng-repeat="company in data.companies_partners">
                     <span ng-if="company.id!=data.company_id">
-                        <span hidden>
-                            {{ companies_partner('Companies partners :') }}
-                        </span>
                     <a href="{{ url_company_profile({company_id: company.id}) }}"> "{{ company.name }}"</a>
                     </span>
                </span>

@@ -90,6 +90,9 @@
     {% include 'partials/base_profireader.html' %}
 {% endblock navbar %}
 
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
 
 {% block content %}
 
@@ -104,12 +107,14 @@
 
 
         {% block portal_content %}
-            Portal Content
+            {% include 'partials/Profireader_content' %}
         {% endblock portal_content %}
         <br/>
     </div>
-    {% include 'partials/portal_footer_Profireader.html' %}
+
 {% endblock content %}
 
 {% block scripts %}
-{%- endblock scripts %}
+   {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock scripts %}
+
