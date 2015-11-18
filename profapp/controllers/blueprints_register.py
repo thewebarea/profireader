@@ -17,7 +17,6 @@ from .blueprints_declaration import *
 from . import views_index, views_user, views_filemanager, views_article, views_image_editor, \
     views_company, views_portal, errors, views_front, views_file
 
-
 def register(app):
     app.register_blueprint(general_bp, url_prefix='/')
 
@@ -34,10 +33,12 @@ def register(app):
     app.register_blueprint(company_bp, url_prefix='/company')
     app.register_blueprint(portal_bp, url_prefix='/portal')
     app.register_blueprint(exception_bp, url_prefix='/exception')
+    # app.register_blueprint(reader_bp, url_prefix='/')
 
 
 def register_front(app):
     app.register_blueprint(front_bp, url_prefix='/')
+    # app.register_blueprint(reader_bp, url_prefix='/')
 
 
 def register_file(app):

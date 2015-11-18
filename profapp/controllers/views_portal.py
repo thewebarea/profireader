@@ -377,13 +377,11 @@ def profile_edit_load(json, portal_id):
         g.db.expire_all()
 
 
-        # TODO: not to forget to delete unused tags... New tags well be added.
+        # TODO (AA to AA): not to forget to delete unused tags... New tags well be added.
 
         # for elem in delete_tag_portal_bound_list:
         #     g.db.delete(elem)
         g.db.commit()
-
-        print('+++++++++++++++++++')
 
         # portal.portal_bound_tags_dynamic = ...
         # portal.portal_notbound_tags_dynamic = ...
@@ -545,7 +543,6 @@ def publication_details_load(json, article_id, company_id):
 @login_required
 @ok
 def update_article_portal(json, article_id):
-    json['new_status'] = json['new_status'][0:json['new_status'].find(' ')-1]
     db(ArticlePortalDivision, id=article_id).update({'status': json.get('new_status')})
     json['article']['status'] = json.get('new_status')
     json['new_status'] = ARTICLE_STATUS_IN_PORTAL.published \

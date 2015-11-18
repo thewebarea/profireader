@@ -137,8 +137,8 @@ class ArticlePortalDivision(Base, PRBase):
         # all = {'name': 'All', 'id': 0}
         companies = {}
         # companies.append(all)
-        articles = g.db.query(ArticlePortalDivision). \
-            join(ArticlePortalDivision.portal). \
+        articles = g.db.query(ArticlePortalDivision).\
+            join(ArticlePortalDivision.portal).\
             filter(Portal.id == portal_id).all()
         # for article in db(ArticlePortalDivision, portal_id=portal_id).all():
         for article in articles:
@@ -152,9 +152,9 @@ class ArticlePortalDivision(Base, PRBase):
 
     @staticmethod
     def subquery_portal_articles(search_text=None, portal_id=None, **kwargs):
-        sub_query = g.db.query(ArticlePortalDivision).filter_by(**kwargs). \
-            join(ArticlePortalDivision.division). \
-            join(PortalDivision.portal). \
+        sub_query = g.db.query(ArticlePortalDivision).filter_by(**kwargs).\
+            join(ArticlePortalDivision.division).\
+            join(PortalDivision.portal).\
             filter(Portal.id == portal_id).order_by(expression.desc(ArticlePortalDivision.publishing_tm))
 
         if search_text:

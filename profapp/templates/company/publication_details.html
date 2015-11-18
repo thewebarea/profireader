@@ -96,10 +96,7 @@
                 <h2>Current status is <span style="color: #1295bf">{{ data.article.status }}</span></h2>
 
                 <h2>Change status to </h2>
-                <select ng-model="data.new_status">
-                    <option ng-repeat="status in data.statuses" ng-if="status!=data.article.status">{{ status }}
-                    </option>
-                </select>
+                <select ng-options="statuslabel for (statuslabel, statusvalue) in data.statuses" ng-model="data.new_status"></select>
                 <input type="submit" ng-click="changeStatus()" value="change">
 
                 <form ang-ok
