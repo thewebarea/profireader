@@ -277,7 +277,7 @@ hr {
 }
 
 .widewrapper.copyright {
-    background-color: #1e1e1e;
+    background-color: #464646;
 
     color: #7b8690;
     padding-top: 15px;
@@ -2094,4 +2094,11 @@ a.title-btn {
     width: 100%;
     background-color: #ccc;
 
+}
+th{
+    padding-top: 7px;
+}
+
+td{
+    padding-top: 12px;
 }
