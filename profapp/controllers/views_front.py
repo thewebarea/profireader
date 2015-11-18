@@ -14,8 +14,6 @@ from flask import send_from_directory
 import collections
 
 
-
-
 def get_division_for_subportal(portal_id, member_company_id):
     q = g.db().query(PortalDivisionSettings_company_subportal). \
         join(MemberCompanyPortal,
