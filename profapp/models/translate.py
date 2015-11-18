@@ -36,10 +36,19 @@ class TranslateTemplate(Base, PRBase):
 
     @staticmethod
     def saveTranslate(template, name, uk, en):
-        return TranslateTemplate(template=template,
+        if TranslateTemplate.isExist(template, name):
+            return 'null'
+        else:
+            tr = TranslateTemplate(template=template,
                           name=name,
                           uk=uk,
                           en=en).save()
+            return tr.name
+
+    @staticmethod
+    def isExist(template, phrase):
+        list = [f for f in db(TranslateTemplate, template=template, name=phrase)]
+        return True if list else False
 
 
     @staticmethod

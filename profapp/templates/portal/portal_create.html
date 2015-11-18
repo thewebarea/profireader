@@ -16,7 +16,7 @@
             $scope.afterSave = function (resp) {
                 window.location.href = $scope.url_after_save({company_id: resp.company_owner_id})
             };
-
+            $scope.$$translate = {{ translates('portal_create')|safe }};
 
             $scope.addDivision = function () {
                 $scope.data.portal.divisions.push({
@@ -73,7 +73,7 @@
 
 
     <div ng-controller="portal_create">
-        <h2>Cteate portal</h2>
+        <h2>{{_('Cteate portal')}}</h2>
 
         <div af af-after-save="afterSave" ng-model="data">
 
@@ -89,34 +89,34 @@
 
             <div style="width: 800px; margin-left: 200px;">
                 <div class="item">
-                    <span class="input_label">portal name:</span><input type="text"
-                                                                        placeholder="Portal name"
+                    <span class="input_label">{{_('Portal name')}}:</span><input type="text"
+                                                                        placeholder="{{_('Portal name')}}"
                                                                         ng-model-options="{updateOn : 'change keypress'}"
                                                                         ng-model="data.portal.name">
                     <span af-validation-answer="data_validation:name"></span>
                 </div>
                 <div class="item">
-                        <span class="input_label">portal host: <span
+                        <span class="input_label">{{_('Portal host')}}: <span
                                 style="color: black">http://</span></span><input type="text"
-                                                                                 placeholder="Host name"
+                                                                                 placeholder="{{_('Host name')}}"
                                                                                  ng-model="data.portal.host">
                     <span af-validation-answer="data_validation:host"></span>
                 </div>
                 <div class="item">
-                    <span class="input_label">portal layout:</span><select
+                    <span class="input_label">{{_('Portal layout')}}:</span><select
                         ng-model="data.portal.portal_layout_id"
                         ng-options="layout.id as layout.name for layout in data.layouts"></select>
                 </div>
             </div>
 
 
-            <h4>Portal divisions</h4>
+            <h4>{{_('Portal divisions')}}</h4>
 
             <div class="item">
                 <input type="text" placeholder="" disabled="disabled"
                        value="{{ data.portal.name }}">
                 <select style="width: 150px" disabled="disabled">
-                    <option>index</option>
+                    <option>{{_('index')}}</option>
                 </select>
 
             </div>
@@ -143,7 +143,7 @@
             </div>
             <div class="item">
                 <input type="text" style="visibility: hidden"/>
-                <button type="button" ng-click="addDivision()">add division</button>
+                <button type="button" ng-click="addDivision()">{{_('add division')}}</button>
                 <span af-validation-answer="data_validation:add_division"></span>
             </div>
 
@@ -154,7 +154,7 @@
                         type="submit"
                         ng-disabled="!$af.isActionAllowed(data, 'save')"
                         ng-click="$af.save(data)"
-                        value="{{ data.id ? 'save' : 'create' }}"/>
+                        value="{{ data.id ? _('save') : _('create') }}"/>
 
 
             </div>
