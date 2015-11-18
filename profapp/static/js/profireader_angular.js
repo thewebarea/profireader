@@ -505,10 +505,12 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
 
 areAllEmpty = function () {
     var are = true;
+
     $.each(arguments, function (ind, object) {
         if (are) {
             var ret = true;
             if ($.isArray(object)) {
+                console.log(object.length);
                 ret = object.length ? false : true;
             }
             else if ($.isPlainObject(object) && $.isEmptyObject(object)) {
@@ -532,8 +534,8 @@ function file_choose(selectedfile) {
 }
 
 // 'ui.select' uses "/static/js/select.js" included in index_layout.html
-module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select']);
-module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select', 'ajaxFormModule']);
+//module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select']);
+module = angular.module('Profireader', ['ui.bootstrap', 'profireaderdirectives', 'ui.tinymce', 'ngSanitize', 'ui.select', 'ajaxFormModule', 'profireaderdirectives', 'xeditable']);
 
 module.config(function ($provide) {
     $provide.decorator('$controller', function ($delegate) {
@@ -578,6 +580,7 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
     }]);
 
 module.run(function ($rootScope, $ok, $sce) {
+    //$rootScope.theme = 'bs3'; // bootstrap3 theme. Can be also 'bs2', 'default'
     angular.extend($rootScope, {
         fileUrl: function (file_id, down, if_no_file) {
             return fileUrl(file_id, down, if_no_file);

@@ -86,7 +86,18 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
     $scope.selected_portal_to_unpublish = '';
     $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
     $scope.$$translate = {{ translates('SelectTagsCtrl')|safe }};
-    
+{#    $scope.$watch("data.selected_division", function(newValue, oldValue) {
+{#        if ($scope.data && (newValue !== oldValue)){
+{#            res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
+{#		    res.success(function(data, status, headers, config) {
+{#                $scope.tagsObject.tags = []; // TODO (AA to AA): it works but...
+{#                $scope.availableTags = data.data.availableTags;
+{#		    });
+{#		    res.error(function(data, status, headers, config) {
+{#			    alert( "failure message: " + JSON.stringify({data: data}));
+{#		    });
+{#        }
+{#    });
 {#    $scope.$watch("data.selected_division", function(newValue, oldValue) {#}
 {#        if ($scope.data && (newValue !== oldValue)){#}
 {#            res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));#}
@@ -370,7 +381,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     <!-- <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal"> -->
                     <form>
                     {{_('Publish this material to portal')}}
-
                     <select ng-model="data.selected_division">
                         <option disabled>---{{_('Below materials sent')}}---</option>
                         <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
