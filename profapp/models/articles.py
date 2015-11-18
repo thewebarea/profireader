@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, aliased
 from sqlalchemy.sql import expression
 from ..constants.TABLE_TYPES import TABLE_TYPES
 # from db_init import db_session
@@ -223,15 +223,18 @@ class ArticleCompany(Base, PRBase):
 
     @staticmethod
     def subquery_user_articles(search_text=None, user_id=None, **kwargs):
-        # article_filter = db(ArticleCompany, article_id=Article.id, **kwargs)
-        article_filter = db(ArticleCompany, **kwargs)  # TODO (AA to OZ): it is my suggestion
+        article_filter = db(ArticleCompany, article_id=Article.id, **kwargs)
         if search_text:
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
                 "%" + repr(search_text).strip("'") + "%"))
 
-        # TODO (AA to OZ): below is my suggestion
-        # return db(Article, author_user_id=user_id).join(ArticleCompany).order_by(ArticleCompany.md_tm).filter(article_filter.exists()).filter(ArticleCompany.company_id==None)
-        return db(Article, author_user_id=user_id).order_by(Article.mine_version.md_tm).filter(article_filter.exists())
+        own_article = aliased(ArticleCompany, name="OwnArticle")
+
+        return db(Article, own_article.md_tm, author_user_id=user_id). \
+            join(own_article,
+                 and_(Article.id == own_article.article_id, own_article.company_id == None)). \
+            order_by(expression.desc(own_article.md_tm)). \
+            filter(article_filter.exists())
 
     @staticmethod
     def subquery_company_articles(search_text=None, company_id=None, portal_id=None, **kwargs):

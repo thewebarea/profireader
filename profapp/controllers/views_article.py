@@ -45,9 +45,15 @@ def load_mine(json):
     statuses = {status: status for status in ARTICLE_STATUS_IN_COMPANY.all}
     statuses['All'] = 'All'
 
-    return {'articles': [{'article': a.get_client_side_dict(),
-                          'company_count': len(a.get_client_side_dict()['submitted_versions']) + 1}
-                         for a in articles],
+    articles_with_time = []
+
+    for (article, time) in articles.all():
+        article_dict = article.get_client_side_dict()
+        article_dict['md_tm'] = time
+        articles_with_time.append({'article': article_dict,
+                                   'company_count': len(article_dict['submitted_versions']) + 1})
+
+    return {'articles': articles_with_time,
             'companies': companies,
             'search_text': json.get('search_text') or '',
             'original_search_text': json.get('search_text') or '',
@@ -75,7 +81,9 @@ def load_form_create(json):
     if action == 'validate':
         del json['coordinates'], json['ratio']
 
-        return Article.save_new_article(g.user_dict['id'], **g.filter_json(json, 'title,short,long,keywords')).mine_version.validate('insert')
+        return Article.save_new_article(g.user_dict['id'],
+                                        **g.filter_json(json, 'title,short,long,keywords')).mine_version.validate(
+            'insert')
     else:
         image_id = json.get('image_file_id')
         if image_id:
@@ -84,8 +92,6 @@ def load_form_create(json):
         article = Article.save_new_article(g.user_dict['id'], **json)
         g.db.add(article)
         return article.get_client_side_dict()
-
-
 
 
 @article_bp.route('/update/<string:article_company_id>/', methods=['GET'])
@@ -97,7 +103,6 @@ def show_form_update(article_company_id):
 @article_bp.route('/update/<string:article_company_id>/', methods=['POST'])
 @ok
 def load_form_update(json, article_company_id):
-
     action = g.req('action', allowed=['load', 'save', 'validate'])
     article = ArticleCompany.get(article_company_id)
     if action == 'load':
