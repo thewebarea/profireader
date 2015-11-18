@@ -27,10 +27,14 @@ def translations_load(json):
     tr = [t.get_client_side_dict() for t in translations]
     templates = db(TranslateTemplate.template).group_by(TranslateTemplate.template) \
         .order_by(expression.asc(expression.func.lower(TranslateTemplate.template))).all()
+    urls = db(TranslateTemplate.url).group_by(TranslateTemplate.url) \
+        .order_by(expression.asc(expression.func.lower(TranslateTemplate.url))).all()
     return {'languages': TranslateTemplate.languages, 'translations': tr,
             'pages': {'total': pages, 'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS},
-            'templates': [{'label': t.template, 'value': t.template} for t in templates]}
+            'templates': [{'label': t.template, 'value': t.template} for t in templates],
+            'urls': [{'label': t[0], 'value': t[0]} for t in urls]
+            }
 
 
 @admin_bp.route('/translations_save', methods=['POST'])

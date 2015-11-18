@@ -600,7 +600,7 @@ module.run(function ($rootScope, $ok, $sce) {
             var CtrlName = this.controllerName ? this.controllerName: 'None';
             if (scope.$$translate[phrase] === undefined) {
                 scope.$$translate[phrase] = phrase;
-                $ok('/articles/save_translate/', {template: CtrlName, phrase: phrase}, function (resp) {
+                $ok('/articles/save_translate/', {template: CtrlName, phrase: phrase, url: window.location.href}, function (resp) {
                     //console.log(resp['phrase']);
                     //if(resp['phrase'] === ''){
                     //    scope.$$translate[phrase] = phrase
