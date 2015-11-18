@@ -69,7 +69,7 @@
 
     <div ng-init="loadData()" ng-controller="companies_list">
         <h1 class="nice-title">Company list<span></span></h1>
-        <a class="h1-btn icon icon-add" href="{{ url_create_own_company }}" title="{{ _('CREATE OWN COMPANY') }}"></a>
+        <a class="h1-btn icon icon-add" href="{{ url_create_own_company }}" title="{{ _('CREATE OWN COMPANY') }}"><img src="../../static/front/img/ico/companies.png" /></a>
 
         <div ng-if="loading">{{ _('Loading...') }}</div>
         <div ng-if="!loading">
@@ -80,21 +80,17 @@
 
                         {{
                         _('Company: `%(name)s`', my_employer ) }}
-                        <br>
                         {{
                         _((my_employer.author_user_id==data.user_id?' Type: OWN
                         COMPANY':''), my_employer) }}
                     </a>
-                    <br/>
                     <span ng-if="!my_employer.own_portal.host"><b>Portals: </b>No</span><a
                         ng-if="my_employer.own_portal.host" href="http://{{ my_employer.own_portal.host }}">http://{{
                     my_employer.own_portal.host }}</a>
                     <!-- <a href="{{ url_portal_profile({portal_id: my_employer.own_portal.id}) }}">[edit portal profile]</a> -->
-                    <br/>
                 </div>
 
             </div>
-            <br />
             <div class="one-company" ng-repeat="non_active_employer in data.non_active_user_company_status"
                  id="joined_company_{{ non_active_employer.id }}">
                 <div class="company-item">

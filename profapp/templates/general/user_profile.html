@@ -10,7 +10,8 @@
 
 {% block portal_content %}
 <h1 class="nice-title">User Profile<span></span></h1>
-<a href="{{ url_for('user.edit_profile', user_id=user.id) }}">[edit]</a>
+
+<a class="h1-btn icon icon-edit" href="{{ url_for('user.edit_profile', user_id=user.id) }}" title="{{ _('EDIT PROFFILE') }}"><img src="../../static/front/img/ico/user.png" /></a>
 
 <div ng-controller="UserLoginController" class="user-profile">
     <h2>{{ user.profireader_name }}</h2>
