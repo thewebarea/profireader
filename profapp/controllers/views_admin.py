@@ -23,7 +23,7 @@ def translations_load(json):
 
     subquery = TranslateTemplate.subquery_search(search_text=json.get('search_text') or None,
                                                  template=json.get('template') or None)
-    translations, pages, current_page = pagination(subquery, page=page, items_per_page=Config.ITEMS_PER_PAGE)
+    translations, pages, current_page = pagination(subquery, page=page, items_per_page=Config.ITEMS_PER_PAGE*10)
     tr = [t.get_client_side_dict() for t in translations]
     templates = db(TranslateTemplate.template).group_by(TranslateTemplate.template) \
         .order_by(expression.asc(expression.func.lower(TranslateTemplate.template))).all()
@@ -35,5 +35,5 @@ def translations_load(json):
 
 @admin_bp.route('/translations_save', methods=['POST'])
 @ok
-def translations_save():
-    return {}
+def translations_save(json):
+    return TranslateTemplate.get(json['id']).attr({json['lang']: json['val']}).save().get_client_side_dict()

@@ -510,7 +510,6 @@ areAllEmpty = function () {
         if (are) {
             var ret = true;
             if ($.isArray(object)) {
-                console.log(object.length);
                 ret = object.length ? false : true;
             }
             else if ($.isPlainObject(object) && $.isEmptyObject(object)) {
