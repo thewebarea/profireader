@@ -2,6 +2,7 @@ from flask import Blueprint
 
 general_bp = Blueprint('general', __name__)
 auth_bp = Blueprint('auth', __name__)
+admin_bp = Blueprint('admin', __name__)
 user_bp = Blueprint('user', __name__)
 article_bp = Blueprint('article', __name__)
 filemanager_bp = Blueprint('filemanager', __name__)
@@ -12,3 +13,4 @@ portal_bp = Blueprint('portal', __name__)
 front_bp = Blueprint('front', __name__)
 file_bp = Blueprint('file', __name__)
 exception_bp = Blueprint('exception', __name__)
+# reader_bp = Blueprint('reader', __name__)

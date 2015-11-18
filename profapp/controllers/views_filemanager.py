@@ -13,6 +13,7 @@ from flask import session, redirect, request, url_for
 from ..models.google import GoogleAuthorize, GoogleToken
 from utils.db_utils import db
 from ..models.company import Company
+from ..models.translate import TranslateTemplate
 
 def parent_folder(func):
     @wraps(func)
@@ -82,8 +83,8 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    file = File.get('5644d72e-a269-4001-a5de-8c3194039273')
-    name = File.set_properties(file,False,name='None', copyright_author_name='',description='')
+    #name = TranslateTemplate.saveTranslate('article_edit', 'update your version of article', 'оновіть свою версію статті', 'update your version of article')
+    name = TranslateTemplate.saveTranslate('companies_list','Company name is `%(name)s` - YOUR OWN COMPANY', 'Ім’я компанії: `%(name)s` - ВАША ВЛАСНА КОМПАНІЯ', 'Company name is `%(name)s` - YOUR OWN COMPANY')
     return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/properties/', methods=['POST'])

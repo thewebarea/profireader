@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="/static/css/profireader.css">
     <link rel="stylesheet" href="/static/css/oles.css">
     <link rel="stylesheet" href="/static/css/icons.css">
+    <link rel="stylesheet" href="/static/angular-xeditable/xeditable.css">
 {%- endblock styles %}
 
 {%- block head %}
@@ -44,6 +45,8 @@
     <script src="{{ url_for('static', filename = 'tinymce/tinymce.jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename = 'angular-ui-tinymce/tinymce.js') }}"></script>
     <script src="{{ url_for('static', filename = 'angular-ajax-validator/ngAjaxValidator.js') }}"></script>
+
+    <script src="{{ url_for('static', filename = 'angular-xeditable/xeditable.js') }}"></script>
 
     <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.13.2.js"></script>
     {#    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js"></script>#}
@@ -90,6 +93,9 @@
     {% include 'partials/base_profireader.html' %}
 {% endblock navbar %}
 
+{% block portal_base %}
+    {% include 'partials/portal_base_Profireader.html' %}
+{% endblock portal_base %}
 
 {% block content %}
 
@@ -104,12 +110,14 @@
 
 
         {% block portal_content %}
-            Portal Content
+            {% include 'partials/Profireader_content' %}
         {% endblock portal_content %}
         <br/>
     </div>
-    {% include 'partials/portal_footer_Profireader.html' %}
+
 {% endblock content %}
 
 {% block scripts %}
-{%- endblock scripts %}
+   {% include 'partials/portal_footer_Profireader.html' %}
+{% endblock scripts %}
+

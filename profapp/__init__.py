@@ -24,7 +24,8 @@ import jinja2
 from .models.users import User
 from .models.config import Config
 from profapp.controllers.errors import BadDataProvided
-
+from .models.translate import TranslateTemplate
+import json
 
 def req(name, allowed=None, default=None, exception=True):
     ret = request.args.get(name)
@@ -120,15 +121,20 @@ def filter_json(json, *args, prefix='', NoneTo='', ExceptionOnNotPresent = False
     return ret
 
 
+def db_session_func(db_config):
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import scoped_session, sessionmaker
+
+    engine = create_engine(db_config)
+    db_session = scoped_session(sessionmaker(autocommit=False,
+                                             autoflush=False,
+                                             bind=engine))
+    return db_session
+
+
 def load_database(db_config):
     def load_db():
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import scoped_session, sessionmaker
-
-        engine = create_engine(db_config)
-        db_session = scoped_session(sessionmaker(autocommit=False,
-                                                 autoflush=False,
-                                                 bind=engine))
+        db_session = db_session_func(db_config)
         g.db = db_session
         g.req = req
         g.filter_json = filter_json
@@ -212,6 +218,16 @@ def load_user():
 #            query.filter_by(id=session['user_id']).first()
 
 
+def load_portal_id(app):
+    from profapp.models.portal import Portal
+
+    def func():
+        g.portal_id = g.db.query(Portal.id).filter_by(host=app.config['SERVER_NAME']).one()[0]
+        # g.portal_id = db_session_func(app.config['SQLALCHEMY_DATABASE_URI']).\
+        #             query(Portal.id).filter_by(host=app.config['SERVER_NAME']).one()[0]
+    return func
+
+
 def flask_endpoint_to_angular(endpoint, **kwargs):
     options = {}
     for kw in kwargs:
@@ -223,13 +239,19 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
-
+# TODO OZ by OZ rename this func and add two parameters
 def file_url(id):
     if not id:
         return ''
     server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', id)
     return 'http://file' + server + '.profireader.com/' + id + '/'
 
+
+def translates(template):
+#     pass
+    phrases = g.db.query(TranslateTemplate).filter_by(template=template).all()
+    ret = {ph.name: ph.uk for ph in phrases}
+    return json.dumps(ret)
 
 def config_variables():
     variables = g.db.query(Config).filter_by(client_side=1).all()
@@ -341,7 +363,9 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     app.before_request(load_user)
     app.before_request(setup_authomatic(app))
+
     if front == 'y':
+        app.before_request(load_portal_id(app))
         register_blueprints_front(app)
         my_loader = jinja2.ChoiceLoader([
             app.jinja_loader,
@@ -372,6 +396,7 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
     app.jinja_env.globals.update(raw_url_for=raw_url_for)
     app.jinja_env.globals.update(pre=pre)
+    app.jinja_env.globals.update(translates=translates)
     app.jinja_env.globals.update(file_url=file_url)
     app.jinja_env.globals.update(config_variables=config_variables)
 

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, aliased, backref
 from sqlalchemy.sql import expression
 from ..constants.TABLE_TYPES import TABLE_TYPES
 # from db_init import db_session
@@ -16,11 +16,13 @@ from .pr_base import PRBase, Base
 from utils.db_utils import db
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from flask import g
-from sqlalchemy.sql import or_
+from sqlalchemy.sql import or_, and_
+from sqlalchemy.sql import expression
 import re
 from sqlalchemy import event
 from html.parser import HTMLParser
 from ..controllers import errors
+
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -60,7 +62,8 @@ class ArticlePortalDivision(Base, PRBase):
     publishing_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'], default=ARTICLE_STATUS_IN_PORTAL.published)
 
-    division = relationship('PortalDivision', backref='article_portal_division')
+    division = relationship('PortalDivision', backref=backref('article_portal_division', cascade="save-update, merge, delete"),
+                            cascade="save-update, merge, delete")
     company = relationship(Company, secondary='article_company',
                            primaryjoin="ArticlePortalDivision.article_company_id == ArticleCompany.id",
                            secondaryjoin="ArticleCompany.company_id == Company.id",
@@ -70,15 +73,18 @@ class ArticlePortalDivision(Base, PRBase):
     #                                     secondary='tag_portal_division_article',
     #                                     back_populates='articles')
 
+    # tag_assoc_ = relationship('TagPortalDivisionArticle',
+    #                                 back_populates='article_portal_division_select')
     tag_assoc_select = relationship('TagPortalDivisionArticle',
-                                    back_populates='article_portal_division_select')
+                                    back_populates='article_portal_division_select',
+                                    cascade="save-update, merge, delete")
 
     @property
     def tags(self):
-        query = g.db.query(Tag.name).\
-            join(TagPortalDivision).\
-            join(TagPortalDivisionArticle).\
-            filter(TagPortalDivisionArticle.article_portal_division_id==self.id)
+        query = g.db.query(Tag.name). \
+            join(TagPortalDivision). \
+            join(TagPortalDivisionArticle). \
+            filter(TagPortalDivisionArticle.article_portal_division_id == self.id)
         tags = list(map(lambda x: x[0], query.all()))
         return tags
 
@@ -117,29 +123,29 @@ class ArticlePortalDivision(Base, PRBase):
     @staticmethod
     def get_portals_where_company_send_article(company_id):
 
-        return db(ArticlePortalDivision, company_id=company_id).group_by.all()
+        # return db(ArticlePortalDivision, company_id=company_id).group_by.all()
 
-        all = {'name': 'All', 'id': 0}
-        portals = []
-        portals.append(all)
+        # all = {'name': 'All', 'id': 0}
+        portals = {}
+        # portals['0'] = {'name': 'All'}
+        # portals.append(all)
         for article in db(ArticleCompany, company_id=company_id).all():
             for port in article.portal_article:
-                portals.append(port.portal.to_dict('id,name'))
-        return []
-        return all, [dict(port) for port in set([tuple(p.items()) for p in portals])]
+                portals[port.portal.id] = port.portal.to_dict('name')
+        return portals
 
     @staticmethod
     def get_companies_which_send_article_to_portal(portal_id):
-        all = {'name': 'All', 'id': 0}
-        companies = []
-        companies.append(all)
+        # all = {'name': 'All', 'id': 0}
+        companies = {}
+        # companies.append(all)
         articles = g.db.query(ArticlePortalDivision).\
             join(ArticlePortalDivision.portal).\
-            filter(Portal.id==portal_id).all()
+            filter(Portal.id == portal_id).all()
         # for article in db(ArticlePortalDivision, portal_id=portal_id).all():
         for article in articles:
-            companies.append(article.company.to_dict('id,name'))
-        return all, [dict(port) for port in set([tuple(p.items()) for p in companies])]
+            companies[article.company.id] = article.company.to_dict('name')
+        return companies
 
     def clone_for_company(self, company_id):
         return self.detach().attr({'company_id': company_id,
@@ -148,11 +154,11 @@ class ArticlePortalDivision(Base, PRBase):
 
     @staticmethod
     def subquery_portal_articles(search_text=None, portal_id=None, **kwargs):
-        sub_query = g.db.query(ArticlePortalDivision).\
+        sub_query = g.db.query(ArticlePortalDivision).filter_by(**kwargs).\
             join(ArticlePortalDivision.division).\
             join(PortalDivision.portal).\
-            filter(Portal.id == portal_id).\
-            filter_by(**kwargs)
+            filter(Portal.id == portal_id).order_by(expression.desc(ArticlePortalDivision.publishing_tm))
+
         if search_text:
             sub_query = sub_query.filter(ArticlePortalDivision.title.ilike("%" + search_text + "%"))
         return sub_query
@@ -190,14 +196,14 @@ class ArticleCompany(Base, PRBase):
                                           'long|keywords|cr_tm|md_tm|company_id|'
                                           'article_id|image_file_id|'
                                           'status, company.name, portal_article.status,'
-                                          'portal_article.portal.name'):
+                                          'portal_article.portal.name,portal_article.portal.id'):
         return self.to_dict(fields)
 
     def validate(self, action):
         ret = super().validate(action)
         # TODO: (AA to OZ): regexp doesn't work
 
-        if not re.match('.*\S{3,}.*',self.title):
+        if not re.match('.*\S{3,}.*', self.title):
             ret['errors']['title'] = 'pls enter title longer than 3 letters'
         if not re.match('\S+.*', self.keywords):
             ret['warnings']['keywords'] = 'pls enter at least one keyword'
@@ -226,17 +232,27 @@ class ArticleCompany(Base, PRBase):
             article_filter = article_filter.filter(ArticleCompany.title.ilike(
                 "%" + repr(search_text).strip("'") + "%"))
 
-        return db(Article, author_user_id=user_id).filter(article_filter.exists())
+        own_article = aliased(ArticleCompany, name="OwnArticle")
+
+        return db(Article, own_article.md_tm, author_user_id=user_id). \
+            join(own_article,
+                 and_(Article.id == own_article.article_id, own_article.company_id == None)). \
+            order_by(expression.desc(own_article.md_tm)). \
+            filter(article_filter.exists())
 
     @staticmethod
-    def subquery_company_articles(search_text=None, company_id=None, **kwargs):
+    def subquery_company_articles(search_text=None, company_id=None, portal_id=None, **kwargs):
 
         sub_query = db(ArticleCompany, company_id=company_id)
         if search_text:
             sub_query = sub_query.filter(ArticleCompany.title.ilike("%" + search_text + "%"))
-        if kwargs.get('portal_id') or kwargs.get('status'):
+        if kwargs.get('status'):
             sub_query = sub_query.filter(db(ArticlePortalDivision, article_company_id=ArticleCompany.id,
                                             **kwargs).exists())
+        if portal_id:
+            sub_query = sub_query.filter(db(PortalDivision, portal_id=portal_id).exists())
+
+        sub_query = sub_query.order_by(expression.desc(ArticleCompany.md_tm))
 
         return sub_query
 
@@ -275,13 +291,13 @@ class ArticleCompany(Base, PRBase):
 
         tags_portal_division_article = []
         for i in range(len(tag_names)):
-            tag_portal_division_article = TagPortalDivisionArticle(position=i+1)
+            tag_portal_division_article = TagPortalDivisionArticle(position=i + 1)
             tag_portal_division = \
-                g.db.query(TagPortalDivision).\
-                    select_from(TagPortalDivision).\
-                    join(Tag).\
-                    filter(TagPortalDivision.portal_division_id==portal_division_id).\
-                    filter(Tag.name==tag_names[i]).one()
+                g.db.query(TagPortalDivision). \
+                    select_from(TagPortalDivision). \
+                    join(Tag). \
+                    filter(TagPortalDivision.portal_division_id == portal_division_id). \
+                    filter(Tag.name == tag_names[i]).one()
 
             tag_portal_division_article.tag_portal_division = tag_portal_division
             tags_portal_division_article.append(tag_portal_division_article)
@@ -303,11 +319,9 @@ class ArticleCompany(Base, PRBase):
         for old_image_id in filesintext:
             long_text = long_text.replace('http://file001.profireader.com/%s/' % (old_image_id,),
                                           'http://file001.profireader.com/%s/' % (
-                                          filesintext[old_image_id],))
+                                              filesintext[old_image_id],))
 
         article_portal_division.long = long_text
-
-        self.portal_article.append(article_portal_division)
 
         return self
 
@@ -321,6 +335,8 @@ class ArticleCompany(Base, PRBase):
 
 def set_long_striped(mapper, connection, target):
     target.long_stripped = MLStripper().strip_tags(target.long)
+
+
 event.listen(ArticlePortalDivision, 'before_update', set_long_striped)
 event.listen(ArticlePortalDivision, 'before_insert', set_long_striped)
 event.listen(ArticleCompany, 'before_update', set_long_striped)
@@ -360,7 +376,8 @@ class Article(Base, PRBase):
 
     def get_article_with_html_tag(self, text_into_html):
         article = self.get_client_side_dict()
-        article['mine_version']['title'] = article['mine_version']['title'].replace(text_into_html, '<span class=colored>%s</span>' % text_into_html)
+        article['mine_version']['title'] = article['mine_version']['title'].replace(text_into_html,
+                                                                                    '<span class=colored>%s</span>' % text_into_html)
         return article
 
     @staticmethod
@@ -408,11 +425,11 @@ class Article(Base, PRBase):
             portal_id = kwargs['portal_id']
             kwargs.pop('portal_id', None)
 
-        sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs).\
+        sub_query = db(ArticlePortalDivision, status=ARTICLE_STATUS_IN_PORTAL.published, **kwargs). \
             order_by(ArticlePortalDivision.publishing_tm.desc()).filter(text(' "publishing_tm" < clock_timestamp() '))
 
         if portal_id:
-            sub_query = sub_query.join(PortalDivision).join(Portal).filter(Portal.id==portal_id)
+            sub_query = sub_query.join(PortalDivision).join(Portal).filter(Portal.id == portal_id)
 
         if search_text:
             sub_query = sub_query. \

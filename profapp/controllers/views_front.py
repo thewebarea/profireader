@@ -14,8 +14,6 @@ from flask import send_from_directory
 import collections
 
 
-
-
 def get_division_for_subportal(portal_id, member_company_id):
     q = g.db().query(PortalDivisionSettings_company_subportal). \
         join(MemberCompanyPortal,
@@ -69,10 +67,11 @@ def index(page=1):
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id,
                                                       portal_division_type_id='index').one()
     articles, pages, page = pagination(query=sub_query, page=page)
+
     ordered_articles = collections.OrderedDict()
     for a in articles:
         ordered_articles[a.id] = dict(list(a.get_client_side_dict().items()) +
-                                                list({'main_tags': {'foo': 'one_tag'}}.items()))
+                                      list({'tags': a.tags}.items()))
 
     return render_template('front/bird/index.html',
                            articles=ordered_articles,
@@ -88,9 +87,9 @@ def index(page=1):
 @front_bp.route('<string:division_name>/<int:page>/', methods=['GET'])
 def division(division_name, page=1):
     search_text, portal, sub_query = get_params()
-    if division_name == 'Компанії' and search_text:
-        return redirect(url_for('front.index', search_text=search_text))
     division = g.db().query(PortalDivision).filter_by(portal_id=portal.id, name=division_name).one()
+    if division.portal_division_type_id == 'catalog' and search_text:
+        return redirect(url_for('front.index', search_text=search_text))
     if division.portal_division_type_id == 'news' or division.portal_division_type_id == 'events':
         sub_query = Article.subquery_articles_at_portal(search_text=search_text,
                                                         portal_division_id=division.id)
