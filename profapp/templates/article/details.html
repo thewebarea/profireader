@@ -15,7 +15,7 @@
             $scope.selectedCompany_name = '';
             $scope.selectedCompany = null;
             $scope.selectedCompany_sending = false;
-
+            $scope.$$translate = {{ translates('article_my_versions')|safe }};
 
             $scope.onSelect = function ($item, $model, $label) {
                 if (!$item || !$item.id) {

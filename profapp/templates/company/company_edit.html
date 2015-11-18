@@ -25,6 +25,7 @@
             $scope.getData = function () {
                 return $scope.data;
             };
+            $scope.$$translate = {{ translates('company_create')|safe }};
 
             $scope.afterSave = function (resp, deff) {
                 if (resp && !$scope.data.id) {
@@ -86,7 +87,7 @@
              af-after-load="afterLoad"
              ng-model="data">
 
-            <h1 class="nice-title">{{ data.id ? 'Edit company profile' : 'New company Account' }}<span></span></h1>
+            <h1 class="nice-title">{{ data.id ? _('Edit company profile') : _('New company Account') }}<span></span></h1>
 
             <div style="width: 400px;">
                 <div ng-click="chooseImage()"
@@ -97,30 +98,30 @@
             </div>
 
             <div style="width: 500px; margin-left: 450px; height: 250px">
-                <div class="item"><span class="input_label">Company name</span><input ng-model="data.name">
+                <div class="item"><span class="input_label">{{_('Company name')}}</span><input ng-model="data.name">
                 </div>
-                <div class="item"><span class="input_label">Country</span><input type="text"
+                <div class="item"><span class="input_label">{{_('Country')}}</span><input type="text"
                                                                                  ng-model="data.country"></div>
-                <div class="item"><span class="input_label">Region</span><input type="text"
+                <div class="item"><span class="input_label">{{_('Region')}}</span><input type="text"
                                                                                 ng-model="data.region"></div>
-                <div class="item"><span class="input_label">Adress</span><input type="text"
+                <div class="item"><span class="input_label">{{_('Adress')}}</span><input type="text"
                                                                                 ng-model="data.address"></div>
-                <div class="item"><span class="input_label">Phone</span><input type="text"
+                <div class="item"><span class="input_label">{{_('Phone')}}</span><input type="text"
                                                                                ng-model="data.phone"></div>
-                <div class="item"><span class="input_label">Fax</span><input type="text" ng-model="data.phone2">
+                <div class="item"><span class="input_label">{{_('Fax')}}</span><input type="text" ng-model="data.phone2">
                 </div>
-                <div class="item"><span class="input_label">Email</span><input type="text"
+                <div class="item"><span class="input_label">{{_('Email')}}</span><input type="text"
                                                                                ng-model="data.email"></div>
             </div>
 
             <div style="width: 1000px; margin-left: 0px;">
-                Short description
+                {{_('Short description')}}
                 <textarea ui-tinymce="tinymceImageOptions" placeholder=""
                           ng-model="data.short_description"></textarea><br/>
             </div>
 
             <div style="width: 1000px; margin-left: 0px;">
-                About company
+                {{_('About company')}}
                 <textarea ui-tinymce="tinymceImageOptions" placeholder=""
                           ng-model="data.about"></textarea><br/>
             </div>
@@ -128,7 +129,7 @@
             <input ng-click="$af.save(data)"
                    ng-disabled="!$af.isActionAllowed(data, 'save')"
                    type="submit"
-                   value="{{ data.id ? 'save' : 'create' }}"/>
+                   value="{{ data.id ? _('save') : _('create') }}"/>
         </div>
 
     </div>

@@ -52,11 +52,8 @@ function getObjectsDifference(a, b, setval, notstrict) {
 
 angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
     .factory('$ok', ['$http', function ($http) {
-        return function (url, data, ifok, iferror, template) {
-            //if(template === false){
-            //    data.
-            //}
-
+        return function (url, data, ifok, iferror, translate) {
+            //console.log($scope);
             function error(result, error_code) {
                 if (iferror) {
                     iferror(result, error_code)
@@ -66,7 +63,7 @@ angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip']
                 }
             }
 
-            return $http.post(url, data).then(
+            return $http.post(url, $.extend({},data, translate?{__translate:translate}:{})).then(
                 function (resp) {
                     if (!resp || !resp['data'] || typeof resp['data'] !== 'object' || resp === null) {
                         return error('wrong response', -1);
@@ -593,11 +590,32 @@ module.run(function ($rootScope, $ok, $sce) {
             return $sce.trustAsHtml(full_text);
         },
         _: function (phrase, dict) {
-            console.log(this.controllerName);
             var scope = this;
+            if (!scope.$$translate) {
+                scope.$$translate = {};
+            }
+            //TODO OZ by OZ hasOwnProperty
+            if (scope.$$translate[phrase] === undefined) {
+                scope.$$translate[phrase] = phrase;
+                $ok('/articles/save_translate/', {template: this.controllerName, phrase: phrase}, function (resp) {
+                    //console.log(resp['phrase']);
+                    //if(resp['phrase'] === ''){
+                    //    scope.$$translate[phrase] = phrase
+                    //}else{
+                    //    scope.$$translate[phrase] = resp;
+                    //}
+
+                });
+                //scope.$$translate[phrase] = phrase;
+            }
+            console.log(scope.$$translate[phrase]);
+            phrase = scope.$$translate[phrase];
+            //alert(scope.$$translate);
+
+
             try {
                 return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {
-                    var indexes = g1.split('.')
+                    var indexes = g1.split('.');
                     var d = dict ? dict : scope;
                     for (var i in indexes) {
                         if (typeof d[indexes[i]] !== undefined) {

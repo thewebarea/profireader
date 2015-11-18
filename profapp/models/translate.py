@@ -21,13 +21,13 @@ class TranslateTemplate(Base, PRBase):
 
 
     @staticmethod
-    def getTranslate(template):
-        tr = list({'name': file.name,
-                   'uk': file.uk,
-                   'en':file.en
-                   }
-                  for file in db(TranslateTemplate, template=template))
-        return tr
+    def getTranslate(template, phrase):
+        tr =[b for b in db(TranslateTemplate, template=template, name=phrase)]
+        if tr:
+            phrase = tr[0]
+        else:
+            return ''
+        return phrase.uk
 
     @staticmethod
     def saveTranslate(template, name, uk, en):
