@@ -15,7 +15,7 @@
 
     <h1 class="nice-title">{{ company.name }}<span></span></h1>
     {% if 'manage_rights_company' in user_rights %}
-            <a class="h1-btn icon icon-draw-pen" href="{{ url_for('company.update', company_id=company.id) }}" title="Edit company">Edit company</a>
+            <a class="h1-btn" href="{{ url_for('company.update', company_id=company.id) }}" title="Edit company">Edit company</a>
         {% endif %}
 
     <br />

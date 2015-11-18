@@ -159,6 +159,7 @@ a:focus {
 h1 {
     display: inline-block;
     width: auto;
+    margin-left: -10px;
     /*background: #CA2027;*/
     background: #777777;
     color: #fff;
@@ -1862,8 +1863,8 @@ form {
     padding: 10px 10px 10px 220px;
 
     margin-bottom: 20px;
-    border: 1px rgba(95, 212, 0, 0.35) solid;
-    background: rgba(95, 212, 0, 0.05);
+    border: 1px rgba(48, 49, 47, 0.35) solid;
+    background: rgb(238, 238, 238);
 }
 
 .form form {
