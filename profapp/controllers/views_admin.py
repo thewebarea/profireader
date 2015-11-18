@@ -10,7 +10,8 @@ from sqlalchemy.sql import expression
 
 @admin_bp.route('/translations', methods=['GET'])
 def translations():
-    return render_template('admin/translations.html')
+    return render_template('admin/translations.html',
+                           angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js')
 
 
 @admin_bp.route('/translations', methods=['POST'])
@@ -27,6 +28,8 @@ def translations_load(json):
     templates = db(TranslateTemplate.template).group_by(TranslateTemplate.template) \
         .order_by(expression.asc(expression.func.lower(TranslateTemplate.template))).all()
     return {'languages': TranslateTemplate.languages, 'translations': tr,
+            'pages': {'total': pages, 'current_page': current_page,
+                      'page_buttons': Config.PAGINATION_BUTTONS},
             'templates': [{'label': t.template, 'value': t.template} for t in templates]}
 
 
