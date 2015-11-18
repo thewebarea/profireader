@@ -98,7 +98,7 @@
             <div class="one-company" ng-repeat="non_active_employer in data.non_active_user_company_status"
                  id="joined_company_{{ non_active_employer.id }}">
                 <div class="company-item">
-                    <img class="company-logo" src="{{ company_logo }}">
+                    <img class="company-logo" src="{{ fileUrl(my_employer.logo_file_id, false, '/static/images/company_no_logo.png') }}">
                     <a href="{{ url_company_profile({company_id: non_active_employer.id}) }}">{{ _('Company:
                         `%(name)s` - NON ACTIVE',
                         non_active_employer) }}</a>

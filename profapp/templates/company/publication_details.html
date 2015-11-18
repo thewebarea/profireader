@@ -32,11 +32,26 @@
                 return $scope.data;
             };
 
-            $scope.setFirstPage= function () {
-                $scope.data.pages.current_page=1;
+            $scope.setFirstPage = function () {
+                $scope.data.pages.current_page = 1;
                 return $scope.getData();
             };
 
+
+            $scope.changeStatus = function () {
+                $scope.loading = true;
+
+                $ok($scope.url_change_status({article_id: $scope.data.article.id}), $scope.data, function (resp) {
+                    $scope.loading = false;
+                    $scope.data = resp;
+                })
+            };
+
+            $scope.loadPublicationDetails = function () {
+                $ok('', {}, function (resp) {
+                    $scope.data = resp;
+                });
+            };
 
 
             $scope.afterSave = function (resp) {
@@ -44,48 +59,57 @@
                 $scope.loading = false;
             };
 
-            $scope.change_text_color = function(full_text, search_text){
+            $scope.change_text_color = function (full_text, search_text) {
 
 
                 var re = new RegExp(search_text, "g");
-{#                full_text = full_text.replace(/#/g, '');#}
-{#                full_text = full_text.replace(re, '#');#}
+                {#                full_text = full_text.replace(/#/g, '');#}
+                {#                full_text = full_text.replace(re, '#');#}
 
-                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">'  + search_text + '</span>'));}
-            $scope.myRights = function(){
+                return $sce.trustAsHtml(full_text.replace(re, '<span style="color:blue">' + search_text + '</span>'));
+            }
+            $scope.myRights = function () {
+                if (!$scope.data || !$scope.data.user_rights) return false;
                 for (var i = 0; i < arguments.length; i++) {
-                     if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
-                         return false;
-                     }
+                    if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
+                        return false;
+                    }
                 }
                 return true;
             };
-              }]);
+        }]);
 
     </script>
-{% include 'company/company_base_angular.html' %}
+    {% include 'company/company_base_angular.html' %}
     {% raw %}
-    <div ng-init="loadData()" ng-controller="article_list">
+    <div ng-init="loadPublicationDetails()" ng-controller="article_list">
 
         <div ng-if="loading">Loading...</div>
         <div ng-if="!loading">
             <div ng-if="myRights('publish')">
-                <h2>Article <span style="color: #1295bf">{{ data.article.title }}</span> was sent from company <span style="color: #1295bf">'{{ data.article.company.name }}'</span></h2><br>
+                <h2>Article <span style="color: #1295bf">{{ data.article.title }}</span> was sent from company <span
+                        style="color: #1295bf">'{{ data.article.company.name }}'</span></h2><br>
                 Short description
                 <input type="text" value="{{ data.article.short }}" disabled><br>
                 Long Text
                 <input type="text" value="{{ data.article.long }}" disabled><br>
+
                 <h2>Current status is <span style="color: #1295bf">{{ data.article.status }}</span></h2>
+
                 <h2>Change status to </h2>
-                    <form ng-ok
-                                ng-onsuccess="afterSave"
-                                ng-onsubmit="getData"
-                                ng-action="url_change_status({article_id:data.article.id})">
-                               <select ng-model="data.new_status">
-                            <option ng-repeat="status in data.statuses" ng-if="status!=data.article.status">{{ status }}</option>
-                        </select>
-                            <input type="submit" value="change">
-                        </form>
+                <select ng-model="data.new_status">
+                    <option ng-repeat="status in data.statuses" ng-if="status!=data.article.status">{{ status }}
+                    </option>
+                </select>
+                <input type="submit" ng-click="changeStatus()" value="change">
+
+                <form ang-ok
+                      ang-onsuccess="afterSave"
+                      ang-onsubmit="getData"
+                      ang-action="url_change_status({article_id:data.article.id})">
+
+
+                </form>
 
 
             </div>

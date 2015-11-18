@@ -231,8 +231,8 @@
             }
         };
 
-        Item.prototype.fileUrl = function(id, down){
-            return fileUrl(id, down)
+        Item.prototype.fileUrl = function(id, down, if_no_file){
+            return fileUrl(id, down, if_no_file)
         };
 
         Item.prototype.choose = function() {
