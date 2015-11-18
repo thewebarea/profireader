@@ -24,6 +24,7 @@
                 }
                 return true;
             };
+            $scope.$$translate = {{ translates('portal_list')|safe }};
             $scope.afterSave = function (resp) {
             window.location.href = $scope.partners({company_id: resp['company_id']})
             };
@@ -32,11 +33,11 @@
     {% raw %}
     <div ng-init="loadData()" ng-controller="portal_list">
     <div ng-if="data.portal==''">
-        <h3>This company does not have portal</h3>
+        <h3>{{_('This company does not have portal')}}</h3>
     </div>
     <div ng-if="data.portal!=''">
         <span>
-            <h3>Companies partners :
+            <h3>{{_('Companies partners :')}}
                 <span ng-repeat="company in data.companies_partners">
                     <span ng-if="company.id!=data.company_id">
                     <a href="{{ url_company_profile({company_id: company.id}) }}"> "{{ company.name }}"</a>

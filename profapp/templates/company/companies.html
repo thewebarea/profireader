@@ -19,6 +19,7 @@
             $scope.url_search_for_company = {{ raw_url_for('company.search_for_company_to_join')|safe }};
             $scope.url_join = {{ raw_url_for('company.join_to_company')|safe }};
             $scope.url_create_own_company = '{{ url_for('company.update')|safe }}';
+            $scope.$$translate = {{ translates('companies_list')|safe }};
 
             $scope.selectedCompany_name = '';
             $scope.selectedCompany = null;

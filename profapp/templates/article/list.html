@@ -16,7 +16,7 @@
             $scope.get_colored_title = function (text_to_change) {
                 return text_to_change
             };
-
+            $scope.$$translate = {{ translates('article_list')|safe }};
             $scope.page_changed = function () {
                 $scope.data.search_text = $scope.data.original_search_text;
                 $scope.loading = true;
@@ -55,18 +55,18 @@
     </script>
     {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
-        <h2><a href="{{ url_create_article() }}"><span class="icon icon-draw-pen-add"></span>Create article</a></h2>
+        <h2><a href="{{ url_create_article() }}"><span class="icon icon-draw-pen-add"></span>{{_('Create article')}}</a></h2>
 
-        <div ng-if="loading">Loading...</div>
+        <div ng-if="loading">{{_('Loading...')}}</div>
         <div ng-if="!loading">
 
 
             <table style="width:100%">
                 <tr>
                     <td>
-                        <input ng-click="setFirstPage()" type="submit" value="search" style="width: 75%;">
+                        <input ng-click="setFirstPage()" type="submit" value="{{_('Search')}}" style="width: 75%;">
                     </td>
-                    <td><input style="width: 98%" type="text" placeholder="Search" ng-model="data.search_text"></td>
+                    <td><input style="width: 98%" type="text" placeholder="{{_('Search')}}" ng-model="data.search_text"></td>
                     <td>
                         <select style="width: 100%; padding: 5px;" ng-model="data.chosen_company"
                                 ng-options="comp.name for comp in data.companies | orderBy:'id' track by comp.id"></select>
@@ -81,10 +81,10 @@
 
                 </tr>
                 <tr>
-                    <th width="250px">Date</th>
-                    <th width="250px">Title</th>
-                    <th width="250px">Campanies</th>
-                    <th><p>Status</p></th>
+                    <th width="250px">{{_('Date')}}</th>
+                    <th width="250px">{{_('Title')}}</th>
+                    <th width="250px">{{_('Campanies')}}</th>
+                    <th><p>{{_('Status')}}</p></th>
                 </tr>
             </table>
             <table style="width:100%" ng-repeat="article_dict in data.articles">
@@ -115,13 +115,13 @@
                                          id="{{ article_dict.article.id }}"
                                          ng-bind-html="highlightSearchResults(article_dict.article.mine_version.title, data.original_search_text)"></a>
                     </td>
-                    <td width="250px">Not sent to any company yet</td>
+                    <td width="250px">{{_('Not sent to any company yet')}}</td>
                     <td>Not sent</td>
                 </tr>
 
             </table>
             <div ng-show="!loading && !areAllEmpty(data.articles)" ng-include="'pagination.html'"></div>
-            <div ng-show="!loading && areAllEmpty(data.articles)">No publications</div>
+            <div ng-show="!loading && areAllEmpty(data.articles)">{{_('No publications')}}</div>
         </div>
     </div>
     {% endraw %}

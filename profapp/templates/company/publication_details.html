@@ -16,7 +16,7 @@
                 return text_to_change
             };
 
-
+            $scope.$$translate = {{ translates('article_list')|safe }};
             $scope.page_changed = function () {
                 $scope.data.search_text = $scope.data.original_search_text;
                 $('#pagerform').trigger('submit');
@@ -84,24 +84,24 @@
     {% raw %}
     <div ng-init="loadPublicationDetails()" ng-controller="article_list">
 
-        <div ng-if="loading">Loading...</div>
+        <div ng-if="loading">{{_('Loading...')}}</div>
         <div ng-if="!loading">
             <div ng-if="myRights('publish')">
-                <h2>Article <span style="color: #1295bf">{{ data.article.title }}</span> was sent from company <span
+                <h2>Article <span style="color: #1295bf">{{ data.article.title }}</span> {{_('was sent from company')}} <span
                         style="color: #1295bf">'{{ data.article.company.name }}'</span></h2><br>
-                Short description
+                {{_('Short description')}}
                 <input type="text" value="{{ data.article.short }}" disabled><br>
-                Long Text
+                {{_('Long Text')}}
                 <input type="text" value="{{ data.article.long }}" disabled><br>
 
-                <h2>Current status is <span style="color: #1295bf">{{ data.article.status }}</span></h2>
+                <h2>{{_('Current status is')}} <span style="color: #1295bf">{{ data.article.status }}</span></h2>
 
-                <h2>Change status to </h2>
+                <h2>{{_('Change status to')}} </h2>
                 <select ng-model="data.new_status">
                     <option ng-repeat="status in data.statuses" ng-if="status!=data.article.status">{{ status }}
                     </option>
                 </select>
-                <input type="submit" ng-click="changeStatus()" value="change">
+                <input type="submit" ng-click="changeStatus()" value="{{_('change')}}">
 
                 <form ang-ok
                       ang-onsuccess="afterSave"

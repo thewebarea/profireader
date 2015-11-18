@@ -13,6 +13,7 @@
         {% endif %}
 
         $scope.data = {};
+        $scope.$$translate = {{ translates('article_edit')|safe }};
 
         $scope.afterSave = function (resp) {
             window.location.href = $scope.details_article({article_id: resp['id']})
@@ -157,7 +158,7 @@
                                                   ng-disabled="!$af.isActionAllowed(data, 'save')"
                                                   ng-click="$af.save(data)"
                                                   type="submit"
-                                                  value="{{ data.id ? 'save' : _('create') }}"/>
+                                                  value="{{ data.id ? _('save') : _('create') }}"/>
             </td>
         </tr>
     </table>

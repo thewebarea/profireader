@@ -23,6 +23,11 @@ def translate(json):
     phrase = TranslateTemplate.getTranslate(request.json['template'], request.json['phrase'])
     return {'phrase':phrase}
 
+@article_bp.route('/save_translate/', methods=['POST'])
+@ok
+def save_translate(json):
+    file = TranslateTemplate.saveTranslate(request.json['template'], request.json['phrase'], request.json['phrase'], request.json['phrase'])
+    return file.name
 
 
 @article_bp.route('/list/', methods=['GET'])

@@ -597,14 +597,13 @@ module.run(function ($rootScope, $ok, $sce) {
             //TODO OZ by OZ hasOwnProperty
             if (scope.$$translate[phrase] === undefined) {
                 scope.$$translate[phrase] = phrase;
-                $ok('/articles/translate/', {template: this.controllerName, phrase: phrase}, function (resp) {
+                $ok('/articles/save_translate/', {template: this.controllerName, phrase: phrase}, function (resp) {
                     //console.log(resp['phrase']);
-                    if(resp['phrase'] === ''){
-                        scope.$$translate[phrase] = phrase
-                    }else{
-                        scope.$$translate[phrase] = resp['phrase'];
-                    }
-
+                    //if(resp['phrase'] === ''){
+                    //    scope.$$translate[phrase] = phrase
+                    //}else{
+                    //    scope.$$translate[phrase] = resp;
+                    //}
 
                 });
                 //scope.$$translate[phrase] = phrase;
