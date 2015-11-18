@@ -68,14 +68,14 @@
 
         <table style="width:100%">
             <tr>
-                <th width="250px">Date</th>
-                <th width="250px">Title</th>
-                <th width="250px">Company - publication status</th>
+                <th width="250px">{{_('Date')}}</th>
+                <th width="250px">{{_('Title')}}</th>
+                <th width="250px">{{_('Company - publication status')}}</th>
                 <th></th>
             </tr>
             <tr valign="top">
                 <td></td>
-                <td><input ng-disabled="loading" style="width: 98%" type="text" placeholder="Search"
+                <td><input ng-disabled="loading" style="width: 98%" type="text" placeholder="{{_('Search')}}"
                            ng-model="new_search_text"></td>
                 <td>
                     <select ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="company_id"
@@ -87,7 +87,7 @@
                 </td>
                 <td></td>
                 <td><input ng-disabled="loading" ng-click="sendData(new_search_text)" type="submit"
-                           value="{{ loading?'loading...':'search' }}"
+                           value="{{ loading?_('loading...'):_('search') }}"
                            style="width: 75%;">
                 </td>
 
@@ -111,7 +111,7 @@
             </tr>
             <tr ng-show="!loading && areAllEmpty(publications)">
                 <td colspan="4">
-                    No publications
+                    {{_('No publications')}}
                 </td>
             </tr>
 

@@ -1,16 +1,15 @@
 <script>
-    module.controller('UserLoginController', ['$scope', '$modal', function ($scope, $modal) {
+    module.controller('UserLoginController', ['$scope', '$modal','$ok', function ($scope, $modal, $ok) {
         $scope.user = {{ g.user_dict|tojson|safe }};
         $scope.$$translate = {{ translates('UserLoginController')|safe }};
         $scope.open_filemanager = function () {
             window.location.href = '/filemanager/';
         };
     }]);
-
 </script>
 
 <!-- read this -->
-<nav ng-controller="UserLoginController" class="navbar navbar-default widewrapper ">
+<nav  ng-controller="UserLoginController" class="navbar navbar-default widewrapper ">
 
     <div class="top-style-line" style="height: 1px;"></div>
     <div class="container">
