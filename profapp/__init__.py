@@ -120,15 +120,20 @@ def filter_json(json, *args, prefix='', NoneTo='', ExceptionOnNotPresent = False
     return ret
 
 
+def db_session_func(db_config):
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import scoped_session, sessionmaker
+
+    engine = create_engine(db_config)
+    db_session = scoped_session(sessionmaker(autocommit=False,
+                                             autoflush=False,
+                                             bind=engine))
+    return db_session
+
+
 def load_database(db_config):
     def load_db():
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import scoped_session, sessionmaker
-
-        engine = create_engine(db_config)
-        db_session = scoped_session(sessionmaker(autocommit=False,
-                                                 autoflush=False,
-                                                 bind=engine))
+        db_session = db_session_func(db_config)
         g.db = db_session
         g.req = req
         g.filter_json = filter_json
@@ -210,6 +215,16 @@ def load_user():
 #    if 'user_id' in session.keys():
 #        g.user = g.db.query(User).\
 #            query.filter_by(id=session['user_id']).first()
+
+
+def load_portal_id(app):
+    from profapp.models.portal import Portal
+
+    def func():
+        g.portal_id = g.db.query(Portal.id).filter_by(host=app.config['SERVER_NAME']).one()[0]
+        # g.portal_id = db_session_func(app.config['SQLALCHEMY_DATABASE_URI']).\
+        #             query(Portal.id).filter_by(host=app.config['SERVER_NAME']).one()[0]
+    return func
 
 
 def flask_endpoint_to_angular(endpoint, **kwargs):
@@ -341,7 +356,9 @@ def create_app(config='config.ProductionDevelopmentConfig',
 
     app.before_request(load_user)
     app.before_request(setup_authomatic(app))
+
     if front == 'y':
+        app.before_request(load_portal_id(app))
         register_blueprints_front(app)
         my_loader = jinja2.ChoiceLoader([
             app.jinja_loader,

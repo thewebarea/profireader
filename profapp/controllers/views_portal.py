@@ -377,13 +377,11 @@ def profile_edit_load(json, portal_id):
         g.db.expire_all()
 
 
-        # TODO: not to forget to delete unused tags... New tags well be added.
+        # TODO (AA to AA): not to forget to delete unused tags... New tags well be added.
 
         # for elem in delete_tag_portal_bound_list:
         #     g.db.delete(elem)
         g.db.commit()
-
-        print('+++++++++++++++++++')
 
         # portal.portal_bound_tags_dynamic = ...
         # portal.portal_notbound_tags_dynamic = ...
