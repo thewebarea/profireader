@@ -160,12 +160,16 @@ def load_material_details(json, company_id, article_id):
 @login_required
 @ok
 # @check_rights(simple_permissions([]))
-def change_article_status_at_portal(json, article_portal_division_id):
+def delete_atricle_from_portal(json, article_portal_division_id):
     for article in json['article']['portal_article']:
         if article['id'] == article_portal_division_id:
             article['status'] = json.get('new_status')
     db(ArticlePortalDivision, id=article_portal_division_id).update({'status': json['new_status']})
-    print(json['article']['portal_article'])
+    # article = db(ArticlePortalDivision, id=article_portal_division_id).one()
+    # file_id = article.image_file_id
+    # g.db.delete(article)
+    # g.db.commit()
+    # File.remove(file_id) if file_id else None
     return json
 
 

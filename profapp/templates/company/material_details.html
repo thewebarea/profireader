@@ -248,12 +248,12 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     $scope.selectedUser = $item;
                 }
             };
-            $scope.url_change_status_at_portal = {{ raw_url_for('company.change_article_status_at_portal')|safe }};
-            $scope.changeStatus_at_portal = function (article_portal_id) {
+            $scope.url_delete_atricle_from_portal = {{ raw_url_for('company.delete_atricle_from_portal')|safe }};
+            $scope.delete_atricle_from_portal = function (article_portal_id) {
                 $scope.loading = true;
                 new_data = $scope.data;
                 new_data['new_status'] = 'not_published';
-                $ok($scope.url_change_status_at_portal({article_portal_division_id: article_portal_id}), new_data, function (resp) {
+                $ok($scope.url_delete_atricle_from_portal({article_portal_division_id: article_portal_id}), new_data, function (resp) {
                     $scope.loading = false;
                     $scope.data = resp;
                 })
@@ -349,11 +349,10 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                         <input disabled type="submit" value="Send article">
                     </div>
                     <hr/>
-                    {{ data.article.portal_article }}
                     This material was published to following portals:
                     <div ng-repeat="portal in data.article.portal_article" style="width: 1000px">
                         {{ portal.division.portal.name }}    -    {{ portal.division.name }}<br>
-                        <button ng-click="changeStatus_at_portal(portal.id)">Delete this material from this portal</button><hr/>
+                        <button ng-click="delete_atricle_from_portal(portal.id)">Delete this material from this portal</button><hr/>
                     </div>
                 </div>
                 <div ng-if="data_resp_user.user">
