@@ -76,14 +76,19 @@
             <div class="one-company" ng-repeat="my_employer in data.companies" id="joined_company_{{ my_employer.id }}">
                 <div class="company-item">
                     <img class="company-logo" src="{{ company_logo }}">
-                    <a href="{{ url_company_profile({company_id: my_employer.id}) }}">{{
-                        _('Company: `%(name)s`' + (my_employer.author_user_id==data.user_id?' - Type: OWN
+                    <a href="{{ url_company_profile({company_id: my_employer.id}) }}">
+
+                        {{
+                        _('Company: `%(name)s`', my_employer ) }}
+                        <br>
+                        {{
+                        _((my_employer.author_user_id==data.user_id?' Type: OWN
                         COMPANY':''), my_employer) }}
                     </a>
                     <br/>
-                    (<span ng-if="!my_employer.own_portal.host">no portal created</span><a
+                    <span ng-if="!my_employer.own_portal.host"><b>Portal:</b> no</span><a
                         ng-if="my_employer.own_portal.host" href="http://{{ my_employer.own_portal.host }}">http://{{
-                    my_employer.own_portal.host }}</a>)
+                    my_employer.own_portal.host }}</a>
                     <!-- <a href="{{ url_portal_profile({portal_id: my_employer.own_portal.id}) }}">[edit portal profile]</a> -->
                     <br/>
                 </div>
@@ -123,5 +128,3 @@
 
 
 {% endblock portal_content %}
-
-
