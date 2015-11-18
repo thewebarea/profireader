@@ -117,26 +117,24 @@ def material_details(company_id, article_id):
 @ok
 # @check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
-    # g.req('action', allowed=['load'])
+
     article = Article.get_one_article(article_id)
-    # if action == 'load':
     portals = {port.portal_id: port.portal.get_client_side_dict() for port in
                MemberCompanyPortal.get_portals(company_id)}
+
     joined_portals = {}
     if article.portal_article:
         joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
                           for articles in article.portal_article
                           if articles.division.portal.id in portals}
-    for key in portals.keys():
-        print(key)
-    # for key in joined_portals.keys():
-    #     print(key)
-    #     del portals[key]
 
     article = article.to_dict('id, title,short, cr_tm, md_tm, '
                               'company_id, status, long,'
                               'editor_user_id, company.name|id,'
-                              'portal_article.division.portal.id')
+                              'portal_article.id, portal_article.division.name, '
+                              'portal_article.division.portal.id,'
+                              'portal_article.division.portal.name,'
+                              'portal_article.status')
 
     user_rights = list(g.user.user_rights_in_company(company_id))
 
@@ -159,6 +157,18 @@ def load_material_details(json, company_id, article_id):
             'company_logo': company_logo}
 
 
+@company_bp.route('/<string:article_portal_division_id>/', methods=['POST'])
+@login_required
+@ok
+# @check_rights(simple_permissions([]))
+def change_article_status_at_portal(json, article_portal_division_id):
+    for article in json['article']['portal_article']:
+        if article['id'] == article_portal_division_id:
+            json['article']['portal_article']['status'] = json.get('new_status')
+    db(ArticlePortalDivision, id=article_portal_division_id).update({'status': json['new_status']})
+    return json
+
+
 @company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([]))
@@ -169,7 +179,8 @@ def get_tags(json, portal_division_id):
     return {'availableTags': available_tag_names}
 
 
-@company_bp.route('/update_material_status/<string:company_id>/<string:article_id>', methods=['POST'])
+@company_bp.route('/update_material_status/<string:company_id>/<string:article_id>',
+                  methods=['POST'])
 # @login_required
 # @check_rights(simple_permissions([]))
 @ok
