@@ -58,6 +58,12 @@ gulp.task('install_tinymce', function () {
         .pipe(gulp.dest('tinymce/'));
 });
 
+gulp.task('install_angular_xeditable', function () {
+    return gulp.src([src + 'angular-xeditable/dist/css/xeditable.css', src + 'angular-xeditable/dist/js/xeditable.js'])
+        .pipe(gulp.dest('angular-xeditable/'));
+});
 
-gulp.task('default', ['clean', 'install_filemanager', 'install_fileuploader', 'install_angular', 'install_angular_translate', 'install_angular_cookies', 'install_angular_ui_tinymce', 'install_tinymce', 'install_angular_bootstrap', 'install_angular_animate']);
+
+gulp.task('default', ['clean', 'install_filemanager', 'install_fileuploader', 'install_angular', 'install_angular_translate', 'install_angular_cookies', 'install_angular_ui_tinymce', 'install_tinymce', 'install_angular_bootstrap', 'install_angular_animate', 
+			'install_angular_xeditable']);
 
