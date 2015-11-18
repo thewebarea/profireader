@@ -72,7 +72,7 @@ class ArticlePortalDivision(Base, PRBase):
     #                                     secondary='tag_portal_division_article',
     #                                     back_populates='articles')
 
-    tag_assoc_select = relationship('TagPortalDivisionArticle',
+    tag_assoc_ = relationship('TagPortalDivisionArticle',
                                     back_populates='article_portal_division_select')
 
     @property

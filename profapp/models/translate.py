@@ -6,7 +6,12 @@ from utils.db_utils import db
 class TranslateTemplate(Base, PRBase):
     __tablename__ = 'translate'
 
+    languages = ['uk', 'en']
+
     id = Column(TABLE_TYPES['id_profireader'], primary_key=True, nullable=False)
+    cr_tm = Column(TABLE_TYPES['timestamp'])
+    ac_tm = Column(TABLE_TYPES['timestamp'])
+    md_tm = Column(TABLE_TYPES['timestamp'])
     template = Column(TABLE_TYPES['short_name'], default='')
     name = Column(TABLE_TYPES['name'], default='')
     uk = Column(TABLE_TYPES['name'], default='')
@@ -35,3 +40,22 @@ class TranslateTemplate(Base, PRBase):
                           name=name,
                           uk=uk,
                           en=en).save()
+
+
+    @staticmethod
+    def subquery_search(search_text=None, template=None, **kwargs):
+
+        sub_query = db(TranslateTemplate)
+        if template:
+            sub_query = sub_query.filter_by(template = template)
+
+        if search_text:
+            sub_query = sub_query.filter(TranslateTemplate.name.ilike("%" + search_text + "%"))
+
+        sub_query = sub_query.order_by(TranslateTemplate.template)
+
+        return sub_query
+
+
+    def get_client_side_dict(self, fields='id|name|uk|en|ac_tm|md_tm|cr_tm|template'):
+        return self.to_dict(fields)
