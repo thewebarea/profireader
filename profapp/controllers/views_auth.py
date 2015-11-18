@@ -111,7 +111,6 @@ def before_request():
         if not current_user.confirmed \
                 and request.endpoint[:5] != 'auth.' \
                 and request.endpoint != 'static':
-            pass
             return redirect(url_for('auth.unconfirmed'))
 
 
@@ -124,14 +123,17 @@ def unconfirmed():
 
 @auth_bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
-    # (Andriy) I suppose it is not necessary
-    if g.user_init and g.user_init.is_authenticated():
+    # if g.user_init and g.user_init.is_authenticated():
+    if g.user_init.is_authenticated():
         if request.method != 'GET':
+            # raise BadDataProvided
             flash('You are already logged in.'
                   'To sign up Profireader with new account you '
                   'should logout first')
-            return redirect(url_for('auth.login'))
-            # raise BadDataProvided
+            return redirect(url_for('auth.signup'))
+        portal_id = request.args.get('subscribe', None)
+        if portal_id:
+            return redirect(url_for('general.reader_subscription', portal_id=portal_id))
 
     form = RegistrationForm()
     if form.validate_on_submit():  # # pass1 == pass2
@@ -181,11 +183,14 @@ def signup_soc_network(soc_network_name):
 # read this!: http://flask.pocoo.org/snippets/62/
 @auth_bp.route('/login/', methods=['GET', 'POST'])
 def login():
-    # (Andriy) I suppose it is not necessary
-    if g.user_init and g.user_init.is_authenticated():
-        flash('You are already logged in. If you want to login with another'
+    # if g.user_init and g.user_init.is_authenticated():
+    portal_id = request.args.get('subscribe', None)
+    if g.user_init.is_authenticated():
+        if portal_id:
+            return redirect(url_for('general.reader_subscription', portal_id=portal_id))
+        flash('You are already logged in. If you want to login with another '
               'account logout first please')
-        redirect(url_for('general.index'))
+        return redirect(url_for('general.index'))
 
     form = LoginForm()
 
@@ -197,11 +202,14 @@ def login():
             return redirect(url_for('general.index'))
         if user and user.verify_password(form.password.data):
             login_user(user)
-            return redirect(request.args.get('next') or
-                            url_for('general.index'))
+            if portal_id:
+                return redirect(url_for('general.reader_subscription', portal_id=portal_id))
+            return redirect(request.args.get('next') or url_for('general.index'))
         flash('Invalid username or password.')
-        return redirect(url_for('auth.login'))
-    return render_template('auth/login.html', form=form)
+        redirect_url = url_for('auth.login')
+        redirect_url += '?/' + portal_id if portal_id else ''
+        return redirect(redirect_url)
+    return render_template('auth/login.html', form=form, portal_id=portal_id)
 
 
 @auth_bp.route('/logout/', methods=['GET'])

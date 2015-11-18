@@ -5,15 +5,17 @@
 {% endblock head %}
 
 {% block portal_base %}
-    {% include 'partials/portal_base_Profireader.html' %}
+    {% include 'partials/portal_base_Profireader_auth_user.html' %}
 {% endblock portal_base %}
 
 {% block portal_content %}
-    <h1 class="nice-title">Your Profile<span></span></h1>
+<div ng-controller="UserLoginController">
+    <h1 class="nice-title">{{ '{{' }}_('Your Profile'){{ '}}' }}<span></span></h1>
 
 
     <div class="form info">
         {#<img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}"><br>#}
+
         <div class="profile-thumbnail" style="background-image: url('{{ user.profireader_avatar_url }}');">
             <div class="control">
                 <a ng-click="mySwitch = !mySwitch">
@@ -26,53 +28,52 @@
             </div>
         </div>
 
+
         {#<a>#}
         {#    <span ng-hide="mySwitch">[use gravatar]</span>#}
         {#</a>#}
         <div class="img-upload-form">
             <form id="avatar" ng-show="mySwitch" ng-init="mySwitch=false" action="{{ request.path }}" method="post"
               enctype="multipart/form-data">
-            Select image to upload:
+            {{ '{{' }}_('Select image to upload'){{ '}}' }}:
             <input style="font-size: 12px;" type="file" name="avatar" id="fileToUpload">
-            <input type="submit" name="avatar" value="Upload Image">
+            <input type="submit" name="avatar" value="{{ '{{' }}_('Upload Image'){{ '}}' }}">
         </form>
 
         </div>
-
         <form action="{{ url_for('user.edit_profile', user_id=user.id) }}" onsubmit="return AjaxPost()" method="post">
-            <div class="item"><span>Your display name:</span><input type="text" placeholder="name" name="name"
+            <div class="item"><span>{{ '{{' }}_('Your display name'){{ '}}' }}:</span><input type="text" placeholder="name" name="name"
                                                                     value="{{ user.profireader_name }}"></div>
-            <div class="item"><span>Your email:</span>{{ user.profireader_email }} <a
+            <div class="item"><span>{{ '{{' }}_('Your email'){{ '}}' }}:</span>{{ user.profireader_email }} <a
                     href="{{ url_for('auth.change_email_request') }}"> [change]</a></div>
-            <div class="item"><span>Your first name:</span><input type="text" placeholder="first name" name="first_name"
+            <div class="item"><span>{{ '{{' }}_('Your first name'){{ '}}' }}:</span><input type="text" placeholder="first name" name="first_name"
                                                                   value="{{ user.profireader_first_name or '' }}"></div>
-            <div class="item"><span>Your last name:</span><input type="text" placeholder="last name" name="last_name"
+            <div class="item"><span>{{ '{{' }}_('Your last name'){{ '}}' }}:</span><input type="text" placeholder="last name" name="last_name"
                                                                  value="{{ user.profireader_last_name or '' }}"></div>
-            <div class="item"><span>Gender:</span>
+            <div class="item"><span>{{ '{{' }}_('Gender'){{ '}}' }}:</span>
                 {% if user.profireader_gender=='female' %}
-                    <input type="radio" name="gender" id="male" value="male"><label for="male">Male</label>
+                    <input type="radio" name="gender" id="male" value="male"><label for="male">{{ '{{' }}_('Male'){{ '}}' }}</label>
                     <input type="radio" name="gender" id="female" value="female" checked="checked">
-                    <label for="female">Female</label>
+                    <label for="female">{{ '{{' }}_('Female'){{ '}}' }}</label>
                 {% else %}
                     <input type="radio" name="gender" id="male" value="male" checked="checked">
-                    <label for="male">Male</label>
-                    <input type="radio" name="gender" id="female" value="female"><label for="female">Female</label>
+                    <label for="male">{{ '{{' }}_('Male'){{ '}}' }}</label>
+                    <input type="radio" name="gender" id="female" value="female"><label for="female">{{ '{{' }}_('Female'){{ '}}' }}</label>
                 {% endif %}
             </div>
 
-            <div class="item"><span>Your web-page:</span><input type="text" placeholder="www.your.webpage.com"
+            <div class="item"><span>{{ '{{' }}_('Your web-page'){{ '}}' }}:</span><input type="text" placeholder="www.your.webpage.com"
                                                                 name="link" value="{{ user.profireader_link or '' }}">
             </div>
-            <div class="item"><span>Phone:</span><input type="text" placeholder="your phone" name="phone"
+            <div class="item"><span>{{ '{{' }}_('Phone'){{ '}}' }}:</span><input type="text" placeholder="{{ '{{' }}_('your phone'){{ '}}' }}" name="phone"
                                                         value="{{ user.profireader_phone or '' }}"></div>
-            <div class="item"><span>Location:</span><input type="text" placeholder="your city" name="location"
+            <div class="item"><span>{{ '{{' }}_('Location'){{ '}}' }}:</span><input type="text" placeholder="{{ '{{' }}_('your city'){{ '}}' }}" name="location"
                                                            value="{{ user.location or '' }}"></div>
-            <div class="item"><span>About me:</span><textarea name="about_me" cols="40" rows="8"
-                                                              placeholder="Give us some information about you please">{{ user.about_me or '' }}</textarea>
+            <div class="item"><span>{{ '{{' }}_('About me'){{ '}}' }}:</span><textarea name="about_me" cols="40" rows="8"
+                                                              placeholder="{{ '{{' }}_('Give us some information about you please'){{ '}}' }}">{{ user.about_me or '' }}</textarea>
             </div>
-            <div class="item"><span></span><input type="submit" value="Update Profile" name="submit"></div>
+            <div class="item"><span></span><input type="submit" value="{{ '{{' }}_('Update Profile'){{ '}}' }}" name="submit"></div>
         </form>
-
     </div>
 
     {#<form class="send coordinates" action="{{ url_for('article.update', article_version_id = article_version.id) }}" onsubmit="return AjaxPost()" id="edit" method="post">#}
@@ -85,7 +86,7 @@
     {##}
     {#<input type="submit" value="...">#}
     {#</form>#}
-
+</div>
 {% endblock portal_content %}
 
 {% block scripts %}

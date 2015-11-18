@@ -32,7 +32,6 @@ class Tag(Base, PRBase):
         pass
 
 
-# TODO (AA to AA): First of all make transform TagCompany -> TagPortal in real DB
 # TODO (AA to AA): We have to add a trigger that checks the intersection of tags from
 # TODO (AA to AA) TagPortal and TagPortalDivision. This intersection must be empty.
 class TagPortal(Base, PRBase):

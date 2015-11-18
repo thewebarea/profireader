@@ -5,12 +5,12 @@
 {% endblock head %}
 
 {% block portal_base %}
-    {% include 'partials/portal_base_Profireader.html' %}
+    {% include 'partials/portal_base_Profireader_auth_user.html' %}
 {% endblock portal_base %}
 {% block portal_content %}
     {% block company_base %}
-{% include 'company/company_base_angular.html' %}
-{% endblock company_base %}
+        {% include 'company/company_base_angular.html' %}
+    {% endblock company_base %}
 
     <script>
         module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
@@ -22,7 +22,10 @@
             $scope.selectedPortal_name = '';
             $scope.selectedPortal = null;
             $scope.selectedPortal_sending = false;
+            $scope.$$translate = {{ translates('portal_list')|safe }};
             $scope.myRights = function(){
+                if (!$scope.data || !$scope.data.user_rights) return false;
+
                 for (var i = 0; i < arguments.length; i++) {
                      if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
                          return false;
@@ -88,11 +91,11 @@
 </span>
     <h3>
         <span ng-if="data.portals_partners==''">
-            This company does not subscribed to any portal
+            {{_('This company does not subscribed to any portal')}}
         </span>
 
         <div ng-if="data.portals_partners!=''">
-            This company portals-partners:
+            {{_('This company portals-partners:')}}
             <span ng-repeat="portal in data.portals_partners">
                 <a href="{{ url_portal_profile({portal_id: portal.id}) }}">"{{ portal.name }}" </a>
             </span>
