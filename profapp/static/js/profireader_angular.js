@@ -580,27 +580,33 @@ module.controller('filemanagerCtrl', ['$scope', '$modalInstance', 'file_manager_
 module.run(function ($rootScope, $ok) {
     angular.extend($rootScope, {
         _: function (phrase, dict) {
-            console.log(phrase, dict);
             var scope = this;
             if (!scope.$$translate) {
                 scope.$$translate = {};
             }
             //TODO OZ by OZ hasOwnProperty
-            if (!scope.$$translate[phrase]) {
-                $ok('/url/', {template: this.controllerName, phrase: phrase}, function (resp) {
-                    scope.$$translate[phrase] = resp;
-                });
+            if (scope.$$translate[phrase] === undefined) {
                 scope.$$translate[phrase] = phrase;
+                $ok('/articles/translate/', {template: this.controllerName, phrase: phrase}, function (resp) {
+                    //console.log(resp['phrase']);
+                    if(resp['phrase'] === ''){
+                        scope.$$translate[phrase] = phrase
+                    }else{
+                        scope.$$translate[phrase] = resp['phrase'];
+                    }
 
+
+                });
+                //scope.$$translate[phrase] = phrase;
             }
-
-                phrase = scope.$$translate[phrase];
-            alert(scope.$$translate);
+            console.log(scope.$$translate[phrase]);
+            phrase = scope.$$translate[phrase];
+            //alert(scope.$$translate);
 
 
             try {
                 return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {
-                    var indexes = g1.split('.')
+                    var indexes = g1.split('.');
                     var d = dict ? dict : scope;
                     for (var i in indexes) {
                         if (typeof d[indexes[i]] !== undefined) {

@@ -68,7 +68,7 @@
     {% raw %}
 
     <div ng-init="loadData()" ng-controller="companies_list">
-        <h1 class="nice-title">Company list<span></span></h1>
+        <h1 class="nice-title">{{ _('Company list') }}<span></span></h1>
         <a class="h1-btn icon icon-add" href="{{ url_create_own_company }}" title="{{ _('CREATE OWN COMPANY') }}"></a>
 
         <div ng-if="loading">{{ _('Loading...') }}</div>

@@ -23,9 +23,9 @@ def ok(func):
             a = request.json
             ret = func(a, *args, **kwargs)
             ret = {'data': ret, 'ok': True, 'error_code': 'ERROR_NO_ERROR'}
-            template = g.req('__translate', default='')
-            if template != '':
-                ret['__translate'] = db(TranslateTemplate, template=template)
+            # template = g.req('__translate', default='')
+            # if template != '':
+            #     ret['__translate'] = db(TranslateTemplate, template=template)
             return jsonify(ret)
         # except Exception as e:
         except errors.ValidationException as e:

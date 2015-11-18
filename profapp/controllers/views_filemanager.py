@@ -83,8 +83,9 @@ def createdir(json, parent_id=None):
 
 @filemanager_bp.route('/test/', methods=['GET','POST'])
 def test():
-    name = TranslateTemplate.saveTranslate('ctrl', 'can', 'могти', 'can')
-    return render_template('tmp-test.html', file=name.id)
+    #name = TranslateTemplate.saveTranslate('article_edit', 'update your version of article', 'оновіть свою версію статті', 'update your version of article')
+    name = TranslateTemplate.saveTranslate('companies_list','Company name is `%(name)s` - YOUR OWN COMPANY', 'Ім’я компанії: `%(name)s` - ВАША ВЛАСНА КОМПАНІЯ', 'Company name is `%(name)s` - YOUR OWN COMPANY')
+    return render_template('tmp-test.html', file=name)
 
 @filemanager_bp.route('/properties/', methods=['POST'])
 @ok

@@ -15,6 +15,14 @@ from ..models.files import ImageCroped, File
 from ..models.pr_base import PRBase
 from utils.db_utils import db
 from sqlalchemy.orm.exc import NoResultFound
+from ..models.translate import TranslateTemplate
+
+@article_bp.route('/translate/', methods=['POST'])
+@ok
+def translate(json):
+    phrase = TranslateTemplate.getTranslate(request.json['template'], request.json['phrase'])
+    return {'phrase':phrase}
+
 
 
 @article_bp.route('/list/', methods=['GET'])
