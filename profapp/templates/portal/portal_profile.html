@@ -22,7 +22,7 @@
 
             $scope.newTag = '';
             $scope.newTagPortDivAvailability = {};
-
+            $scope.$$translate = {{ translates('PortalProfileController')|safe }};
             $scope.PortDivCheckboxLoad = function(portal_divisions){
                 var i;
                 $scope.PortDivCheckbox = {};
@@ -126,13 +126,13 @@
     <!-- ???{{ PortDivCheckbox }}<br/><br/> -->
     <!-- ***{{ data.PortalDivisionTags4 }}<br/><br/> -->
 
-    <h3>Portal <strong>"{{ data.portal.name }}"</strong> profile</h3>
+    <h3>{{_('Portal')}} <strong>"{{ data.portal.name }}"</strong> {{_('profile')}}</h3>
     <br/>
-    <h4>Portal tags:</h4>
+    <h4>{{_('Portal tags')}}:</h4>
     <table style="width:100%">
             <tr>
                 <th>
-                    <strong>tag/division</strong>
+                    <strong>{{_('tag/division')}}</strong>
                 </th>
                 <th ng-repeat="portal_division in data.portal.divisions">
                     {{ portal_division.name }}<br/>
@@ -148,11 +148,11 @@
             </tr>
         </table>
     <br/>
-    <a href="{{ url_portal_profile_edit({portal_id: data.portal['id']}) }}">[edit]</a>
+    <a href="{{ url_portal_profile_edit({portal_id: data.portal['id']}) }}">[{{_('edit')}}]</a>
     <br/>
     <br/>
 
-    Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> company profile
+    {{_('Back to')}} <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{ data.portal['own_company']['name'] }}"</a> {{_('company profile')}}
 
 
 </div>

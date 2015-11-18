@@ -25,13 +25,13 @@
         <!-- ???{{ PortDivCheckbox }}<br/><br/> -->
         <!-- ***{{ data.PortalDivisionTags4 }}<br/><br/> -->
 
-        <h3>Portal <strong>{{ data.portal.name }}</strong> profile</h3>
+        <h3>{{_('Portal')}} <strong>{{ data.portal.name }}</strong> {{_('profile')}}</h3>
         <br/>
-        <h4>Portal tags:</h4>
+        <h4>{{_('Portal tags')}}:</h4>
         <table style="width:100%">
             <tr>
                 <th>
-                    <strong>tag/division</strong>
+                    <strong>{{_('tag/division')}}</strong>
                 </th>
                 <th ng-repeat="portal_division in data.portal.divisions">
                     {{ portal_division.name }}<br/>
@@ -43,7 +43,7 @@
             <tr ng-repeat="tag_name in data.tagsNew  | orderBy: 'toString()'">
                 <th>
                     <input type="checkbox" ng-click='toggleTag(tag_name)' ng-model="tagCheckbox[tag_name]"/>
-                    <button type="button" ng-click='removeTag(tag_name)'>remove tag</button>
+                    <button type="button" ng-click='removeTag(tag_name)'>{{_('remove tag')}}</button>
                     {{ tag_name }}
                 </th>
                 <td ng-repeat="portal_division_id in PortalDivisionIDs">
@@ -61,7 +61,7 @@
                     <input type="text" ng-model="newTag"/>
                     <button type="button" ng-click="addTag(newTag, newTagPortDivAvailability)"
                             ng-disabled="data.tagsNew.indexOf(newTag) !== -1 || newTag === '' || !tagAvailabilityOnAllPortDivs">
-                        add tag
+                        {{_('add tag')}}
                     </button>
                 </td>
                 <td ng-repeat="portal_division_id in PortalDivisionIDs">
@@ -73,13 +73,12 @@
         </table>
         <br/>
 
-        <div class="item text-align-left"><input ng-click="saveData()" type="submit" value="Save Tags"/></div>
+        <div class="item text-align-left"><input ng-click="saveData()" type="submit" value="{{_('Save Tags')}}"/></div>
 
 
-        Back to <a href="{{ url_portal_profile({portal_id: data.portal['id']}) }}"> "{{ data.portal.name }}"</a> portal
-        profile<br/>
-        Back to <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{
-        data.portal['own_company']['name'] }}"</a> company profile
+        {{_('Back to')}} <a href="{{ url_portal_profile({portal_id: data.portal['id']}) }}"> "{{ data.portal.name }}"</a> {{_('portal profile')}}<br/>
+        {{_('Back to')}} <a href="{{ url_company_profile({company_id: data.portal['company_owner_id']}) }}"> "{{
+        data.portal['own_company']['name'] }}"</a> {{_('company profile')}}
 
     </div>
     {% endraw %}

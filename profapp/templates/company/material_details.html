@@ -325,7 +325,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
         </button>
         <i ng-show="loadingUsers" class="glyphicon glyphicon-refresh"></i>
                 <div ng-if="data_resp_user_search.user">
-                    {{_('Article '+data.article.title+ 'was successfully sent to user')}} {{
+                    {{_('Article')}} {{data.article.title}} {{_('was successfully sent to user')}} {{
                     data_resp_user_search.user.profireader_name }}
                 </div>
                 <div ng-if="!data_resp_user.user">
@@ -357,7 +357,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
 
                 </div>
                 <div ng-if="data_resp_user.user">
-                    {{_('Article '+data.article.title+' was successfully sent to user')}}
+                    {{_('Article')}} {{data.article.title}} {{_('was successfully sent to user')}}
                     {{ data_resp_user.user.profireader_name }}
                 </div>
 
@@ -414,7 +414,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     </form>
                 </div>
                 <span ng-if="data_resp_portal">
-                    {{_('Article '+data.article.title+' successfully was published at portal')}} "{{ data_resp_portal }}"
+                    {{_('Article')}} {{data.article.title}} {{_('successfully was published at portal')}} "{{ data_resp_portal }}"
                 </span>
             </div>
         </div>

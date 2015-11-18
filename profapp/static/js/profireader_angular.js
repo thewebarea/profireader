@@ -595,9 +595,10 @@ module.run(function ($rootScope, $ok, $sce) {
                 scope.$$translate = {};
             }
             //TODO OZ by OZ hasOwnProperty
+            var CtrlName = this.controllerName ? this.controllerName: 'None';
             if (scope.$$translate[phrase] === undefined) {
                 scope.$$translate[phrase] = phrase;
-                $ok('/articles/save_translate/', {template: this.controllerName, phrase: phrase}, function (resp) {
+                $ok('/articles/save_translate/', {template: CtrlName, phrase: phrase}, function (resp) {
                     //console.log(resp['phrase']);
                     //if(resp['phrase'] === ''){
                     //    scope.$$translate[phrase] = phrase
@@ -608,7 +609,7 @@ module.run(function ($rootScope, $ok, $sce) {
                 });
                 //scope.$$translate[phrase] = phrase;
             }
-            console.log(scope.$$translate[phrase]);
+            console.log(this.controllerName);
             phrase = scope.$$translate[phrase];
             //alert(scope.$$translate);
 
