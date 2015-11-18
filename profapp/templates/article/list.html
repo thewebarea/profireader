@@ -13,9 +13,11 @@
 
             $scope.url_list = {{ raw_url_for('article.show_mine')|safe }};
             $scope.url_search_article = '{{ url_for('article.load_mine')|safe }}';
+
             $scope.get_colored_title = function (text_to_change) {
                 return text_to_change
             };
+
             $scope.$$translate = {{ translates('article_list')|safe }};
             $scope.page_changed = function () {
                 $scope.data.search_text = $scope.data.original_search_text;
@@ -61,8 +63,8 @@
         <div ng-if="!loading">
 
 
-            <table style="width:100%">
-                <tr>
+            <table style="width:100%" ng-repeat="article_dict in data.articles">
+                <tr ng-if="$first">
                     <td>
                         <input ng-click="setFirstPage()" type="submit" value="{{_('Search')}}" style="width: 75%;">
                     </td>
@@ -80,15 +82,12 @@
                     </td>
 
                 </tr>
-                <tr>
+                <tr ng-if="$first">
                     <th width="250px">{{_('Date')}}</th>
                     <th width="250px">{{_('Title')}}</th>
                     <th width="250px">{{_('Campanies')}}</th>
-                    <th><p>{{_('Status')}}</p></th>
+                    <th>{{_('Status')}}</th>
                 </tr>
-            </table>
-            <table style="width:100%" ng-repeat="article_dict in data.articles">
-
                 <tr ng-if="article_dict.company_count>1">
                     <td rowspan="{{ article_dict.company_count }}" width="250px">{{
                         article_dict.article.mine_version.md_tm }}
