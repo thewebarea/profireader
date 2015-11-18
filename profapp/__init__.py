@@ -24,7 +24,8 @@ import jinja2
 from .models.users import User
 from .models.config import Config
 from profapp.controllers.errors import BadDataProvided
-
+from .models.translate import TranslateTemplate
+import json
 
 def req(name, allowed=None, default=None, exception=True):
     ret = request.args.get(name)
@@ -238,13 +239,19 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
-
+# TODO OZ by OZ rename this func and add two parameters
 def file_url(id):
     if not id:
         return ''
     server = re.sub(r'^[^-]*-[^-]*-4([^-]*)-.*$', r'\1', id)
     return 'http://file' + server + '.profireader.com/' + id + '/'
 
+
+def translates(template):
+#     pass
+    phrases = g.db.query(TranslateTemplate).filter_by(template=template).all()
+    ret = {ph.name: ph.uk for ph in phrases}
+    return json.dumps(ret)
 
 def config_variables():
     variables = g.db.query(Config).filter_by(client_side=1).all()
@@ -389,6 +396,7 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.jinja_env.globals.update(flask_endpoint_to_angular=flask_endpoint_to_angular)
     app.jinja_env.globals.update(raw_url_for=raw_url_for)
     app.jinja_env.globals.update(pre=pre)
+    app.jinja_env.globals.update(translates=translates)
     app.jinja_env.globals.update(file_url=file_url)
     app.jinja_env.globals.update(config_variables=config_variables)
 

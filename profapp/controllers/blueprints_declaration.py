@@ -2,6 +2,7 @@ from flask import Blueprint
 
 general_bp = Blueprint('general', __name__)
 auth_bp = Blueprint('auth', __name__)
+admin_bp = Blueprint('admin', __name__)
 user_bp = Blueprint('user', __name__)
 article_bp = Blueprint('article', __name__)
 filemanager_bp = Blueprint('filemanager', __name__)

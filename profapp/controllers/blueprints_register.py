@@ -15,7 +15,7 @@ from flask import Blueprint
 
 from .blueprints_declaration import *
 from . import views_index, views_user, views_filemanager, views_article, views_image_editor, \
-    views_company, views_portal, errors, views_front, views_file
+    views_company, views_portal, errors, views_front, views_file, views_admin
 
 def register(app):
     app.register_blueprint(general_bp, url_prefix='/')
@@ -24,7 +24,7 @@ def register(app):
     # the following string must be exactly here. why?
     from . import views_auth
     app.register_blueprint(auth_bp, url_prefix='/auth')
-
+    app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(user_bp, url_prefix='/users')
     app.register_blueprint(filemanager_bp, url_prefix='/filemanager')
     app.register_blueprint(static_bp, url_prefix='/static')
