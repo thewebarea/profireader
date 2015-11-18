@@ -83,8 +83,8 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
 
     $scope.disabled = undefined;
     $scope.searchEnabled = undefined;
+    $scope.selected_portal_to_unpublish = '';
     $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
-
     $scope.$watch("data.selected_division", function(newValue, oldValue) {
         if ($scope.data && (newValue !== oldValue)){
             res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
@@ -239,6 +239,16 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     $scope.selectedUser = $item;
                 }
             };
+            $scope.url_change_status_at_portal = {{ raw_url_for('company.change_article_status_at_portal')|safe }};
+            $scope.changeStatus_at_portal = function () {
+                $scope.loading = true;
+                new_data = $scope.data;
+                new_data['new_status'] = 'not_published';
+                $ok($scope.url_change_status_at_portal({article_portal_division_id: $scope.selected_portal_to_unpublish}), new_data, function (resp) {
+                    $scope.loading = false;
+                    $scope.data = resp;
+                })
+            };
 
             $scope.searchForUserToJoin = function (val) {
                 return $ok($scope.url_search_for_user({company_id: $scope.data.company.id}), {
@@ -357,20 +367,26 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     <!-- <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal"> -->
                     <form ng-action="url_submit_to_portal">
                     Publish this material to portal
-
                     <select ng-model="data.selected_division">
                         <option disabled>---Below materials sent---</option>
                         <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
-                            <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}"  ng-selected="selected">
+                            <option ng-repeat="division in port.divisions" value="{{ division.id }}"  ng-selected="selected">
                                 {{ division.name }} {{ division.portal_division_type_id }}
                             </option>
                         </optgroup>
-                        <optgroup ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
+
+                        <optgroup disabled ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
                             <option ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
                                 {{ division.name }}
                             </option>
                         </optgroup>
                     </select>
+                        <select ng-model="selected_portal_to_unpublish">
+                            <option ng-repeat="portal in data.article.portal_article" value="{{ portal.id }}">
+                              {{ portal.division.portal.name }}    -    {{ portal.division.name }}
+                            </option>
+                        </select>
+                        <button ng-click="changeStatus_at_portal()">Unpublish</button>
                     <br/>
                     <hr>
                     <div ng-controller="SelectTagsCtrl">

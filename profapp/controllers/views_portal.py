@@ -543,8 +543,11 @@ def publication_details_load(json, article_id, company_id):
 @login_required
 @ok
 def update_article_portal(json, article_id):
+    json['new_status'] = json['new_status'][0:json['new_status'].find(' ')-1]
+    print(len(json['new_status']))
     db(ArticlePortalDivision, id=article_id).update({'status': json.get('new_status')})
-    json['article']['status'] = json.get('new_status')
+    json['article']['status'] = json.get('new_status').replace(' ', '')
+
     json['new_status'] = ARTICLE_STATUS_IN_PORTAL.published \
         if json.get('new_status') != ARTICLE_STATUS_IN_PORTAL.published \
         else ARTICLE_STATUS_IN_PORTAL.declined
