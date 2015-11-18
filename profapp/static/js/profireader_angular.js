@@ -612,7 +612,6 @@ module.run(function ($rootScope, $ok, $sce) {
                 });
                 //scope.$$translate[phrase] = phrase;
             }
-            console.log(this.controllerName);
             phrase = scope.$$translate[phrase];
             //alert(scope.$$translate);
 
