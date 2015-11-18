@@ -546,10 +546,8 @@ def publication_details_load(json, article_id, company_id):
 @ok
 def update_article_portal(json, article_id):
     json['new_status'] = json['new_status'][0:json['new_status'].find(' ')-1]
-    print(len(json['new_status']))
     db(ArticlePortalDivision, id=article_id).update({'status': json.get('new_status')})
-    json['article']['status'] = json.get('new_status').replace(' ', '')
-
+    json['article']['status'] = json.get('new_status')
     json['new_status'] = ARTICLE_STATUS_IN_PORTAL.published \
         if json.get('new_status') != ARTICLE_STATUS_IN_PORTAL.published \
         else ARTICLE_STATUS_IN_PORTAL.declined
@@ -584,4 +582,10 @@ def submit_to_portal(json):
     article_portal = article.clone_for_portal(portal_division_id, json['tags'])
     article.save()
     portal = article_portal.get_article_owner_portal(portal_division_id=portal_division_id)
-    return {'portal': portal.name}
+    json['article'] = article_portal.to_dict(
+        'id, title,short, cr_tm, md_tm, company_id, status, long,'
+        'editor_user_id, company.name|id,portal_article.id,'
+        'portal_article.division.name, portal_article.division.portal.name,portal_article.status')
+    json.update({'portal': portal.name})
+    print(json['article'])
+    return json

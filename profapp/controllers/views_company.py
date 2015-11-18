@@ -132,7 +132,6 @@ def load_material_details(json, company_id, article_id):
                               'company_id, status, long,'
                               'editor_user_id, company.name|id,'
                               'portal_article.id, portal_article.division.name, '
-                              'portal_article.division.portal.id,'
                               'portal_article.division.portal.name,'
                               'portal_article.status')
 
@@ -164,8 +163,9 @@ def load_material_details(json, company_id, article_id):
 def change_article_status_at_portal(json, article_portal_division_id):
     for article in json['article']['portal_article']:
         if article['id'] == article_portal_division_id:
-            json['article']['portal_article']['status'] = json.get('new_status')
+            article['status'] = json.get('new_status')
     db(ArticlePortalDivision, id=article_portal_division_id).update({'status': json['new_status']})
+    print(json['article']['portal_article'])
     return json
 
 

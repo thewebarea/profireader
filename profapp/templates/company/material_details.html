@@ -85,19 +85,19 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
     $scope.searchEnabled = undefined;
     $scope.selected_portal_to_unpublish = '';
     $scope.url_get_tags = {{ raw_url_for('company.get_tags')|safe }};
-    $scope.$watch("data.selected_division", function(newValue, oldValue) {
-        if ($scope.data && (newValue !== oldValue)){
-            res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));
-		    res.success(function(data, status, headers, config) {
-                $scope.tagsObject.tags = []; // TODO (AA to AA): it works but...
-                $scope.availableTags = data.data.availableTags;
-		    });
-		    res.error(function(data, status, headers, config) {
-			    alert( "failure message: " + JSON.stringify({data: data}));
-		    });
-        }
-    });
-
+{#    $scope.$watch("data.selected_division", function(newValue, oldValue) {#}
+{#        if ($scope.data && (newValue !== oldValue)){#}
+{#            res = $http.post($scope.url_get_tags({'portal_division_id': $scope.data.selected_division}));#}
+{#		    res.success(function(data, status, headers, config) {#}
+{#                $scope.tagsObject.tags = []; // TODO (AA to AA): it works but...#}
+{#                $scope.availableTags = data.data.availableTags;#}
+{#		    });#}
+{#		    res.error(function(data, status, headers, config) {#}
+{#			    alert( "failure message: " + JSON.stringify({data: data}));#}
+{#		    });#}
+{#        }#}
+{#    });#}
+{##}
     $scope.getData = function () {
         $scope.loading = true;
     };
@@ -143,16 +143,25 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
             $scope.data_resp_user = '';
             $scope.data_resp_user_search = '';
             $scope.data_resp_portal = '';
+            submit_to_portal = function(){console.log($scope.data);
+
+                $ok(url_submit_to_portal, $scope.data, function (resp) {
+
+                    $scope.data = resp.data
+                })
+            };
 
             $scope.saveData =function(data, tags){
-                var passData = {
-                    article: data.article,
-                    tags: tags,
-                    selected_division: data.selected_division
-                };
+{#                var passData = {#}
+{#                    article: data.article,#}
+{#                    tags: tags,#}
+{#                    selected_division: data.selected_division#}
+{#                };#}
+                data['tags'] = tags;
                 $ok($scope.url_submit_to_portal,
-                        passData,
+                        data,
                         function (resp) {
+                            $scope.data = resp;
                             $scope.data_resp_portal = resp.portal;
                         }
                 );
@@ -240,11 +249,11 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 }
             };
             $scope.url_change_status_at_portal = {{ raw_url_for('company.change_article_status_at_portal')|safe }};
-            $scope.changeStatus_at_portal = function () {
+            $scope.changeStatus_at_portal = function (article_portal_id) {
                 $scope.loading = true;
                 new_data = $scope.data;
                 new_data['new_status'] = 'not_published';
-                $ok($scope.url_change_status_at_portal({article_portal_division_id: $scope.selected_portal_to_unpublish}), new_data, function (resp) {
+                $ok($scope.url_change_status_at_portal({article_portal_division_id: article_portal_id}), new_data, function (resp) {
                     $scope.loading = false;
                     $scope.data = resp;
                 })
@@ -339,21 +348,13 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                         </select>
                         <input disabled type="submit" value="Send article">
                     </div>
-
-
-<!--                    <form ng-ok
-                          ng-onsuccess="resp_data_user"
-                          ng-onsubmit="getData"
-                          ng-action="url_send_article_to_user">
-                        Introduce user to work with this material
-                        <select disabled ng-init="data.send_to_user = data.company.employees[0]"
-                                ng-model="data.send_to_user"
-                                ng-options="user.profireader_name for user in data.company.employees">
-                            <option value="" selected hidden/>
-                        </select>
-                        <input disabled type="submit" value="Send article">
-                    </form>  -->
-
+                    <hr/>
+                    {{ data.article.portal_article }}
+                    This material was published to following portals:
+                    <div ng-repeat="portal in data.article.portal_article" style="width: 1000px">
+                        {{ portal.division.portal.name }}    -    {{ portal.division.name }}<br>
+                        <button ng-click="changeStatus_at_portal(portal.id)">Delete this material from this portal</button><hr/>
+                    </div>
                 </div>
                 <div ng-if="data_resp_user.user">
                     Article "{{ data.article.title }}" was successfully sent to user
@@ -365,7 +366,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                 <div ng-if="!data_resp_portal.portal">
                     <hr>
                     <!-- <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal"> -->
-                    <form ng-action="url_submit_to_portal">
+                    <form>
                     Publish this material to portal
                     <select ng-model="data.selected_division">
                         <option disabled>---Below materials sent---</option>
@@ -381,12 +382,6 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                             </option>
                         </optgroup>
                     </select>
-                        <select ng-model="selected_portal_to_unpublish">
-                            <option ng-repeat="portal in data.article.portal_article" value="{{ portal.id }}">
-                              {{ portal.division.portal.name }}    -    {{ portal.division.name }}
-                            </option>
-                        </select>
-                        <button ng-click="changeStatus_at_portal()">Unpublish</button>
                     <br/>
                     <hr>
                     <div ng-controller="SelectTagsCtrl">
@@ -412,7 +407,7 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     </form>
                 </div>
                 <span ng-if="data_resp_portal">
-                    Article "{{ data.article.title }}" successfully was published at portal "{{ data_resp_portal }}"
+                    Article "{{ data.article.title }}" successfully was published at portal "{{ data.portal }}"
                 </span>
             </div>
         </div>
