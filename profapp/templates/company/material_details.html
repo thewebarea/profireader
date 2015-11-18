@@ -357,15 +357,15 @@ module.controller('SelectTagsCtrl', ['$scope', '$http', '$ok', function($scope, 
                     <!-- <form ang-ok ng-onsuccess="resp_data_portal" ng-onsubmit="getData" ng-action="url_submit_to_portal"> -->
                     <form ng-action="url_submit_to_portal">
                     Publish this material to portal
-
                     <select ng-model="data.selected_division">
                         <option disabled>---Below materials sent---</option>
                         <optgroup ng-repeat="port in porals_divisions(data.portals)" label="{{ port.name }}">
-                            <option ng-repeat="division in port.divisions" value="{{ division.id }}" ng-disabled="{{ division.portal_division_type_id != 'news' && division.portal_division_type_id != 'events' }}"  ng-selected="selected">
+                            <option ng-repeat="division in port.divisions" value="{{ division.id }}"  ng-selected="selected">
                                 {{ division.name }} {{ division.portal_division_type_id }}
                             </option>
                         </optgroup>
-                        <optgroup ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
+
+                        <optgroup disabled ng-repeat="joined_portal in data.joined_portals" label="| {{ joined_portal.name }} |">
                             <option ng-repeat="division in joined_portal.divisions" value="{{ division.id }}">
                                 {{ division.name }}
                             </option>

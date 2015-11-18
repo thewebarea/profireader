@@ -127,6 +127,11 @@ def load_material_details(json, company_id, article_id):
         joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
                           for articles in article.portal_article
                           if articles.division.portal.id in portals}
+    for key in portals.keys():
+        print(key)
+    # for key in joined_portals.keys():
+    #     print(key)
+    #     del portals[key]
 
     article = article.to_dict('id, title,short, cr_tm, md_tm, '
                               'company_id, status, long,'
