@@ -302,9 +302,18 @@ def profile_edit_load(json, portal_id):
                 if not other_portal_with_added_tags:
                     actually_added_tags.add(tag_name)
 
-        actually_added_tags_dict = {}
-        for tag_name in actually_added_tags:
-            actually_added_tags_dict[tag_name] = Tag(tag_name)
+        new_tags_dict = {}
+        for tag_name in new_tag_tames:
+            tag = g.db.query(Tag).filter_by(name=tag_name).join(TagPortal).first()
+            if not tag:
+                tag = g.db.query(Tag).filter_by(name=tag_name).join(TagPortalDivision).first()
+            if not tag:
+                tag = Tag(tag_name)
+            new_tags_dict[tag_name] = tag
+
+        # actually_added_tags_dict = {}
+        # for tag_name in actually_added_tags:
+        #     actually_added_tags_dict[tag_name] = Tag(tag_name)
 
         # user_company = UserCompany(status=STATUS.ACTIVE(), rights_int=COMPANY_OWNER_RIGHTS)
         # user_company.employer = self
@@ -315,13 +324,13 @@ def profile_edit_load(json, portal_id):
 
         # TODO: Now we have actually_deleted_tags and actually_added_tags
 
-        new_tags_dict = {}
-        for key in actually_added_tags_dict.keys():
-            new_tags_dict[key] = actually_added_tags_dict[key]
-        for key in curr_portal_bound_tags_dict.keys():
-            new_tags_dict[key] = curr_portal_bound_tags_dict[key]
-        for key in curr_portal_notbound_tags_dict.keys():
-            new_tags_dict[key] = curr_portal_notbound_tags_dict[key]
+        # new_tags_dict = {}
+        # for key in actually_added_tags_dict.keys():
+        #     new_tags_dict[key] = actually_added_tags_dict[key]
+        # for key in curr_portal_bound_tags_dict.keys():
+        #     new_tags_dict[key] = curr_portal_bound_tags_dict[key]
+        # for key in curr_portal_notbound_tags_dict.keys():
+        #     new_tags_dict[key] = curr_portal_notbound_tags_dict[key]
 
         # curr_portal_bound_tag_port_div_objects
         # curr_portal_bound_port_div_id_tag_name_dict
