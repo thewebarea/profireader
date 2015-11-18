@@ -2103,3 +2103,7 @@ th{
 td{
     padding-top: 12px;
 }
+.row{
+    margin-left: 0px;
+    margin-right: 0px;
+}
