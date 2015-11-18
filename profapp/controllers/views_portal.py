@@ -25,7 +25,7 @@ from config import Config
 def create(company_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
 
     return render_template('portal/portal_create.html',
                            company_id=company_id,
@@ -49,7 +49,7 @@ def create_save(json, create_or_update, company_id):
     types = {x.id: x.get_client_side_dict() for x in PortalDivisionType.get_division_types()}
     company = Company.get(company_id)
     member_companies = {company_id: company.get_client_side_dict()}
-    company_logo = company.logo_file_relationship.url() if company.logo_file_id else '/static/img/company_no_logo.png'
+    company_logo = company.logo_file_relationship.url() if company.logo_file_id else '/static/images/company_no_logo.png'
 
     if action == 'load':
         ret = {'company_id': company_id,
@@ -78,7 +78,7 @@ def create_save(json, create_or_update, company_id):
             portal = Portal(company_owner=company, **g.filter_json(json_portal, 'name', 'portal_layout_id', 'host'))
             divisions = []
             for division_json in json['portal']['divisions']:
-                division = PortalDivision(portal, portal_division_type_id = division_json['portal_division_type_id'],
+                division = PortalDivision(portal, portal_division_type_id=division_json['portal_division_type_id'],
                                           position=len(json['portal']['divisions']) - len(divisions),
                                           name=division_json['name'])
                 if division_json['portal_division_type_id'] == 'company_subportal':
@@ -158,7 +158,7 @@ def profile(portal_id):
     portal = db(Portal, id=portal_id).one()
     company = portal.own_company
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return render_template('portal/portal_profile.html',
                            company_id=company.id,
                            company_logo=company_logo)
@@ -188,7 +188,7 @@ def profile_edit(portal_id):
     # company_id = portal.company_owner_id
 
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return render_template('portal/portal_profile_edit.html',
                            company_id=company.id,
                            company_logo=company_logo)
@@ -377,13 +377,11 @@ def profile_edit_load(json, portal_id):
         g.db.expire_all()
 
 
-        # TODO: not to forget to delete unused tags... New tags well be added.
+        # TODO (AA to AA): not to forget to delete unused tags... New tags well be added.
 
         # for elem in delete_tag_portal_bound_list:
         #     g.db.delete(elem)
         g.db.commit()
-
-        print('+++++++++++++++++++')
 
         # portal.portal_bound_tags_dynamic = ...
         # portal.portal_notbound_tags_dynamic = ...
@@ -400,7 +398,7 @@ def profile_edit_load(json, portal_id):
 
     company = portal.own_company
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
     return {'portal': portal.to_dict('*, '
                                      'divisions.*, '
                                      'own_company.*, '
@@ -448,8 +446,8 @@ def companies_partners(company_id):
 @ok
 def companies_partners_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
-    companies_partners = [comp.to_dict('id, name') for comp in
-                          portal.companies] if portal else []
+    companies_partners = [comp.to_dict('company.id, company.name') for comp in
+                          portal.company_members] if portal else []
     user_rights = list(g.user.user_rights_in_company(company_id))
     return {'portal': portal.to_dict('name') if portal else [],
             'companies_partners': companies_partners,
@@ -473,7 +471,7 @@ def search_for_portal_to_join(json):
 def publications(company_id):
     company = db(Company, id=company_id).one()
     company_logo = company.logo_file_relationship.url() \
-        if company.logo_file_id else '/static/img/company_no_logo.png'
+        if company.logo_file_id else '/static/images/company_no_logo.png'
 
     return render_template(
         'portal/portal_publications.html',
@@ -491,39 +489,32 @@ def publications_load(json, company_id):
     portal = db(Company, id=company_id).one().own_portal
     if not portal:
         return dict(portal_not_exist=True)
-    current_page = json.get('pages')['current_page'] if json.get('pages') else 1
-    chosen_company_id = json.get('chosen_company')['id'] if json.get('chosen_company') else 0
+    current_page = json.get('page') or 1
     params = {'search_text': json.get('search_text'), 'portal_id': portal.id}
-    article_status = json.get('chosen_status')
-    original_chosen_status = None
-
-    if article_status and article_status != 'All':
-        params['status'] = original_chosen_status = article_status
+    if json.get('status'):
+        params['status'] = json.get('status')
     subquery = ArticlePortalDivision.subquery_portal_articles(**params)
-    if chosen_company_id:
+    if json.get('company_id'):
         subquery = subquery.filter(db(ArticleCompany,
-                                      company_id=chosen_company_id,
+                                      company_id=json.get('company_id'),
                                       id=ArticlePortalDivision.article_company_id).exists())
     articles, pages, current_page = pagination(subquery,
-                                               page=current_page,
-                                               items_per_page=5)
-    all, companies = ArticlePortalDivision.get_companies_which_send_article_to_portal(portal.id)
-    statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
-    statuses['All'] = 'All'
+                                               page=current_page)
 
-    return {'articles': [a.get_client_side_dict() for a in articles],
+    companies = ArticlePortalDivision.get_companies_which_send_article_to_portal(portal.id)
+    statuses = {status: status for status in ARTICLE_STATUS_IN_PORTAL.all}
+    publications = []
+    for a in articles:
+        a = a.get_client_side_dict()
+        del a['long']
+        publications.append(a)
+
+    return {'publications': publications,
             'companies': companies,
-            'search_text': json.get('search_text') or '',
-            'original_search_text': json.get('search_text') or '',
-            'chosen_company': json.get('chosen_company') or all,
             'pages': {'total': pages,
                       'current_page': current_page,
                       'page_buttons': Config.PAGINATION_BUTTONS},
-            'company_id': company_id,
-            'chosen_status': article_status or statuses['All'],
-            'statuses': statuses,
-            'original_chosen_status': original_chosen_status,
-            'user_rights': list(g.user.user_rights_in_company(company_id))}
+            'statuses': statuses}
 
 
 @portal_bp.route('/publication_details/<string:article_id>/<string:company_id>', methods=['GET'])

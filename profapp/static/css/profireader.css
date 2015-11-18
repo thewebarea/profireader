@@ -202,6 +202,7 @@ h3 {
 
 hr {
     border-top-color: #ced5db;
+    clear: both;
 }
 
 /* Font Awesome Icons */
@@ -276,7 +277,7 @@ hr {
 }
 
 .widewrapper.copyright {
-    background-color: #1e1e1e;
+    background-color: #464646;
 
     color: #7b8690;
     padding-top: 15px;
@@ -2086,7 +2087,7 @@ a.title-btn {
 }
 
 .one-company{
-    display: inline-block;
+    float: left;
 }
 
 .company-logo{
@@ -2094,4 +2095,11 @@ a.title-btn {
     width: 100%;
     background-color: #ccc;
 
+}
+th{
+    padding-top: 7px;
+}
+
+td{
+    padding-top: 12px;
 }

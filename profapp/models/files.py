@@ -485,7 +485,7 @@ class File(Base, PRBase):
         if self == None or folder == None:
             return False
         id = self.id
-        youtube_id = self.youtube_id
+        # youtube_id = self.youtube_id
         root = folder.root_folder_id
         if folder.root_folder_id == None:
             root = folder.id
