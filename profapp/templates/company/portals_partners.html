@@ -24,6 +24,8 @@
             $scope.selectedPortal_sending = false;
             $scope.$$translate = {{ translates('portal_list')|safe }};
             $scope.myRights = function(){
+                if (!$scope.data || !$scope.data.user_rights) return false;
+
                 for (var i = 0; i < arguments.length; i++) {
                      if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
                          return false;

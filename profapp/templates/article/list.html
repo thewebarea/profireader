@@ -55,7 +55,7 @@
     </script>
     {% raw %}
     <div ng-init="loadData()" ng-controller="article_list">
-        <h2><a href="{{ url_create_article() }}"><span class="icon icon-draw-pen-add"></span>{{_('Create article')}}</a></h2>
+        <h2><a href="{{ url_create_article() }}"><span class="icon icon-draw-pen-add"></span>Create article</a></h2>
 
         <div ng-if="loading">{{_('Loading...')}}</div>
         <div ng-if="!loading">
