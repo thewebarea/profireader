@@ -52,7 +52,11 @@ function getObjectsDifference(a, b, setval, notstrict) {
 
 angular.module('profireaderdirectives', ['ui.bootstrap', 'ui.bootstrap.tooltip'])
     .factory('$ok', ['$http', function ($http) {
-        return function (url, data, ifok, iferror) {
+        return function (url, data, ifok, iferror, template) {
+            //if(template === false){
+            //    data.
+            //}
+
             function error(result, error_code) {
                 if (iferror) {
                     iferror(result, error_code)
@@ -589,6 +593,7 @@ module.run(function ($rootScope, $ok, $sce) {
             return $sce.trustAsHtml(full_text);
         },
         _: function (phrase, dict) {
+            console.log(this.controllerName);
             var scope = this;
             try {
                 return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {

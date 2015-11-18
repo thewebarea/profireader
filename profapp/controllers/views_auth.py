@@ -111,7 +111,6 @@ def before_request():
         if not current_user.confirmed \
                 and request.endpoint[:5] != 'auth.' \
                 and request.endpoint != 'static':
-            pass
             return redirect(url_for('auth.unconfirmed'))
 
 

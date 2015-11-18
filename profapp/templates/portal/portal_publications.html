@@ -79,7 +79,7 @@
                     <select ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="company_id"
                             ng-options="comp_id as comp.name for (comp_id, comp) in companies">
                     </select>
-                    <select ng-if="0" ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="status"
+                    <select ng-disabled="loading" style="width: 40%; padding: 5px;" ng-model="status"
                             ng-options="lab for (lab, val) in statuses track by val">
                     </select>
                 </td>
@@ -97,7 +97,7 @@
                 </a></td>
                 <td>
                     <div>
-                        {{ companies[publication.company_article.company_id].name }} - <span>{{ publication.company_article.status }}</span>
+                        {{ companies[publication.company_article.company_id].name }} - <span>{{ publication.status }}</span>
                     </div>
                 </td>
             </tr>

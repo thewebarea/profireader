@@ -3,18 +3,18 @@ from ..models.company import simple_permissions
 from flask.ext.login import login_required, current_user
 from flask import render_template, request, url_for, g, redirect
 from ..models.company import Company, UserCompany, Right, RightHumnReadible
-# from ..models.rights import list_of_RightAtomic_attributes
 from .request_wrapers import ok, check_rights
 from ..constants.STATUS import STATUS
 from flask.ext.login import login_required
 from ..models.articles import Article
 from ..models.portal import PortalDivision
-from ..models.tag import TagPortalDivisionArticle
 from ..constants.ARTICLE_STATUSES import ARTICLE_STATUS_IN_COMPANY, ARTICLE_STATUS_IN_PORTAL
 from ..models.portal import MemberCompanyPortal
 from ..models.articles import ArticleCompany, ArticlePortalDivision
 from utils.db_utils import db
 from collections import OrderedDict
+from ..models.tag import TagPortalDivisionArticle
+# from ..models.rights import list_of_RightAtomic_attributes
 # from ..models.rights import list_of_RightAtomic_attributes
 from profapp.models.rights import RIGHTS
 from ..models.files import File
@@ -117,11 +117,11 @@ def material_details(company_id, article_id):
 @ok
 # @check_rights(simple_permissions([]))
 def load_material_details(json, company_id, article_id):
-    # g.req('action', allowed=['load'])
+
     article = Article.get_one_article(article_id)
-    # if action == 'load':
     portals = {port.portal_id: port.portal.get_client_side_dict() for port in
                MemberCompanyPortal.get_portals(company_id)}
+
     joined_portals = {}
     if article.portal_article:
         joined_portals = {articles.division.portal.id: portals.pop(articles.division.portal.id)
@@ -131,7 +131,10 @@ def load_material_details(json, company_id, article_id):
     article = article.to_dict('id, title,short, cr_tm, md_tm, '
                               'company_id, status, long,'
                               'editor_user_id, company.name|id,'
-                              'portal_article.division.portal.id')
+                              'portal_article.id, portal_article.division.name, '
+                              'portal_article.division.portal.id,'
+                              'portal_article.division.portal.name,'
+                              'portal_article.status')
 
     user_rights = list(g.user.user_rights_in_company(company_id))
 
@@ -154,6 +157,18 @@ def load_material_details(json, company_id, article_id):
             'company_logo': company_logo}
 
 
+@company_bp.route('/<string:article_portal_division_id>/', methods=['POST'])
+@login_required
+@ok
+# @check_rights(simple_permissions([]))
+def change_article_status_at_portal(json, article_portal_division_id):
+    for article in json['article']['portal_article']:
+        if article['id'] == article_portal_division_id:
+            json['article']['portal_article']['status'] = json.get('new_status')
+    db(ArticlePortalDivision, id=article_portal_division_id).update({'status': json['new_status']})
+    return json
+
+
 @company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])
 @login_required
 # @check_rights(simple_permissions([]))
@@ -164,7 +179,8 @@ def get_tags(json, portal_division_id):
     return {'availableTags': available_tag_names}
 
 
-@company_bp.route('/update_material_status/<string:company_id>/<string:article_id>', methods=['POST'])
+@company_bp.route('/update_material_status/<string:company_id>/<string:article_id>',
+                  methods=['POST'])
 # @login_required
 # @check_rights(simple_permissions([]))
 @ok

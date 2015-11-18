@@ -5,17 +5,19 @@
 {% endblock head %}
 
 {% block portal_base %}
-    {% include 'partials/portal_base_Profireader.html' %}
+    {% include 'partials/portal_base_Profireader_auth_user.html' %}
 {% endblock portal_base %}
+
 {% block portal_content %}
     {% block company_base %}
-{% include 'company/company_base_angular.html' %}
-{% endblock company_base %}
+        {% include 'company/company_base_angular.html' %}
+    {% endblock company_base %}
 
     <script>
         module.controller('portal_list', ['$scope', '$ok', function ($scope, $ok) {
             $scope.url_join = {{ raw_url_for('portal.apply_company')|safe }};
             $scope.myRights = function(){
+                if (!$scope.data || !$scope.data.user_rights) return false;
                 for (var i = 0; i < arguments.length; i++) {
                      if ($scope.data.user_rights.indexOf(arguments[i]) === -1) {
                          return false;
