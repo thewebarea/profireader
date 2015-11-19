@@ -27,6 +27,7 @@ from profapp.controllers.errors import BadDataProvided
 from .models.translate import TranslateTemplate
 import json
 
+
 def req(name, allowed=None, default=None, exception=True):
     ret = request.args.get(name)
     if allowed and (ret in allowed):
@@ -39,7 +40,7 @@ def req(name, allowed=None, default=None, exception=True):
         return None
 
 
-def filter_json(json, *args, prefix='', NoneTo='', ExceptionOnNotPresent = False):
+def filter_json(json, *args, prefix='', NoneTo='', ExceptionOnNotPresent=False):
     ret = {}
     req_columns = {}
     req_relationships = {}
@@ -50,7 +51,8 @@ def filter_json(json, *args, prefix='', NoneTo='', ExceptionOnNotPresent = False
             column_names = columnsdevided.pop(0)
             for column_name in column_names.split('|'):
                 if len(columnsdevided) == 0:
-                    req_columns[column_name] = NoneTo if (column_name not in json or json[column_name] is None) else json[column_name]
+                    req_columns[column_name] = NoneTo if (column_name not in json or json[column_name] is None) else \
+                        json[column_name]
                 else:
                     if column_name not in req_relationships:
                         req_relationships[column_name] = []
@@ -230,6 +232,7 @@ def load_portal_id(app):
         g.portal_id = g.db.query(Portal.id).filter_by(host=app.config['SERVER_NAME']).one()[0]
         # g.portal_id = db_session_func(app.config['SQLALCHEMY_DATABASE_URI']).\
         #             query(Portal.id).filter_by(host=app.config['SERVER_NAME']).one()[0]
+
     return func
 
 
@@ -244,6 +247,7 @@ def flask_endpoint_to_angular(endpoint, **kwargs):
     url = url.replace('{{', '{{ ').replace('}}', ' }}')
     return url
 
+
 # TODO OZ by OZ rename this func and add two parameters
 def file_url(id):
     if not id:
@@ -253,10 +257,42 @@ def file_url(id):
 
 
 def translates(template):
-#     pass
+    #     pass
     phrases = g.db.query(TranslateTemplate).filter_by(template=template).all()
     ret = {ph.name: ph.uk for ph in phrases}
     return json.dumps(ret)
+
+
+
+
+
+@jinja2.contextfunction
+def translate_phrase(context, phrase, dictionary={}):
+
+    template = context.name
+
+    record = g.db.query(TranslateTemplate).filter_by(phrase=phrase, template=template).first()
+
+    if record:
+
+        g.db.add(TranslateTemplate(name=phrase,template=template, **{lang:phrase for lang in TranslateTemplate.languages}))
+    else:
+
+
+    r = re.compile("%\\(([^)]*)\\)s")
+
+    def replaceinphrase(match):
+        indexes = match.group(1).split('.')
+        d = dictionary
+        for i in indexes:
+            if i in d:
+                d = d[i]
+            else:
+                return match.group(1)
+        return str(d)
+
+    return r.sub(replaceinphrase, phrase)
+
 
 def config_variables():
     variables = g.db.query(Config).filter_by(client_side=1).all()
@@ -282,9 +318,9 @@ def get_url_adapter():
         url_adapter = appctx.url_adapter
     return url_adapter
 
+
 # TODO: OZ by OZ: add kwargs just like in url_for
 def raw_url_for(endpoint):
-
     url_adapter = get_url_adapter()
 
     rules = url_adapter.map._rules_by_endpoint.get(endpoint, ())
@@ -409,6 +445,9 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.jinja_env.globals.update(translates=translates)
     app.jinja_env.globals.update(file_url=file_url)
     app.jinja_env.globals.update(config_variables=config_variables)
+    app.jinja_env.globals.update(_=translate_phrase)
+    app.jinja_env.globals.update(get_context=get_context)
+
 
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/

@@ -52,8 +52,6 @@
 {#            </div>#}
 {#        </div>#}
         <div class="widewrapper copyright">
-            <div class="container">
-                Powered by <a href="/">ProfiReader</a>
-            </div>
+            <div class="container">{{ get_context('a') }}{{ _("Powered by %(name.first)s l %(name.last)s ss ", {'name': {'first': 'f', 'last': True} }) }} <a href="/">http://profireader.com/</a></div>
         </div>
     </footer>
