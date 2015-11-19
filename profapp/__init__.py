@@ -126,6 +126,7 @@ def db_session_func(db_config):
     from sqlalchemy.orm import scoped_session, sessionmaker
 
     engine = create_engine(db_config)
+    g.sql_connection = engine.connect()
     db_session = scoped_session(sessionmaker(autocommit=False,
                                              autoflush=False,
                                              bind=engine))
@@ -145,6 +146,9 @@ def load_database(db_config):
 
 def close_database(exception):
     db = getattr(g, 'db', None)
+    sql_connection = getattr(g, 'sql_connection', None)
+    if sql_connection:
+        sql_connection.close()
     if db is not None:
         if exception:
             db.rollback()

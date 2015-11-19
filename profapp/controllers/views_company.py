@@ -161,16 +161,13 @@ def load_material_details(json, company_id, article_id):
 @ok
 # @check_rights(simple_permissions([]))
 def delete_atricle_from_portal(json, article_portal_division_id):
-    for article in json['article']['portal_article']:
-        if article['id'] == article_portal_division_id:
-            article['status'] = json.get('new_status')
-    db(ArticlePortalDivision, id=article_portal_division_id).update({'status': json['new_status']})
-    # article = db(ArticlePortalDivision, id=article_portal_division_id).one()
-    # file_id = article.image_file_id
-    # g.db.delete(article)
-    # g.db.commit()
-    # File.remove(file_id) if file_id else None
-    return json
+    g.sql_connection.execute("DELETE FROM article_portal_division WHERE id='%s';"
+                             % article_portal_division_id)
+    new_json = json.copy()
+    for article in json:
+        if json[article]['id'] == article_portal_division_id:
+            del new_json[article]
+    return new_json
 
 
 @company_bp.route('/get_tags/<string:portal_division_id>', methods=['POST'])
@@ -224,8 +221,6 @@ def profile(company_id):
 # @check_rights(simple_permissions([]))
 def employees(company_id):
     company_user_rights = UserCompany.show_rights(company_id)
-    # print(company_user_rights[list(company_user_rights.keys())[0]])
-    # print(company_user_rights[list(company_user_rights.keys())[0]]['position'])
     ordered_rights = sorted(Right.keys(), key=lambda t: Right.RIGHT_POSITION()[t.lower()])
     ordered_rights = list(map((lambda x: getattr(x, 'lower')()), ordered_rights))
 
