@@ -138,6 +138,7 @@ def load_database(db_config):
         g.db = db_session
         g.req = req
         g.filter_json = filter_json
+        g.get_url_adapter = get_url_adapter
 
     return load_db
 
@@ -268,14 +269,19 @@ def config_variables():
         [("Config['%s']=%s;\n" % (var_id, ret[var_id])) for var_id in ret]) + '</script>'
 
 
-# TODO: OZ by OZ: add kwargs just like in url_for
-def raw_url_for(endpoint):
+def get_url_adapter():
     appctx = globals._app_ctx_stack.top
     reqctx = globals._request_ctx_stack.top
     if reqctx is not None:
         url_adapter = reqctx.url_adapter
     else:
         url_adapter = appctx.url_adapter
+    return url_adapter
+
+# TODO: OZ by OZ: add kwargs just like in url_for
+def raw_url_for(endpoint):
+
+    url_adapter = get_url_adapter()
 
     rules = url_adapter.map._rules_by_endpoint.get(endpoint, ())
 
