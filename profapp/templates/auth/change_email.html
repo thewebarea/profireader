@@ -9,8 +9,8 @@
 {% endblock portal_base %}
 
 {% block portal_content %}
-<div>
-    <h1 class="nice-title">Change Your Email Address<span></span></h1>
+<div ng-controller="UserLoginController">
+    <h1 class="nice-title">{{ '{{' }}_('Change Your Email Address'){{ '}}' }}<span></span></h1>
 </div>
 <form action="{{ url_for('auth.change_email_request') }}" method="POST">
     {{ form.email(placeholder='yourname@email.com', maxlength="100", type="email") }} <br/>
@@ -19,6 +19,5 @@
     {{ form.csrf_token }}
 </form>
 
-<p>Forgot your password? <a href="{{ url_for('auth.password_reset_request') }}">Click here to reset it</a>.</p>
-content
+<p ng-controller="UserLoginController">{{ '{{' }}_('Forgot your password'){{ '}}' }}? <a href="{{ url_for('auth.password_reset_request') }}">{{ '{{' }}_('Click here to reset it'){{ '}}' }}</a>.</p>
 {% endblock portal_content %}

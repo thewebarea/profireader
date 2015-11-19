@@ -44,8 +44,8 @@ We have something similar in bootstrap? Can correct this class to look nicer?
 }
 
 .navbar-brand {
-    padding: 5px;
-    margin-left: 1px !important;
+    padding: 5px 0px;
+    /*margin-left: 1px !important;*/
 }
 
 .navbar-brand img {
@@ -163,18 +163,18 @@ h1 {
     /*background: #CA2027;*/
     background: #777777;
     color: #fff;
-    /*margin-left: -25px;*/
+
     padding: 10px 15px 10px 25px;
-    font-size: 28px;
+    font-size: 24px;
     line-height: 28px;
     font-weight: normal;
-    font-family: 'Open Sans', sans-serif;
+    /*font-family: 'Open Sans', sans-serif;*/
     position: relative;
 }
 
-
 h1.nice-title{
     padding-bottom: 11px;
+    margin-left: -25px;
 }
 
 h1.nice-title span{
@@ -1824,7 +1824,7 @@ form {
 
 .user-profile .info .item:hover,
 .form.info .item:hover {
-    background: rgba(205, 32, 39, 0.27);
+    background: rgba(140, 14, 14, 0.05);
 }
 
 .profile-thumbnail .control {
@@ -1863,8 +1863,8 @@ form {
     padding: 10px 10px 10px 220px;
 
     margin-bottom: 20px;
-    border: 1px rgba(48, 49, 47, 0.35) solid;
-    background: rgb(238, 238, 238);
+    border: 1px rgba(12, 12, 11, 0.35) solid;
+    background: rgba(47, 47, 47, 0.05);
 }
 
 .form form {
@@ -2066,7 +2066,11 @@ a.title-btn {
     color: #eee;
     font-weight: bolder;
     padding: 11px;
-    top: -3px;
+    top: -2px;
+}
+
+.icon-add img{
+    margin: 0px 7px;
 }
 
 
@@ -2079,12 +2083,11 @@ a.title-btn {
     position: relative;
     display: inline-block;
     text-align: center;
-    width: 300px;
+    width: 370px;
     height: 300px;
     background: #eee;
     border-color: #ccc;
-    padding-top: 20px;
-    margin: 0px 25px 15px 0px;
+    margin: 0px 15px 15px 0px;
 }
 
 .one-company{
@@ -2108,3 +2111,16 @@ td{
     margin-left: 0px;
     margin-right: 0px;
 }
+
+
+
+/* STYLE CORRECTION */
+
+.main-site-block{
+    background: #fff;
+}
+
+.over-block{
+    width: 1155px;
+}
+

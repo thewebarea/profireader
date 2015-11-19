@@ -11,17 +11,19 @@
     </script>
 
 
-    <div class="container">
-        {% for message in get_flashed_messages() %}
-            <div class="alert alert-warning">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {{ message }}
-            </div>
-        {% endfor %}
+    <div class="container main-site-block">
+        <div class="over-block">
+            {% for message in get_flashed_messages() %}
+                <div class="alert alert-warning">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {{ message }}
+                </div>
+            {% endfor %}
 
-        {% block portal_content %}
-            Portal Content
-        {% endblock portal_content %}
-        <br/>
+            {% block portal_content %}
+                Portal Content
+            {% endblock portal_content %}
+            <br/>
+        </div>
     </div>
 {% endblock content %}

@@ -331,7 +331,11 @@ class PortalDivision(Base, PRBase):
 
     settings = None
 
-    def __init__(self, portal=portal, portal_division_type_id = portal_division_type_id, name='', settings=None, position=0):
+    def __init__(self, portal=portal,
+                 portal_division_type_id=portal_division_type_id,
+                 name='',
+                 settings=None,
+                 position=0):
         self.position = position
         self.portal = portal
         self.portal_division_type_id = portal_division_type_id

@@ -1,0 +1,123 @@
+{% extends "index_lazy_layout.html" %}
+
+{% block title %}Profireader - Translations{% endblock title %}
+
+{% block portal_content %}
+
+
+    <script>
+        module.controller('translation_list', ['$scope', '$ok', '$sce', function ($scope, $ok, $sce) {
+
+            $scope.url_search_translations = {{ raw_url_for('admin.translations_load')|safe }};
+            $scope.url_save_translations = {{ raw_url_for('admin.translations_save')|safe }};
+
+            $scope.page_changed = function () {
+                $scope.sendData(false);
+            };
+
+            $scope.data = {
+                search_text: '',
+                pages: {},
+                template: null,
+                url: null
+            };
+
+            $scope.new_search_text = '';
+
+            $scope.saveTranslation = function (id, lang, newval, model) {
+                $ok($scope.url_save_translations(), {id: id, lang: lang, val: newval}, function (resp) {
+                    model.saving = true;
+                }, function () {
+                }).finally(function () {
+                    model.saving = false;
+                });
+            };
+
+            $scope.sendData = function (new_search_text) {
+                var data = {}
+                data.search_text = (new_search_text !== false) ? new_search_text : $scope.data['search_text'];
+                data.template = $scope.template ? $scope.template : null;
+                data.url = $scope.url ? $scope.url : null;
+                data.page = $scope.data.pages.current_page;
+                $ok($scope.url_search_translations({}), data, function (resp) {
+
+                    $scope.data['pages'] = resp.pages;
+                    $scope.translations = resp.translations;
+
+                    $scope.languages = resp.languages;
+
+                    $scope.templates = resp.templates;
+                    $scope.templates.unshift({label: '-- all --', value: undefined});
+
+                    $scope.urls = resp.urls;
+                    $scope.urls.unshift({label: '-- all --', value: undefined});
+
+                    $scope.data.search_text = (new_search_text !== false) ? new_search_text : $scope.data['search_text'];
+                })
+            };
+
+        }]);
+
+    </script>
+    {% raw %}
+    <style>
+        .editable-buttons {
+            display: none;
+        }
+    </style>
+    <div ng-init="sendData('')" ng-controller="translation_list">
+
+        <table style="width:100%">
+            <tr>
+                <th width="150px">Creation time</th>
+                <th width="150px">Last accessed</th>
+                <th width="150px">Template</th>
+                <th width="150px">First url used</th>
+                <th width="250px">Phrase</th>
+                <th ng-repeat="lang in languages" width="250px">{{ lang }}</th>
+            </tr>
+            <tr valign="top">
+                <td></td>
+                <td></td>
+                <td><select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="template"
+                            ng-options="template.value as template.label for template in templates"></select></td>
+                <td><select ng-disabled="loading" style="width: 100%; padding: 5px;" ng-model="url"
+                            ng-options="url.value as url.label for url in urls"></select></td>
+                <td colspan="{{ languages.length + 1 }}"><input ng-disabled="loading" style="width: 98%" type="text"
+                                                                placeholder="Search"
+                                                                ng-model="new_search_text"></td>
+                <td><input ng-disabled="loading" ng-click="sendData(new_search_text)" type="submit"
+                           ng-model="new_search_text"
+                           value="{{ loading?'loading...':'search' }}"
+                           style="width: 50px"></td>
+            </tr>
+            <tr ng-repeat="translation in translations" valign="top">
+                <td>{{ translation.cr_tm }}</td>
+                <td>{{ translation.ac_tm }}</td>
+                <td>{{ translation.template }}</td>
+                <td>{{ translation.url }}</td>
+                <td>{{ translation.name }}</td>
+                <td ng-repeat="lang in languages">
+                     <span style="margin: 3px;"
+                           onbeforesave="saveTranslation(translation['id'], lang, $data, translation)"
+                           editable-text="translation[lang]">{{ translation[lang] }}</span>
+                </td>
+            </tr>
+            <tr ng-show="!loading && !areAllEmpty(translations)">
+                <td colspan="5">
+                    <div ng-include="'pagination.html'"></div>
+                </td>
+            </tr>
+            <tr ng-show="!loading && areAllEmpty(translations)">
+                <td colspan="5">
+                    No translations
+                </td>
+            </tr>
+        </table>
+
+    </div>
+    {% endraw %}
+
+{% endblock portal_content %}
+
+

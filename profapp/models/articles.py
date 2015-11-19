@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, text
-from sqlalchemy.orm import relationship, aliased
+from sqlalchemy.orm import relationship, aliased, backref
 from sqlalchemy.sql import expression
 from ..constants.TABLE_TYPES import TABLE_TYPES
 # from db_init import db_session
@@ -62,7 +62,8 @@ class ArticlePortalDivision(Base, PRBase):
     publishing_tm = Column(TABLE_TYPES['timestamp'])
     status = Column(TABLE_TYPES['id_profireader'], default=ARTICLE_STATUS_IN_PORTAL.published)
 
-    division = relationship('PortalDivision', backref='article_portal_division')
+    division = relationship('PortalDivision', backref=backref('article_portal_division', cascade="save-update, merge, delete"),
+                            cascade="save-update, merge, delete")
     company = relationship(Company, secondary='article_company',
                            primaryjoin="ArticlePortalDivision.article_company_id == ArticleCompany.id",
                            secondaryjoin="ArticleCompany.company_id == Company.id",
@@ -72,8 +73,11 @@ class ArticlePortalDivision(Base, PRBase):
     #                                     secondary='tag_portal_division_article',
     #                                     back_populates='articles')
 
+    # tag_assoc_ = relationship('TagPortalDivisionArticle',
+    #                                 back_populates='article_portal_division_select')
     tag_assoc_select = relationship('TagPortalDivisionArticle',
-                                    back_populates='article_portal_division_select')
+                                    back_populates='article_portal_division_select',
+                                    cascade="save-update, merge, delete")
 
     @property
     def tags(self):
@@ -318,8 +322,6 @@ class ArticleCompany(Base, PRBase):
                                               filesintext[old_image_id],))
 
         article_portal_division.long = long_text
-
-        self.portal_article.append(article_portal_division)
 
         return self
 
