@@ -177,6 +177,7 @@ def load_user():
     user_dict = INFO_ITEMS_NONE.copy()
     user_dict['logged_via'] = None
     user_dict['registered_tm'] = None
+    user_dict['lang'] = 'uk'
     #  ['id', 'email', 'first_name', 'last_name', 'name', 'gender', 'link', 'phone']
 
     if user_init.is_authenticated():
@@ -187,6 +188,7 @@ def load_user():
         user = current_user
         logged_via = REGISTERED_WITH[user.logged_in_via()]
         user_dict['logged_via'] = logged_via
+
         user_dict['profile_completed'] = user.profile_completed()
 
         for attr in SOC_NET_FIELDS:
@@ -198,6 +200,7 @@ def load_user():
                     user.attribute_getter(logged_via, attr)
         user_dict['id'] = id
         user_dict['registered_tm'] = user.registered_tm
+        user_dict['lang'] = user.lang
         # name = user.user_name
 
 
@@ -263,35 +266,28 @@ def translates(template):
     return json.dumps(ret)
 
 
-
-
-
 @jinja2.contextfunction
-def translate_phrase(context, phrase, dictionary={}):
-
+def translate_phrase(context, phrase, dictionary=None):
     template = context.name
 
-    record = g.db.query(TranslateTemplate).filter_by(phrase=phrase, template=template).first()
-
-    if record:
-
-        g.db.add(TranslateTemplate(name=phrase,template=template, **{lang:phrase for lang in TranslateTemplate.languages}))
-    else:
-
+    translated = TranslateTemplate.getTranslate(template, phrase)
 
     r = re.compile("%\\(([^)]*)\\)s")
 
-    def replaceinphrase(match):
-        indexes = match.group(1).split('.')
-        d = dictionary
+    def getFromContext(context, indexes, default):
+        d = context
         for i in indexes:
             if i in d:
                 d = d[i]
             else:
-                return match.group(1)
-        return str(d)
+                return default
+        return d
 
-    return r.sub(replaceinphrase, phrase)
+    def replaceinphrase(match):
+        indexes = match.group(1).split('.')
+        return str(getFromContext(context if dictionary is None else dictionary, indexes, match.group(1)))
+
+    return r.sub(replaceinphrase, translated)
 
 
 def config_variables():
@@ -446,8 +442,6 @@ def create_app(config='config.ProductionDevelopmentConfig',
     app.jinja_env.globals.update(file_url=file_url)
     app.jinja_env.globals.update(config_variables=config_variables)
     app.jinja_env.globals.update(_=translate_phrase)
-    app.jinja_env.globals.update(get_context=get_context)
-
 
 
     # see: http://flask.pocoo.org/docs/0.10/patterns/sqlalchemy/

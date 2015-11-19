@@ -44,6 +44,7 @@ class User(Base, UserMixin, PRBase):
     profireader_phone = Column(TABLE_TYPES['phone'])
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
+    lang = Column(String(2))
 
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
