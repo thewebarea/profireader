@@ -260,8 +260,8 @@ def update_rights():
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
                               company_id=data['company_id'],
-                              new_rights=data.getlist('right')
-                              )
+                              new_rights=data.getlist('right'),
+                              position=data['position'])
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
 
