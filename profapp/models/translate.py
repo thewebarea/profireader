@@ -2,7 +2,7 @@ from .pr_base import PRBase, Base
 from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey, text
 from utils.db_utils import db
-
+import datetime
 
 class TranslateTemplate(Base, PRBase):
     __tablename__ = 'translate'
@@ -15,8 +15,8 @@ class TranslateTemplate(Base, PRBase):
     md_tm = Column(TABLE_TYPES['timestamp'])
     template = Column(TABLE_TYPES['short_name'], default='')
     name = Column(TABLE_TYPES['name'], default='')
-    uk = Column(TABLE_TYPES['name'], default='')
     url = Column(TABLE_TYPES['keywords'], default='')
+    uk = Column(TABLE_TYPES['name'], default='')
     en = Column(TABLE_TYPES['name'], default='')
 
     def __init__(self, id=None, template=None, url='', name=None, uk=None, en=None):
@@ -33,20 +33,37 @@ class TranslateTemplate(Base, PRBase):
         if tr:
             phrase = tr[0]
         else:
-            return ''
-        return phrase.uk
+            return phrase
+        return phrase.getattr(phrase.languages[0])
 
     @staticmethod
-    def saveTranslate(template, url, name, uk, en):
-        if TranslateTemplate.isExist(template, name):
+    def saveTranslate(**kwargs):#url, name, uk, en):
+        attr = {f: kwargs[f] for f in kwargs}
+        if TranslateTemplate.isExist(kwargs['template'], kwargs['name']):
             return 'null'
         else:
-            tr = TranslateTemplate(template=template,
-                                   name=name,
-                                   uk=uk,
-                                   url=url,
-                                   en=en).save()
-            return tr.name
+            tr = TranslateTemplate()
+            tr.attr(attr).save()
+                # template=template,
+                #                    name=name,
+                #                    uk=uk,
+                #                    url=url,
+                #                    en=en).save()
+            return 'True'
+
+    @staticmethod
+    def update_last_accessed(template, phrase):
+        i = datetime.datetime.now()
+        obj = [b for b in db(TranslateTemplate, template=template, name=phrase)]
+        obj[0].updates({'ac_tm': i})
+
+
+
+    @staticmethod
+    def delete(id):
+        obj = TranslateTemplate.get(id)
+        TranslateTemplate.delfile(obj)
+        return 'True'
 
     @staticmethod
     def isExist(template, phrase):

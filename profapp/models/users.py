@@ -40,6 +40,7 @@ class User(Base, UserMixin, PRBase):
     profireader_gender = Column(TABLE_TYPES['gender'])
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
+    profireader_language = Column(TABLE_TYPES['language'])
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
 
@@ -171,6 +172,7 @@ class User(Base, UserMixin, PRBase):
         self.profireader_gender = PROFIREADER_ALL['gender']
         self.profireader_link = PROFIREADER_ALL['link']
         self.profireader_phone = PROFIREADER_ALL['phone']
+        self.profireader_language = PROFIREADER_ALL['language']
 
         self.about_me = about_me
         self.location = location

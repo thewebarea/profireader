@@ -249,9 +249,12 @@ def file_url(id):
 
 
 def translates(template):
-#     pass
+    user_language = g.user.profireader_language
     phrases = g.db.query(TranslateTemplate).filter_by(template=template).all()
-    ret = {ph.name: ph.uk for ph in phrases}
+    if user_language == 'uk':
+        ret = {ph.name: ph.uk for ph in phrases}
+    else:
+        ret = {ph.name: ph.en for ph in phrases}
     return json.dumps(ret)
 
 def config_variables():
