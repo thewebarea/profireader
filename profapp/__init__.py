@@ -146,7 +146,7 @@ def load_database(db_config):
 
 def close_database(exception):
     db = getattr(g, 'db', None)
-    sql_connection =  getattr(g, 'sql_connection', None)
+    sql_connection = getattr(g, 'sql_connection', None)
     if sql_connection:
         sql_connection.close()
     if db is not None:
