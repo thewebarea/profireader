@@ -510,7 +510,6 @@ areAllEmpty = function () {
         if (are) {
             var ret = true;
             if ($.isArray(object)) {
-                console.log(object.length);
                 ret = object.length ? false : true;
             }
             else if ($.isPlainObject(object) && $.isEmptyObject(object)) {
@@ -601,7 +600,7 @@ module.run(function ($rootScope, $ok, $sce) {
             var CtrlName = this.controllerName ? this.controllerName: 'None';
             if (scope.$$translate[phrase] === undefined) {
                 scope.$$translate[phrase] = phrase;
-                $ok('/articles/save_translate/', {template: CtrlName, phrase: phrase}, function (resp) {
+                $ok('/articles/save_translate/', {template: CtrlName, phrase: phrase, url: window.location.href}, function (resp) {
                     //console.log(resp['phrase']);
                     //if(resp['phrase'] === ''){
                     //    scope.$$translate[phrase] = phrase
@@ -612,7 +611,6 @@ module.run(function ($rootScope, $ok, $sce) {
                 });
                 //scope.$$translate[phrase] = phrase;
             }
-            console.log(this.controllerName);
             phrase = scope.$$translate[phrase];
             //alert(scope.$$translate);
 
