@@ -593,5 +593,4 @@ def submit_to_portal(json):
         'editor_user_id, company.name|id,portal_article.id,'
         'portal_article.division.name, portal_article.division.portal.name,portal_article.status')
     json.update({'portal': portal.name})
-    print(json['article'])
     return json
