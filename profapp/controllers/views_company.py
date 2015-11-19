@@ -200,7 +200,7 @@ def update_material_status(json, company_id, article_id):
 
 @company_bp.route('/profile/<string:company_id>/')
 @login_required
-@check_rights(simple_permissions(['manage_rights_company']))
+# @check_rights(simple_permissions(['manage_rights_company']))
 def profile(company_id):
     company = db(Company, id=company_id).one()
     user_rights = list(g.user.user_rights_in_company(company_id))
