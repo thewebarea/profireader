@@ -260,8 +260,8 @@ def update_rights():
     data = request.form
     UserCompany.update_rights(user_id=data['user_id'],
                               company_id=data['company_id'],
-                              new_rights=data.getlist('right')
-                              )
+                              new_rights=data.getlist('right'),
+                              position=data['position'])
     return redirect(url_for('company.employees',
                             company_id=data['company_id']))
 
@@ -271,9 +271,9 @@ def update_rights():
 @login_required
 # @check_rights(simple_permissions([]))
 def update(company_id=None):
-    company = db(Company, id=company_id).one()
+    company = db(Company, id=company_id).first()
     return render_template('company/company_edit.html', company_id=company_id,
-                           company_name=company.name)
+                           company_name=company.name if company else '')
 
 
 @company_bp.route('/create/', methods=['POST'])
