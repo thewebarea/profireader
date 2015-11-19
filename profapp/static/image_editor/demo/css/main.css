@@ -252,8 +252,8 @@ body {
 .docs-buttons > .btn,
 .docs-buttons > .btn-group,
 .docs-buttons > .form-control {
-  margin-right: 5px;
-  margin-bottom: 10px;
+  margin-left: 83px;
+  /*margin-bottom: 10px;*/
 }
 
 .docs-toggles > .btn,
