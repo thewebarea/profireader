@@ -84,7 +84,7 @@
                         COMPANY':''), my_employer) }}
                     </a>
                     <br/>
-                    <span ng-if="!my_employer.own_portal.host"><b>Portals: </b>No</span>
+                    <span ng-if="!my_employer.own_portal.host"><b>{{_('Portals')}}: </b>No</span>
                     <div ng-if="my_employer.own_portal.host" >
                         <a href="http://{{ my_employer.own_portal.host }}">
                             http://{{my_employer.own_portal.host }}
