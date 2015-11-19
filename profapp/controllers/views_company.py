@@ -63,7 +63,8 @@ def materials(company_id):
         'company/materials.html',
         company_id=company_id,
         angular_ui_bootstrap_version='//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.14.2.js',
-        company_logo=company_logo
+        company_logo=company_logo,
+        company_name=company.name
     )
 
 
@@ -109,7 +110,8 @@ def material_details(company_id, article_id):
     return render_template('company/material_details.html',
                            company_id=company_id,
                            article_id=article_id,
-                           company_logo=company_logo)
+                           company_logo=company_logo,
+                           company_name=company.name)
 
 
 @company_bp.route('/material_details/<string:company_id>/<string:article_id>/', methods=['POST'])
@@ -212,7 +214,8 @@ def profile(company_id):
                            company=company.to_dict('*, own_portal.*'),
                            user_rights=user_rights,
                            company_logo=company_logo,
-                           company_id=company_id
+                           company_id=company_id,
+                           company_name=company.name
                            )
 
 
@@ -245,7 +248,8 @@ def employees(company_id):
                            curr_user=curr_user,
                            Right=Right,
                            RightHumnReadible=RightHumnReadible,
-                           company_logo=company_logo
+                           company_logo=company_logo,
+                           company_name=current_company.name
                            )
 
 
@@ -267,7 +271,9 @@ def update_rights():
 @login_required
 # @check_rights(simple_permissions([]))
 def update(company_id=None):
-    return render_template('company/company_edit.html', company_id=company_id)
+    company = db(Company, id=company_id).one()
+    return render_template('company/company_edit.html', company_id=company_id,
+                           company_name=company.name)
 
 
 @company_bp.route('/create/', methods=['POST'])
