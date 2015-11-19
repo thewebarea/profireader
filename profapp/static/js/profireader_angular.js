@@ -600,7 +600,7 @@ module.run(function ($rootScope, $ok, $sce) {
             var CtrlName = this.controllerName ? this.controllerName: 'None';
             if (scope.$$translate[phrase] === undefined) {
                 scope.$$translate[phrase] = phrase;
-                $ok('/articles/save_translate/', {template: CtrlName, phrase: phrase}, function (resp) {
+                $ok('/articles/save_translate/', {template: CtrlName, phrase: phrase, url: window.location.href}, function (resp) {
                     //console.log(resp['phrase']);
                     //if(resp['phrase'] === ''){
                     //    scope.$$translate[phrase] = phrase
@@ -616,7 +616,7 @@ module.run(function ($rootScope, $ok, $sce) {
 
 
             try {
-                return phrase.replace(/%\(([^)]*)\)s/g, function (g0, g1) {
+                return phrase.replace(/%\(([^)]*)\)(s|d|f|m|i)/g, function (g0, g1) {
                     var indexes = g1.split('.');
                     var d = dict ? dict : scope;
                     for (var i in indexes) {

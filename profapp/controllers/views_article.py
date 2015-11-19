@@ -17,17 +17,19 @@ from utils.db_utils import db
 from sqlalchemy.orm.exc import NoResultFound
 from ..models.translate import TranslateTemplate
 
+
+
 @article_bp.route('/translate/', methods=['POST'])
 @ok
 def translate(json):
-    phrase = TranslateTemplate.getTranslate(request.json['template'], request.json['phrase'])
-    return {'phrase':phrase}
+    translation = TranslateTemplate.getTranslate(request.json['template'], request.json['phrase'])
+    return {'phrase': translation}
+
 
 @article_bp.route('/save_translate/', methods=['POST'])
 @ok
 def save_translate(json):
-    file = TranslateTemplate.saveTranslate(request.json['template'], request.json['phrase'], request.json['phrase'], request.json['phrase'])
-    return file
+    return TranslateTemplate.getTranslate(json['template'], json['phrase'], json['url'])
 
 
 @article_bp.route('/list/', methods=['GET'])
