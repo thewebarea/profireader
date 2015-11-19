@@ -115,7 +115,10 @@
 
 
 <div ng-controller="article_edit">
+    <h1 ng-show="!data.id" class="nice-title">{{ _('Create new article') }}<span></span></h1>
 
+    <h1 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company) }}<span></span></h1>
+    <h1 ng-show="data.id && !company">{{ _('update your version of article') }}<span></span></h1>
     <h2 ng-show="!data.id">{{ _('Create new article') }}</h2>
 
     <h2 ng-show="data.id && company">{{ _('update version of article for company `%(company.name)s`', company)
