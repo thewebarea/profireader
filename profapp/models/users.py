@@ -158,6 +158,7 @@ class User(Base, UserMixin, PRBase):
                  password=None,
                  confirmed=False,
                  banned=False,
+                 lang=None,
 
                  email_conf_key=None,
                  email_conf_tm=None,
@@ -181,7 +182,7 @@ class User(Base, UserMixin, PRBase):
         self.confirmed = confirmed
         self.banned = banned
         self.registered_tm = datetime.datetime.utcnow()   # here problems are possible
-
+        self.lang = lang
         self.email_conf_key = email_conf_key
         self.email_conf_tm = email_conf_tm
         self.pass_reset_key = pass_reset_key

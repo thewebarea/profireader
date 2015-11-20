@@ -596,6 +596,10 @@ module.run(function ($rootScope, $ok, $sce) {
             if (!scope.$$translate) {
                 scope.$$translate = {};
             }
+
+            if (!scope.$$translate_accessed) {
+                scope.$$translate_accessed = {};
+            }
             //TODO OZ by OZ hasOwnProperty
             var CtrlName = this.controllerName ? this.controllerName: 'None';
             if (scope.$$translate[phrase] === undefined) {
@@ -610,6 +614,11 @@ module.run(function ($rootScope, $ok, $sce) {
 
                 });
                 //scope.$$translate[phrase] = phrase;
+            }else if(scope.$$translate_accessed[phrase] === undefined){
+                scope.$$translate_accessed[phrase] = true;
+                $ok('/articles/update_last_accessed/', {template: CtrlName, phrase: phrase}, function (resp) {
+
+                });
             }
             phrase = scope.$$translate[phrase];
             //alert(scope.$$translate);
