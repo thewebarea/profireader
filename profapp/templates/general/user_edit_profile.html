@@ -16,7 +16,7 @@
     <div class="form info">
         {#<img class="img-rounded profile-thumbnail" src="{{ user.gravatar(size=256) }}"><br>#}
 
-        <div class="profile-thumbnail" style="background-image: url('{{ user.profireader_avatar_url }}');">
+        <div class="profile-thumbnail" style="background-image: url('{{ user.avatar() }}');">
             <div class="control">
                 <a ng-click="mySwitch = !mySwitch">
                     <span ng-hide="mySwitch">[{{ '{{' }}_('upload picture'){{ '}}' }}]</span><span ng-show="mySwitch">[{{ '{{' }}_('hide'){{ '}}' }}]</span>
@@ -63,7 +63,7 @@
             </div>
             <div class="item"><span>{{ '{{' }}_('Language'){{ '}}' }}:</span>
                 <select id="language" name="language" style="width: 100px">
-                        {% if user.profireader_language=='en' %}
+                        {% if user.lang=='en' %}
                             <option selected="selected">en</option>
                             <option>uk</option>
                         {% else %}

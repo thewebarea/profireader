@@ -3,6 +3,8 @@ from ..constants.TABLE_TYPES import TABLE_TYPES
 from sqlalchemy import Column, ForeignKey, text
 from utils.db_utils import db
 import datetime
+import re
+from flask import g, request, current_app
 
 class TranslateTemplate(Base, PRBase):
     __tablename__ = 'translate'
@@ -28,36 +30,50 @@ class TranslateTemplate(Base, PRBase):
         self.en = en
 
     @staticmethod
-    def getTranslate(template, phrase):
-        tr = [b for b in db(TranslateTemplate, template=template, name=phrase)]
-        if tr:
-            phrase = tr[0]
-        else:
-            return phrase
-        return phrase.getattr(phrase.languages[0])
+    def getTranslate(template, phrase, url=None):
+        url_adapter = g.get_url_adapter()
 
-    @staticmethod
-    def saveTranslate(**kwargs):#url, name, uk, en):
-        attr = {f: kwargs[f] for f in kwargs}
-        if TranslateTemplate.isExist(kwargs['template'], kwargs['name']):
-            return 'null'
+        if url is None:
+            url_adapter = g.get_url_adapter()
+            rules = url_adapter.map._rules_by_endpoint.get(request.endpoint, ())
+            url = '' if len(rules) < 1 else rules[0].rule
         else:
-            tr = TranslateTemplate()
-            tr.attr(attr).save()
-                # template=template,
-                #                    name=name,
-                #                    uk=uk,
-                #                    url=url,
-                #                    en=en).save()
-            return 'True'
+            try:
+                from werkzeug.urls import url_parse
+
+                parsed_url = url_parse(url)
+                rules = url_adapter.match(parsed_url.path, method='GET', return_rule=True)
+                url = rules[0].rule
+            except Exception:
+                url = ''
+
+        if phrase[:2] == '__':
+            phrase = phrase[2:]
+            template = '__GLOBAL'
+
+        exist = db(TranslateTemplate, template=template, name=phrase).first()
+
+        lang = TranslateTemplate.languages[0]
+        if g.user_dict['lang'] in TranslateTemplate.languages:
+            lang = g.user_dict['lang']
+
+        if exist:
+            if current_app.config['DEBUG']:
+                # TODO: OZ by OZ change ac without changing md (md changed by trigger)
+                exist.ac_tm = None
+                exist.save()
+        else:
+            exist = TranslateTemplate(template=template, name=phrase,
+                                      url=url, **{l: phrase for l in TranslateTemplate.languages}).save()
+
+        return getattr(exist, lang)
 
     @staticmethod
     def update_last_accessed(template, phrase):
         i = datetime.datetime.now()
         obj = [b for b in db(TranslateTemplate, template=template, name=phrase)]
         obj[0].updates({'ac_tm': i})
-
-
+        return 'True'
 
     @staticmethod
     def delete(id):

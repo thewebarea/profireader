@@ -3,6 +3,8 @@ from flask import request, current_app, g, flash
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from flask.ext.login import logout_user
+from flask import session, json
+from urllib import request as req
 
 # from db_init import Base, g.db
 
@@ -40,9 +42,9 @@ class User(Base, UserMixin, PRBase):
     profireader_gender = Column(TABLE_TYPES['gender'])
     profireader_link = Column(TABLE_TYPES['link'])
     profireader_phone = Column(TABLE_TYPES['phone'])
-    profireader_language = Column(TABLE_TYPES['language'])
     about_me = Column(TABLE_TYPES['text'])
     location = Column(TABLE_TYPES['location'])
+    lang = Column(String(2))
 
     password_hash = Column(TABLE_TYPES['password_hash'])
     confirmed = Column(TABLE_TYPES['boolean'], default=False, nullable=False)
@@ -156,6 +158,7 @@ class User(Base, UserMixin, PRBase):
                  password=None,
                  confirmed=False,
                  banned=False,
+                 lang=None,
 
                  email_conf_key=None,
                  email_conf_tm=None,
@@ -172,7 +175,6 @@ class User(Base, UserMixin, PRBase):
         self.profireader_gender = PROFIREADER_ALL['gender']
         self.profireader_link = PROFIREADER_ALL['link']
         self.profireader_phone = PROFIREADER_ALL['phone']
-        self.profireader_language = PROFIREADER_ALL['language']
 
         self.about_me = about_me
         self.location = location
@@ -180,7 +182,7 @@ class User(Base, UserMixin, PRBase):
         self.confirmed = confirmed
         self.banned = banned
         self.registered_tm = datetime.datetime.utcnow()   # here problems are possible
-
+        self.lang = lang
         self.email_conf_key = email_conf_key
         self.email_conf_tm = email_conf_tm
         self.pass_reset_key = pass_reset_key
@@ -279,6 +281,22 @@ class User(Base, UserMixin, PRBase):
         self.last_seen = datetime.datetime.utcnow()
         g.db.add(self)
         g.db.commit()
+
+    def avatar(self, size=100):
+        print('avatar')
+        if 'facebook' in session['logged_via']:
+            avatar = json.load(req.urlopen(
+                url='http://graph.facebook.com/{facebook_id}/picture?width='
+                    '{size}&height={size}&redirect=0'.format(
+                facebook_id=g.user.facebook_id, size=size)))
+            if avatar['data'].get('is_silhouette'):
+                avatar = self.gravatar(size=size)
+            else:
+                avatar = avatar['data'].get('url')
+        else:
+            avatar = self.gravatar(size=size)
+
+        return avatar
 
     def gravatar(self, size=100, default='identicon', rating='g'):
         if request.is_secure:
